@@ -12,9 +12,9 @@ return {
         {1,1,1,1,1,1,1,1,1,1}
     },
     entities = {
-        {type = "crack", x = 2, y = 1},
+        {type = "crack", x = 2, y = 2},
         {type = "crack", x = 9, y = 4},
         {type = "crack", x = 5, y = 7},
-        {type = "pipe", x = 3, y = 1, has_shovel = true}
+        {type = "pipe", x = 3, y = 2, has_shovel = true}
     }
 }
