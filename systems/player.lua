@@ -7,6 +7,8 @@ function Player.new(x, y)
     self.y = y or 1
     self.move_timer = 0
     self.move_delay = 0.15
+    self.inventory = {}
+    self.equipped = nil
     return self
 end
 
@@ -42,6 +44,17 @@ function Player:keypressed(key, map)
 end
 
 function Player:keyreleased(_)
+end
+
+function Player:addItem(item)
+    self.inventory[item] = true
+    if not self.equipped then
+        self.equipped = item
+    end
+end
+
+function Player:hasItem(item)
+    return self.inventory[item] == true
 end
 
 function Player:draw()
