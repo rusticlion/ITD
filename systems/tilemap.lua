@@ -3,10 +3,12 @@ TileMap.__index = TileMap
 
 local TILE_SIZE = 32
 
+local Entity = require("systems.entity")
+
 local function create_entities(room_data)
     local entities = {}
     for _, entity in ipairs(room_data.entities or {}) do
-        entities[#entities + 1] = entity
+        entities[#entities + 1] = Entity.new(entity)
     end
     return entities
 end
@@ -38,6 +40,15 @@ function TileMap:isSolid(x, y)
     return row[x] ~= 0
 end
 
+function TileMap:getEntityAt(x, y)
+    for _, entity in ipairs(self.entities) do
+        if entity.x == x and entity.y == y then
+            return entity
+        end
+    end
+    return nil
+end
+
 function TileMap:draw()
     for y = 1, self.height do
         local row = self.tiles[y]
@@ -57,6 +68,10 @@ function TileMap:draw()
                 self.tile_size
             )
         end
+    end
+
+    for _, entity in ipairs(self.entities) do
+        entity:draw()
     end
 
     love.graphics.setColor(1, 1, 1)
