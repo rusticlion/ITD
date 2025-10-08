@@ -1,5 +1,6 @@
 local Events = require("combat.events")
 local States = require("combat.states")
+local Dice = require("core.dice")
 
 local Engine = {}
 Engine.__index = Engine
@@ -321,6 +322,21 @@ function Engine:resolve_action(attacker, action)
         if opponent and body_part then
             local amount = action.amount or 1
             self:apply_damage(attacker, opponent, body_part, amount)
+        end
+    elseif action.type == "attack_roll" then
+        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+        self:emit(Events.DICE_ROLLED, {
+            attacker = attacker,
+            action = action,
+            result = result
+        })
+
+        local opponent, body_part = self:select_target_body_part(attacker, action)
+        if opponent and body_part then
+            local toughness = body_part.toughness or 0
+            if result.total > toughness then
+                self:apply_damage(attacker, opponent, body_part, 1)
+            end
         end
     end
 end

@@ -2,6 +2,8 @@ local Engine = require("combat.engine")
 local Events = require("combat.events")
 local Combatant = require("combat.combatant")
 
+math.randomseed(12345)
+
 local engine = Engine:new()
 
 engine:on(Events.ROUND_START, function(data)
@@ -35,6 +37,20 @@ engine:on(Events.DAMAGE_DEALT, function(data)
     end
 end)
 
+engine:on(Events.DICE_ROLLED, function(data)
+    local attacker_name = data.attacker and data.attacker.name or "Unknown"
+    local result = data.result or {}
+    local rolls = {}
+    for _, value in ipairs(result.rolls or {}) do
+        table.insert(rolls, tostring(value))
+    end
+
+    local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
+    local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
+
+    print(string.format("%s rolls %s [%s] -> total %d", attacker_name, dice_label, roll_string, result.total or 0))
+end)
+
 engine:on(Events.COMBAT_END, function(data)
     local winner = engine.winner
     if winner then
@@ -54,7 +70,7 @@ local function create_demo_combatants()
         id = "slash",
         name = "Dreamblade Slash",
         actions = {
-            { type = "direct_damage", amount = 1 }
+            { type = "attack_roll", dice_count = 2, dice_type = "d6" }
         }
     }
 
@@ -62,7 +78,7 @@ local function create_demo_combatants()
         id = "crushing_blow",
         name = "Crushing Blow",
         actions = {
-            { type = "direct_damage", amount = 2 }
+            { type = "attack_roll", dice_count = 1, dice_type = "d8" }
         }
     }
 
