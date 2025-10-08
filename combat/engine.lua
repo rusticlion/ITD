@@ -2,6 +2,7 @@ local Events = require("combat.events")
 local States = require("combat.states")
 local Dice = require("core.dice")
 local CrestPassives = require("combat.crests")
+local AI = require("combat.ai")
 
 local Engine = {}
 Engine.__index = Engine
@@ -239,10 +240,6 @@ function Engine:begin_tech_selection()
     self:advance_tech_selection()
 end
 
-local function select_first_tech(techs)
-    return techs[1]
-end
-
 function Engine:advance_tech_selection()
     if not self.selection_queue then
         return
@@ -302,7 +299,8 @@ function Engine:advance_tech_selection()
     end
 
     if #available_techs > 0 then
-        combatant.selected_tech = select_first_tech(available_techs)
+        local opponent = self:get_opponent(combatant)
+        combatant.selected_tech = AI.choose_tech(combatant, opponent, available_techs) or available_techs[1]
         self:emit(Events.TECH_SELECTED, {
             combatant = combatant,
             tech = combatant.selected_tech,
@@ -597,22 +595,38 @@ function Engine:prepare_attack_assignments()
                     next_index = 1
                 })
             else
+                local opponent = self:get_opponent(combatant)
+                local assigned_targets = AI.assign_targets(combatant, opponent, tech, {
+                    engine = self,
+                    actions = actions
+                })
+
                 for _, data in ipairs(actions) do
-                    local opponent, body_part = self:select_target_body_part(combatant, data.action)
-                    if opponent and body_part then
+                    local target_part = assigned_targets and assigned_targets[data.action_index] or nil
+
+                    if target_part and not is_part_targetable(self, target_part) then
+                        target_part = nil
+                    end
+
+                    if not target_part then
+                        local _, fallback_part = self:select_target_body_part(combatant, data.action)
+                        target_part = fallback_part
+                    end
+
+                    if opponent and target_part then
                         table.insert(self.attack_assignments[combatant], {
                             tech = tech,
                             action = data.action,
                             action_index = data.action_index,
                             target_combatant = opponent,
-                            target_part = body_part
+                            target_part = target_part
                         })
 
                         self:emit(Events.ATTACK_ASSIGNED, {
                             combatant = combatant,
                             action = data.action,
                             action_index = data.action_index,
-                            target = body_part,
+                            target = target_part,
                             automatic = true
                         })
                     end
