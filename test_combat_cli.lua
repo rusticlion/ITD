@@ -10,6 +10,24 @@ engine:on(Events.ROUND_START, function(data)
     print("\n=== ROUND " .. data.round .. " ===")
 end)
 
+engine:on(Events.UPKEEP_PHASE, function(_)
+    print("Upkeep Phase")
+    for _, combatant in ipairs(engine.combatants) do
+        local crest_strings = {}
+        for crest, count in pairs(combatant.crest_pool or {}) do
+            if count > 0 then
+                table.insert(crest_strings, crest .. ":" .. tostring(count))
+            end
+        end
+
+        local crest_summary = #crest_strings > 0 and table.concat(crest_strings, ", ") or "None"
+        local attack_bonus = combatant.get_modifier and combatant:get_modifier("attack_bonus") or 0
+        local modifier_summary = attack_bonus > 0 and ("Attack Bonus +" .. attack_bonus) or "No passive bonuses"
+
+        print(string.format(" - %s Crests [%s] | %s", combatant.name, crest_summary, modifier_summary))
+    end
+end)
+
 engine:on(Events.TECH_SELECT_PHASE, function(data)
     if data.combatant and data.available_techs then
         print("\nSelect tech for " .. data.combatant.name)
@@ -55,13 +73,26 @@ engine:on(Events.DICE_ROLLED, function(data)
 
     local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
     local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
+    local modified_total = data.modified_total or result.total or 0
 
     if data.defense then
         local body_part_name = data.body_part and data.body_part.name or "target"
         print(string.format("%s defends %s with %s [%s] -> total %d", actor_name, body_part_name, dice_label, roll_string, result.total or 0))
     else
-        print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, result.total or 0))
+        if modified_total ~= (result.total or 0) then
+            print(string.format("%s rolls %s [%s] -> total %d (modified to %d)", actor_name, dice_label, roll_string, result.total or 0, modified_total))
+        else
+            print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, modified_total))
+        end
     end
+end)
+
+engine:on(Events.CREST_GAINED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local crest = data.crest or "?"
+    local amount = data.amount or 0
+    local total = data.total or amount
+    print(string.format("%s gains %d %s crest(s). Total: %d", combatant_name, amount, crest, total))
 end)
 
 engine:on(Events.COMBAT_END, function(data)
@@ -79,10 +110,11 @@ local function get_player_input(prompt)
 end
 
 local function create_demo_combatants()
-    local slash = {
-        id = "slash",
-        name = "Dreamblade Slash",
+    local valor_surge = {
+        id = "valor_surge",
+        name = "Valor Surge",
         actions = {
+            { type = "gain_crest", crest = "Valor", amount = 1, name = "Rallying Cry" },
             { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep" },
             { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Guarded Stance" }
         }
@@ -104,7 +136,7 @@ local function create_demo_combatants()
         type = "ARM",
         toughness = 2,
         hp_value = 1,
-        techs = { slash }
+        techs = { valor_surge }
     })
     player:add_body_part({
         id = "player_legs",

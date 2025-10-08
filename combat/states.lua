@@ -17,6 +17,7 @@ States.ROUND_START = {
 
 States.UPKEEP = {
     enter = function(engine)
+        engine:perform_upkeep()
         engine:emit(Events.UPKEEP_PHASE, { round = engine.current_round })
     end,
     process = function(_) return "TECH_SELECT" end

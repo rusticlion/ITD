@@ -1,6 +1,7 @@
 local Events = require("combat.events")
 local States = require("combat.states")
 local Dice = require("core.dice")
+local CrestPassives = require("combat.crests")
 
 local Engine = {}
 Engine.__index = Engine
@@ -87,9 +88,29 @@ function Engine:start_combat()
     self.attack_assignment_ready = false
     self.defense_assignment_ready = false
     self.winner = nil
+    self:clear_combatant_modifiers()
 
     self:emit(Events.COMBAT_START, { combatants = self.combatants })
     self:transition_to("ROUND_START")
+end
+
+function Engine:clear_combatant_modifiers()
+    for _, combatant in ipairs(self.combatants) do
+        if combatant.clear_modifiers then
+            combatant:clear_modifiers()
+        end
+    end
+end
+
+function Engine:apply_crest_passives()
+    for _, combatant in ipairs(self.combatants) do
+        CrestPassives.apply(self, combatant)
+    end
+end
+
+function Engine:perform_upkeep()
+    self:clear_combatant_modifiers()
+    self:apply_crest_passives()
 end
 
 function Engine:transition_to(state_name)
@@ -753,10 +774,13 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
         end
     elseif action.type == "attack_roll" then
         local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+        local attack_bonus = attacker and attacker.get_modifier and attacker:get_modifier("attack_bonus") or 0
+        local modified_total = (result.total or 0) + attack_bonus
         self:emit(Events.DICE_ROLLED, {
             attacker = attacker,
             action = action,
-            result = result
+            result = result,
+            modified_total = modified_total
         })
 
         local assignment = self:get_attack_assignment(attacker, action_index)
@@ -777,12 +801,24 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             end
 
             local toughness = (body_part.toughness or 0) + defense_total
-            if result.total > toughness then
+            if modified_total > toughness then
                 self:apply_damage(attacker, opponent, body_part, 1)
             end
         end
     elseif action.type == "defense_roll" then
         return
+    elseif action.type == "gain_crest" then
+        local crest = action.crest
+        if crest and attacker and attacker.add_crest then
+            local amount = action.amount or 1
+            local total = attacker:add_crest(crest, amount)
+            self:emit(Events.CREST_GAINED, {
+                combatant = attacker,
+                crest = crest,
+                amount = amount,
+                total = total
+            })
+        end
     end
 end
 
