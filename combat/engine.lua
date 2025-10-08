@@ -7,6 +7,27 @@ Engine.__index = Engine
 
 local MAX_STATE_ADVANCES_PER_UPDATE = 8
 
+local function is_part_targetable(part)
+    return part and part.status ~= "maimed"
+end
+
+local function collect_targetable_parts_from(combatant)
+    local parts = {}
+
+    if not combatant or not combatant.body_parts then
+        return parts
+    end
+
+    for _, part in ipairs(combatant.body_parts) do
+        if is_part_targetable(part) then
+            table.insert(parts, part)
+        end
+    end
+
+    return parts
+end
+
+
 function Engine:new()
     local instance = {
         state = "WAITING",
@@ -599,26 +620,6 @@ function Engine:get_opponent(combatant)
     end
 
     return nil
-end
-
-local function is_part_targetable(part)
-    return part and part.status ~= "maimed"
-end
-
-local function collect_targetable_parts_from(combatant)
-    local parts = {}
-
-    if not combatant or not combatant.body_parts then
-        return parts
-    end
-
-    for _, part in ipairs(combatant.body_parts) do
-        if is_part_targetable(part) then
-            table.insert(parts, part)
-        end
-    end
-
-    return parts
 end
 
 function Engine:select_target_body_part(attacker, action)
