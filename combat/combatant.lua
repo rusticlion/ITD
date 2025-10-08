@@ -10,6 +10,7 @@ function Combatant:new(data)
         body_parts = {},
         heart_points = data.heart_points or 3,
         crest_pool = data.crest_pool or {},
+        modifiers = {},
         selected_tech = nil,
         is_player = data.is_player or false
     }
@@ -70,6 +71,40 @@ end
 
 function Combatant:is_defeated()
     return self.heart_points <= 0
+end
+
+function Combatant:add_crest(crest, amount)
+    if not crest then
+        return 0
+    end
+
+    local delta = amount or 1
+    self.crest_pool[crest] = (self.crest_pool[crest] or 0) + delta
+    return self.crest_pool[crest]
+end
+
+function Combatant:get_crest_count(crest)
+    return self.crest_pool[crest] or 0
+end
+
+function Combatant:clear_modifiers()
+    self.modifiers = {}
+end
+
+function Combatant:add_modifier(key, value)
+    if not key then
+        return
+    end
+
+    self.modifiers[key] = (self.modifiers[key] or 0) + (value or 0)
+end
+
+function Combatant:get_modifier(key)
+    if not key then
+        return 0
+    end
+
+    return self.modifiers[key] or 0
 end
 
 return Combatant
