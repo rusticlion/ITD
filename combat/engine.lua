@@ -16,6 +16,10 @@ function Engine:new()
         listeners = {},
         pending_input = nil,
         selection_queue = nil,
+        attack_assignments = {},
+        defense_assignments = {},
+        attack_assignment_queue = nil,
+        defense_assignment_queue = nil,
         attack_assignment_ready = false,
         defense_assignment_ready = false,
         winner = nil,
@@ -55,6 +59,10 @@ function Engine:start_combat()
     self.event_queue = {}
     self.pending_input = nil
     self.selection_queue = nil
+    self.attack_assignments = {}
+    self.defense_assignments = {}
+    self.attack_assignment_queue = nil
+    self.defense_assignment_queue = nil
     self.attack_assignment_ready = false
     self.defense_assignment_ready = false
     self.winner = nil
@@ -104,6 +112,10 @@ end
 
 function Engine:get_input_prompt()
     return self.pending_input and self.pending_input.prompt or ""
+end
+
+function Engine:get_pending_input_metadata()
+    return self.pending_input and self.pending_input.metadata
 end
 
 function Engine:provide_input(input)
@@ -214,19 +226,369 @@ function Engine:tech_selection_complete()
 end
 
 function Engine:prepare_attack_assignments()
-    self.attack_assignment_ready = true
+    self.attack_assignment_ready = false
+    self.attack_assignments = {}
+    self.attack_assignment_queue = {}
+
+    for _, combatant in ipairs(self.combatants) do
+        self.attack_assignments[combatant] = {}
+
+        local tech = combatant.selected_tech
+        local actions = {}
+
+        if tech and tech.actions then
+            for index, action in ipairs(tech.actions) do
+                if action.type == "attack_roll" then
+                    table.insert(actions, {
+                        action = action,
+                        action_index = index
+                    })
+                end
+            end
+        end
+
+        if #actions > 0 then
+            if combatant.is_player then
+                table.insert(self.attack_assignment_queue, {
+                    combatant = combatant,
+                    actions = actions,
+                    next_index = 1
+                })
+            else
+                for _, data in ipairs(actions) do
+                    local opponent, body_part = self:select_target_body_part(combatant, data.action)
+                    if opponent and body_part then
+                        table.insert(self.attack_assignments[combatant], {
+                            tech = tech,
+                            action = data.action,
+                            action_index = data.action_index,
+                            target_combatant = opponent,
+                            target_part = body_part
+                        })
+
+                        self:emit(Events.ATTACK_ASSIGNED, {
+                            combatant = combatant,
+                            action = data.action,
+                            action_index = data.action_index,
+                            target = body_part,
+                            automatic = true
+                        })
+                    end
+                end
+            end
+        end
+    end
+
+    if self.attack_assignment_queue and #self.attack_assignment_queue == 0 then
+        self.attack_assignment_queue = nil
+        self.attack_assignment_ready = true
+        return
+    end
+
+    self:advance_attack_assignment()
 end
 
 function Engine:attack_assignment_complete()
-    return self.attack_assignment_ready
+    return self.attack_assignment_ready and not self:needs_input()
+end
+
+function Engine:add_attack_assignment(combatant, assignment_data, opponent, body_part)
+    if not combatant or not assignment_data or not opponent or not body_part then
+        return
+    end
+
+    local assignments = self.attack_assignments[combatant]
+    if not assignments then
+        assignments = {}
+        self.attack_assignments[combatant] = assignments
+    end
+
+    for index = #assignments, 1, -1 do
+        local existing = assignments[index]
+        if existing.action_index == assignment_data.action_index then
+            table.remove(assignments, index)
+        end
+    end
+
+    table.insert(assignments, {
+        tech = combatant.selected_tech,
+        action = assignment_data.action,
+        action_index = assignment_data.action_index,
+        target_combatant = opponent,
+        target_part = body_part
+    })
+
+    self:emit(Events.ATTACK_ASSIGNED, {
+        combatant = combatant,
+        action = assignment_data.action,
+        action_index = assignment_data.action_index,
+        target = body_part,
+        automatic = not combatant.is_player
+    })
+end
+
+function Engine:advance_attack_assignment()
+    if not self.attack_assignment_queue then
+        return
+    end
+
+    while true do
+        if #self.attack_assignment_queue == 0 then
+            self.attack_assignment_queue = nil
+            self.attack_assignment_ready = true
+            return
+        end
+
+        local entry = self.attack_assignment_queue[1]
+        entry.next_index = entry.next_index or 1
+
+        if entry.next_index > #entry.actions then
+            table.remove(self.attack_assignment_queue, 1)
+        else
+            local action_data = entry.actions[entry.next_index]
+            local opponent = self:get_opponent(entry.combatant)
+            local targetable_parts = collect_targetable_parts_from(opponent)
+
+            if not opponent or #targetable_parts == 0 then
+                entry.next_index = entry.next_index + 1
+            else
+                local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "attack"
+                local base_prompt = string.format("Assign attack %d for %s", entry.next_index, entry.combatant.name)
+
+                local options = {}
+                for index, part in ipairs(targetable_parts) do
+                    options[index] = {
+                        index = index,
+                        part = part,
+                        id = part.id,
+                        name = part.name,
+                        status = part.status,
+                        toughness = part.toughness or 0
+                    }
+                end
+
+                local metadata = {
+                    type = "attack_assignment",
+                    combatant = entry.combatant,
+                    opponent = opponent,
+                    action = action_data.action,
+                    action_index = action_data.action_index,
+                    action_label = action_label,
+                    options = options
+                }
+
+                local function handle_input(engine, raw_input)
+                    local choice = tonumber(raw_input)
+                    local selection = choice and metadata.options[choice] or nil
+
+                    if not selection then
+                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        return
+                    end
+
+                    engine:add_attack_assignment(entry.combatant, action_data, opponent, selection.part)
+                    entry.next_index = entry.next_index + 1
+
+                    if entry.next_index > #entry.actions then
+                        table.remove(engine.attack_assignment_queue, 1)
+                    end
+
+                    engine:clear_input()
+                    engine:advance_attack_assignment()
+                end
+
+                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                return
+            end
+        end
+    end
 end
 
 function Engine:prepare_defense_assignments()
-    self.defense_assignment_ready = true
+    self.defense_assignment_ready = false
+    self.defense_assignments = {}
+    self.defense_assignment_queue = {}
+
+    local function select_best_defense_part(combatant)
+        local best_part = nil
+        for _, part in ipairs(combatant.body_parts) do
+            if part.status ~= "maimed" then
+                if not best_part or (part.toughness or 0) > (best_part.toughness or 0) then
+                    best_part = part
+                end
+            end
+        end
+        return best_part
+    end
+
+    for _, combatant in ipairs(self.combatants) do
+        self.defense_assignments[combatant] = {}
+
+        local tech = combatant.selected_tech
+        local actions = {}
+
+        if tech and tech.actions then
+            for index, action in ipairs(tech.actions) do
+                if action.type == "defense_roll" then
+                    table.insert(actions, {
+                        action = action,
+                        action_index = index
+                    })
+                end
+            end
+        end
+
+        if #actions > 0 then
+            if combatant.is_player then
+                table.insert(self.defense_assignment_queue, {
+                    combatant = combatant,
+                    actions = actions,
+                    next_index = 1
+                })
+            else
+                local preferred_part = select_best_defense_part(combatant)
+                for _, data in ipairs(actions) do
+                    if preferred_part then
+                        table.insert(self.defense_assignments[combatant], {
+                            tech = tech,
+                            action = data.action,
+                            action_index = data.action_index,
+                            target_part = preferred_part
+                        })
+
+                        self:emit(Events.DEFENSE_ASSIGNED, {
+                            combatant = combatant,
+                            action = data.action,
+                            action_index = data.action_index,
+                            target = preferred_part,
+                            automatic = true
+                        })
+                    end
+                end
+            end
+        end
+    end
+
+    if self.defense_assignment_queue and #self.defense_assignment_queue == 0 then
+        self.defense_assignment_queue = nil
+        self.defense_assignment_ready = true
+        return
+    end
+
+    self:advance_defense_assignment()
 end
 
 function Engine:defense_assignment_complete()
-    return self.defense_assignment_ready
+    return self.defense_assignment_ready and not self:needs_input()
+end
+
+function Engine:add_defense_assignment(combatant, assignment_data, body_part)
+    if not combatant or not assignment_data or not body_part then
+        return
+    end
+
+    local assignments = self.defense_assignments[combatant]
+    if not assignments then
+        assignments = {}
+        self.defense_assignments[combatant] = assignments
+    end
+
+    for index = #assignments, 1, -1 do
+        local existing = assignments[index]
+        if existing.action_index == assignment_data.action_index then
+            table.remove(assignments, index)
+        end
+    end
+
+    table.insert(assignments, {
+        tech = combatant.selected_tech,
+        action = assignment_data.action,
+        action_index = assignment_data.action_index,
+        target_part = body_part
+    })
+
+    self:emit(Events.DEFENSE_ASSIGNED, {
+        combatant = combatant,
+        action = assignment_data.action,
+        action_index = assignment_data.action_index,
+        target = body_part,
+        automatic = not combatant.is_player
+    })
+end
+
+function Engine:advance_defense_assignment()
+    if not self.defense_assignment_queue then
+        return
+    end
+
+    while true do
+        if #self.defense_assignment_queue == 0 then
+            self.defense_assignment_queue = nil
+            self.defense_assignment_ready = true
+            return
+        end
+
+        local entry = self.defense_assignment_queue[1]
+        entry.next_index = entry.next_index or 1
+
+        if entry.next_index > #entry.actions then
+            table.remove(self.defense_assignment_queue, 1)
+        else
+            local action_data = entry.actions[entry.next_index]
+            local available_parts = collect_targetable_parts_from(entry.combatant)
+
+            if #available_parts == 0 then
+                entry.next_index = entry.next_index + 1
+            else
+                local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "defense"
+                local base_prompt = string.format("Assign defense %d for %s", entry.next_index, entry.combatant.name)
+
+                local options = {}
+                for index, part in ipairs(available_parts) do
+                    options[index] = {
+                        index = index,
+                        part = part,
+                        id = part.id,
+                        name = part.name,
+                        status = part.status,
+                        toughness = part.toughness or 0
+                    }
+                end
+
+                local metadata = {
+                    type = "defense_assignment",
+                    combatant = entry.combatant,
+                    action = action_data.action,
+                    action_index = action_data.action_index,
+                    action_label = action_label,
+                    options = options
+                }
+
+                local function handle_input(engine, raw_input)
+                    local choice = tonumber(raw_input)
+                    local selection = choice and metadata.options[choice] or nil
+
+                    if not selection then
+                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        return
+                    end
+
+                    engine:add_defense_assignment(entry.combatant, action_data, selection.part)
+                    entry.next_index = entry.next_index + 1
+
+                    if entry.next_index > #entry.actions then
+                        table.remove(engine.defense_assignment_queue, 1)
+                    end
+
+                    engine:clear_input()
+                    engine:advance_defense_assignment()
+                end
+
+                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                return
+            end
+        end
+    end
 end
 
 function Engine:get_opponent(combatant)
@@ -241,6 +603,22 @@ end
 
 local function is_part_targetable(part)
     return part and part.status ~= "maimed"
+end
+
+local function collect_targetable_parts_from(combatant)
+    local parts = {}
+
+    if not combatant or not combatant.body_parts then
+        return parts
+    end
+
+    for _, part in ipairs(combatant.body_parts) do
+        if is_part_targetable(part) then
+            table.insert(parts, part)
+        end
+    end
+
+    return parts
 end
 
 function Engine:select_target_body_part(attacker, action)
@@ -312,7 +690,56 @@ function Engine:apply_damage(attacker, target, body_part, amount)
     end
 end
 
-function Engine:resolve_action(attacker, action)
+function Engine:get_attack_assignment(attacker, action_index)
+    local assignments = self.attack_assignments[attacker]
+    if not assignments then
+        return nil
+    end
+
+    for _, assignment in ipairs(assignments) do
+        if assignment.action_index == action_index then
+            return assignment
+        end
+    end
+
+    return nil
+end
+
+function Engine:roll_defense_assignments()
+    local totals = {}
+
+    for _, combatant in ipairs(self.combatants) do
+        totals[combatant] = {}
+    end
+
+    for combatant, assignments in pairs(self.defense_assignments or {}) do
+        for _, assignment in ipairs(assignments) do
+            local action = assignment.action
+            local target_part = assignment.target_part
+
+            if action and target_part then
+                local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                self:emit(Events.DICE_ROLLED, {
+                    attacker = combatant,
+                    action = action,
+                    result = result,
+                    defense = true,
+                    body_part = target_part
+                })
+
+                local part_id = target_part.id
+                if part_id then
+                    local combatant_totals = totals[combatant]
+                    combatant_totals[part_id] = (combatant_totals[part_id] or 0) + (result.total or 0)
+                end
+            end
+        end
+    end
+
+    return totals
+end
+
+function Engine:resolve_action(attacker, action, action_index, defense_totals)
     if not action or action.type == nil then
         return
     end
@@ -331,22 +758,41 @@ function Engine:resolve_action(attacker, action)
             result = result
         })
 
-        local opponent, body_part = self:select_target_body_part(attacker, action)
+        local assignment = self:get_attack_assignment(attacker, action_index)
+        local opponent = assignment and assignment.target_combatant
+        local body_part = assignment and assignment.target_part
+
+        if not opponent or not body_part then
+            opponent, body_part = self:select_target_body_part(attacker, action)
+        end
+
         if opponent and body_part then
-            local toughness = body_part.toughness or 0
+            local defense_total = 0
+            if defense_totals then
+                local opponent_totals = defense_totals[opponent]
+                if opponent_totals and body_part.id then
+                    defense_total = opponent_totals[body_part.id] or 0
+                end
+            end
+
+            local toughness = (body_part.toughness or 0) + defense_total
             if result.total > toughness then
                 self:apply_damage(attacker, opponent, body_part, 1)
             end
         end
+    elseif action.type == "defense_roll" then
+        return
     end
 end
 
 function Engine:resolve_actions()
+    local defense_totals = self:roll_defense_assignments()
+
     for _, combatant in ipairs(self.combatants) do
         local tech = combatant.selected_tech
         if tech and tech.actions then
-            for _, action in ipairs(tech.actions) do
-                self:resolve_action(combatant, action)
+            for index, action in ipairs(tech.actions) do
+                self:resolve_action(combatant, action, index, defense_totals)
             end
         end
     end

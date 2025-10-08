@@ -22,6 +22,14 @@ engine:on(Events.TECH_SELECT_PHASE, function(data)
     end
 end)
 
+engine:on(Events.ATTACK_ASSIGN_PHASE, function(_)
+    print("\nAttack Assignment Phase")
+end)
+
+engine:on(Events.DEFENSE_ASSIGN_PHASE, function(_)
+    print("\nDefense Assignment Phase")
+end)
+
 engine:on(Events.DAMAGE_DEALT, function(data)
     if data.heart_point_loss then
         print(string.format("%s loses %d Heart Point(s)!", data.target.name, data.heart_point_loss))
@@ -38,7 +46,7 @@ engine:on(Events.DAMAGE_DEALT, function(data)
 end)
 
 engine:on(Events.DICE_ROLLED, function(data)
-    local attacker_name = data.attacker and data.attacker.name or "Unknown"
+    local actor_name = data.attacker and data.attacker.name or "Unknown"
     local result = data.result or {}
     local rolls = {}
     for _, value in ipairs(result.rolls or {}) do
@@ -48,7 +56,12 @@ engine:on(Events.DICE_ROLLED, function(data)
     local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
     local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
 
-    print(string.format("%s rolls %s [%s] -> total %d", attacker_name, dice_label, roll_string, result.total or 0))
+    if data.defense then
+        local body_part_name = data.body_part and data.body_part.name or "target"
+        print(string.format("%s defends %s with %s [%s] -> total %d", actor_name, body_part_name, dice_label, roll_string, result.total or 0))
+    else
+        print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, result.total or 0))
+    end
 end)
 
 engine:on(Events.COMBAT_END, function(data)
@@ -70,7 +83,8 @@ local function create_demo_combatants()
         id = "slash",
         name = "Dreamblade Slash",
         actions = {
-            { type = "attack_roll", dice_count = 2, dice_type = "d6" }
+            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep" },
+            { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Guarded Stance" }
         }
     }
 
@@ -78,7 +92,8 @@ local function create_demo_combatants()
         id = "crushing_blow",
         name = "Crushing Blow",
         actions = {
-            { type = "attack_roll", dice_count = 1, dice_type = "d8" }
+            { type = "attack_roll", dice_count = 1, dice_type = "d8", name = "Heavy Smash" },
+            { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Harden Hide" }
         }
     }
 
@@ -132,6 +147,29 @@ local function run_test_combat()
         engine:process_state()
 
         if engine:needs_input() then
+            local metadata = engine:get_pending_input_metadata()
+            if metadata and metadata.type == "attack_assignment" then
+                print(string.format("\n%s is assigning attack (%s) against %s.",
+                    metadata.combatant and metadata.combatant.name or "?",
+                    metadata.action_label or "attack",
+                    metadata.opponent and metadata.opponent.name or "opponent"))
+            elseif metadata and metadata.type == "defense_assignment" then
+                print(string.format("\n%s is assigning defense (%s).",
+                    metadata.combatant and metadata.combatant.name or "?",
+                    metadata.action_label or "defense"))
+            end
+
+            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment") then
+                print("Targets:")
+                for _, option in ipairs(metadata.options or {}) do
+                    local part = option.part
+                    local name = part and part.name or option.id or ("Option " .. tostring(option.index))
+                    local status = part and part.status or "unknown"
+                    local toughness = part and part.toughness or 0
+                    print(string.format("%d. %s (Status: %s, Toughness: %d)", option.index, name, status, toughness))
+                end
+            end
+
             local input = get_player_input(engine:get_input_prompt())
             engine:provide_input(input)
         end
