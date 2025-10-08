@@ -37,6 +37,150 @@ local function collect_targetable_parts_from(engine, combatant)
     return parts
 end
 
+local function merge_keyword_sources(destination, source)
+    if not source or not source.keywords then
+        return
+    end
+
+    for key, value in pairs(source.keywords) do
+        if type(value) == "number" then
+            destination[key] = (destination[key] or 0) + value
+        elseif type(value) == "boolean" then
+            destination[key] = value and 1 or 0
+        elseif type(value) == "string" then
+            local numeric = tonumber(value)
+            destination[key] = numeric or value
+        else
+            destination[key] = value
+        end
+    end
+end
+
+local function collect_keywords(tech, action)
+    local combined = {}
+    merge_keyword_sources(combined, tech)
+    merge_keyword_sources(combined, action)
+    return combined
+end
+
+local function get_keyword_value(keywords, key)
+    if not keywords then
+        return nil
+    end
+
+    local value = keywords[key]
+    if type(value) == "number" then
+        return value
+    elseif type(value) == "boolean" then
+        return value and 1 or 0
+    elseif type(value) == "string" then
+        return tonumber(value) or value
+    end
+
+    return value
+end
+
+local function apply_consistent_keyword(result, keywords)
+    if not result or not keywords then
+        return nil
+    end
+
+    local consistent_value = get_keyword_value(keywords, "Consistent")
+    if not consistent_value then
+        return nil
+    end
+
+    consistent_value = tonumber(consistent_value)
+    if not consistent_value then
+        return nil
+    end
+
+    local count = result.count or #result.rolls or 0
+    if count <= 0 then
+        return nil
+    end
+
+    result.rolls = result.rolls or {}
+    for index = 1, count do
+        result.rolls[index] = consistent_value
+    end
+
+    result.total = consistent_value * count
+    result.consistent_value = consistent_value
+
+    return consistent_value
+end
+
+local AttackPipeline = {}
+
+function AttackPipeline.apply_base_totals(_, context)
+    context.attack_total = (context.attack_total or 0)
+    context.effective_defense = math.max(0, context.effective_defense or 0)
+    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
+    context.defense_total = context.effective_defense
+end
+
+function AttackPipeline.apply_piercing(_, context)
+    local pierce = get_keyword_value(context.keywords, "Piercing")
+    if not pierce then
+        return
+    end
+
+    pierce = tonumber(pierce) or 0
+    if pierce <= 0 then
+        return
+    end
+
+    local total_reduction = 0
+    local defense_before = context.effective_defense or 0
+    local defense_reduction = math.min(defense_before, pierce)
+    context.effective_defense = defense_before - defense_reduction
+    total_reduction = total_reduction + defense_reduction
+
+    local remaining = pierce - defense_reduction
+    local toughness_reduction = 0
+    if remaining > 0 then
+        local base_before = context.base_toughness or 0
+        toughness_reduction = math.min(base_before, remaining)
+        context.base_toughness = base_before - toughness_reduction
+        total_reduction = total_reduction + toughness_reduction
+    end
+
+    context.effective_defense = math.max(0, context.effective_defense)
+    context.base_toughness = math.max(0, context.base_toughness or 0)
+    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
+    context.defense_total = context.effective_defense
+
+    context.notes = context.notes or {}
+    context.notes.piercing = total_reduction
+    context.notes.piercing_defense = defense_reduction
+    context.notes.piercing_toughness = toughness_reduction
+end
+
+function AttackPipeline.check_hit(_, context)
+    context.hit = (context.attack_total or 0) > (context.effective_toughness or 0)
+end
+
+function AttackPipeline.apply_brutal(_, context)
+    if not context.hit then
+        return
+    end
+
+    local brutal = get_keyword_value(context.keywords, "Brutal")
+    if not brutal then
+        return
+    end
+
+    brutal = tonumber(brutal) or 0
+    if brutal == 0 then
+        return
+    end
+
+    context.damage = (context.damage or context.base_damage or 1) + brutal
+    context.notes = context.notes or {}
+    context.notes.brutal = brutal
+end
+
 
 function Engine:new()
     local instance = {
@@ -59,6 +203,27 @@ function Engine:new()
     }
 
     return setmetatable(instance, Engine)
+end
+
+function Engine:get_attack_pipeline()
+    return {
+        AttackPipeline.apply_base_totals,
+        AttackPipeline.apply_piercing,
+        AttackPipeline.check_hit,
+        AttackPipeline.apply_brutal
+    }
+end
+
+function Engine:run_attack_pipeline(context)
+    if not context then
+        return nil
+    end
+
+    for _, step in ipairs(self:get_attack_pipeline()) do
+        step(self, context)
+    end
+
+    return context
 end
 
 function Engine:emit(event_type, data)
@@ -979,7 +1144,28 @@ function Engine:select_target_body_part(attacker, action)
     return opponent, fallback
 end
 
-function Engine:apply_damage(attacker, target, body_part, amount)
+function Engine:select_friendly_body_part(combatant, action)
+    if not combatant then
+        return nil
+    end
+
+    if action and action.target_body_part_id then
+        local explicit = combatant:get_body_part_by_id(action.target_body_part_id)
+        if explicit then
+            return combatant, explicit
+        end
+    end
+
+    for _, part in ipairs(combatant.body_parts or {}) do
+        if part.status == "maimed" or part.status == "wounded" then
+            return combatant, part
+        end
+    end
+
+    return combatant, combatant:get_first_healthy_part()
+end
+
+function Engine:apply_damage(attacker, target, body_part, amount, context)
     if not target or not body_part or body_part.status == "maimed" then
         return
     end
@@ -994,7 +1180,8 @@ function Engine:apply_damage(attacker, target, body_part, amount)
             target = target,
             body_part = body_part,
             status_before = status_before,
-            status_after = new_status
+            status_after = new_status,
+            context = context
         })
 
         if new_status ~= status_before then
@@ -1002,7 +1189,8 @@ function Engine:apply_damage(attacker, target, body_part, amount)
                 combatant = target,
                 body_part = body_part,
                 previous_status = status_before,
-                new_status = new_status
+                new_status = new_status,
+                context = context
             })
         end
 
@@ -1015,13 +1203,49 @@ function Engine:apply_damage(attacker, target, body_part, amount)
                 body_part = body_part,
                 status_before = "maimed",
                 status_after = "maimed",
-                heart_point_loss = lost_hp
+                heart_point_loss = lost_hp,
+                context = context
             })
         end
 
         status_before = body_part.status
 
         if body_part.status == "maimed" then
+            break
+        end
+    end
+end
+
+function Engine:apply_healing(actor, target, body_part, amount, context)
+    if not target or not body_part then
+        return
+    end
+
+    local steps = amount or 1
+    for _ = 1, steps do
+        local status_before = body_part.status
+        local new_status = body_part:regress_damage_state()
+
+        self:emit(Events.HEAL_APPLIED, {
+            healer = actor,
+            target = target,
+            body_part = body_part,
+            status_before = status_before,
+            status_after = new_status,
+            context = context,
+            no_effect = status_before == new_status
+        })
+
+        if new_status ~= status_before then
+            self:emit(Events.BP_STATUS_CHANGED, {
+                combatant = target,
+                body_part = body_part,
+                previous_status = status_before,
+                new_status = new_status,
+                healed = true,
+                context = context
+            })
+        else
             break
         end
     end
@@ -1091,7 +1315,17 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
         local opponent, body_part = self:select_target_body_part(attacker, action)
         if opponent and body_part then
             local amount = action.amount or 1
-            self:apply_damage(attacker, opponent, body_part, amount)
+            local context = {
+                attacker = attacker,
+                defender = opponent,
+                target_part = body_part,
+                action = action,
+                action_index = action_index,
+                base_damage = amount,
+                damage = amount,
+                keywords = collect_keywords(attacker and attacker.selected_tech, action)
+            }
+            self:apply_damage(attacker, opponent, body_part, amount, context)
         end
     elseif action.type == "attack_roll" then
         local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
@@ -1101,19 +1335,13 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             action_index = action_index
         })
 
+        local tech = attacker and attacker.selected_tech
+        local keywords = collect_keywords(tech, action)
+        local consistent_value = apply_consistent_keyword(result, keywords)
+
         local passive_bonus = attacker and attacker.get_modifier and attacker:get_modifier("attack_bonus") or 0
         local token_bonus = self:consume_attack_bonus_token(attacker)
         local attack_bonus = passive_bonus + token_bonus
-        local modified_total = (result.total or 0) + attack_bonus
-        self:emit(Events.DICE_ROLLED, {
-            attacker = attacker,
-            action = action,
-            result = result,
-            modified_total = modified_total,
-            attack_bonus = attack_bonus,
-            passive_attack_bonus = passive_bonus,
-            temporary_attack_bonus = token_bonus
-        })
 
         local assignment = self:get_attack_assignment(attacker, action_index)
         local opponent = assignment and assignment.target_combatant
@@ -1123,19 +1351,51 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             opponent, body_part = self:select_target_body_part(attacker, action)
         end
 
-        if opponent and body_part then
-            local defense_total = 0
-            if defense_totals then
-                local opponent_totals = defense_totals[opponent]
-                if opponent_totals and body_part.id then
-                    defense_total = opponent_totals[body_part.id] or 0
-                end
-            end
+        local defense_total = 0
+        if defense_totals and opponent and body_part and body_part.id then
+            local opponent_totals = defense_totals[opponent]
+            defense_total = opponent_totals and opponent_totals[body_part.id] or 0
+        end
 
-            local toughness = (body_part.toughness or 0) + defense_total
-            if modified_total > toughness then
-                self:apply_damage(attacker, opponent, body_part, 1)
-            end
+        local context = {
+            attacker = attacker,
+            defender = opponent,
+            target_part = body_part,
+            action = action,
+            action_index = action_index,
+            keywords = keywords,
+            dice_result = result,
+            consistent_value = consistent_value,
+            passive_attack_bonus = passive_bonus,
+            temporary_attack_bonus = token_bonus,
+            attack_bonus = attack_bonus,
+            base_roll_total = result.total or 0,
+            attack_total = (result.total or 0) + attack_bonus,
+            defense_total = defense_total,
+            effective_defense = defense_total,
+            base_toughness = body_part and body_part.toughness or 0,
+            original_base_toughness = body_part and body_part.toughness or 0,
+            effective_toughness = (body_part and body_part.toughness or 0) + defense_total,
+            base_damage = action.damage or 1,
+            damage = action.damage or 1,
+            notes = {}
+        }
+
+        self:run_attack_pipeline(context)
+
+        self:emit(Events.DICE_ROLLED, {
+            attacker = attacker,
+            action = action,
+            result = result,
+            modified_total = context.attack_total,
+            attack_bonus = attack_bonus,
+            passive_attack_bonus = passive_bonus,
+            temporary_attack_bonus = token_bonus,
+            context = context
+        })
+
+        if context.hit and opponent and body_part then
+            self:apply_damage(attacker, opponent, body_part, context.damage, context)
         end
     elseif action.type == "defense_roll" then
         return
@@ -1144,6 +1404,26 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
         if crest and attacker then
             local amount = action.amount or 1
             self:grant_crest(attacker, crest, amount, { source = "action" })
+        end
+    elseif action.type == "heal_body_part" then
+        local recipient = attacker
+        if action.target == "opponent" then
+            recipient = self:get_opponent(attacker)
+        elseif type(action.target) == "table" and action.target.combatant then
+            recipient = action.target.combatant
+        end
+
+        local target_combatant, body_part = self:select_friendly_body_part(recipient, action)
+        if target_combatant and body_part then
+            local amount = action.amount or 1
+            local context = {
+                healer = attacker,
+                target = target_combatant,
+                target_part = body_part,
+                action = action,
+                action_index = action_index
+            }
+            self:apply_healing(attacker, target_combatant, body_part, amount, context)
         end
     end
 end

@@ -51,4 +51,16 @@ function BodyPart:advance_damage_state()
     return self.status
 end
 
+function BodyPart:regress_damage_state()
+    if self.status == "maimed" then
+        self.status = "wounded"
+        return "wounded"
+    elseif self.status == "wounded" then
+        self.status = "healthy"
+        return "healthy"
+    end
+
+    return self.status
+end
+
 return BodyPart

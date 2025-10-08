@@ -18,6 +18,7 @@ local Events = {
     DIE_REROLLED = "die_rerolled",
     DAMAGE_DEALT = "damage_dealt",
     BP_STATUS_CHANGED = "bp_status_changed",
+    HEAL_APPLIED = "heal_applied",
     CREST_GAINED = "crest_gained",
     CREST_EXPENDED = "crest_expended",
 
