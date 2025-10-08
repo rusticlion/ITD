@@ -95,6 +95,41 @@ engine:on(Events.CREST_GAINED, function(data)
     print(string.format("%s gains %d %s crest(s). Total: %d", combatant_name, amount, crest, total))
 end)
 
+engine:on(Events.CREST_EXPENDED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local crest = data.crest or "?"
+    local remaining = data.remaining
+    local effect = data.effect or {}
+
+    local effect_summary = ""
+    if effect.type == "shadow" then
+        local target = effect.target
+        local target_name = target and target.name or (target and target.id) or "target"
+        if effect.skipped then
+            effect_summary = "No valid target."
+        else
+            effect_summary = string.format("%s becomes untargetable this round.", target_name)
+        end
+    elseif effect.type == "valor" then
+        effect_summary = "Next attack gains +2." 
+    elseif effect.type == "madness" then
+        local gained = effect.gained_crest or "an unknown crest"
+        effect_summary = string.format("Forced reroll will occur. Gained %s.", gained)
+    else
+        effect_summary = "Effect resolved."
+    end
+
+    local remaining_text = remaining ~= nil and (" Remaining: " .. tostring(remaining)) or ""
+    print(string.format("%s expends %s crest.%s %s", combatant_name, crest, remaining_text, effect_summary))
+end)
+
+engine:on(Events.DIE_REROLLED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local previous = data.previous_value or "?"
+    local new_value = data.new_value or "?"
+    print(string.format("Madness forces %s to reroll a die: %s -> %s", combatant_name, tostring(previous), tostring(new_value)))
+end)
+
 engine:on(Events.COMBAT_END, function(data)
     local winner = engine.winner
     if winner then
@@ -180,18 +215,36 @@ local function run_test_combat()
 
         if engine:needs_input() then
             local metadata = engine:get_pending_input_metadata()
-            if metadata and metadata.type == "attack_assignment" then
-                print(string.format("\n%s is assigning attack (%s) against %s.",
-                    metadata.combatant and metadata.combatant.name or "?",
-                    metadata.action_label or "attack",
-                    metadata.opponent and metadata.opponent.name or "opponent"))
-            elseif metadata and metadata.type == "defense_assignment" then
-                print(string.format("\n%s is assigning defense (%s).",
-                    metadata.combatant and metadata.combatant.name or "?",
-                    metadata.action_label or "defense"))
+            if metadata then
+                if metadata.type == "attack_assignment" then
+                    print(string.format("\n%s is assigning attack (%s) against %s.",
+                        metadata.combatant and metadata.combatant.name or "?",
+                        metadata.action_label or "attack",
+                        metadata.opponent and metadata.opponent.name or "opponent"))
+                elseif metadata.type == "defense_assignment" then
+                    print(string.format("\n%s is assigning defense (%s).",
+                        metadata.combatant and metadata.combatant.name or "?",
+                        metadata.action_label or "defense"))
+                elseif metadata.type == "crest_prompt" then
+                    print(string.format("\n%s may expend a crest.", metadata.combatant and metadata.combatant.name or "?"))
+                    local crest_options = metadata.options or {}
+                    if #crest_options > 0 then
+                        print("Available crests:")
+                        for _, option in ipairs(crest_options) do
+                            print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
+                        end
+                    end
+                elseif metadata.type == "crest_select" then
+                    print("\nChoose a crest to expend:")
+                    for _, option in ipairs(metadata.options or {}) do
+                        print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
+                    end
+                elseif metadata.type == "crest_target_select" then
+                    print(string.format("\nSelect a body part to shroud for %s.", metadata.combatant and metadata.combatant.name or "?"))
+                end
             end
 
-            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment") then
+            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment" or metadata.type == "crest_target_select") then
                 print("Targets:")
                 for _, option in ipairs(metadata.options or {}) do
                     local part = option.part

@@ -15,6 +15,7 @@ local Events = {
     ATTACK_ASSIGNED = "attack_assigned",
     DEFENSE_ASSIGNED = "defense_assigned",
     DICE_ROLLED = "dice_rolled",
+    DIE_REROLLED = "die_rerolled",
     DAMAGE_DEALT = "damage_dealt",
     BP_STATUS_CHANGED = "bp_status_changed",
     CREST_GAINED = "crest_gained",
