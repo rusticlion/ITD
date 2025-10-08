@@ -60,7 +60,31 @@ engine:on(Events.DAMAGE_DEALT, function(data)
             data.body_part.name,
             data.status_before or "?",
             data.status_after or "?"))
+
+        local context = data.context or {}
+        local notes = context.notes or {}
+        if notes.brutal and notes.brutal ~= 0 then
+            print(string.format("  Brutal adds +%d damage", notes.brutal))
+        end
     end
+end)
+
+engine:on(Events.HEAL_APPLIED, function(data)
+    local healer_name = data.healer and data.healer.name or "Unknown"
+    local target_name = data.target and data.target.name or "Unknown"
+    local body_part_name = data.body_part and data.body_part.name or "body part"
+
+    if data.no_effect then
+        print(string.format("%s attempts to heal %s's %s, but it has no effect.", healer_name, target_name, body_part_name))
+        return
+    end
+
+    print(string.format("%s heals %s's %s (%s -> %s)",
+        healer_name,
+        target_name,
+        body_part_name,
+        data.status_before or "?",
+        data.status_after or "?"))
 end)
 
 engine:on(Events.DICE_ROLLED, function(data)
@@ -74,6 +98,7 @@ engine:on(Events.DICE_ROLLED, function(data)
     local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
     local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
     local modified_total = data.modified_total or result.total or 0
+    local context = data.context or {}
 
     if data.defense then
         local body_part_name = data.body_part and data.body_part.name or "target"
@@ -83,6 +108,15 @@ engine:on(Events.DICE_ROLLED, function(data)
             print(string.format("%s rolls %s [%s] -> total %d (modified to %d)", actor_name, dice_label, roll_string, result.total or 0, modified_total))
         else
             print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, modified_total))
+        end
+
+        if result.consistent_value then
+            print(string.format("  Consistent keyword forces each die to %d", result.consistent_value))
+        end
+
+        local notes = context.notes or {}
+        if notes.piercing and notes.piercing > 0 then
+            print(string.format("  Piercing ignores %d defense", notes.piercing))
         end
     end
 end)
@@ -148,16 +182,26 @@ local function create_demo_combatants()
     local valor_surge = {
         id = "valor_surge",
         name = "Valor Surge",
+        keywords = { Piercing = 1 },
         actions = {
             { type = "gain_crest", crest = "Valor", amount = 1, name = "Rallying Cry" },
-            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep" },
+            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep", keywords = { Consistent = 4 } },
             { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Guarded Stance" }
+        }
+    }
+
+    local soothing_light = {
+        id = "soothing_light",
+        name = "Soothing Light",
+        actions = {
+            { type = "heal_body_part", amount = 1, name = "Mending Pulse" }
         }
     }
 
     local crushing_blow = {
         id = "crushing_blow",
         name = "Crushing Blow",
+        keywords = { Brutal = 1 },
         actions = {
             { type = "attack_roll", dice_count = 1, dice_type = "d8", name = "Heavy Smash" },
             { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Harden Hide" }
@@ -179,7 +223,7 @@ local function create_demo_combatants()
         type = "LEG",
         toughness = 2,
         hp_value = 1,
-        techs = {}
+        techs = { soothing_light }
     })
 
     local enemy = Combatant:new({ id = "enemy", name = "Nightmare" })
