@@ -12,7 +12,9 @@ function Combatant:new(data)
         crest_pool = data.crest_pool or {},
         modifiers = {},
         selected_tech = nil,
-        is_player = data.is_player or false
+        is_player = data.is_player or false,
+        pending_forced_rerolls = 0,
+        attack_bonus_tokens = {}
     }
 
     local combatant = setmetatable(instance, Combatant)
@@ -81,6 +83,24 @@ function Combatant:add_crest(crest, amount)
     local delta = amount or 1
     self.crest_pool[crest] = (self.crest_pool[crest] or 0) + delta
     return self.crest_pool[crest]
+end
+
+function Combatant:remove_crest(crest, amount)
+    if not crest then
+        return 0
+    end
+
+    local current = self.crest_pool[crest] or 0
+    local delta = amount or 1
+    local remaining = current - delta
+
+    if remaining <= 0 then
+        self.crest_pool[crest] = 0
+        return 0
+    end
+
+    self.crest_pool[crest] = remaining
+    return remaining
 end
 
 function Combatant:get_crest_count(crest)
