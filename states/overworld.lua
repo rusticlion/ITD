@@ -1,6 +1,7 @@
 local Overworld = {}
 Overworld.__index = Overworld
 
+local GameState = require("core.gamestate")
 local Player = require("systems.player")
 local TileMap = require("systems.tilemap")
 
@@ -23,7 +24,10 @@ function Overworld:draw()
 end
 
 function Overworld:keypressed(key)
-    if key == "space" then
+    if key == "c" then
+        GameState.switch(require("states.combat"))
+        return
+    elseif key == "space" then
         local entity = self.map:getEntityAt(self.player.x, self.player.y)
         if entity then
             local action, param = entity:interact(self.player)
