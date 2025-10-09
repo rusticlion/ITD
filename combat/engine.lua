@@ -425,29 +425,54 @@ function Engine:advance_tech_selection()
 
     local function handle_player_selection()
         if #available_techs > 0 then
+            local metadata = {
+                type = "tech_select_phase",
+                combatant = combatant,
+                options = {}
+            }
+
+            for index, tech in ipairs(available_techs) do
+                local source_part = tech and tech._source_part or nil
+                metadata.options[index] = {
+                    index = index,
+                    tech = tech,
+                    tech_id = tech and tech.id,
+                    tech_name = tech and tech.name,
+                    body_part = source_part,
+                    body_part_id = source_part and source_part.id,
+                    body_part_name = source_part and source_part.name
+                }
+            end
+
             self:emit(Events.TECH_SELECT_PHASE, {
                 combatant = combatant,
-                available_techs = available_techs
+                available_techs = available_techs,
+                options = metadata.options
             })
 
             local function handle_input(engine, raw_input)
                 local choice = tonumber(raw_input)
-                if not choice or not available_techs[choice] then
-                    engine:request_input("Invalid selection. Choose a tech by number", handle_input)
+                local selected_tech = choice and available_techs[choice] or nil
+                local selected_option = choice and metadata.options[choice] or nil
+
+                if not selected_tech then
+                    engine:request_input("Invalid selection. Choose a tech by number", handle_input, metadata)
                     return
                 end
 
-                combatant.selected_tech = available_techs[choice]
+                combatant.selected_tech = selected_tech
                 engine:emit(Events.TECH_SELECTED, {
                     combatant = combatant,
-                    tech = combatant.selected_tech
+                    tech = combatant.selected_tech,
+                    body_part = selected_option and selected_option.body_part,
+                    option = selected_option
                 })
 
                 engine:clear_input()
                 advance_queue()
             end
 
-            self:request_input("Select tech for " .. combatant.name, handle_input)
+            self:request_input("Select tech for " .. combatant.name, handle_input, metadata)
         else
             combatant.selected_tech = nil
             advance_queue()

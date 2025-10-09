@@ -12,6 +12,186 @@ CombatState.__index = CombatState
 
 local MAX_ENGINE_STEPS_PER_FRAME = 4
 
+local TECH_CARD_WIDTH = 176
+local TECH_CARD_HEIGHT = 72
+local TECH_CARD_SPACING = 10
+local TECH_CARD_GAP = 20
+local TECH_CARD_CORNER_RADIUS = 12
+
+local PANEL_CORNER_RADIUS = 14
+local PANEL_SPACING = 14
+local SELECTED_PANEL_HEIGHT = 96
+local DICE_PANEL_HEIGHT = 110
+
+local function point_in_rect(x, y, rect)
+    if not rect then
+        return false
+    end
+
+    return x >= rect.x and x <= rect.x + rect.w and y >= rect.y and y <= rect.y + rect.h
+end
+
+local function normalize_dice_type(dice_type)
+    if not dice_type or dice_type == "" then
+        return "d6"
+    end
+
+    if type(dice_type) == "number" then
+        return "d" .. tostring(dice_type)
+    end
+
+    local str = tostring(dice_type)
+    if str:match("^d%d+") then
+        return str
+    end
+
+    return "d" .. str
+end
+
+local function format_dice_label(count, dice_type)
+    if not count or count <= 0 then
+        return nil
+    end
+
+    local type_label = normalize_dice_type(dice_type)
+    return string.format("%d%s", count, type_label)
+end
+
+local function draw_highlight_fill(rect, is_hovered)
+    local alpha = is_hovered and 0.32 or 0.18
+    love.graphics.setColor(0.18, 0.45, 0.85, alpha)
+    love.graphics.rectangle("fill", rect.x - 6, rect.y - 6, rect.w + 12, rect.h + 12, 12, 12)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+local function draw_highlight_outline(rect, is_hovered)
+    local alpha = is_hovered and 0.9 or 0.4
+    love.graphics.setColor(0.45, 0.8, 1, alpha)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle("line", rect.x - 6, rect.y - 6, rect.w + 12, rect.h + 12, 12, 12)
+    love.graphics.setLineWidth(1)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+local function draw_panel_background(x, y, w, h, intensity)
+    local base_alpha = intensity or 0.88
+    love.graphics.setColor(0.07, 0.1, 0.16, base_alpha)
+    love.graphics.rectangle("fill", x, y, w, h, PANEL_CORNER_RADIUS, PANEL_CORNER_RADIUS)
+    love.graphics.setColor(0.35, 0.7, 1, 0.45)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle("line", x, y, w, h, PANEL_CORNER_RADIUS, PANEL_CORNER_RADIUS)
+    love.graphics.setLineWidth(1)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+local function draw_tech_card(option, is_hovered)
+    local rect = option and option.card_rect or nil
+    if not rect then
+        return
+    end
+
+    local fill_alpha = is_hovered and 0.95 or 0.82
+    local border_alpha = is_hovered and 1 or 0.55
+
+    love.graphics.setColor(0.11, 0.18, 0.28, fill_alpha)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, TECH_CARD_CORNER_RADIUS, TECH_CARD_CORNER_RADIUS)
+
+    love.graphics.setColor(0.58, 0.86, 1, border_alpha)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, TECH_CARD_CORNER_RADIUS, TECH_CARD_CORNER_RADIUS)
+    love.graphics.setLineWidth(1)
+
+    local text_x = rect.x + 14
+    local text_width = rect.w - 28
+
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.printf(option.tech_name or option.metadata and option.metadata.tech_name or "Tech", text_x, rect.y + 8, text_width, "left")
+
+    if option.body_part_name and option.body_part_name ~= "" then
+        love.graphics.setColor(0.78, 0.88, 1, 0.9)
+        love.graphics.printf(option.body_part_name, text_x, rect.y + 30, text_width, "left")
+    end
+
+    if option.summary and option.summary ~= "" then
+        love.graphics.setColor(0.85, 0.92, 1, 0.85)
+        love.graphics.printf(option.summary, text_x, rect.y + rect.h - 24, text_width, "left")
+    end
+
+    if option.selection_index then
+        love.graphics.setColor(0.75, 0.85, 1, 0.65)
+        love.graphics.printf("#" .. tostring(option.selection_index), rect.x + rect.w - 34, rect.y + 8, 24, "right")
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+end
+
+local function build_tech_summary(tech)
+    if not tech or not tech.actions then
+        return ""
+    end
+
+    local segments = {}
+
+    for _, action in ipairs(tech.actions) do
+        if action.type == "attack_roll" or action.type == "defense_roll" then
+            local prefix = action.type == "attack_roll" and "ATK" or "DEF"
+            local dice_label = format_dice_label(action.dice_count, action.dice_type)
+            if dice_label then
+                table.insert(segments, string.format("%s %s", prefix, dice_label))
+            end
+        end
+    end
+
+    return table.concat(segments, "  ")
+end
+
+local function collect_dice_lines(tech)
+    local lines = {}
+
+    if not tech or not tech.actions then
+        return lines
+    end
+
+    for _, action in ipairs(tech.actions) do
+        if action.type == "attack_roll" or action.type == "defense_roll" then
+            local label = action.type == "attack_roll" and "Attack" or "Defense"
+            local dice_label = format_dice_label(action.dice_count, action.dice_type)
+            local name = action.name or ""
+
+            if dice_label and name ~= "" then
+                table.insert(lines, string.format("%s: %s (%s)", label, dice_label, name))
+            elseif dice_label then
+                table.insert(lines, string.format("%s: %s", label, dice_label))
+            elseif name ~= "" then
+                table.insert(lines, string.format("%s: %s", label, name))
+            end
+        end
+    end
+
+    return lines
+end
+
+local function collect_keyword_list(tech)
+    local keywords = {}
+
+    if not tech or not tech.keywords then
+        return keywords
+    end
+
+    for key, value in pairs(tech.keywords) do
+        if type(value) == "boolean" then
+            if value then
+                table.insert(keywords, key)
+            end
+        elseif value ~= nil then
+            table.insert(keywords, string.format("%s %s", key, tostring(value)))
+        end
+    end
+
+    table.sort(keywords)
+
+    return keywords
+end
+
 local function clone_crest_pool(source)
     local copy = {}
 
@@ -76,6 +256,8 @@ local function build_ui_state(engine)
             crest_pool = clone_crest_pool(combatant.crest_pool),
             body_parts = {}
         }
+
+        view.index = index
 
         state.combatants[index] = view
         state.combatant_lookup[combatant] = view
@@ -313,6 +495,8 @@ function CombatState:enter()
     self.engine = Engine:new()
     self.input_buffer = ""
     self.background_color = { 0.05, 0.06, 0.09, 1 }
+    self.mouse_position = { x = 0, y = 0 }
+    self.tech_selection_ui = nil
 
     local player = create_player_combatant()
     local enemy = create_enemy_combatant()
@@ -338,6 +522,9 @@ function CombatState:update(dt)
         self.engine:process_state()
         steps = steps + 1
     end
+
+    self:update_mouse_position()
+    self:update_interactive_input()
 end
 
 function CombatState:refresh_ui_state()
@@ -376,6 +563,224 @@ function CombatState:get_body_part_view(part)
     end
 
     return view
+end
+
+function CombatState:update_mouse_position(x, y)
+    if not self.mouse_position then
+        self.mouse_position = { x = 0, y = 0 }
+    end
+
+    if x and y then
+        self.mouse_position.x = x
+        self.mouse_position.y = y
+        return
+    end
+
+    if love and love.mouse and love.mouse.getPosition then
+        local mx, my = love.mouse.getPosition()
+        self.mouse_position.x = mx
+        self.mouse_position.y = my
+    end
+end
+
+function CombatState:is_text_input_active()
+    if not (self.engine and self.engine:needs_input()) then
+        return false
+    end
+
+    local metadata = self.engine:get_pending_input_metadata()
+    if metadata and metadata.type == "tech_select_phase" then
+        return false
+    end
+
+    return true
+end
+
+function CombatState:build_tech_selection_context(metadata)
+    if not metadata then
+        return nil
+    end
+
+    local context = {
+        metadata = metadata,
+        combatant = metadata.combatant,
+        options = {},
+        option_lookup = {},
+        part_entries = {},
+        part_lookup = {},
+        parts_by_view = {},
+        hovered_part_entry = nil,
+        hovered_option = nil,
+        preview_option = nil,
+        mouse_x = self.mouse_position and self.mouse_position.x or 0,
+        mouse_y = self.mouse_position and self.mouse_position.y or 0,
+        active = true
+    }
+
+    local combatant_view = metadata.combatant and self:get_combatant_view(metadata.combatant) or nil
+    context.combatant_view = combatant_view
+    context.combatant_index = combatant_view and combatant_view.index or nil
+
+    if combatant_view then
+        context.side = Layouts.get_combatant_side(combatant_view, context.combatant_index)
+    end
+
+    for option_index, option in ipairs(metadata.options or {}) do
+        local tech = option.tech or option
+        local body_part = option.body_part or (tech and tech._source_part) or nil
+        local part_view = body_part and self:get_body_part_view(body_part) or nil
+
+        local entry = nil
+        if body_part then
+            entry = context.part_lookup[body_part]
+            if not entry then
+                entry = { part = body_part, view = part_view, options = {}, rect = nil }
+                context.part_lookup[body_part] = entry
+                table.insert(context.part_entries, entry)
+            end
+        else
+            entry = context.part_lookup.__fallback
+            if not entry then
+                entry = { part = nil, view = part_view, options = {}, rect = nil }
+                context.part_lookup.__fallback = entry
+                table.insert(context.part_entries, entry)
+            end
+        end
+
+        local card_option = {
+            index = option_index,
+            selection_index = option.index or option_index,
+            tech = tech,
+            tech_name = option.tech_name or (tech and (tech.name or tech.id)) or ("Tech " .. option_index),
+            body_part = body_part,
+            body_part_name = option.body_part_name or (body_part and (body_part.name or body_part.id)) or nil,
+            summary = build_tech_summary(tech),
+            dice_lines = collect_dice_lines(tech),
+            keywords = collect_keyword_list(tech),
+            metadata = option,
+            card_rect = nil
+        }
+
+        table.insert(entry.options, card_option)
+        table.insert(context.options, card_option)
+        context.option_lookup[card_option.selection_index] = card_option
+
+        if part_view then
+            context.parts_by_view[part_view] = entry
+        end
+    end
+
+    return context
+end
+
+function CombatState:update_tech_card_layout(context, entry)
+    if not context or not entry or not entry.options or #entry.options == 0 then
+        return
+    end
+
+    local combatant_view = context.combatant_view
+    if not combatant_view then
+        return
+    end
+
+    local part_view = entry.view
+    if not part_view then
+        return
+    end
+
+    local sprite_size = Layouts.get_sprite_size()
+    local index = context.combatant_index or combatant_view.index or 1
+    local px, py = Layouts.get_body_part_position(combatant_view, index, part_view)
+    local side = context.side or Layouts.get_combatant_side(combatant_view, index)
+    local direction = (side == "right") and -1 or 1
+    local base_x = direction == 1 and (px + sprite_size + TECH_CARD_GAP) or (px - TECH_CARD_GAP - TECH_CARD_WIDTH)
+
+    local count = #entry.options
+    local total_height = count * TECH_CARD_HEIGHT + (count - 1) * TECH_CARD_SPACING
+    local start_y = py + sprite_size * 0.5 - total_height * 0.5
+
+    for option_index, option in ipairs(entry.options) do
+        option.card_rect = option.card_rect or {}
+        option.card_rect.x = base_x
+        option.card_rect.y = start_y + (option_index - 1) * (TECH_CARD_HEIGHT + TECH_CARD_SPACING)
+        option.card_rect.w = TECH_CARD_WIDTH
+        option.card_rect.h = TECH_CARD_HEIGHT
+    end
+end
+
+function CombatState:evaluate_tech_selection_hover(context)
+    if not context or not context.active then
+        return
+    end
+
+    local mx = context.mouse_x or 0
+    local my = context.mouse_y or 0
+    context.hovered_part_entry = nil
+    context.hovered_option = nil
+
+    local combatant_view = context.combatant_view
+    local index = context.combatant_index or combatant_view and combatant_view.index or 1
+    local sprite_size = Layouts.get_sprite_size()
+
+    for _, entry in ipairs(context.part_entries) do
+        local part_view = entry.view
+        if combatant_view and part_view then
+            entry.rect = entry.rect or {}
+            local px, py = Layouts.get_body_part_position(combatant_view, index, part_view)
+            entry.rect.x = px
+            entry.rect.y = py
+            entry.rect.w = sprite_size
+            entry.rect.h = sprite_size
+
+            if point_in_rect(mx, my, entry.rect) then
+                context.hovered_part_entry = entry
+            end
+        else
+            entry.rect = nil
+        end
+    end
+
+    if context.hovered_part_entry then
+        self:update_tech_card_layout(context, context.hovered_part_entry)
+
+        for _, option in ipairs(context.hovered_part_entry.options) do
+            if point_in_rect(mx, my, option.card_rect) then
+                context.hovered_option = option
+                break
+            end
+        end
+
+        context.preview_option = context.hovered_option or context.hovered_part_entry.options[1]
+    else
+        context.preview_option = nil
+    end
+end
+
+function CombatState:update_interactive_input()
+    if not self.engine then
+        self.tech_selection_ui = nil
+        return
+    end
+
+    local metadata = self.engine:get_pending_input_metadata()
+    if not (self.engine:needs_input() and metadata and metadata.type == "tech_select_phase") then
+        self.tech_selection_ui = nil
+        return
+    end
+
+    if not self.tech_selection_ui or self.tech_selection_ui.metadata ~= metadata then
+        self.tech_selection_ui = self:build_tech_selection_context(metadata)
+        self.input_buffer = ""
+    end
+
+    if not self.tech_selection_ui then
+        return
+    end
+
+    self.tech_selection_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
+    self.tech_selection_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
+
+    self:evaluate_tech_selection_hover(self.tech_selection_ui)
 end
 
 function CombatState:handle_bp_status_changed(data)
@@ -529,7 +934,7 @@ local function draw_body_part(part, x, y)
     love.graphics.printf("T " .. tostring(part.toughness or 0), x, y - 18, sprite_size, "center")
 end
 
-local function draw_combatant(combatant, index)
+local function draw_combatant(combatant, index, selection_context)
     local sprite_size = Layouts.get_sprite_size()
     local name_x, name_y, name_width = Layouts.get_name_region(combatant, index)
     love.graphics.setColor(1, 1, 1, 1)
@@ -537,7 +942,33 @@ local function draw_combatant(combatant, index)
 
     for _, part in ipairs(combatant.body_parts or {}) do
         local px, py = Layouts.get_body_part_position(combatant, index, part)
+        local highlight_entry = nil
+
+        if selection_context and selection_context.parts_by_view then
+            highlight_entry = selection_context.parts_by_view[part]
+        end
+
+        local rect = nil
+        if highlight_entry then
+            rect = highlight_entry.rect
+            if not rect then
+                rect = { x = px, y = py, w = sprite_size, h = sprite_size }
+                highlight_entry.rect = rect
+            else
+                rect.x = px
+                rect.y = py
+                rect.w = sprite_size
+                rect.h = sprite_size
+            end
+
+            draw_highlight_fill(rect, selection_context.hovered_part_entry == highlight_entry)
+        end
+
         draw_body_part(part, px, py)
+
+        if highlight_entry then
+            draw_highlight_outline(rect, selection_context.hovered_part_entry == highlight_entry)
+        end
     end
 
     local heart_x, heart_y = Layouts.get_heart_position(combatant, index)
@@ -560,6 +991,77 @@ local function draw_combatant(combatant, index)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
+function CombatState:draw_selected_tech_panel(context, preview_option)
+    local x, prompt_y, width = Layouts.get_prompt_region()
+    local selected_y = prompt_y - (SELECTED_PANEL_HEIGHT + DICE_PANEL_HEIGHT + PANEL_SPACING * 2)
+
+    draw_panel_background(x, selected_y, width, SELECTED_PANEL_HEIGHT)
+
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.printf("Selected Tech", x + 16, selected_y + 12, width - 32, "left")
+
+    if preview_option then
+        love.graphics.printf(preview_option.tech_name or "", x + 16, selected_y + 36, width - 32, "left")
+
+        local source = preview_option.body_part_name or "Unknown Source"
+        love.graphics.setColor(0.82, 0.9, 1, 0.85)
+        love.graphics.printf("Source: " .. source, x + 16, selected_y + 56, width - 32, "left")
+
+        if preview_option.keywords and #preview_option.keywords > 0 then
+            love.graphics.setColor(0.85, 0.95, 1, 0.85)
+            love.graphics.printf("Keywords: " .. table.concat(preview_option.keywords, ", "), x + 16, selected_y + 76, width - 32, "left")
+        end
+    else
+        love.graphics.setColor(0.82, 0.88, 1, 0.8)
+        love.graphics.printf("Hover a body part to preview its Techs.", x + 16, selected_y + 40, width - 32, "left")
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function CombatState:draw_dice_preview_panel(context, preview_option)
+    local x, prompt_y, width = Layouts.get_prompt_region()
+    local dice_y = prompt_y - (DICE_PANEL_HEIGHT + PANEL_SPACING)
+
+    draw_panel_background(x, dice_y, width, DICE_PANEL_HEIGHT)
+
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.printf("Dice Preview", x + 16, dice_y + 12, width - 32, "left")
+
+    local start_y = dice_y + 40
+    if preview_option and preview_option.dice_lines and #preview_option.dice_lines > 0 then
+        love.graphics.setColor(0.9, 0.95, 1, 0.9)
+        for line_index, line in ipairs(preview_option.dice_lines) do
+            love.graphics.printf(line, x + 16, start_y + (line_index - 1) * 22, width - 32, "left")
+        end
+    elseif preview_option then
+        love.graphics.setColor(0.82, 0.9, 1, 0.8)
+        love.graphics.printf("No dice generated by this Tech.", x + 16, start_y, width - 32, "left")
+    else
+        love.graphics.setColor(0.82, 0.88, 1, 0.8)
+        love.graphics.printf("Select a Tech to preview its dice.", x + 16, start_y, width - 32, "left")
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function CombatState:draw_tech_selection_ui(context)
+    if not context or not context.active then
+        return
+    end
+
+    if context.hovered_part_entry then
+        self:update_tech_card_layout(context, context.hovered_part_entry)
+
+        for _, option in ipairs(context.hovered_part_entry.options) do
+            draw_tech_card(option, context.hovered_option == option)
+        end
+    end
+
+    self:draw_selected_tech_panel(context, context.preview_option)
+    self:draw_dice_preview_panel(context, context.preview_option)
+end
+
 function CombatState:draw()
     if self.background_color then
         love.graphics.clear(self.background_color[1], self.background_color[2], self.background_color[3], self.background_color[4])
@@ -571,24 +1073,78 @@ function CombatState:draw()
         return
     end
 
-    for index, combatant in ipairs(self.ui_state and self.ui_state.combatants or {}) do
-        draw_combatant(combatant, index)
+    local selection_context = self.tech_selection_ui
+    local metadata = nil
+    if self.engine:needs_input() then
+        metadata = self.engine:get_pending_input_metadata()
     end
 
+    for index, combatant in ipairs(self.ui_state and self.ui_state.combatants or {}) do
+        local highlight = nil
+        if selection_context and selection_context.combatant_view == combatant then
+            highlight = selection_context
+        end
+
+        draw_combatant(combatant, index, highlight)
+    end
+
+    if selection_context and metadata and metadata.type == "tech_select_phase" then
+        self:draw_tech_selection_ui(selection_context)
+    end
+
+    local x, y, width = Layouts.get_prompt_region()
+
     if self.engine:needs_input() then
-        local prompt = self.engine:get_input_prompt()
-        local x, y, width = Layouts.get_prompt_region()
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.printf(prompt or "", x, y, width, "left")
-        love.graphics.printf("> " .. (self.input_buffer or ""), x, y + 18, width, "left")
-        love.graphics.setColor(1, 1, 1, 0.3)
-        love.graphics.rectangle("line", x - 4, y - 6, width + 8, 36)
-        love.graphics.setColor(1, 1, 1, 1)
+        if metadata and metadata.type == "tech_select_phase" then
+            love.graphics.setColor(1, 1, 1, 0.95)
+            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
+            love.graphics.setColor(0.82, 0.9, 1, 0.85)
+            love.graphics.printf("Click a Tech card to select it.", x, y + 20, width, "center")
+            love.graphics.setColor(1, 1, 1, 1)
+        else
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "left")
+            love.graphics.printf("> " .. (self.input_buffer or ""), x, y + 18, width, "left")
+            love.graphics.setColor(1, 1, 1, 0.3)
+            love.graphics.rectangle("line", x - 4, y - 6, width + 8, 36)
+            love.graphics.setColor(1, 1, 1, 1)
+        end
     else
-        local x, y, width = Layouts.get_prompt_region()
         love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.printf("Press ESC to return to the overworld", x, y, width, "center")
         love.graphics.setColor(1, 1, 1, 1)
+    end
+end
+
+function CombatState:mousepressed(x, y, button)
+    if button ~= 1 then
+        return
+    end
+
+    if not (self.engine and self.engine:needs_input()) then
+        return
+    end
+
+    local metadata = self.engine:get_pending_input_metadata()
+    if not metadata or metadata.type ~= "tech_select_phase" then
+        return
+    end
+
+    self:update_mouse_position(x, y)
+
+    if not self.tech_selection_ui then
+        return
+    end
+
+    local context = self.tech_selection_ui
+    context.mouse_x = x
+    context.mouse_y = y
+    self:evaluate_tech_selection_hover(context)
+
+    if context.hovered_option and context.hovered_option.selection_index then
+        self.engine:provide_input(context.hovered_option.selection_index)
+        self.tech_selection_ui = nil
+        self.input_buffer = ""
     end
 end
 
@@ -599,12 +1155,12 @@ function CombatState:keypressed(key)
     end
 
     if key == "return" or key == "kpenter" then
-        if self.engine and self.engine:needs_input() then
+        if self:is_text_input_active() then
             self.engine:provide_input(self.input_buffer or "")
             self.input_buffer = ""
         end
     elseif key == "backspace" then
-        if self.input_buffer and #self.input_buffer > 0 then
+        if self:is_text_input_active() and self.input_buffer and #self.input_buffer > 0 then
             local byteoffset = utf8.offset(self.input_buffer, -1)
             if byteoffset then
                 self.input_buffer = self.input_buffer:sub(1, byteoffset - 1)
@@ -616,7 +1172,7 @@ function CombatState:keypressed(key)
 end
 
 function CombatState:textinput(text)
-    if self.engine and self.engine:needs_input() then
+    if self:is_text_input_active() then
         self.input_buffer = (self.input_buffer or "") .. text
     end
 end
