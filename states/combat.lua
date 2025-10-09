@@ -467,7 +467,7 @@ local function create_player_combatant()
     return Combatant:new({
         id = "player_demo",
         name = "The Dreamer",
-        is_player = false,
+        is_player = true,
         heart_points = 3,
         crest_pool = { Valor = 1, Shadow = 2 },
         body_parts = body_parts
