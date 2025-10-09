@@ -102,7 +102,7 @@ EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
         local selection = choice and metadata.options[choice] or nil
 
         if not selection then
-            engine_instance:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+            engine_instance:request_input("Select a body part to shroud", handle_input, metadata)
             return
         end
 
@@ -117,7 +117,7 @@ EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
         end
     end
 
-    engine:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+    engine:request_input("Select a body part to shroud", handle_input, metadata)
 end
 
 EXPEND_REGISTRY.Valor = function(_, combatant, on_complete)
