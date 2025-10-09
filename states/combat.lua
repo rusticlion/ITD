@@ -4,10 +4,101 @@ local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Layouts = require("ui.layouts")
 local Engine = require("combat.engine")
+local Events = require("combat.events")
 local Combatant = require("combat.combatant")
 
 local CombatState = {}
 CombatState.__index = CombatState
+
+local MAX_ENGINE_STEPS_PER_FRAME = 4
+
+local function clone_crest_pool(source)
+    local copy = {}
+
+    if not source then
+        return copy
+    end
+
+    for crest, count in pairs(source) do
+        copy[crest] = count
+    end
+
+    return copy
+end
+
+local function copy_body_part(part)
+    local status = part.status or "healthy"
+    local tags = {}
+
+    if part.tags then
+        for index, tag in ipairs(part.tags) do
+            tags[index] = tag
+        end
+    end
+
+    local copied = {
+        id = part.id,
+        name = part.name,
+        type = part.type,
+        status = status,
+        toughness = part.toughness or 0,
+        hp_value = part.hp_value or 0,
+        techs = part.techs,
+        tags = tags,
+        layout_slot = part.layout_slot,
+        slot = part.slot,
+        asset_base = part.id or "placeholder"
+    }
+
+    copied.asset_id = (copied.asset_base or "placeholder") .. "_" .. status
+
+    return copied
+end
+
+local function build_ui_state(engine)
+    local state = {
+        combatants = {},
+        combatant_lookup = setmetatable({}, { __mode = "k" }),
+        part_lookup = setmetatable({}, { __mode = "k" })
+    }
+
+    if not engine then
+        return state
+    end
+
+    for index, combatant in ipairs(engine.combatants or {}) do
+        local view = {
+            id = combatant.id,
+            name = combatant.name,
+            is_player = combatant.is_player or false,
+            is_enemy = combatant.is_enemy or false,
+            heart_points = combatant.heart_points or 0,
+            crest_pool = clone_crest_pool(combatant.crest_pool),
+            body_parts = {}
+        }
+
+        state.combatants[index] = view
+        state.combatant_lookup[combatant] = view
+
+        for part_index, part in ipairs(combatant.body_parts or {}) do
+            local part_view = copy_body_part(part)
+            view.body_parts[part_index] = part_view
+            state.part_lookup[part] = part_view
+        end
+    end
+
+    return state
+end
+
+local function update_part_asset_id(part_view)
+    if not part_view then
+        return
+    end
+
+    local base = part_view.asset_base or part_view.id or "placeholder"
+    local status = part_view.status or "healthy"
+    part_view.asset_id = base .. "_" .. status
+end
 
 local function create_player_combatant()
     local body_parts = {
@@ -228,8 +319,12 @@ function CombatState:enter()
 
     self.engine:add_combatant(player)
     self.engine:add_combatant(enemy)
+    self.ui_state = build_ui_state(self.engine)
+    self:register_event_listeners()
+
     self.engine:start_combat()
     self.engine:process_state()
+    self:refresh_ui_state()
 end
 
 function CombatState:update(dt)
@@ -237,16 +332,185 @@ function CombatState:update(dt)
         return
     end
 
-    if not self.engine:needs_input() then
+    local steps = 0
+
+    while self.engine and not self.engine:needs_input() and steps < MAX_ENGINE_STEPS_PER_FRAME do
         self.engine:process_state()
+        steps = steps + 1
     end
+end
+
+function CombatState:refresh_ui_state()
+    self.ui_state = build_ui_state(self.engine)
+end
+
+function CombatState:get_combatant_view(combatant)
+    if not self.ui_state then
+        return nil
+    end
+
+    local view = self.ui_state.combatant_lookup[combatant]
+
+    if not view then
+        self:refresh_ui_state()
+        if self.ui_state then
+            view = self.ui_state.combatant_lookup[combatant]
+        end
+    end
+
+    return view
+end
+
+function CombatState:get_body_part_view(part)
+    if not self.ui_state then
+        return nil
+    end
+
+    local view = self.ui_state.part_lookup[part]
+
+    if not view then
+        self:refresh_ui_state()
+        if self.ui_state then
+            view = self.ui_state.part_lookup[part]
+        end
+    end
+
+    return view
+end
+
+function CombatState:handle_bp_status_changed(data)
+    if not data then
+        return
+    end
+
+    local part_view = self:get_body_part_view(data.body_part)
+    if not part_view then
+        return
+    end
+
+    part_view.status = data.new_status or data.body_part and data.body_part.status or part_view.status
+    part_view.toughness = data.body_part and data.body_part.toughness or part_view.toughness
+    part_view.name = data.body_part and data.body_part.name or part_view.name
+    update_part_asset_id(part_view)
+end
+
+function CombatState:handle_damage_dealt(data)
+    if not data then
+        return
+    end
+
+    local target = data.target
+    if not target then
+        return
+    end
+
+    local target_view = self:get_combatant_view(target)
+    if not target_view then
+        return
+    end
+
+    if target.heart_points ~= nil then
+        target_view.heart_points = target.heart_points
+    elseif data.heart_point_loss then
+        local current = target_view.heart_points or 0
+        local updated = math.max(0, current - data.heart_point_loss)
+        target_view.heart_points = updated
+    end
+end
+
+local function update_crest_count(view, crest, new_value)
+    if not view or not crest then
+        return
+    end
+
+    if new_value == nil then
+        return
+    end
+
+    view.crest_pool = view.crest_pool or {}
+
+    if new_value <= 0 then
+        view.crest_pool[crest] = 0
+        return
+    end
+
+    view.crest_pool[crest] = new_value
+end
+
+function CombatState:handle_crest_gained(data)
+    if not data then
+        return
+    end
+
+    local combatant = data.combatant
+    local crest = data.crest
+
+    local view = self:get_combatant_view(combatant)
+    if not view then
+        return
+    end
+
+    local total = data.total
+    if total == nil and combatant and combatant.get_crest_count then
+        total = combatant:get_crest_count(crest)
+    end
+
+    update_crest_count(view, crest, total)
+end
+
+function CombatState:handle_crest_expended(data)
+    if not data then
+        return
+    end
+
+    local combatant = data.combatant
+    local crest = data.crest
+
+    local view = self:get_combatant_view(combatant)
+    if not view then
+        return
+    end
+
+    local remaining = data.remaining
+    if remaining == nil and combatant and combatant.get_crest_count then
+        remaining = combatant:get_crest_count(crest)
+    end
+
+    update_crest_count(view, crest, remaining)
+end
+
+function CombatState:register_event_listeners()
+    if not self.engine then
+        return
+    end
+
+    self.engine:on(Events.BP_STATUS_CHANGED, function(data)
+        self:handle_bp_status_changed(data)
+    end)
+
+    self.engine:on(Events.DAMAGE_DEALT, function(data)
+        self:handle_damage_dealt(data)
+    end)
+
+    self.engine:on(Events.CREST_GAINED, function(data)
+        self:handle_crest_gained(data)
+    end)
+
+    self.engine:on(Events.CREST_EXPENDED, function(data)
+        self:handle_crest_expended(data)
+    end)
 end
 
 local function draw_body_part(part, x, y)
     local sprite_size = Layouts.get_sprite_size()
     local status = part.status or "healthy"
-    local asset_base = part.id or "placeholder"
-    local asset_id = asset_base .. "_" .. status
+    local asset_id = part.asset_id
+
+    if not asset_id then
+        local asset_base = part.asset_base or part.id or "placeholder"
+        asset_id = asset_base .. "_" .. status
+    end
+
     local image = Assets:get(asset_id)
 
     love.graphics.setColor(1, 1, 1, 1)
@@ -307,7 +571,7 @@ function CombatState:draw()
         return
     end
 
-    for index, combatant in ipairs(self.engine.combatants or {}) do
+    for index, combatant in ipairs(self.ui_state and self.ui_state.combatants or {}) do
         draw_combatant(combatant, index)
     end
 
