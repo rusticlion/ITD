@@ -1,8 +1,10 @@
+local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Overworld = require("states.overworld")
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Assets:load()
     GameState.switch(Overworld)
 end
 
