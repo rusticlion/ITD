@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-10-08 21:42 UTC_
+_Generated on 2025-10-09 21:09 UTC_
 
 ## AGENTS.md
 
@@ -9,6 +9,43 @@ Start by reviewing the documentation in /docs for context on your task - you wil
 
 Review any relevant code before implementation, then proceed to implement the requested features in Lua/LOVE2D.
 ```
+
+## assets/README.md
+
+```markdown
+# Sprite Asset Guidelines
+
+The combat prototype currently relies on programmer-art placeholders while the final pipeline is under construction.
+All placeholder sprites should be authored as square PNGs with a resolution of **128x128 pixels** so they align with the
+mocked UI layout used throughout the S4 UI Foundation sprint.
+
+## Directory Overview
+
+- `assets/sprites/bodyparts/`
+  - State-specific placeholders such as `placeholder_healthy.png`, `placeholder_wounded.png`, and `placeholder_maimed.png`.
+- `assets/sprites/icons/`
+  - Generic UI glyphs, including the `placeholder_default.png` fallback used by the asset manager.
+
+Each file is addressed by its filename (without the `.png` extension) through `core/assets.lua`. Avoid embedding
+state or directory information in code outside of the asset manager—always request sprites by ID via
+`Assets:get("asset_id")`.
+```
+
+## assets/sprites/bodyparts/placeholder_healthy.png
+
+Binary file; contents omitted.
+
+## assets/sprites/bodyparts/placeholder_maimed.png
+
+Binary file; contents omitted.
+
+## assets/sprites/bodyparts/placeholder_wounded.png
+
+Binary file; contents omitted.
+
+## assets/sprites/icons/placeholder_default.png
+
+Binary file; contents omitted.
 
 ## combat/ai.lua
 
@@ -2275,6 +2312,85 @@ end
 
 ```
 
+## core/assets.lua
+
+```lua
+local Assets = {
+    images = {},
+    directories = {
+        "assets/sprites/bodyparts",
+        "assets/sprites/icons",
+    }
+}
+
+local function loadImage(path)
+    local success, result = pcall(love.graphics.newImage, path)
+    if not success then
+        print(string.format("[Assets] Failed to load image '%s': %s", path, result))
+        return nil
+    end
+    return result
+end
+
+function Assets:load()
+    self.images = {}
+
+    for _, directory in ipairs(self.directories) do
+        local info = love.filesystem.getInfo(directory)
+        if info and info.type == "directory" then
+            for _, file in ipairs(love.filesystem.getDirectoryItems(directory)) do
+                if file:sub(-4):lower() == ".png" then
+                    local id = file:sub(1, -5)
+                    local image = loadImage(directory .. "/" .. file)
+                    if image then
+                        self.images[id] = image
+                    end
+                end
+            end
+        else
+            print(string.format("[Assets] Directory not found: %s", directory))
+        end
+    end
+end
+
+local function parseStateSuffix(id)
+    if type(id) ~= "string" then
+        return nil
+    end
+    return id:match("_(healthy|wounded|maimed)$")
+end
+
+function Assets:get(id)
+    if not id then
+        return nil
+    end
+
+    local image = self.images[id]
+    if image then
+        return image
+    end
+
+    local state = parseStateSuffix(id)
+    if state then
+        local placeholder = "placeholder_" .. state
+        image = self.images[placeholder]
+        if image then
+            return image
+        end
+    end
+
+    image = self.images["placeholder_default"]
+    if image then
+        return image
+    end
+
+    print(string.format("[Assets] Missing asset for id '%s'", id))
+    return nil
+end
+
+return Assets
+```
+
 ## core/dice.lua
 
 ```lua
@@ -2651,6 +2767,69 @@ Player win rate (learning): ~40%
 Player win rate (mastered): ~80%
 Decisions per round: 3-4 meaningful choices
 RNG impact: 30% (tactics > luck)
+```
+
+## docs/CombatPresentation.md
+
+```markdown
+Design Document: Combat Presentation
+Core Philosophy: The combat UI must be a clear, unified, and tactile interface that visually reinforces the game's core mechanics. It prioritizes immediate contextual feedback and direct manipulation over abstract menus, ensuring players understand the source and consequence of every action. The flow of a round should feel like a single, seamless sequence of decisions within one consistent space.
+1. The Unified View: "The Anatomical Display"
+Combat takes place on a single, static screen. There is no switching between views to support the phases of combat - elements update in-place instead.
+Layout: The screen is split vertically.
+Left Side: The Player's "Dreamform" (a stylized anatomical layout of their equipped Body Parts).
+Right Side: The Enemy's "Dreamform" (a mirror image).
+Core Components (Always Visible):
+Body Parts (BPs): Each combatant's equipped BPs are displayed in their logical anatomical positions (Head, Body, Arms, Legs). Each BP display clearly shows:
+Its artwork.
+Its current status (e.g., color-coded outline: Green for Healthy, Yellow for Wounded).
+Its Toughness value.
+Heart Points (HP): Three heart icons are displayed directly below each combatant's Dreamform.
+Crest Pools: A dedicated area at the bottom-left of the screen displays the Player's Crests. The bottom-right displays the Enemy's.
+Action Bar: A central space at the bottom of the screen that contains the primary interaction button (e.g., "Commit Tech," "Resolve").
+2. Round Flow & UI Transformation
+The UI will transform in-place to guide the player through the phases of a round.
+Visuals: A brief, subtle animation plays to signify the start of a new round. Any passive Crest effects are visually indicated (e.g., Valor crests begin to glow if the 2+ threshold is met, with a "+1 ATK" icon appearing briefly).
+Goal: Visually link Techs to their source Body Parts and show the immediate consequence of a selection.
+Interaction Flow:
+The Player's functional (Healthy/Wounded) Body Parts gain a subtle interactive glow.
+On Mouse-Over a BP: A "fan" of Tech cards animates out directly from that BP.
+On Click a Tech Card: The card animates to a "Selected Tech" slot near the player's side of the Action Bar.
+Instant Feedback: Simultaneously, a "Dice Preview" area appears next to the selected Tech card. This area shows icons of the dice the Tech provides (e.g., two d6 icons, one d4 icon). These icons are animated (rolling/spinning) to signify they are not yet settled.
+The player can freely test different Tech selections, with the "Selected Tech" and "Dice Preview" updating in real-time.
+When satisfied, the player clicks the central "Commit Tech" button. The enemy's selected Tech card animates into view on their side, and the phase ends.
+Goal: Provide the player with perfect knowledge of their own resources and partial knowledge of the enemy's, creating a puzzle of "calculated risk."
+Interaction Flow:
+Dice Settle:
+The Player's dice in their Dice Preview roll and settle on their final values (e.g., the two d6 icons become a static 6 and 2). These now move to a "Dice Shelf" on the player's side of the Action Bar.
+The Enemy's dice remain animatedly rolling on their Dice Shelf. The player knows the enemy has a 1d8 attack, but not its value.
+Targets Highlighted:
+All enemy BPs gain a red "targetable" outline.
+All player BPs gain a blue "defendable" outline.
+Direct Manipulation:
+The player clicks and drags a die with a known value from their shelf.
+As they drag, valid "Attack Slots" and "Defense Slots" appear next to the corresponding BPs.
+They drop the die into a slot to assign it.
+Simultaneous Enemy Action: As the player assigns their dice, the enemy AI simultaneously assigns its unsettled, rolling dice to its chosen targets. The player sees where the enemy is attacking and defending, but not with what strength.
+Once all dice from both sides are assigned, the central button glows, now reading "Resolve."
+Goal: Provide a clear, dramatic, and easily understandable resolution sequence.
+Visual Flow (Automated Sequence):
+On clicking "Resolve," all of the enemy's dice settle on their final values.
+For each attack in sequence, a visual effect (e.g., a line of energy) connects the attack die to its target BP.
+Key numbers are displayed clearly near the target: Attack Roll vs. (Toughness + Defense Roll).
+The result is shown with a large, clear graphic ("HIT!", "MISS!", "BLOCKED!").
+On a successful hit, the target BP flashes, and its status color/artwork updates.
+HP loss is animated by a heart icon cracking or fading away.
+After all actions resolve, the UI returns to its neutral state for the next Upkeep phase.
+3. Information Display & Keywords
+Tooltips are Key: Complexity is managed via contextual tooltips. Mousing over any game piece (a BP, a Tech card, a Crest, a die on the shelf) will provide a detailed "info box."
+Communicating Keywords:
+When a Tech is selected, its keywords (Piercing, Brutal, etc.) are displayed as icons on the Tech card in the "Selected Tech" slot.
+When the dice are generated from that Tech, they inherit these keyword icons. A die on the shelf will have small Piercing or Brutal icons attached to it.
+This visually confirms that this specific die carries that specific property. The tooltip for the die will explain the keyword's effect.
+Crest Interaction:
+The Crest Pool is always visible. Crests can be clicked to expend them during valid phases (primarily the Tech Selection phase).
+A glowing aura or similar visual effect will indicate when a Crest's passive effect is active. The tooltip will provide the details.
 ```
 
 ## docs/InitialPlanning.md
@@ -3301,7 +3480,7 @@ Them with a tighter clasp?
 O God! can I not save
 One from the pitiless wave?
 Is all that we see or seem
-But a dream within a dream?The game then prompts the player to select a sprite for the P, then input a name, then playfully presents a sprite of a cat and takes an input to name the cat. Then we cut to a small "bedroom" environment, and a "good night" dialog (inverting the RPG trope of beginning a game with the main character waking up at their home). The player can grasp the basic movement and interaction controls in their bedroom with some no-stakes overworld interactions (pet the cat, turn the radio on or off), gets bounced with a "it's pretty late...better get some rest" message if they try to leave the room, and kicks off the game proper when they interact with the bed.From here, we present a dreamscape where some sort of "corrupted" threat makes some mysterious statements and threatens the main character - but it interrupted and repelled by the cat, appearing in the Dreamlands as a powerful warrior. We maybe flash some "cutscene" high-level NPC vs. NPC combat between the cat and the threat as a teaser for the combat system and first introduction to the combat screen. The cat defeats the threat, but a horde of similar threats emerges, and the cat tells the player to run, opening the first dream portal (tentatively termed a "rabbithole") that the player will see. This pipes them into the Act I game proper, where they're likely to be defeated relatively quickly.When they are defeated and "wake", the cat is missing in the "real world" - setting the initial stakes for the exploration into the Dreamlands - "save the cat". This is probably the key content for the demo/alpha, but I have some headier material prepared too to unravel as the game progresses.EditThis is absolutely stellar narrative design - you're subverting expectations at every turn while establishing emotional stakes immediately. The Poe epigraph perfectly frames the themes of loss, futility, and questioning reality that will permeate the experience.
+But a dream within a dream?The game then prompts the player to select a sprite for the PC, then input a name, then playfully presents a sprite of a cat and takes an input to name the cat. Then we cut to a small "bedroom" environment, and a "good night" dialog (inverting the RPG trope of beginning a game with the main character waking up at their home). The player can grasp the basic movement and interaction controls in their bedroom with some no-stakes overworld interactions (pet the cat, turn the radio on or off), gets bounced with a "it's pretty late...better get some rest" message if they try to leave the room, and kicks off the game proper when they interact with the bed.From here, we present a dreamscape where some sort of "corrupted" threat makes some mysterious statements and threatens the main character - but it interrupted and repelled by the cat, appearing in the Dreamlands as a powerful warrior. We maybe flash some "cutscene" high-level NPC vs. NPC combat between the cat and the threat as a teaser for the combat system and first introduction to the combat screen. The cat defeats the threat, but a horde of similar threats emerges, and the cat tells the player to run, opening the first dream portal (tentatively termed a "rabbithole") that the player will see. This pipes them into the Act I game proper, where they're likely to be defeated relatively quickly.When they are defeated and "wake", the cat is missing in the "real world" - setting the initial stakes for the exploration into the Dreamlands - "save the cat". This is probably the key content for the demo/alpha, but I have some headier material prepared too to unravel as the game progresses.EditThis is absolutely stellar narrative design - you're subverting expectations at every turn while establishing emotional stakes immediately. The Poe epigraph perfectly frames the themes of loss, futility, and questioning reality that will permeate the experience.
 Narrative Brilliance
 The Inversion: Starting with "good night" instead of "good morning" immediately signals this isn't your standard RPG. It's such a simple flip but it recontextualizes everything - you're not beginning an adventure, you're descending into one.
 The Cat as Anchor: This is genuinely inspired. The cat serves multiple narrative functions:
@@ -4246,14 +4425,149 @@ The Pipeline Pattern: The best way to handle keywords is with a pipeline. Start 
 Event Data: When emitting events like DAMAGE_DEALT, include the context. Did the damage come from a Brutal hit? Was Piercing involved? This information will be invaluable for the UI later.
 ```
 
+## docs/tickets/S4_UIFoundation/T4_1_AssetManager+PlaceholderInfrastructure.md
+
+```markdown
+Asset Manager & Placeholder Infrastructure
+Goal: Create a centralized, data-driven Asset Manager to decouple game code from asset files. This system must handle loading assets by ID and gracefully fall back to placeholder "programmer art" when final assets are missing.
+Tasks:
+Create a new module: core/assets.lua.
+Implement the Assets:load() function. This function should be called once at game startup. It will scan specified asset directories (e.g., assets/sprites/bodyparts/, assets/sprites/icons/) and load all .png files, using their filenames (without the extension) as their unique ID.
+Implement the Assets:get(id) function. This will be the primary interface for all game code. It must contain the crucial fallback logic:
+First, try to find the exact ID (dreamblade_arm_healthy).
+If not found, parse the ID for a state suffix (e.g., _healthy, _wounded) and try a generic placeholder for that state (placeholder_healthy).
+If no specific placeholder is found, try a final default (placeholder_default).
+If nothing is found, print a warning to the console and return nil. The game must not crash.
+Create the initial set of programmer art. These should be simple colored squares that conform to the art spec (e.g., 128x128 PNGs):
+assets/sprites/bodyparts/placeholder_healthy.png (Green)
+assets/sprites/bodyparts/placeholder_wounded.png (Yellow)
+assets/sprites/bodyparts/placeholder_maimed.png (Red/Grey)
+assets/sprites/icons/placeholder_default.png (White)
+Update main.lua to require the new asset manager and call Assets:load() within the love.load() function.
+Deliverables:
+A functional core/assets.lua module exists.
+The game loads all assets from specified directories on startup without errors.
+Calling Assets:get("some_id_healthy") correctly returns the placeholder_healthy asset if some_id_healthy.png does not exist.
+Calling Assets:get("some_real_asset_healthy") returns the correct asset if the file does exist.
+Design Notes/Pitfalls:
+Code Against IDs: This is the Golden Rule. No part of the game outside of assets.lua should ever reference a file path. All rendering code must use Assets:get(id).
+No Game Logic: The Asset Manager should be completely "dumb." It knows about files and IDs, nothing more. It should not know what a "Body Part" is or have any combat-specific logic.
+Error, Don't Crash: A missing asset should be a recoverable error that logs a warning, not a fatal crash. This makes development robust.
+```
+
+## docs/tickets/S4_UIFoundation/T4_2_CombatState+StaticDisplay.md
+
+```markdown
+Combat State & Static Display
+Goal: Create the main combat game state and render the static "Anatomical Display" layout, drawing data directly from the combat engine using the new Asset Manager.
+Tasks:
+Create a new game state file: states/combat.lua.
+In this state's enter function, instantiate a combat Engine, create two demo Combatants, add them, and start the combat.
+Create ui/layouts.lua to manage coordinates for the anatomical displays.
+In the combat.lua draw function, iterate through engine.combatants.
+For each Body Part, construct the asset ID from its id and status (e.g., "player_arm" .. "_" .. "healthy").
+Call Assets:get(asset_id) to retrieve the correct sprite (which will be the placeholder art for now).
+Draw the retrieved sprite in the correct anatomical position determined by the layout module.
+Draw the combatant's Heart Points and Crests as simple text or placeholder icons.
+Deliverables:
+A new states/combat.lua that starts a combat and renders two opposing "paper dolls" using sprites served by the Asset Manager.
+The displayed sprites (e.g., green for healthy, yellow for wounded) accurately reflect the status of the Body Parts in the engine.
+Design Notes/Pitfalls:
+This ticket now serves as the first real-world test of the Asset Manager. Ensure the fallback logic is working correctly by having some combatants with "real" (placeholder) assets and some without, to verify both paths.
+
+```
+
+## docs/tickets/S4_UIFoundation/T4_3_EventDrivenUIUpdates.md
+
+```markdown
+Event-Driven UI Updates
+Goal: Make the UI "live" by listening to events from the engine and updating the display in response, replacing the need to manually advance the state.
+Tasks:
+In states/combat.lua, subscribe to engine events (BP_STATUS_CHANGED, DAMAGE_DEALT, CREST_GAINED, CREST_EXPENDED).
+When a BP_STATUS_CHANGED event is received, the UI should immediately update its visual state to request the new asset ID on the next draw call (e.g., it should now request ..._wounded instead of ..._healthy).
+Update the update(dt) loop to automatically call engine:process_state() when not awaiting input.
+Deliverables:
+The UI now updates in real-time during an AI-vs-AI combat, swapping between the placeholder_healthy and placeholder_wounded sprites as damage is dealt.
+Design Notes/Pitfalls:
+Continue to reinforce that the UI is a "dumb" client. It just redraws based on the latest information from the engine's events; it doesn't decide the logic itself.
+
+```
+
+## docs/tickets/S5_InteractiveCombatLoop/T5_1_InteractiveTechSelection.md
+
+```markdown
+Interactive Tech Selection
+Goal: Allow the player to select a Tech using the mouse, fulfilling the engine's AWAIT_PLAYER_INPUT request for the Tech Selection phase.
+Tasks:
+Implement mouse position tracking in combat.lua's update loop.
+When engine:needs_input() is true and the metadata.type is tech_select_phase (or similar), the UI should enter a "Tech Selection" mode.
+In this mode, determine which Body Part the mouse is hovering over. When hovered, render the "fan" of Tech cards associated with that part.
+Implement love.mousepressed(x, y, button). If the player clicks on a valid Tech card, call engine:provide_input(tech_index) with the corresponding index from the metadata.options.
+Create the "Selected Tech" and "Dice Preview" UI elements as described in the presentation document. They should update in real-time as the player hovers and selects different Techs.
+Deliverables:
+The player can select and commit a Tech using the mouse.
+The engine correctly receives this input and proceeds to the next state.
+The Dice Preview area accurately reflects the dice that will be generated by the chosen Tech.
+Design Notes/Pitfalls:
+Hit-Testing: You will need a simple system for "hit-testing"—checking if the mouse coordinates are within the bounding box of a UI element. This logic should be kept clean, perhaps in a UI utility module.
+Input Gating: The UI must only listen for clicks when engine:needs_input() is true. At all other times, clicks should be ignored to prevent invalid inputs. The engine's state is the gatekeeper for all interactions.
+
+```
+
+## docs/tickets/S5_InteractiveCombatLoop/T5_2_DragAndDropDiceAssignment.md
+
+```markdown
+Drag-and-Drop Dice Assignment
+Goal: Implement the tactile drag-and-drop interface for assigning dice to attack and defense slots.
+Tasks:
+When the engine requests input for attack_assignment or defense_assignment, the UI should enter an "Assignment" mode.
+Render the player's dice on their "Dice Shelf" as interactable objects.
+In love.mousepressed, check if a die was clicked. If so, "pick it up" by attaching its visual representation to the cursor.
+In love.mousereleased, check if the die was "dropped" over a valid target slot (an enemy BP for attack, a friendly BP for defense).
+If the drop is valid, call engine:provide_input(target_index) with the appropriate index from the metadata.options. The die should visually "snap" into the assignment slot.
+The UI must also render the enemy's unsettled, rolling dice being assigned to their targets.
+Deliverables:
+The player can successfully assign all their attack and defense dice using a drag-and-drop interface.
+The engine correctly receives these assignments.
+A full combat round is now playable from start to finish using only the mouse.
+Design Notes/Pitfalls:
+UI State Management: The UI will need its own state variables to manage the drag-and-drop action, such as ui_state.dragged_die = { die_data, x, y }. This state is purely visual and should be kept separate from the engine's game state.
+Clear Affordances: Use visual cues (highlighting, glowing outlines) to clearly show the player which targets are valid drop zones for the die they are currently dragging.
+```
+
+## docs/tickets/S6_Polish+Animation+Clarity/T6_1_AnimatedResolutionSequence.md
+
+Binary file; contents omitted.
+
+## docs/tickets/S6_Polish+Animation+Clarity/T6_2_ContextualTooltips+Keywords.md
+
+```markdown
+Contextual Tooltips & Keywords
+Goal: Add the final layer of informational clarity by implementing mouse-over tooltips and displaying keyword iconography.
+Tasks:
+Implement a generic tooltip system that can display a box with text near the mouse cursor.
+In the UI's update loop, perform hit-testing to see what game element the mouse is currently hovering over.
+Create and display tooltips for: Body Parts (showing full stats), Crests (explaining their passive and expend effects), and Tech cards.
+Modify the Dice Shelf and Selected Tech UI to display small icons for any associated Keywords.
+Implement a tooltip for these keyword icons that explains their function (e.g., "Brutal: This attack deals +1 damage on a successful hit.").
+Deliverables:
+Hovering the mouse over any key game element provides the player with detailed, contextual information.
+Keywords are visually represented and explained, removing ambiguity from Techs and dice.
+The game is now fully playable and understandable without needing to reference outside documentation.
+Design Notes/Pitfalls:
+Data-Driven Text: Do not hardcode tooltip text in your UI code. Create a separate data file (e.g., data/ui_text.lua) that maps IDs (tooltips.brutal, tooltips.valor_crest) to strings. This makes editing, proofreading, and future localization much, much easier.
+```
+
 ## main.lua
 
 ```lua
+local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Overworld = require("states.overworld")
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Assets:load()
     GameState.switch(Overworld)
 end
 
@@ -4275,12 +4589,643 @@ end
 
 ```
 
+## states/combat.lua
+
+```lua
+local utf8 = require("utf8")
+
+local Assets = require("core.assets")
+local GameState = require("core.gamestate")
+local Layouts = require("ui.layouts")
+local Engine = require("combat.engine")
+local Events = require("combat.events")
+local Combatant = require("combat.combatant")
+
+local CombatState = {}
+CombatState.__index = CombatState
+
+local MAX_ENGINE_STEPS_PER_FRAME = 4
+
+local function clone_crest_pool(source)
+    local copy = {}
+
+    if not source then
+        return copy
+    end
+
+    for crest, count in pairs(source) do
+        copy[crest] = count
+    end
+
+    return copy
+end
+
+local function copy_body_part(part)
+    local status = part.status or "healthy"
+    local tags = {}
+
+    if part.tags then
+        for index, tag in ipairs(part.tags) do
+            tags[index] = tag
+        end
+    end
+
+    local copied = {
+        id = part.id,
+        name = part.name,
+        type = part.type,
+        status = status,
+        toughness = part.toughness or 0,
+        hp_value = part.hp_value or 0,
+        techs = part.techs,
+        tags = tags,
+        layout_slot = part.layout_slot,
+        slot = part.slot,
+        asset_base = part.id or "placeholder"
+    }
+
+    copied.asset_id = (copied.asset_base or "placeholder") .. "_" .. status
+
+    return copied
+end
+
+local function build_ui_state(engine)
+    local state = {
+        combatants = {},
+        combatant_lookup = setmetatable({}, { __mode = "k" }),
+        part_lookup = setmetatable({}, { __mode = "k" })
+    }
+
+    if not engine then
+        return state
+    end
+
+    for index, combatant in ipairs(engine.combatants or {}) do
+        local view = {
+            id = combatant.id,
+            name = combatant.name,
+            is_player = combatant.is_player or false,
+            is_enemy = combatant.is_enemy or false,
+            heart_points = combatant.heart_points or 0,
+            crest_pool = clone_crest_pool(combatant.crest_pool),
+            body_parts = {}
+        }
+
+        state.combatants[index] = view
+        state.combatant_lookup[combatant] = view
+
+        for part_index, part in ipairs(combatant.body_parts or {}) do
+            local part_view = copy_body_part(part)
+            view.body_parts[part_index] = part_view
+            state.part_lookup[part] = part_view
+        end
+    end
+
+    return state
+end
+
+local function update_part_asset_id(part_view)
+    if not part_view then
+        return
+    end
+
+    local base = part_view.asset_base or part_view.id or "placeholder"
+    local status = part_view.status or "healthy"
+    part_view.asset_id = base .. "_" .. status
+end
+
+local function create_player_combatant()
+    local body_parts = {
+        {
+            id = "dreamer_head",
+            name = "Astral Visage",
+            type = "head",
+            status = "healthy",
+            toughness = 2,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "lucid_gaze",
+                    name = "Lucid Gaze",
+                    actions = {
+                        { type = "attack_roll", name = "Lucid Strike", dice_count = 2, dice_type = "d4", damage = 1 },
+                        { type = "defense_roll", name = "Astral Veil", dice_count = 1, dice_type = "d4" }
+                    }
+                }
+            }
+        },
+        {
+            id = "dreamer_torso",
+            name = "Liminal Core",
+            type = "torso",
+            status = "healthy",
+            toughness = 3,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "steady_breath",
+                    name = "Steady Breath",
+                    actions = {
+                        { type = "defense_roll", name = "Composed Guard", dice_count = 1, dice_type = "d6" }
+                    }
+                }
+            }
+        },
+        {
+            id = "dreamer_arm_left",
+            name = "Mnemonic Grip",
+            type = "arm_left",
+            status = "wounded",
+            toughness = 2,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "memory_shear",
+                    name = "Memory Shear",
+                    actions = {
+                        { type = "attack_roll", name = "Mnemonic Cut", dice_count = 1, dice_type = "d6", damage = 1 }
+                    }
+                }
+            }
+        },
+        {
+            id = "dreamer_arm_right",
+            name = "Aether Reach",
+            type = "arm_right",
+            status = "healthy",
+            toughness = 2,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "projection",
+                    name = "Projection",
+                    actions = {
+                        { type = "attack_roll", name = "Astral Jab", dice_count = 1, dice_type = "d6", damage = 1 }
+                    }
+                }
+            }
+        },
+        {
+            id = "dreamer_leg_left",
+            name = "Gliding Step",
+            type = "leg_left",
+            status = "healthy",
+            toughness = 2,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "sidestep",
+                    name = "Sidestep",
+                    actions = {
+                        { type = "defense_roll", name = "Flowing Evasion", dice_count = 1, dice_type = "d6" }
+                    }
+                }
+            }
+        },
+        {
+            id = "dreamer_leg_right",
+            name = "Anchoring Stride",
+            type = "leg_right",
+            status = "healthy",
+            toughness = 2,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "grounding_kick",
+                    name = "Grounding Kick",
+                    actions = {
+                        { type = "attack_roll", name = "Forceful Kick", dice_count = 1, dice_type = "d6", damage = 1 }
+                    }
+                }
+            }
+        }
+    }
+
+    return Combatant:new({
+        id = "player_demo",
+        name = "The Dreamer",
+        is_player = true,
+        heart_points = 3,
+        crest_pool = { Valor = 1, Shadow = 2 },
+        body_parts = body_parts
+    })
+end
+
+local function create_enemy_combatant()
+    local body_parts = {
+        {
+            id = "placeholder",
+            name = "Hollow Visor",
+            type = "head",
+            status = "healthy",
+            toughness = 1,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "glare",
+                    name = "Gloom Glare",
+                    actions = {
+                        { type = "attack_roll", name = "Piercing Glare", dice_count = 1, dice_type = "d4", damage = 1 }
+                    }
+                }
+            }
+        },
+        {
+            id = "placeholder",
+            name = "Threadbare Husk",
+            type = "torso",
+            status = "wounded",
+            toughness = 2,
+            hp_value = 1,
+            techs = {}
+        },
+        {
+            id = "nightmare_arm_left",
+            name = "Raveled Claw",
+            type = "arm_left",
+            status = "healthy",
+            toughness = 1,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "snatch",
+                    name = "Snatch",
+                    actions = {
+                        { type = "attack_roll", name = "Snare", dice_count = 1, dice_type = "d6", damage = 1 }
+                    }
+                }
+            }
+        },
+        {
+            id = "nightmare_arm_right",
+            name = "Splinter Lash",
+            type = "arm_right",
+            status = "maimed",
+            toughness = 0,
+            hp_value = 1,
+            techs = {}
+        },
+        {
+            id = "nightmare_leg_left",
+            name = "Staggered Limb",
+            type = "leg_left",
+            status = "healthy",
+            toughness = 1,
+            hp_value = 1,
+            techs = {
+                {
+                    id = "lurch",
+                    name = "Lurch",
+                    actions = {
+                        { type = "attack_roll", name = "Wild Swing", dice_count = 1, dice_type = "d8", damage = 1 }
+                    }
+                }
+            }
+        },
+        {
+            id = "nightmare_leg_right",
+            name = "Drifting Limb",
+            type = "leg_right",
+            status = "healthy",
+            toughness = 1,
+            hp_value = 1,
+            techs = {}
+        }
+    }
+
+    return Combatant:new({
+        id = "enemy_demo",
+        name = "Dream Eater",
+        is_enemy = true,
+        heart_points = 2,
+        crest_pool = { Madness = 1 },
+        body_parts = body_parts
+    })
+end
+
+function CombatState:enter()
+    self.engine = Engine:new()
+    self.input_buffer = ""
+    self.background_color = { 0.05, 0.06, 0.09, 1 }
+
+    local player = create_player_combatant()
+    local enemy = create_enemy_combatant()
+
+    self.engine:add_combatant(player)
+    self.engine:add_combatant(enemy)
+    self.ui_state = build_ui_state(self.engine)
+    self:register_event_listeners()
+
+    self.engine:start_combat()
+    self.engine:process_state()
+    self:refresh_ui_state()
+end
+
+function CombatState:update(dt)
+    if not self.engine then
+        return
+    end
+
+    local steps = 0
+
+    while self.engine and not self.engine:needs_input() and steps < MAX_ENGINE_STEPS_PER_FRAME do
+        self.engine:process_state()
+        steps = steps + 1
+    end
+end
+
+function CombatState:refresh_ui_state()
+    self.ui_state = build_ui_state(self.engine)
+end
+
+function CombatState:get_combatant_view(combatant)
+    if not self.ui_state then
+        return nil
+    end
+
+    local view = self.ui_state.combatant_lookup[combatant]
+
+    if not view then
+        self:refresh_ui_state()
+        if self.ui_state then
+            view = self.ui_state.combatant_lookup[combatant]
+        end
+    end
+
+    return view
+end
+
+function CombatState:get_body_part_view(part)
+    if not self.ui_state then
+        return nil
+    end
+
+    local view = self.ui_state.part_lookup[part]
+
+    if not view then
+        self:refresh_ui_state()
+        if self.ui_state then
+            view = self.ui_state.part_lookup[part]
+        end
+    end
+
+    return view
+end
+
+function CombatState:handle_bp_status_changed(data)
+    if not data then
+        return
+    end
+
+    local part_view = self:get_body_part_view(data.body_part)
+    if not part_view then
+        return
+    end
+
+    part_view.status = data.new_status or data.body_part and data.body_part.status or part_view.status
+    part_view.toughness = data.body_part and data.body_part.toughness or part_view.toughness
+    part_view.name = data.body_part and data.body_part.name or part_view.name
+    update_part_asset_id(part_view)
+end
+
+function CombatState:handle_damage_dealt(data)
+    if not data then
+        return
+    end
+
+    local target = data.target
+    if not target then
+        return
+    end
+
+    local target_view = self:get_combatant_view(target)
+    if not target_view then
+        return
+    end
+
+    if target.heart_points ~= nil then
+        target_view.heart_points = target.heart_points
+    elseif data.heart_point_loss then
+        local current = target_view.heart_points or 0
+        local updated = math.max(0, current - data.heart_point_loss)
+        target_view.heart_points = updated
+    end
+end
+
+local function update_crest_count(view, crest, new_value)
+    if not view or not crest then
+        return
+    end
+
+    if new_value == nil then
+        return
+    end
+
+    view.crest_pool = view.crest_pool or {}
+
+    if new_value <= 0 then
+        view.crest_pool[crest] = 0
+        return
+    end
+
+    view.crest_pool[crest] = new_value
+end
+
+function CombatState:handle_crest_gained(data)
+    if not data then
+        return
+    end
+
+    local combatant = data.combatant
+    local crest = data.crest
+
+    local view = self:get_combatant_view(combatant)
+    if not view then
+        return
+    end
+
+    local total = data.total
+    if total == nil and combatant and combatant.get_crest_count then
+        total = combatant:get_crest_count(crest)
+    end
+
+    update_crest_count(view, crest, total)
+end
+
+function CombatState:handle_crest_expended(data)
+    if not data then
+        return
+    end
+
+    local combatant = data.combatant
+    local crest = data.crest
+
+    local view = self:get_combatant_view(combatant)
+    if not view then
+        return
+    end
+
+    local remaining = data.remaining
+    if remaining == nil and combatant and combatant.get_crest_count then
+        remaining = combatant:get_crest_count(crest)
+    end
+
+    update_crest_count(view, crest, remaining)
+end
+
+function CombatState:register_event_listeners()
+    if not self.engine then
+        return
+    end
+
+    self.engine:on(Events.BP_STATUS_CHANGED, function(data)
+        self:handle_bp_status_changed(data)
+    end)
+
+    self.engine:on(Events.DAMAGE_DEALT, function(data)
+        self:handle_damage_dealt(data)
+    end)
+
+    self.engine:on(Events.CREST_GAINED, function(data)
+        self:handle_crest_gained(data)
+    end)
+
+    self.engine:on(Events.CREST_EXPENDED, function(data)
+        self:handle_crest_expended(data)
+    end)
+end
+
+local function draw_body_part(part, x, y)
+    local sprite_size = Layouts.get_sprite_size()
+    local status = part.status or "healthy"
+    local asset_id = part.asset_id
+
+    if not asset_id then
+        local asset_base = part.asset_base or part.id or "placeholder"
+        asset_id = asset_base .. "_" .. status
+    end
+
+    local image = Assets:get(asset_id)
+
+    love.graphics.setColor(1, 1, 1, 1)
+    if image then
+        love.graphics.draw(image, x, y)
+    else
+        love.graphics.rectangle("line", x, y, sprite_size, sprite_size)
+    end
+
+    local label_y = y + sprite_size + 4
+    love.graphics.printf(part.name or part.id or "", x, label_y, sprite_size, "center")
+
+    local status_label = status:gsub("^%l", string.upper)
+    love.graphics.printf(status_label, x, label_y + 14, sprite_size, "center")
+
+    love.graphics.printf("T " .. tostring(part.toughness or 0), x, y - 18, sprite_size, "center")
+end
+
+local function draw_combatant(combatant, index)
+    local sprite_size = Layouts.get_sprite_size()
+    local name_x, name_y, name_width = Layouts.get_name_region(combatant, index)
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.printf(combatant.name or "", name_x, name_y, name_width, "center")
+
+    for _, part in ipairs(combatant.body_parts or {}) do
+        local px, py = Layouts.get_body_part_position(combatant, index, part)
+        draw_body_part(part, px, py)
+    end
+
+    local heart_x, heart_y = Layouts.get_heart_position(combatant, index)
+    love.graphics.print("HP: " .. tostring(combatant.heart_points or 0), heart_x, heart_y)
+
+    local crest_x, crest_y, crest_width = Layouts.get_crest_region(combatant, index)
+    local crest_entries = {}
+    for crest, count in pairs(combatant.crest_pool or {}) do
+        if (count or 0) > 0 then
+            table.insert(crest_entries, string.format("%s: %d", crest, count))
+        end
+    end
+    table.sort(crest_entries)
+
+    local crest_text = #crest_entries > 0 and table.concat(crest_entries, "    ") or "No Crests"
+    love.graphics.printf("Crests: " .. crest_text, crest_x, crest_y, crest_width, "center")
+
+    love.graphics.setColor(1, 1, 1, 0.4)
+    love.graphics.rectangle("line", name_x, name_y + sprite_size * 1.6, name_width, sprite_size * 1.6)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function CombatState:draw()
+    if self.background_color then
+        love.graphics.clear(self.background_color[1], self.background_color[2], self.background_color[3], self.background_color[4])
+    else
+        love.graphics.clear(0, 0, 0, 1)
+    end
+
+    if not self.engine then
+        return
+    end
+
+    for index, combatant in ipairs(self.ui_state and self.ui_state.combatants or {}) do
+        draw_combatant(combatant, index)
+    end
+
+    if self.engine:needs_input() then
+        local prompt = self.engine:get_input_prompt()
+        local x, y, width = Layouts.get_prompt_region()
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf(prompt or "", x, y, width, "left")
+        love.graphics.printf("> " .. (self.input_buffer or ""), x, y + 18, width, "left")
+        love.graphics.setColor(1, 1, 1, 0.3)
+        love.graphics.rectangle("line", x - 4, y - 6, width + 8, 36)
+        love.graphics.setColor(1, 1, 1, 1)
+    else
+        local x, y, width = Layouts.get_prompt_region()
+        love.graphics.setColor(1, 1, 1, 0.5)
+        love.graphics.printf("Press ESC to return to the overworld", x, y, width, "center")
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+end
+
+function CombatState:keypressed(key)
+    if key == "escape" then
+        GameState.switch(require("states.overworld"))
+        return
+    end
+
+    if key == "return" or key == "kpenter" then
+        if self.engine and self.engine:needs_input() then
+            self.engine:provide_input(self.input_buffer or "")
+            self.input_buffer = ""
+        end
+    elseif key == "backspace" then
+        if self.input_buffer and #self.input_buffer > 0 then
+            local byteoffset = utf8.offset(self.input_buffer, -1)
+            if byteoffset then
+                self.input_buffer = self.input_buffer:sub(1, byteoffset - 1)
+            else
+                self.input_buffer = ""
+            end
+        end
+    end
+end
+
+function CombatState:textinput(text)
+    if self.engine and self.engine:needs_input() then
+        self.input_buffer = (self.input_buffer or "") .. text
+    end
+end
+
+return CombatState
+
+```
+
 ## states/overworld.lua
 
 ```lua
 local Overworld = {}
 Overworld.__index = Overworld
 
+local GameState = require("core.gamestate")
 local Player = require("systems.player")
 local TileMap = require("systems.tilemap")
 
@@ -4303,7 +5248,10 @@ function Overworld:draw()
 end
 
 function Overworld:keypressed(key)
-    if key == "space" then
+    if key == "c" then
+        GameState.switch(require("states.combat"))
+        return
+    elseif key == "space" then
         local entity = self.map:getEntityAt(self.player.x, self.player.y)
         if entity then
             local action, param = entity:interact(self.player)
@@ -4883,6 +5831,195 @@ local function run_test_combat()
 end
 
 run_test_combat()
+
+```
+
+## ui/layouts.lua
+
+```lua
+local Layouts = {}
+
+local SPRITE_SIZE = 128
+local DEFAULT_WIDTH = 220
+
+local SLOT_ALIASES = {
+    head = "head",
+    skull = "head",
+    torso = "torso",
+    body = "torso",
+    chest = "torso",
+    core = "torso",
+    arm = "arm",
+    arm_left = "arm_left",
+    left_arm = "arm_left",
+    l_arm = "arm_left",
+    arm_right = "arm_right",
+    right_arm = "arm_right",
+    r_arm = "arm_right",
+    leg = "leg",
+    leg_left = "leg_left",
+    left_leg = "leg_left",
+    l_leg = "leg_left",
+    leg_right = "leg_right",
+    right_leg = "leg_right",
+    r_leg = "leg_right"
+}
+
+local SLOT_OFFSETS = {
+    head = { x = 0, y = -SPRITE_SIZE * 1.3 },
+    torso = { x = 0, y = -SPRITE_SIZE * 0.1 },
+    arm_left = { x = -SPRITE_SIZE * 1.2, y = -SPRITE_SIZE * 0.1 },
+    arm_right = { x = SPRITE_SIZE * 1.2, y = -SPRITE_SIZE * 0.1 },
+    leg_left = { x = -SPRITE_SIZE * 0.6, y = SPRITE_SIZE * 1.15 },
+    leg_right = { x = SPRITE_SIZE * 0.6, y = SPRITE_SIZE * 1.15 }
+}
+
+local function clamp_width(width)
+    if not width or width <= 0 then
+        return DEFAULT_WIDTH
+    end
+    return width
+end
+
+local function resolve_side(combatant, index)
+    if combatant and combatant.is_player then
+        return "left"
+    end
+
+    if combatant and combatant.is_enemy then
+        return "right"
+    end
+
+    if index == 1 then
+        return "left"
+    end
+
+    return "right"
+end
+
+local function resolve_slot(part)
+    if not part then
+        return "torso"
+    end
+
+    if part.layout_slot then
+        return part.layout_slot
+    end
+
+    if part.slot then
+        return part.slot
+    end
+
+    local part_type = part.type
+    if type(part_type) == "string" then
+        part_type = part_type:lower()
+        if SLOT_ALIASES[part_type] then
+            local mapped = SLOT_ALIASES[part_type]
+            if mapped ~= "arm" and mapped ~= "leg" then
+                return mapped
+            end
+
+            part_type = mapped
+        end
+    end
+
+    local id = part.id
+    if type(id) == "string" then
+        local lowered = id:lower()
+        if lowered:find("left", 1, true) then
+            if part_type == "arm" then
+                return "arm_left"
+            elseif part_type == "leg" then
+                return "leg_left"
+            end
+        elseif lowered:find("right", 1, true) then
+            if part_type == "arm" then
+                return "arm_right"
+            elseif part_type == "leg" then
+                return "leg_right"
+            end
+        end
+    end
+
+    if part_type == "arm" then
+        return "arm_right"
+    elseif part_type == "leg" then
+        return "leg_right"
+    end
+
+    return part_type or "torso"
+end
+
+local function get_anchor(side)
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+
+    local center_x = width * (side == "right" and 0.72 or 0.28)
+    local center_y = height * 0.45
+
+    return center_x, center_y
+end
+
+function Layouts.get_combatant_side(combatant, index)
+    return resolve_side(combatant, index)
+end
+
+function Layouts.get_body_part_position(combatant, index, part)
+    local side = resolve_side(combatant, index)
+    local slot = resolve_slot(part)
+    local anchor_x, anchor_y = get_anchor(side)
+    local offset = SLOT_OFFSETS[slot] or SLOT_OFFSETS.torso or { x = 0, y = 0 }
+
+    local x = anchor_x + offset.x - SPRITE_SIZE * 0.5
+    local y = anchor_y + offset.y - SPRITE_SIZE * 0.5
+
+    return x, y
+end
+
+function Layouts.get_name_region(combatant, index)
+    local side = resolve_side(combatant, index)
+    local anchor_x, anchor_y = get_anchor(side)
+    local width = clamp_width(SPRITE_SIZE * 2.2)
+    local x = anchor_x - width * 0.5
+    local y = anchor_y - SPRITE_SIZE * 2.1
+
+    return x, y, width
+end
+
+function Layouts.get_heart_position(combatant, index)
+    local side = resolve_side(combatant, index)
+    local anchor_x, anchor_y = get_anchor(side)
+    local x = anchor_x - SPRITE_SIZE * 0.7
+    local y = anchor_y + SPRITE_SIZE * 1.2
+
+    return x, y
+end
+
+function Layouts.get_crest_region(combatant, index)
+    local side = resolve_side(combatant, index)
+    local anchor_x, anchor_y = get_anchor(side)
+    local width = clamp_width(SPRITE_SIZE * 2.4)
+    local x = anchor_x - width * 0.5
+    local y = anchor_y + SPRITE_SIZE * 1.8
+
+    return x, y, width
+end
+
+function Layouts.get_prompt_region()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local region_width = math.min(width * 0.9, 640)
+    local x = (width - region_width) * 0.5
+    local y = height - 64
+
+    return x, y, region_width
+end
+
+function Layouts.get_sprite_size()
+    return SPRITE_SIZE
+end
+
+return Layouts
 
 ```
 
