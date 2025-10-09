@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-10-08 20:53 UTC_
+_Generated on 2025-10-08 21:42 UTC_
 
 ## AGENTS.md
 
@@ -8,6 +8,282 @@ _Generated on 2025-10-08 20:53 UTC_
 Start by reviewing the documentation in /docs for context on your task - you will be directed to the most relevant documentation. You may be directed to find details for your task in /docs/tickets, otherwise proceed based on the contents of the request.
 
 Review any relevant code before implementation, then proceed to implement the requested features in Lua/LOVE2D.
+```
+
+## combat/ai.lua
+
+```lua
+local AI = {}
+
+local BENEFICIAL_CRESTS = {
+    Shadow = true,
+    Valor = true,
+    Knowledge = true,
+    Cunning = true
+}
+
+local DETRIMENTAL_CRESTS = {
+    Madness = true,
+    Greed = true,
+    Corruption = true
+}
+
+local STATUS_PRIORITY = {
+    wounded = 3,
+    healthy = 2,
+    maimed = 0
+}
+
+local function average_for_die(dice_type)
+    if type(dice_type) ~= "string" then
+        return 0
+    end
+
+    local sides = dice_type:lower():match("d(%d+)")
+    sides = sides and tonumber(sides)
+
+    if not sides or sides <= 0 then
+        return 0
+    end
+
+    return (sides + 1) / 2
+end
+
+local function count_wounded_parts(combatant)
+    if not combatant or not combatant.body_parts then
+        return 0
+    end
+
+    local total = 0
+    for _, part in ipairs(combatant.body_parts) do
+        if part.status == "wounded" then
+            total = total + 1
+        end
+    end
+
+    return total
+end
+
+local function estimate_attack_value(action)
+    local dice_count = action.dice_count or 0
+    local average = average_for_die(action.dice_type or "d6")
+    local bonus = action.flat_bonus or 0
+
+    return dice_count * average + bonus
+end
+
+local function estimate_defense_value(action)
+    local dice_count = action.dice_count or 0
+    local average = average_for_die(action.dice_type or "d6")
+
+    return dice_count * average
+end
+
+local function crest_value(crest, amount)
+    local multiplier = amount or 1
+
+    if BENEFICIAL_CRESTS[crest] then
+        return 2 * multiplier
+    end
+
+    if DETRIMENTAL_CRESTS[crest] then
+        return -2 * multiplier
+    end
+
+    return multiplier
+end
+
+local function score_tech(ai_combatant, opponent, tech)
+    if not tech then
+        return -math.huge
+    end
+
+    local offense = 0
+    local defense = 0
+    local support = 0
+
+    local opponent_wounds = count_wounded_parts(opponent)
+
+    for _, action in ipairs(tech.actions or {}) do
+        if action.type == "attack_roll" then
+            local value = estimate_attack_value(action)
+
+            if opponent_wounds > 0 then
+                value = value * (1 + opponent_wounds * 0.15)
+            end
+
+            offense = offense + value
+        elseif action.type == "damage_body_part" then
+            local steps = action.amount or 1
+            offense = offense + (steps * 6)
+        elseif action.type == "defense_roll" then
+            defense = defense + estimate_defense_value(action)
+        elseif action.type == "heal_body_part" then
+            support = support + 6
+        elseif action.type == "gain_crest" then
+            support = support + crest_value(action.crest, action.amount)
+        elseif action.type == "consume_crest" then
+            support = support - crest_value(action.crest, action.amount)
+        end
+    end
+
+    local heart_points = ai_combatant and ai_combatant.heart_points or 3
+    if heart_points <= 1 then
+        defense = defense * 1.75
+        support = support + 2
+    elseif heart_points == 2 then
+        defense = defense * 1.25
+    end
+
+    local ai_wounds = count_wounded_parts(ai_combatant)
+    if ai_wounds > 0 then
+        support = support + ai_wounds * 2.5
+    end
+
+    local total_actions = #(tech.actions or {})
+
+    return offense * 1.1 + defense + support + total_actions * 0.1
+end
+
+local function get_tech_list(ai_combatant, provided)
+    if provided and #provided > 0 then
+        return provided
+    end
+
+    if ai_combatant and ai_combatant.get_available_techs then
+        return ai_combatant:get_available_techs()
+    end
+
+    return {}
+end
+
+function AI.choose_tech(ai_combatant, opponent, available_techs)
+    local techs = get_tech_list(ai_combatant, available_techs)
+    local best_tech = nil
+    local best_score = -math.huge
+
+    for _, tech in ipairs(techs) do
+        local score = score_tech(ai_combatant, opponent, tech)
+        if score > best_score then
+            best_score = score
+            best_tech = tech
+        end
+    end
+
+    return best_tech
+end
+
+local function gather_targetable_parts(opponent, context)
+    if not opponent then
+        return {}
+    end
+
+    local parts = nil
+
+    if context and context.engine and context.engine.get_targetable_parts then
+        parts = context.engine:get_targetable_parts(opponent)
+    end
+
+    if parts and #parts > 0 then
+        return parts
+    end
+
+    parts = {}
+    for _, part in ipairs(opponent.body_parts or {}) do
+        if part.status ~= "maimed" then
+            table.insert(parts, part)
+        end
+    end
+
+    return parts
+end
+
+local function sort_target_priority(parts)
+    table.sort(parts, function(a, b)
+        local a_priority = STATUS_PRIORITY[a.status or "healthy"] or 1
+        local b_priority = STATUS_PRIORITY[b.status or "healthy"] or 1
+
+        if a_priority == b_priority then
+            local a_toughness = a.toughness or math.huge
+            local b_toughness = b.toughness or math.huge
+
+            if a_toughness == b_toughness then
+                local a_hp = a.hp_value or 0
+                local b_hp = b.hp_value or 0
+                if a_hp == b_hp then
+                    return (a.id or "") < (b.id or "")
+                end
+                return a_hp > b_hp
+            end
+
+            return a_toughness < b_toughness
+        end
+
+        return a_priority > b_priority
+    end)
+end
+
+function AI.assign_targets(ai_combatant, opponent, tech, context)
+    local assignments = {}
+
+    if not tech or not tech.actions or not opponent then
+        return assignments
+    end
+
+    local engine = context and context.engine or nil
+    local targetable_parts = gather_targetable_parts(opponent, context)
+
+    if #targetable_parts == 0 then
+        return assignments
+    end
+
+    sort_target_priority(targetable_parts)
+
+    local function get_preferred_part(index)
+        if #targetable_parts == 0 then
+            return nil
+        end
+
+        local adjusted = ((index - 1) % #targetable_parts) + 1
+        return targetable_parts[adjusted]
+    end
+
+    local attack_index = 0
+
+    for index, action in ipairs(tech.actions) do
+        if action.type == "attack_roll" then
+            attack_index = attack_index + 1
+
+            local target_part = nil
+
+            if action.target_body_part_id and opponent.get_body_part_by_id then
+                target_part = opponent:get_body_part_by_id(action.target_body_part_id)
+            end
+
+            if not target_part then
+                target_part = get_preferred_part(attack_index)
+            end
+
+            if target_part then
+                if target_part.status == "maimed" then
+                    target_part = nil
+                end
+            end
+
+            if target_part then
+                if not engine or not engine.is_part_untargetable or not engine:is_part_untargetable(target_part) then
+                    assignments[index] = target_part
+                end
+            end
+        end
+    end
+
+    return assignments
+end
+
+return AI
+
+
 ```
 
 ## combat/bodypart.lua
@@ -66,6 +342,18 @@ function BodyPart:advance_damage_state()
     return self.status
 end
 
+function BodyPart:regress_damage_state()
+    if self.status == "maimed" then
+        self.status = "wounded"
+        return "wounded"
+    elseif self.status == "wounded" then
+        self.status = "healthy"
+        return "healthy"
+    end
+
+    return self.status
+end
+
 return BodyPart
 
 ```
@@ -85,8 +373,11 @@ function Combatant:new(data)
         body_parts = {},
         heart_points = data.heart_points or 3,
         crest_pool = data.crest_pool or {},
+        modifiers = {},
         selected_tech = nil,
-        is_player = data.is_player or false
+        is_player = data.is_player or false,
+        pending_forced_rerolls = 0,
+        attack_bonus_tokens = {}
     }
 
     local combatant = setmetatable(instance, Combatant)
@@ -147,7 +438,219 @@ function Combatant:is_defeated()
     return self.heart_points <= 0
 end
 
+function Combatant:add_crest(crest, amount)
+    if not crest then
+        return 0
+    end
+
+    local delta = amount or 1
+    self.crest_pool[crest] = (self.crest_pool[crest] or 0) + delta
+    return self.crest_pool[crest]
+end
+
+function Combatant:remove_crest(crest, amount)
+    if not crest then
+        return 0
+    end
+
+    local current = self.crest_pool[crest] or 0
+    local delta = amount or 1
+    local remaining = current - delta
+
+    if remaining <= 0 then
+        self.crest_pool[crest] = 0
+        return 0
+    end
+
+    self.crest_pool[crest] = remaining
+    return remaining
+end
+
+function Combatant:get_crest_count(crest)
+    return self.crest_pool[crest] or 0
+end
+
+function Combatant:clear_modifiers()
+    self.modifiers = {}
+end
+
+function Combatant:add_modifier(key, value)
+    if not key then
+        return
+    end
+
+    self.modifiers[key] = (self.modifiers[key] or 0) + (value or 0)
+end
+
+function Combatant:get_modifier(key)
+    if not key then
+        return 0
+    end
+
+    return self.modifiers[key] or 0
+end
+
 return Combatant
+
+```
+
+## combat/crests.lua
+
+```lua
+local CrestEffects = {}
+
+local PASSIVE_REGISTRY = {
+    Valor = function(engine, combatant, count)
+        if count >= 2 and combatant and combatant.add_modifier then
+            combatant:add_modifier("attack_bonus", 1)
+        end
+    end
+}
+
+local ALL_CRESTS = {
+    "Shadow",
+    "Valor",
+    "Knowledge",
+    "Cunning",
+    "Madness",
+    "Greed",
+    "Corruption"
+}
+
+local EXPEND_REGISTRY = {}
+
+local function random_crest_name()
+    if #ALL_CRESTS == 0 then
+        return nil
+    end
+
+    local index = math.random(1, #ALL_CRESTS)
+    return ALL_CRESTS[index]
+end
+
+function CrestEffects.apply(engine, combatant)
+    if not combatant then
+        return
+    end
+
+    for crest, handler in pairs(PASSIVE_REGISTRY) do
+        if handler then
+            local count = combatant.get_crest_count and combatant:get_crest_count(crest) or 0
+            handler(engine, combatant, count)
+        end
+    end
+end
+
+function CrestEffects.can_expend(crest)
+    return crest ~= nil and EXPEND_REGISTRY[crest] ~= nil
+end
+
+function CrestEffects.get_expend_handler(crest)
+    return crest and EXPEND_REGISTRY[crest] or nil
+end
+
+function CrestEffects.random_crest()
+    return random_crest_name()
+end
+
+EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
+    if not engine or not combatant then
+        if on_complete then
+            on_complete({ type = "shadow", skipped = true })
+        end
+        return
+    end
+
+    local opponent = engine:get_opponent(combatant)
+    if not opponent then
+        if on_complete then
+            on_complete({ type = "shadow", skipped = true })
+        end
+        return
+    end
+
+    local options = engine:get_targetable_parts(opponent)
+    if not options or #options == 0 then
+        if on_complete then
+            on_complete({ type = "shadow", skipped = true })
+        end
+        return
+    end
+
+    local metadata = {
+        type = "crest_target_select",
+        crest = "Shadow",
+        combatant = combatant,
+        opponent = opponent,
+        options = {}
+    }
+
+    for index, part in ipairs(options) do
+        metadata.options[index] = {
+            index = index,
+            part = part,
+            id = part.id,
+            name = part.name,
+            status = part.status,
+            toughness = part.toughness or 0
+        }
+    end
+
+    local function handle_input(engine_instance, raw_input)
+        local choice = tonumber(raw_input)
+        local selection = choice and metadata.options[choice] or nil
+
+        if not selection then
+            engine_instance:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+            return
+        end
+
+        engine_instance:clear_input()
+        engine_instance:mark_part_untargetable(selection.part)
+
+        if on_complete then
+            on_complete({
+                type = "shadow",
+                target = selection.part
+            })
+        end
+    end
+
+    engine:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+end
+
+EXPEND_REGISTRY.Valor = function(_, combatant, on_complete)
+    if combatant and combatant.attack_bonus_tokens then
+        table.insert(combatant.attack_bonus_tokens, 2)
+    end
+
+    if on_complete then
+        on_complete({
+            type = "valor",
+            bonus = 2
+        })
+    end
+end
+
+EXPEND_REGISTRY.Madness = function(engine, combatant, on_complete)
+    if combatant then
+        combatant.pending_forced_rerolls = (combatant.pending_forced_rerolls or 0) + 1
+    end
+
+    local gained_crest = CrestEffects.random_crest()
+    if engine and engine.grant_crest and gained_crest and combatant then
+        engine:grant_crest(combatant, gained_crest, 1, { source = "madness_expend" })
+    end
+
+    if on_complete then
+        on_complete({
+            type = "madness",
+            gained_crest = gained_crest
+        })
+    end
+end
+
+return CrestEffects
 
 ```
 
@@ -157,17 +660,27 @@ return Combatant
 local Events = require("combat.events")
 local States = require("combat.states")
 local Dice = require("core.dice")
+local CrestPassives = require("combat.crests")
+local AI = require("combat.ai")
 
 local Engine = {}
 Engine.__index = Engine
 
 local MAX_STATE_ADVANCES_PER_UPDATE = 8
 
-local function is_part_targetable(part)
-    return part and part.status ~= "maimed"
+local function is_part_targetable(engine, part)
+    if not part or part.status == "maimed" then
+        return false
+    end
+
+    if engine and engine:is_part_untargetable(part) then
+        return false
+    end
+
+    return true
 end
 
-local function collect_targetable_parts_from(combatant)
+local function collect_targetable_parts_from(engine, combatant)
     local parts = {}
 
     if not combatant or not combatant.body_parts then
@@ -175,12 +688,156 @@ local function collect_targetable_parts_from(combatant)
     end
 
     for _, part in ipairs(combatant.body_parts) do
-        if is_part_targetable(part) then
+        if is_part_targetable(engine, part) then
             table.insert(parts, part)
         end
     end
 
     return parts
+end
+
+local function merge_keyword_sources(destination, source)
+    if not source or not source.keywords then
+        return
+    end
+
+    for key, value in pairs(source.keywords) do
+        if type(value) == "number" then
+            destination[key] = (destination[key] or 0) + value
+        elseif type(value) == "boolean" then
+            destination[key] = value and 1 or 0
+        elseif type(value) == "string" then
+            local numeric = tonumber(value)
+            destination[key] = numeric or value
+        else
+            destination[key] = value
+        end
+    end
+end
+
+local function collect_keywords(tech, action)
+    local combined = {}
+    merge_keyword_sources(combined, tech)
+    merge_keyword_sources(combined, action)
+    return combined
+end
+
+local function get_keyword_value(keywords, key)
+    if not keywords then
+        return nil
+    end
+
+    local value = keywords[key]
+    if type(value) == "number" then
+        return value
+    elseif type(value) == "boolean" then
+        return value and 1 or 0
+    elseif type(value) == "string" then
+        return tonumber(value) or value
+    end
+
+    return value
+end
+
+local function apply_consistent_keyword(result, keywords)
+    if not result or not keywords then
+        return nil
+    end
+
+    local consistent_value = get_keyword_value(keywords, "Consistent")
+    if not consistent_value then
+        return nil
+    end
+
+    consistent_value = tonumber(consistent_value)
+    if not consistent_value then
+        return nil
+    end
+
+    local count = result.count or #result.rolls or 0
+    if count <= 0 then
+        return nil
+    end
+
+    result.rolls = result.rolls or {}
+    for index = 1, count do
+        result.rolls[index] = consistent_value
+    end
+
+    result.total = consistent_value * count
+    result.consistent_value = consistent_value
+
+    return consistent_value
+end
+
+local AttackPipeline = {}
+
+function AttackPipeline.apply_base_totals(_, context)
+    context.attack_total = (context.attack_total or 0)
+    context.effective_defense = math.max(0, context.effective_defense or 0)
+    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
+    context.defense_total = context.effective_defense
+end
+
+function AttackPipeline.apply_piercing(_, context)
+    local pierce = get_keyword_value(context.keywords, "Piercing")
+    if not pierce then
+        return
+    end
+
+    pierce = tonumber(pierce) or 0
+    if pierce <= 0 then
+        return
+    end
+
+    local total_reduction = 0
+    local defense_before = context.effective_defense or 0
+    local defense_reduction = math.min(defense_before, pierce)
+    context.effective_defense = defense_before - defense_reduction
+    total_reduction = total_reduction + defense_reduction
+
+    local remaining = pierce - defense_reduction
+    local toughness_reduction = 0
+    if remaining > 0 then
+        local base_before = context.base_toughness or 0
+        toughness_reduction = math.min(base_before, remaining)
+        context.base_toughness = base_before - toughness_reduction
+        total_reduction = total_reduction + toughness_reduction
+    end
+
+    context.effective_defense = math.max(0, context.effective_defense)
+    context.base_toughness = math.max(0, context.base_toughness or 0)
+    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
+    context.defense_total = context.effective_defense
+
+    context.notes = context.notes or {}
+    context.notes.piercing = total_reduction
+    context.notes.piercing_defense = defense_reduction
+    context.notes.piercing_toughness = toughness_reduction
+end
+
+function AttackPipeline.check_hit(_, context)
+    context.hit = (context.attack_total or 0) > (context.effective_toughness or 0)
+end
+
+function AttackPipeline.apply_brutal(_, context)
+    if not context.hit then
+        return
+    end
+
+    local brutal = get_keyword_value(context.keywords, "Brutal")
+    if not brutal then
+        return
+    end
+
+    brutal = tonumber(brutal) or 0
+    if brutal == 0 then
+        return
+    end
+
+    context.damage = (context.damage or context.base_damage or 1) + brutal
+    context.notes = context.notes or {}
+    context.notes.brutal = brutal
 end
 
 
@@ -200,10 +857,32 @@ function Engine:new()
         attack_assignment_ready = false,
         defense_assignment_ready = false,
         winner = nil,
-        states = States
+        states = States,
+        untargetable_parts = setmetatable({}, { __mode = "k" })
     }
 
     return setmetatable(instance, Engine)
+end
+
+function Engine:get_attack_pipeline()
+    return {
+        AttackPipeline.apply_base_totals,
+        AttackPipeline.apply_piercing,
+        AttackPipeline.check_hit,
+        AttackPipeline.apply_brutal
+    }
+end
+
+function Engine:run_attack_pipeline(context)
+    if not context then
+        return nil
+    end
+
+    for _, step in ipairs(self:get_attack_pipeline()) do
+        step(self, context)
+    end
+
+    return context
 end
 
 function Engine:emit(event_type, data)
@@ -243,9 +922,56 @@ function Engine:start_combat()
     self.attack_assignment_ready = false
     self.defense_assignment_ready = false
     self.winner = nil
+    self.untargetable_parts = setmetatable({}, { __mode = "k" })
+    self:clear_combatant_modifiers()
 
     self:emit(Events.COMBAT_START, { combatants = self.combatants })
     self:transition_to("ROUND_START")
+end
+
+function Engine:clear_combatant_modifiers()
+    for _, combatant in ipairs(self.combatants) do
+        if combatant.clear_modifiers then
+            combatant:clear_modifiers()
+        end
+    end
+end
+
+function Engine:clear_untargetable_parts()
+    self.untargetable_parts = setmetatable({}, { __mode = "k" })
+end
+
+function Engine:is_part_untargetable(part)
+    if not part then
+        return false
+    end
+
+    return self.untargetable_parts and self.untargetable_parts[part] == true
+end
+
+function Engine:mark_part_untargetable(part)
+    if not part then
+        return
+    end
+
+    self.untargetable_parts = self.untargetable_parts or setmetatable({}, { __mode = "k" })
+    self.untargetable_parts[part] = true
+end
+
+function Engine:get_targetable_parts(combatant)
+    return collect_targetable_parts_from(self, combatant)
+end
+
+function Engine:apply_crest_passives()
+    for _, combatant in ipairs(self.combatants) do
+        CrestPassives.apply(self, combatant)
+    end
+end
+
+function Engine:perform_upkeep()
+    self:clear_untargetable_parts()
+    self:clear_combatant_modifiers()
+    self:apply_crest_passives()
 end
 
 function Engine:transition_to(state_name)
@@ -338,10 +1064,6 @@ function Engine:begin_tech_selection()
     self:advance_tech_selection()
 end
 
-local function select_first_tech(techs)
-    return techs[1]
-end
-
 function Engine:advance_tech_selection()
     if not self.selection_queue then
         return
@@ -355,36 +1077,54 @@ function Engine:advance_tech_selection()
     local combatant = self.selection_queue[1]
     local available_techs = combatant:get_available_techs()
 
-    if combatant.is_player and #available_techs > 0 then
-        self:emit(Events.TECH_SELECT_PHASE, {
-            combatant = combatant,
-            available_techs = available_techs
-        })
+    local function advance_queue()
+        table.remove(self.selection_queue, 1)
+        self:advance_tech_selection()
+    end
 
-        local function handle_input(engine, raw_input)
-            local choice = tonumber(raw_input)
-            if not choice or not available_techs[choice] then
-                engine:request_input("Invalid selection. Choose a tech by number", handle_input)
-                return
-            end
-
-            combatant.selected_tech = available_techs[choice]
-            engine:emit(Events.TECH_SELECTED, {
+    local function handle_player_selection()
+        if #available_techs > 0 then
+            self:emit(Events.TECH_SELECT_PHASE, {
                 combatant = combatant,
-                tech = combatant.selected_tech
+                available_techs = available_techs
             })
 
-            table.remove(engine.selection_queue, 1)
-            engine:clear_input()
-            engine:advance_tech_selection()
+            local function handle_input(engine, raw_input)
+                local choice = tonumber(raw_input)
+                if not choice or not available_techs[choice] then
+                    engine:request_input("Invalid selection. Choose a tech by number", handle_input)
+                    return
+                end
+
+                combatant.selected_tech = available_techs[choice]
+                engine:emit(Events.TECH_SELECTED, {
+                    combatant = combatant,
+                    tech = combatant.selected_tech
+                })
+
+                engine:clear_input()
+                advance_queue()
+            end
+
+            self:request_input("Select tech for " .. combatant.name, handle_input)
+        else
+            combatant.selected_tech = nil
+            advance_queue()
+        end
+    end
+
+    if combatant.is_player then
+        if self:prompt_crest_expenditure(combatant, handle_player_selection) then
+            return
         end
 
-        self:request_input("Select tech for " .. combatant.name, handle_input)
+        handle_player_selection()
         return
     end
 
     if #available_techs > 0 then
-        combatant.selected_tech = select_first_tech(available_techs)
+        local opponent = self:get_opponent(combatant)
+        combatant.selected_tech = AI.choose_tech(combatant, opponent, available_techs) or available_techs[1]
         self:emit(Events.TECH_SELECTED, {
             combatant = combatant,
             tech = combatant.selected_tech,
@@ -394,12 +1134,259 @@ function Engine:advance_tech_selection()
         combatant.selected_tech = nil
     end
 
-    table.remove(self.selection_queue, 1)
-    self:advance_tech_selection()
+    advance_queue()
 end
 
 function Engine:tech_selection_complete()
     return self.selection_queue == nil and not self:needs_input()
+end
+
+function Engine:get_expendable_crests(combatant)
+    local options = {}
+
+    if not combatant or not combatant.crest_pool then
+        return options
+    end
+
+    for crest, count in pairs(combatant.crest_pool) do
+        if (count or 0) > 0 and CrestPassives.can_expend(crest) then
+            table.insert(options, {
+                name = crest,
+                count = count
+            })
+        end
+    end
+
+    table.sort(options, function(a, b)
+        if a.name == b.name then
+            return false
+        end
+        return a.name < b.name
+    end)
+
+    for index, entry in ipairs(options) do
+        entry.index = index
+    end
+
+    return options
+end
+
+function Engine:prompt_select_crest(combatant, options, continue_callback)
+    local crest_options = options or self:get_expendable_crests(combatant)
+    if not crest_options or #crest_options == 0 then
+        if continue_callback then
+            continue_callback()
+        end
+        return
+    end
+
+    local metadata = {
+        type = "crest_select",
+        combatant = combatant,
+        options = crest_options
+    }
+
+    local function handle_selection(engine, raw_input)
+        local choice = tonumber(raw_input)
+        local selection = choice and crest_options[choice] or nil
+
+        if not selection then
+            engine:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+            return
+        end
+
+        engine:clear_input()
+        engine:expend_crest(combatant, selection.name, function()
+            if continue_callback then
+                continue_callback()
+            end
+        end)
+    end
+
+    self:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+end
+
+function Engine:prompt_crest_expenditure(combatant, on_complete)
+    if not combatant then
+        return false
+    end
+
+    combatant._crest_prompted_round = combatant._crest_prompted_round or 0
+    if combatant._crest_prompt_in_progress then
+        return true
+    end
+
+    if combatant._crest_prompted_round == self.current_round then
+        return false
+    end
+
+    local function finish()
+        combatant._crest_prompt_in_progress = false
+        combatant._crest_prompted_round = self.current_round
+        if on_complete then
+            on_complete()
+        end
+    end
+
+    local function ask_again()
+        local crest_options = self:get_expendable_crests(combatant)
+        if #crest_options == 0 then
+            finish()
+            return
+        end
+
+        local metadata = {
+            type = "crest_prompt",
+            combatant = combatant,
+            options = crest_options
+        }
+
+        local function handle_yes_no(engine, raw_input)
+            local response = tostring(raw_input or ""):lower()
+            if response == "y" or response == "yes" then
+                engine:clear_input()
+                engine:prompt_select_crest(combatant, crest_options, ask_again)
+            elseif response == "n" or response == "no" then
+                engine:clear_input()
+                finish()
+            else
+                engine:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+            end
+        end
+
+        self:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+    end
+
+    combatant._crest_prompt_in_progress = true
+    ask_again()
+
+    return true
+end
+
+function Engine:grant_crest(combatant, crest, amount, extra)
+    if not combatant or not combatant.add_crest or not crest then
+        return 0
+    end
+
+    local delta = amount or 1
+    local total = combatant:add_crest(crest, delta)
+    local data = {
+        combatant = combatant,
+        crest = crest,
+        amount = delta,
+        total = total
+    }
+
+    if extra then
+        for key, value in pairs(extra) do
+            if data[key] == nil then
+                data[key] = value
+            end
+        end
+    end
+
+    self:emit(Events.CREST_GAINED, data)
+    return total
+end
+
+function Engine:expend_crest(combatant, crest, on_complete)
+    if not combatant or not crest then
+        if on_complete then
+            on_complete(nil)
+        end
+        return
+    end
+
+    local current = combatant.get_crest_count and combatant:get_crest_count(crest) or 0
+    if current <= 0 then
+        if on_complete then
+            on_complete(nil)
+        end
+        return
+    end
+
+    local remaining = combatant.remove_crest and combatant:remove_crest(crest, 1) or (current - 1)
+    if remaining < 0 then
+        remaining = 0
+    end
+
+    local handler = CrestPassives.get_expend_handler(crest)
+
+    local function finalize(effect_data)
+        self:emit(Events.CREST_EXPENDED, {
+            combatant = combatant,
+            crest = crest,
+            remaining = remaining,
+            effect = effect_data
+        })
+
+        if on_complete then
+            on_complete(effect_data)
+        end
+    end
+
+    if handler then
+        handler(self, combatant, finalize)
+    else
+        finalize(nil)
+    end
+end
+
+function Engine:consume_attack_bonus_token(combatant)
+    if not combatant or not combatant.attack_bonus_tokens then
+        return 0
+    end
+
+    if #combatant.attack_bonus_tokens == 0 then
+        return 0
+    end
+
+    return table.remove(combatant.attack_bonus_tokens, 1)
+end
+
+function Engine:apply_forced_reroll(combatant, result, context)
+    if not combatant or not result then
+        return result
+    end
+
+    local pending = combatant.pending_forced_rerolls or 0
+    if pending <= 0 then
+        return result
+    end
+
+    local rolls = result.rolls or {}
+    if #rolls == 0 then
+        combatant.pending_forced_rerolls = math.max(0, pending - 1)
+        return result
+    end
+
+    combatant.pending_forced_rerolls = pending - 1
+
+    local highest_index = 1
+    local highest_value = rolls[1]
+
+    for index, value in ipairs(rolls) do
+        if value > highest_value then
+            highest_value = value
+            highest_index = index
+        end
+    end
+
+    local sides = result.sides or (result.type and tonumber(result.type:match("d(%d+)"))) or 6
+    local new_roll = math.random(1, sides)
+
+    result.total = (result.total or 0) - highest_value + new_roll
+    rolls[highest_index] = new_roll
+
+    self:emit(Events.DIE_REROLLED, {
+        combatant = combatant,
+        crest = "Madness",
+        previous_value = highest_value,
+        new_value = new_roll,
+        context = context
+    })
+
+    return result
 end
 
 function Engine:prepare_attack_assignments()
@@ -432,22 +1419,38 @@ function Engine:prepare_attack_assignments()
                     next_index = 1
                 })
             else
+                local opponent = self:get_opponent(combatant)
+                local assigned_targets = AI.assign_targets(combatant, opponent, tech, {
+                    engine = self,
+                    actions = actions
+                })
+
                 for _, data in ipairs(actions) do
-                    local opponent, body_part = self:select_target_body_part(combatant, data.action)
-                    if opponent and body_part then
+                    local target_part = assigned_targets and assigned_targets[data.action_index] or nil
+
+                    if target_part and not is_part_targetable(self, target_part) then
+                        target_part = nil
+                    end
+
+                    if not target_part then
+                        local _, fallback_part = self:select_target_body_part(combatant, data.action)
+                        target_part = fallback_part
+                    end
+
+                    if opponent and target_part then
                         table.insert(self.attack_assignments[combatant], {
                             tech = tech,
                             action = data.action,
                             action_index = data.action_index,
                             target_combatant = opponent,
-                            target_part = body_part
+                            target_part = target_part
                         })
 
                         self:emit(Events.ATTACK_ASSIGNED, {
                             combatant = combatant,
                             action = data.action,
                             action_index = data.action_index,
-                            target = body_part,
+                            target = target_part,
                             automatic = true
                         })
                     end
@@ -524,7 +1527,7 @@ function Engine:advance_attack_assignment()
         else
             local action_data = entry.actions[entry.next_index]
             local opponent = self:get_opponent(entry.combatant)
-            local targetable_parts = collect_targetable_parts_from(opponent)
+            local targetable_parts = self:get_targetable_parts(opponent)
 
             if not opponent or #targetable_parts == 0 then
                 entry.next_index = entry.next_index + 1
@@ -712,7 +1715,7 @@ function Engine:advance_defense_assignment()
             table.remove(self.defense_assignment_queue, 1)
         else
             local action_data = entry.actions[entry.next_index]
-            local available_parts = collect_targetable_parts_from(entry.combatant)
+                    local available_parts = self:get_targetable_parts(entry.combatant)
 
             if #available_parts == 0 then
                 entry.next_index = entry.next_index + 1
@@ -786,20 +1789,42 @@ function Engine:select_target_body_part(attacker, action)
 
     if action and action.target_body_part_id then
         local explicit = opponent:get_body_part_by_id(action.target_body_part_id)
-        if is_part_targetable(explicit) then
+        if is_part_targetable(self, explicit) then
             return opponent, explicit
         end
     end
 
-    local part = opponent:get_first_healthy_part()
-    if is_part_targetable(part) then
-        return opponent, part
+    local targetable = self:get_targetable_parts(opponent)
+    if #targetable > 0 then
+        return opponent, targetable[1]
     end
 
-    return opponent, part
+    local fallback = opponent:get_first_healthy_part()
+    return opponent, fallback
 end
 
-function Engine:apply_damage(attacker, target, body_part, amount)
+function Engine:select_friendly_body_part(combatant, action)
+    if not combatant then
+        return nil
+    end
+
+    if action and action.target_body_part_id then
+        local explicit = combatant:get_body_part_by_id(action.target_body_part_id)
+        if explicit then
+            return combatant, explicit
+        end
+    end
+
+    for _, part in ipairs(combatant.body_parts or {}) do
+        if part.status == "maimed" or part.status == "wounded" then
+            return combatant, part
+        end
+    end
+
+    return combatant, combatant:get_first_healthy_part()
+end
+
+function Engine:apply_damage(attacker, target, body_part, amount, context)
     if not target or not body_part or body_part.status == "maimed" then
         return
     end
@@ -814,7 +1839,8 @@ function Engine:apply_damage(attacker, target, body_part, amount)
             target = target,
             body_part = body_part,
             status_before = status_before,
-            status_after = new_status
+            status_after = new_status,
+            context = context
         })
 
         if new_status ~= status_before then
@@ -822,7 +1848,8 @@ function Engine:apply_damage(attacker, target, body_part, amount)
                 combatant = target,
                 body_part = body_part,
                 previous_status = status_before,
-                new_status = new_status
+                new_status = new_status,
+                context = context
             })
         end
 
@@ -835,13 +1862,49 @@ function Engine:apply_damage(attacker, target, body_part, amount)
                 body_part = body_part,
                 status_before = "maimed",
                 status_after = "maimed",
-                heart_point_loss = lost_hp
+                heart_point_loss = lost_hp,
+                context = context
             })
         end
 
         status_before = body_part.status
 
         if body_part.status == "maimed" then
+            break
+        end
+    end
+end
+
+function Engine:apply_healing(actor, target, body_part, amount, context)
+    if not target or not body_part then
+        return
+    end
+
+    local steps = amount or 1
+    for _ = 1, steps do
+        local status_before = body_part.status
+        local new_status = body_part:regress_damage_state()
+
+        self:emit(Events.HEAL_APPLIED, {
+            healer = actor,
+            target = target,
+            body_part = body_part,
+            status_before = status_before,
+            status_after = new_status,
+            context = context,
+            no_effect = status_before == new_status
+        })
+
+        if new_status ~= status_before then
+            self:emit(Events.BP_STATUS_CHANGED, {
+                combatant = target,
+                body_part = body_part,
+                previous_status = status_before,
+                new_status = new_status,
+                healed = true,
+                context = context
+            })
+        else
             break
         end
     end
@@ -876,6 +1939,12 @@ function Engine:roll_defense_assignments()
 
             if action and target_part then
                 local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                result = self:apply_forced_reroll(combatant, result, {
+                    type = "defense",
+                    action = action,
+                    body_part = target_part
+                })
+
                 self:emit(Events.DICE_ROLLED, {
                     attacker = combatant,
                     action = action,
@@ -905,15 +1974,33 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
         local opponent, body_part = self:select_target_body_part(attacker, action)
         if opponent and body_part then
             local amount = action.amount or 1
-            self:apply_damage(attacker, opponent, body_part, amount)
+            local context = {
+                attacker = attacker,
+                defender = opponent,
+                target_part = body_part,
+                action = action,
+                action_index = action_index,
+                base_damage = amount,
+                damage = amount,
+                keywords = collect_keywords(attacker and attacker.selected_tech, action)
+            }
+            self:apply_damage(attacker, opponent, body_part, amount, context)
         end
     elseif action.type == "attack_roll" then
         local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
-        self:emit(Events.DICE_ROLLED, {
-            attacker = attacker,
+        result = self:apply_forced_reroll(attacker, result, {
+            type = "attack",
             action = action,
-            result = result
+            action_index = action_index
         })
+
+        local tech = attacker and attacker.selected_tech
+        local keywords = collect_keywords(tech, action)
+        local consistent_value = apply_consistent_keyword(result, keywords)
+
+        local passive_bonus = attacker and attacker.get_modifier and attacker:get_modifier("attack_bonus") or 0
+        local token_bonus = self:consume_attack_bonus_token(attacker)
+        local attack_bonus = passive_bonus + token_bonus
 
         local assignment = self:get_attack_assignment(attacker, action_index)
         local opponent = assignment and assignment.target_combatant
@@ -923,22 +2010,80 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             opponent, body_part = self:select_target_body_part(attacker, action)
         end
 
-        if opponent and body_part then
-            local defense_total = 0
-            if defense_totals then
-                local opponent_totals = defense_totals[opponent]
-                if opponent_totals and body_part.id then
-                    defense_total = opponent_totals[body_part.id] or 0
-                end
-            end
+        local defense_total = 0
+        if defense_totals and opponent and body_part and body_part.id then
+            local opponent_totals = defense_totals[opponent]
+            defense_total = opponent_totals and opponent_totals[body_part.id] or 0
+        end
 
-            local toughness = (body_part.toughness or 0) + defense_total
-            if result.total > toughness then
-                self:apply_damage(attacker, opponent, body_part, 1)
-            end
+        local context = {
+            attacker = attacker,
+            defender = opponent,
+            target_part = body_part,
+            action = action,
+            action_index = action_index,
+            keywords = keywords,
+            dice_result = result,
+            consistent_value = consistent_value,
+            passive_attack_bonus = passive_bonus,
+            temporary_attack_bonus = token_bonus,
+            attack_bonus = attack_bonus,
+            base_roll_total = result.total or 0,
+            attack_total = (result.total or 0) + attack_bonus,
+            defense_total = defense_total,
+            effective_defense = defense_total,
+            base_toughness = body_part and body_part.toughness or 0,
+            original_base_toughness = body_part and body_part.toughness or 0,
+            effective_toughness = (body_part and body_part.toughness or 0) + defense_total,
+            base_damage = action.damage or 1,
+            damage = action.damage or 1,
+            notes = {}
+        }
+
+        self:run_attack_pipeline(context)
+
+        self:emit(Events.DICE_ROLLED, {
+            attacker = attacker,
+            action = action,
+            result = result,
+            modified_total = context.attack_total,
+            attack_bonus = attack_bonus,
+            passive_attack_bonus = passive_bonus,
+            temporary_attack_bonus = token_bonus,
+            context = context
+        })
+
+        if context.hit and opponent and body_part then
+            self:apply_damage(attacker, opponent, body_part, context.damage, context)
         end
     elseif action.type == "defense_roll" then
         return
+    elseif action.type == "gain_crest" then
+        local crest = action.crest
+        if crest and attacker then
+            local amount = action.amount or 1
+            self:grant_crest(attacker, crest, amount, { source = "action" })
+        end
+    elseif action.type == "heal_body_part" then
+        local recipient = attacker
+        if action.target == "opponent" then
+            recipient = self:get_opponent(attacker)
+        elseif type(action.target) == "table" and action.target.combatant then
+            recipient = action.target.combatant
+        end
+
+        local target_combatant, body_part = self:select_friendly_body_part(recipient, action)
+        if target_combatant and body_part then
+            local amount = action.amount or 1
+            local context = {
+                healer = attacker,
+                target = target_combatant,
+                target_part = body_part,
+                action = action,
+                action_index = action_index
+            }
+            self:apply_healing(attacker, target_combatant, body_part, amount, context)
+        end
     end
 end
 
@@ -1001,8 +2146,10 @@ local Events = {
     ATTACK_ASSIGNED = "attack_assigned",
     DEFENSE_ASSIGNED = "defense_assigned",
     DICE_ROLLED = "dice_rolled",
+    DIE_REROLLED = "die_rerolled",
     DAMAGE_DEALT = "damage_dealt",
     BP_STATUS_CHANGED = "bp_status_changed",
+    HEAL_APPLIED = "heal_applied",
     CREST_GAINED = "crest_gained",
     CREST_EXPENDED = "crest_expended",
 
@@ -1037,6 +2184,7 @@ States.ROUND_START = {
 
 States.UPKEEP = {
     enter = function(engine)
+        engine:perform_upkeep()
         engine:emit(Events.UPKEEP_PHASE, { round = engine.current_round })
     end,
     process = function(_) return "TECH_SELECT" end
@@ -3439,6 +4587,24 @@ engine:on(Events.ROUND_START, function(data)
     print("\n=== ROUND " .. data.round .. " ===")
 end)
 
+engine:on(Events.UPKEEP_PHASE, function(_)
+    print("Upkeep Phase")
+    for _, combatant in ipairs(engine.combatants) do
+        local crest_strings = {}
+        for crest, count in pairs(combatant.crest_pool or {}) do
+            if count > 0 then
+                table.insert(crest_strings, crest .. ":" .. tostring(count))
+            end
+        end
+
+        local crest_summary = #crest_strings > 0 and table.concat(crest_strings, ", ") or "None"
+        local attack_bonus = combatant.get_modifier and combatant:get_modifier("attack_bonus") or 0
+        local modifier_summary = attack_bonus > 0 and ("Attack Bonus +" .. attack_bonus) or "No passive bonuses"
+
+        print(string.format(" - %s Crests [%s] | %s", combatant.name, crest_summary, modifier_summary))
+    end
+end)
+
 engine:on(Events.TECH_SELECT_PHASE, function(data)
     if data.combatant and data.available_techs then
         print("\nSelect tech for " .. data.combatant.name)
@@ -3471,7 +4637,31 @@ engine:on(Events.DAMAGE_DEALT, function(data)
             data.body_part.name,
             data.status_before or "?",
             data.status_after or "?"))
+
+        local context = data.context or {}
+        local notes = context.notes or {}
+        if notes.brutal and notes.brutal ~= 0 then
+            print(string.format("  Brutal adds +%d damage", notes.brutal))
+        end
     end
+end)
+
+engine:on(Events.HEAL_APPLIED, function(data)
+    local healer_name = data.healer and data.healer.name or "Unknown"
+    local target_name = data.target and data.target.name or "Unknown"
+    local body_part_name = data.body_part and data.body_part.name or "body part"
+
+    if data.no_effect then
+        print(string.format("%s attempts to heal %s's %s, but it has no effect.", healer_name, target_name, body_part_name))
+        return
+    end
+
+    print(string.format("%s heals %s's %s (%s -> %s)",
+        healer_name,
+        target_name,
+        body_part_name,
+        data.status_before or "?",
+        data.status_after or "?"))
 end)
 
 engine:on(Events.DICE_ROLLED, function(data)
@@ -3484,13 +4674,71 @@ engine:on(Events.DICE_ROLLED, function(data)
 
     local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
     local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
+    local modified_total = data.modified_total or result.total or 0
+    local context = data.context or {}
 
     if data.defense then
         local body_part_name = data.body_part and data.body_part.name or "target"
         print(string.format("%s defends %s with %s [%s] -> total %d", actor_name, body_part_name, dice_label, roll_string, result.total or 0))
     else
-        print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, result.total or 0))
+        if modified_total ~= (result.total or 0) then
+            print(string.format("%s rolls %s [%s] -> total %d (modified to %d)", actor_name, dice_label, roll_string, result.total or 0, modified_total))
+        else
+            print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, modified_total))
+        end
+
+        if result.consistent_value then
+            print(string.format("  Consistent keyword forces each die to %d", result.consistent_value))
+        end
+
+        local notes = context.notes or {}
+        if notes.piercing and notes.piercing > 0 then
+            print(string.format("  Piercing ignores %d defense", notes.piercing))
+        end
     end
+end)
+
+engine:on(Events.CREST_GAINED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local crest = data.crest or "?"
+    local amount = data.amount or 0
+    local total = data.total or amount
+    print(string.format("%s gains %d %s crest(s). Total: %d", combatant_name, amount, crest, total))
+end)
+
+engine:on(Events.CREST_EXPENDED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local crest = data.crest or "?"
+    local remaining = data.remaining
+    local effect = data.effect or {}
+
+    local effect_summary = ""
+    if effect.type == "shadow" then
+        local target = effect.target
+        local target_name = target and target.name or (target and target.id) or "target"
+        if effect.skipped then
+            effect_summary = "No valid target."
+        else
+            effect_summary = string.format("%s becomes untargetable this round.", target_name)
+        end
+    elseif effect.type == "valor" then
+        effect_summary = "Next attack gains +2." 
+    elseif effect.type == "madness" then
+        local gained = effect.gained_crest or "an unknown crest"
+        effect_summary = string.format("Forced reroll will occur. Gained %s.", gained)
+    else
+        effect_summary = "Effect resolved."
+    end
+
+    local remaining_text = remaining ~= nil and (" Remaining: " .. tostring(remaining)) or ""
+    print(string.format("%s expends %s crest.%s %s", combatant_name, crest, remaining_text, effect_summary))
+end)
+
+engine:on(Events.DIE_REROLLED, function(data)
+    local combatant_name = data.combatant and data.combatant.name or "Unknown"
+    local previous = data.previous_value or "?"
+    local new_value = data.new_value or "?"
+    print(string.format("Madness forces %s to reroll a die: %s -> %s", combatant_name, tostring(previous), tostring(new_value)))
 end)
 
 engine:on(Events.COMBAT_END, function(data)
@@ -3508,18 +4756,29 @@ local function get_player_input(prompt)
 end
 
 local function create_demo_combatants()
-    local slash = {
-        id = "slash",
-        name = "Dreamblade Slash",
+    local valor_surge = {
+        id = "valor_surge",
+        name = "Valor Surge",
+        keywords = { Piercing = 1 },
         actions = {
-            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep" },
+            { type = "gain_crest", crest = "Valor", amount = 1, name = "Rallying Cry" },
+            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep", keywords = { Consistent = 4 } },
             { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Guarded Stance" }
+        }
+    }
+
+    local soothing_light = {
+        id = "soothing_light",
+        name = "Soothing Light",
+        actions = {
+            { type = "heal_body_part", amount = 1, name = "Mending Pulse" }
         }
     }
 
     local crushing_blow = {
         id = "crushing_blow",
         name = "Crushing Blow",
+        keywords = { Brutal = 1 },
         actions = {
             { type = "attack_roll", dice_count = 1, dice_type = "d8", name = "Heavy Smash" },
             { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Harden Hide" }
@@ -3533,7 +4792,7 @@ local function create_demo_combatants()
         type = "ARM",
         toughness = 2,
         hp_value = 1,
-        techs = { slash }
+        techs = { valor_surge }
     })
     player:add_body_part({
         id = "player_legs",
@@ -3541,7 +4800,7 @@ local function create_demo_combatants()
         type = "LEG",
         toughness = 2,
         hp_value = 1,
-        techs = {}
+        techs = { soothing_light }
     })
 
     local enemy = Combatant:new({ id = "enemy", name = "Nightmare" })
@@ -3577,18 +4836,36 @@ local function run_test_combat()
 
         if engine:needs_input() then
             local metadata = engine:get_pending_input_metadata()
-            if metadata and metadata.type == "attack_assignment" then
-                print(string.format("\n%s is assigning attack (%s) against %s.",
-                    metadata.combatant and metadata.combatant.name or "?",
-                    metadata.action_label or "attack",
-                    metadata.opponent and metadata.opponent.name or "opponent"))
-            elseif metadata and metadata.type == "defense_assignment" then
-                print(string.format("\n%s is assigning defense (%s).",
-                    metadata.combatant and metadata.combatant.name or "?",
-                    metadata.action_label or "defense"))
+            if metadata then
+                if metadata.type == "attack_assignment" then
+                    print(string.format("\n%s is assigning attack (%s) against %s.",
+                        metadata.combatant and metadata.combatant.name or "?",
+                        metadata.action_label or "attack",
+                        metadata.opponent and metadata.opponent.name or "opponent"))
+                elseif metadata.type == "defense_assignment" then
+                    print(string.format("\n%s is assigning defense (%s).",
+                        metadata.combatant and metadata.combatant.name or "?",
+                        metadata.action_label or "defense"))
+                elseif metadata.type == "crest_prompt" then
+                    print(string.format("\n%s may expend a crest.", metadata.combatant and metadata.combatant.name or "?"))
+                    local crest_options = metadata.options or {}
+                    if #crest_options > 0 then
+                        print("Available crests:")
+                        for _, option in ipairs(crest_options) do
+                            print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
+                        end
+                    end
+                elseif metadata.type == "crest_select" then
+                    print("\nChoose a crest to expend:")
+                    for _, option in ipairs(metadata.options or {}) do
+                        print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
+                    end
+                elseif metadata.type == "crest_target_select" then
+                    print(string.format("\nSelect a body part to shroud for %s.", metadata.combatant and metadata.combatant.name or "?"))
+                end
             end
 
-            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment") then
+            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment" or metadata.type == "crest_target_select") then
                 print("Targets:")
                 for _, option in ipairs(metadata.options or {}) do
                     local part = option.part
