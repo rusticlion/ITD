@@ -23,6 +23,11 @@ local PANEL_SPACING = 14
 local SELECTED_PANEL_HEIGHT = 96
 local DICE_PANEL_HEIGHT = 110
 
+local DIE_TOKEN_SIZE = 64
+local DIE_TOKEN_RADIUS = 10
+local DIE_TOKEN_SPACING = 14
+local DICE_SHELF_HEIGHT = DIE_TOKEN_SIZE + 32
+
 local function point_in_rect(x, y, rect)
     if not rect then
         return false
@@ -70,6 +75,76 @@ local function draw_highlight_outline(rect, is_hovered)
     love.graphics.setLineWidth(2)
     love.graphics.rectangle("line", rect.x - 6, rect.y - 6, rect.w + 12, rect.h + 12, 12, 12)
     love.graphics.setLineWidth(1)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+local function get_player_shelf_rect()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+
+    local shelf_width = math.min(width * 0.36, 360)
+    local shelf_height = DICE_SHELF_HEIGHT
+    local x = width * 0.08
+    local y = height - shelf_height - 120
+
+    return x, y, shelf_width, shelf_height
+end
+
+local function get_enemy_shelf_rect()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+
+    local shelf_width = math.min(width * 0.36, 360)
+    local shelf_height = DICE_SHELF_HEIGHT
+    local x = width - shelf_width - width * 0.08
+    local y = height - shelf_height - 120
+
+    return x, y, shelf_width, shelf_height
+end
+
+local function draw_die_token(die, is_hovered, is_dragging)
+    if not die or not die.rect then
+        return
+    end
+
+    local rect = die.rect
+    local fill = { 0.14, 0.32, 0.55, 0.82 }
+    local outline = { 0.58, 0.86, 1, 0.95 }
+
+    if die.assigned then
+        fill = { 0.12, 0.34, 0.25, 0.85 }
+        outline = { 0.48, 0.88, 0.64, 0.95 }
+    elseif die.interactable then
+        fill = { 0.18, 0.46, 0.78, 0.9 }
+        outline = { 0.62, 0.88, 1, 0.95 }
+    else
+        fill = { 0.1, 0.24, 0.38, 0.75 }
+        outline = { 0.35, 0.6, 0.9, 0.7 }
+    end
+
+    if is_hovered or is_dragging then
+        outline = { 1, 1, 1, 1 }
+    end
+
+    love.graphics.setColor(fill)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, DIE_TOKEN_RADIUS, DIE_TOKEN_RADIUS)
+
+    love.graphics.setColor(outline)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, DIE_TOKEN_RADIUS, DIE_TOKEN_RADIUS)
+    love.graphics.setLineWidth(1)
+
+    local title = die.label or ""
+    local subtitle = die.subtitle or ""
+
+    love.graphics.setColor(1, 1, 1, 0.95)
+    love.graphics.printf(title, rect.x + 8, rect.y + 10, rect.w - 16, "center")
+
+    if subtitle ~= "" then
+        love.graphics.setColor(0.85, 0.95, 1, 0.88)
+        love.graphics.printf(subtitle, rect.x + 8, rect.y + rect.h - 26, rect.w - 16, "center")
+    end
+
     love.graphics.setColor(1, 1, 1, 1)
 end
 
@@ -497,6 +572,7 @@ function CombatState:enter()
     self.background_color = { 0.05, 0.06, 0.09, 1 }
     self.mouse_position = { x = 0, y = 0 }
     self.tech_selection_ui = nil
+    self.assignment_ui = nil
 
     local player = create_player_combatant()
     local enemy = create_enemy_combatant()
@@ -673,6 +749,339 @@ function CombatState:build_tech_selection_context(metadata)
     return context
 end
 
+local function gather_assignment_actions(tech, desired_type)
+    local actions = {}
+
+    if not tech or not tech.actions then
+        return actions
+    end
+
+    for index, action in ipairs(tech.actions) do
+        if action.type == desired_type then
+            table.insert(actions, { index = index, action = action })
+        end
+    end
+
+    return actions
+end
+
+function CombatState:sync_assignment_dice(context)
+    if not context then
+        return
+    end
+
+    local combatant = context.combatant
+    local tech = combatant and combatant.selected_tech
+    local desired_type = context.mode == "attack" and "attack_roll" or "defense_roll"
+
+    context.dice_map = context.dice_map or {}
+    local new_order = {}
+    local seen = {}
+
+    local assignments = nil
+    if self.engine then
+        if context.mode == "attack" then
+            assignments = self.engine.attack_assignments and self.engine.attack_assignments[combatant]
+        else
+            assignments = self.engine.defense_assignments and self.engine.defense_assignments[combatant]
+        end
+    end
+
+    for _, info in ipairs(gather_assignment_actions(tech, desired_type)) do
+        local action_index = info.index
+        local action = info.action
+        local die = context.dice_map[action_index]
+
+        if not die then
+            die = {
+                rect = { x = 0, y = 0, w = DIE_TOKEN_SIZE, h = DIE_TOKEN_SIZE },
+                home = { x = 0, y = 0 }
+            }
+            context.dice_map[action_index] = die
+        end
+
+        die.action = action
+        die.action_index = action_index
+        die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
+        die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+        die.assigned = false
+        die.assigned_option = nil
+        die.assigned_part_view = nil
+        die.interactable = (context.metadata and context.metadata.action_index == action_index)
+
+        if assignments then
+            for _, assignment in ipairs(assignments) do
+                if assignment.action_index == action_index and assignment.target_part then
+                    die.assigned = true
+                    die.assigned_option = assignment
+                    die.assigned_part_view = self:get_body_part_view(assignment.target_part)
+                    break
+                end
+            end
+        end
+
+        die.rect.w = DIE_TOKEN_SIZE
+        die.rect.h = DIE_TOKEN_SIZE
+
+        seen[action_index] = true
+        table.insert(new_order, die)
+    end
+
+    for key, value in pairs(context.dice_map) do
+        if not seen[key] then
+            context.dice_map[key] = nil
+        end
+    end
+
+    context.dice = new_order
+end
+
+function CombatState:update_assignment_target_rects(context)
+    if not context then
+        return
+    end
+
+    local target_view = context.target_combatant_view
+    if not target_view then
+        context.target_parts_by_view = {}
+        return
+    end
+
+    local sprite_size = Layouts.get_sprite_size()
+    local index = target_view.index or 1
+    local mapping = {}
+
+    for _, entry in ipairs(context.target_entries or {}) do
+        local part_view = entry.part_view
+        if part_view then
+            entry.rect = entry.rect or {}
+            local px, py = Layouts.get_body_part_position(target_view, index, part_view)
+            entry.rect.x = px
+            entry.rect.y = py
+            entry.rect.w = sprite_size
+            entry.rect.h = sprite_size
+            mapping[part_view] = entry
+        end
+    end
+
+    context.target_parts_by_view = mapping
+end
+
+function CombatState:collect_enemy_assignments(context)
+    local assignments = {}
+
+    if not (self.engine and context and context.opponent_combatant) then
+        return assignments
+    end
+
+    local source = nil
+    if context.mode == "attack" then
+        source = self.engine.attack_assignments and self.engine.attack_assignments[context.opponent_combatant]
+    else
+        source = self.engine.defense_assignments and self.engine.defense_assignments[context.opponent_combatant]
+    end
+
+    if not source then
+        return assignments
+    end
+
+    local target_view = nil
+    if context.mode == "attack" then
+        target_view = context.combatant_view
+    else
+        target_view = context.opponent_view
+    end
+
+    if not target_view then
+        return assignments
+    end
+
+    for _, assignment in ipairs(source) do
+        local part = assignment.target_part
+        local part_view = self:get_body_part_view(part)
+        if part_view then
+            table.insert(assignments, {
+                action = assignment.action,
+                action_index = assignment.action_index,
+                part = part,
+                part_view = part_view,
+                target_view = target_view,
+                label = format_dice_label(assignment.action and assignment.action.dice_count, assignment.action and assignment.action.dice_type)
+                    or (context.mode == "attack" and "ATK" or "DEF")
+            })
+        end
+    end
+
+    return assignments
+end
+
+function CombatState:layout_assignment_dice(context)
+    if not context then
+        return
+    end
+
+    local shelf_x, shelf_y, shelf_w, shelf_h = get_player_shelf_rect()
+    context.shelf_rect = { x = shelf_x, y = shelf_y, w = shelf_w, h = shelf_h }
+
+    local sprite_size = Layouts.get_sprite_size()
+    local unassigned = {}
+
+    for _, die in ipairs(context.dice or {}) do
+        die.rect = die.rect or { x = shelf_x, y = shelf_y, w = DIE_TOKEN_SIZE, h = DIE_TOKEN_SIZE }
+        die.rect.w = DIE_TOKEN_SIZE
+        die.rect.h = DIE_TOKEN_SIZE
+
+        if die.assigned and die.assigned_part_view and context.target_combatant_view then
+            local px, py = Layouts.get_body_part_position(context.target_combatant_view, context.target_combatant_view.index or 1, die.assigned_part_view)
+            local cx = px + sprite_size * 0.5 - DIE_TOKEN_SIZE * 0.5
+            local cy = py + sprite_size * 0.5 - DIE_TOKEN_SIZE * 0.5
+
+            die.home = die.home or {}
+            die.home.x = cx
+            die.home.y = cy
+
+            if not (context.dragging and context.dragging.die == die) then
+                die.rect.x = cx
+                die.rect.y = cy
+            end
+        else
+            table.insert(unassigned, die)
+        end
+    end
+
+    if #unassigned > 0 then
+        local spacing = DIE_TOKEN_SPACING
+        local total_width = (#unassigned) * DIE_TOKEN_SIZE + math.max(0, (#unassigned - 1) * spacing)
+        local start_x = shelf_x + math.max(0, (shelf_w - total_width) * 0.5)
+        local y = shelf_y + (shelf_h - DIE_TOKEN_SIZE) * 0.5
+
+        for index, die in ipairs(unassigned) do
+            local target_x = start_x + (index - 1) * (DIE_TOKEN_SIZE + spacing)
+            if not (context.dragging and context.dragging.die == die) then
+                die.rect.x = target_x
+                die.rect.y = y
+            end
+
+            die.home = die.home or {}
+            die.home.x = target_x
+            die.home.y = y
+        end
+    end
+
+    if context.dragging and context.dragging.die then
+        local die = context.dragging.die
+        die.rect.x = context.mouse_x - (context.dragging.offset_x or 0)
+        die.rect.y = context.mouse_y - (context.dragging.offset_y or 0)
+    end
+end
+
+function CombatState:evaluate_assignment_hover(context)
+    if not context then
+        return
+    end
+
+    local mx = context.mouse_x or 0
+    local my = context.mouse_y or 0
+
+    context.hovered_die = nil
+    if not (context.dragging and context.dragging.die) then
+        for _, die in ipairs(context.dice or {}) do
+            if die.interactable and not die.assigned and point_in_rect(mx, my, die.rect) then
+                context.hovered_die = die
+                break
+            end
+        end
+    end
+
+    context.hovered_target = nil
+    for _, entry in ipairs(context.target_entries or {}) do
+        if point_in_rect(mx, my, entry.rect) then
+            context.hovered_target = entry
+            break
+        end
+    end
+
+    context.highlight = context.highlight or { parts_by_view = {} }
+    context.highlight.parts_by_view = context.target_parts_by_view or {}
+    context.highlight.hovered_part_entry = context.hovered_target
+end
+
+function CombatState:update_assignment_context(context)
+    if not context then
+        return
+    end
+
+    self:sync_assignment_dice(context)
+    self:update_assignment_target_rects(context)
+    context.enemy_assignments = self:collect_enemy_assignments(context)
+
+    context.mouse_x = self.mouse_position and self.mouse_position.x or context.mouse_x or 0
+    context.mouse_y = self.mouse_position and self.mouse_position.y or context.mouse_y or 0
+
+    self:layout_assignment_dice(context)
+    self:evaluate_assignment_hover(context)
+end
+
+function CombatState:build_assignment_context(metadata)
+    if not metadata then
+        return nil
+    end
+
+    local mode = metadata.type == "attack_assignment" and "attack" or "defense"
+    local combatant = metadata.combatant
+
+    local context = {
+        metadata = metadata,
+        type = metadata.type,
+        mode = mode,
+        combatant = combatant,
+        combatant_view = combatant and self:get_combatant_view(combatant) or nil,
+        opponent_combatant = nil,
+        opponent_view = nil,
+        target_combatant = nil,
+        target_combatant_view = nil,
+        options = metadata.options or {},
+        target_entries = {},
+        dice_map = {},
+        dice = {},
+        mouse_x = self.mouse_position and self.mouse_position.x or 0,
+        mouse_y = self.mouse_position and self.mouse_position.y or 0,
+        shelf_rect = nil,
+        enemy_assignments = {}
+    }
+
+    local opponent = metadata.opponent or (self.engine and self.engine:get_opponent(combatant)) or nil
+    context.opponent_combatant = opponent
+    context.opponent_view = opponent and self:get_combatant_view(opponent) or nil
+
+    if mode == "attack" then
+        context.target_combatant = metadata.opponent or opponent
+        context.target_combatant_view = context.target_combatant and self:get_combatant_view(context.target_combatant) or context.opponent_view
+    else
+        context.target_combatant = combatant
+        context.target_combatant_view = context.combatant_view
+    end
+
+    for _, option in ipairs(context.options) do
+        local part_view = self:get_body_part_view(option.part)
+        local entry = {
+            option = option,
+            part = option.part,
+            part_view = part_view,
+            rect = nil
+        }
+
+        table.insert(context.target_entries, entry)
+    end
+
+    self:update_assignment_target_rects(context)
+    self:sync_assignment_dice(context)
+    context.enemy_assignments = self:collect_enemy_assignments(context)
+    self:evaluate_assignment_hover(context)
+
+    return context
+end
+
 function CombatState:update_tech_card_layout(context, entry)
     if not context or not entry or not entry.options or #entry.options == 0 then
         return
@@ -759,28 +1168,57 @@ end
 function CombatState:update_interactive_input()
     if not self.engine then
         self.tech_selection_ui = nil
+        self.assignment_ui = nil
         return
     end
 
     local metadata = self.engine:get_pending_input_metadata()
-    if not (self.engine:needs_input() and metadata and metadata.type == "tech_select_phase") then
+    if not (self.engine:needs_input() and metadata) then
         self.tech_selection_ui = nil
+        self.assignment_ui = nil
         return
     end
 
-    if not self.tech_selection_ui or self.tech_selection_ui.metadata ~= metadata then
-        self.tech_selection_ui = self:build_tech_selection_context(metadata)
-        self.input_buffer = ""
-    end
+    if metadata.type == "tech_select_phase" then
+        self.assignment_ui = nil
 
-    if not self.tech_selection_ui then
+        if not self.tech_selection_ui or self.tech_selection_ui.metadata ~= metadata then
+            self.tech_selection_ui = self:build_tech_selection_context(metadata)
+            self.input_buffer = ""
+        end
+
+        if not self.tech_selection_ui then
+            return
+        end
+
+        self.tech_selection_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
+        self.tech_selection_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
+
+        self:evaluate_tech_selection_hover(self.tech_selection_ui)
         return
     end
 
-    self.tech_selection_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
-    self.tech_selection_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
+    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
+        self.tech_selection_ui = nil
 
-    self:evaluate_tech_selection_hover(self.tech_selection_ui)
+        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
+            self.assignment_ui = self:build_assignment_context(metadata)
+            if self.assignment_ui then
+                self.assignment_ui.metadata = metadata
+            end
+        end
+
+        if self.assignment_ui then
+            self.assignment_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
+            self.assignment_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
+            self:update_assignment_context(self.assignment_ui)
+        end
+
+        return
+    end
+
+    self.tech_selection_ui = nil
+    self.assignment_ui = nil
 end
 
 function CombatState:handle_bp_status_changed(data)
@@ -1062,6 +1500,135 @@ function CombatState:draw_tech_selection_ui(context)
     self:draw_dice_preview_panel(context, context.preview_option)
 end
 
+function CombatState:draw_enemy_assignment_tokens(context)
+    local assignments = context and context.enemy_assignments or nil
+    if not assignments or #assignments == 0 then
+        return
+    end
+
+    local sprite_size = Layouts.get_sprite_size()
+    local counts_by_part = {}
+
+    for _, entry in ipairs(assignments) do
+        local part_view = entry.part_view
+        local target_view = entry.target_view
+        if part_view and target_view then
+            local index = target_view.index or 1
+            local px, py = Layouts.get_body_part_position(target_view, index, part_view)
+            local key = part_view
+            counts_by_part[key] = (counts_by_part[key] or 0) + 1
+            local stack_index = counts_by_part[key]
+
+            local size = DIE_TOKEN_SIZE * 0.55
+            local offset_x = (stack_index - 1) * (size * 0.35)
+            local x = px + sprite_size * 0.5 - size * 0.5 + offset_x
+            local y = py + sprite_size * 0.5 - size * 0.5 - 8
+
+            love.graphics.setColor(0.82, 0.35, 0.22, 0.82)
+            love.graphics.rectangle("fill", x, y, size, size, DIE_TOKEN_RADIUS * 0.8, DIE_TOKEN_RADIUS * 0.8)
+
+            love.graphics.setColor(1, 0.68, 0.42, 0.95)
+            love.graphics.setLineWidth(2)
+            love.graphics.rectangle("line", x, y, size, size, DIE_TOKEN_RADIUS * 0.8, DIE_TOKEN_RADIUS * 0.8)
+            love.graphics.setLineWidth(1)
+
+            love.graphics.setColor(1, 0.95, 0.9, 0.92)
+            love.graphics.printf(entry.label or "?", x + 6, y + size * 0.5 - 8, size - 12, "center")
+        end
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function CombatState:draw_assignment_ui(context)
+    if not context then
+        return
+    end
+
+    local shelf = context.shelf_rect
+    if shelf then
+        draw_panel_background(shelf.x, shelf.y, shelf.w, shelf.h, 0.78)
+
+        local header = context.mode == "attack" and "Attack Dice" or "Defense Dice"
+        love.graphics.setColor(1, 1, 1, 0.95)
+        love.graphics.printf(header, shelf.x + 16, shelf.y + 10, shelf.w - 32, "left")
+
+        love.graphics.setColor(0.82, 0.9, 1, 0.85)
+        local instruction = context.mode == "attack" and "Drag a die onto an enemy body part." or "Drag a die onto one of your body parts."
+        love.graphics.printf(instruction, shelf.x + 16, shelf.y + shelf.h - 26, shelf.w - 32, "left")
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
+    local enemy_x, enemy_y, enemy_w, enemy_h = get_enemy_shelf_rect()
+    draw_panel_background(enemy_x, enemy_y, enemy_w, enemy_h, 0.65)
+    love.graphics.setColor(1, 0.92, 0.82, 0.9)
+    love.graphics.printf("Enemy Dice", enemy_x + 16, enemy_y + 10, enemy_w - 32, "right")
+    love.graphics.setColor(0.95, 0.75, 0.55, 0.85)
+    love.graphics.printf("Assigning...", enemy_x + 16, enemy_y + enemy_h - 26, enemy_w - 32, "right")
+    love.graphics.setColor(1, 1, 1, 1)
+
+    local dragging_die = context.dragging and context.dragging.die or nil
+
+    for _, die in ipairs(context.dice or {}) do
+        if die ~= dragging_die then
+            draw_die_token(die, context.hovered_die == die, false)
+        end
+    end
+
+    if dragging_die then
+        draw_die_token(dragging_die, true, true)
+    end
+
+    self:draw_enemy_assignment_tokens(context)
+end
+
+function CombatState:handle_assignment_mousepressed(context, x, y)
+    if not context then
+        return
+    end
+
+    self:update_assignment_context(context)
+
+    for _, die in ipairs(context.dice or {}) do
+        if die.interactable and not die.assigned and point_in_rect(x, y, die.rect) then
+            context.dragging = {
+                die = die,
+                offset_x = x - die.rect.x,
+                offset_y = y - die.rect.y
+            }
+            die.rect.x = x - context.dragging.offset_x
+            die.rect.y = y - context.dragging.offset_y
+            return
+        end
+    end
+end
+
+function CombatState:handle_assignment_mousereleased(context, x, y)
+    if not context or not context.dragging or not context.dragging.die then
+        return
+    end
+
+    local die = context.dragging.die
+    context.dragging = nil
+
+    self:update_assignment_context(context)
+    local target_entry = context.hovered_target
+
+    if target_entry and target_entry.option and target_entry.option.index then
+        die.assigned = true
+        die.assigned_part_view = target_entry.part_view
+        die.assigned_option = target_entry.option
+        self.assignment_ui = nil
+        self.engine:provide_input(target_entry.option.index)
+        return
+    end
+
+    if die.home then
+        die.rect.x = die.home.x
+        die.rect.y = die.home.y
+    end
+end
+
 function CombatState:draw()
     if self.background_color then
         love.graphics.clear(self.background_color[1], self.background_color[2], self.background_color[3], self.background_color[4])
@@ -1074,6 +1641,7 @@ function CombatState:draw()
     end
 
     local selection_context = self.tech_selection_ui
+    local assignment_context = self.assignment_ui
     local metadata = nil
     if self.engine:needs_input() then
         metadata = self.engine:get_pending_input_metadata()
@@ -1083,6 +1651,8 @@ function CombatState:draw()
         local highlight = nil
         if selection_context and selection_context.combatant_view == combatant then
             highlight = selection_context
+        elseif assignment_context and assignment_context.target_combatant_view == combatant then
+            highlight = assignment_context.highlight
         end
 
         draw_combatant(combatant, index, highlight)
@@ -1090,6 +1660,8 @@ function CombatState:draw()
 
     if selection_context and metadata and metadata.type == "tech_select_phase" then
         self:draw_tech_selection_ui(selection_context)
+    elseif assignment_context and metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment") then
+        self:draw_assignment_ui(assignment_context)
     end
 
     local x, y, width = Layouts.get_prompt_region()
@@ -1100,6 +1672,18 @@ function CombatState:draw()
             love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
             love.graphics.setColor(0.82, 0.9, 1, 0.85)
             love.graphics.printf("Click a Tech card to select it.", x, y + 20, width, "center")
+            love.graphics.setColor(1, 1, 1, 1)
+        elseif metadata and metadata.type == "attack_assignment" then
+            love.graphics.setColor(1, 1, 1, 0.95)
+            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
+            love.graphics.setColor(0.82, 0.9, 1, 0.85)
+            love.graphics.printf("Drag an attack die onto a highlighted enemy body part.", x, y + 20, width, "center")
+            love.graphics.setColor(1, 1, 1, 1)
+        elseif metadata and metadata.type == "defense_assignment" then
+            love.graphics.setColor(1, 1, 1, 0.95)
+            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
+            love.graphics.setColor(0.82, 0.9, 1, 0.85)
+            love.graphics.printf("Drag a defense die onto one of your body parts.", x, y + 20, width, "center")
             love.graphics.setColor(1, 1, 1, 1)
         else
             love.graphics.setColor(1, 1, 1, 1)
@@ -1126,25 +1710,78 @@ function CombatState:mousepressed(x, y, button)
     end
 
     local metadata = self.engine:get_pending_input_metadata()
-    if not metadata or metadata.type ~= "tech_select_phase" then
+    if not metadata then
         return
     end
 
     self:update_mouse_position(x, y)
 
-    if not self.tech_selection_ui then
+    if metadata.type == "tech_select_phase" then
+        if not self.tech_selection_ui then
+            return
+        end
+
+        local context = self.tech_selection_ui
+        context.mouse_x = x
+        context.mouse_y = y
+        self:evaluate_tech_selection_hover(context)
+
+        if context.hovered_option and context.hovered_option.selection_index then
+            self.engine:provide_input(context.hovered_option.selection_index)
+            self.tech_selection_ui = nil
+            self.input_buffer = ""
+        end
+
         return
     end
 
-    local context = self.tech_selection_ui
-    context.mouse_x = x
-    context.mouse_y = y
-    self:evaluate_tech_selection_hover(context)
+    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
+        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
+            self.assignment_ui = self:build_assignment_context(metadata)
+            if self.assignment_ui then
+                self.assignment_ui.metadata = metadata
+            end
+        end
 
-    if context.hovered_option and context.hovered_option.selection_index then
-        self.engine:provide_input(context.hovered_option.selection_index)
-        self.tech_selection_ui = nil
-        self.input_buffer = ""
+        if self.assignment_ui then
+            self.assignment_ui.mouse_x = x
+            self.assignment_ui.mouse_y = y
+            self:handle_assignment_mousepressed(self.assignment_ui, x, y)
+        end
+
+        return
+    end
+end
+
+function CombatState:mousereleased(x, y, button)
+    if button ~= 1 then
+        return
+    end
+
+    if not (self.engine and self.engine:needs_input()) then
+        return
+    end
+
+    local metadata = self.engine:get_pending_input_metadata()
+    if not metadata then
+        return
+    end
+
+    self:update_mouse_position(x, y)
+
+    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
+        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
+            self.assignment_ui = self:build_assignment_context(metadata)
+            if self.assignment_ui then
+                self.assignment_ui.metadata = metadata
+            end
+        end
+
+        if self.assignment_ui then
+            self.assignment_ui.mouse_x = x
+            self.assignment_ui.mouse_y = y
+            self:handle_assignment_mousereleased(self.assignment_ui, x, y)
+        end
     end
 end
 
