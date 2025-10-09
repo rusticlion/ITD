@@ -131,15 +131,29 @@ local function score_tech(ai_combatant, opponent, tech)
 end
 
 local function get_tech_list(ai_combatant, provided)
-    if provided and #provided > 0 then
-        return provided
+    local source = provided
+
+    if not source or #source == 0 then
+        if ai_combatant and ai_combatant.get_available_techs then
+            source = ai_combatant:get_available_techs()
+        else
+            source = {}
+        end
     end
 
-    if ai_combatant and ai_combatant.get_available_techs then
-        return ai_combatant:get_available_techs()
+    local techs = {}
+
+    for _, entry in ipairs(source) do
+        if entry then
+            if entry.tech then
+                table.insert(techs, entry.tech)
+            else
+                table.insert(techs, entry)
+            end
+        end
     end
 
-    return {}
+    return techs
 end
 
 function AI.choose_tech(ai_combatant, opponent, available_techs)

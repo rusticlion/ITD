@@ -416,7 +416,12 @@ function Engine:advance_tech_selection()
     end
 
     local combatant = self.selection_queue[1]
-    local available_techs = combatant:get_available_techs()
+    local available_entries = combatant:get_available_techs()
+    local available_techs = {}
+
+    for index, entry in ipairs(available_entries) do
+        available_techs[index] = entry.tech
+    end
 
     local function advance_queue()
         table.remove(self.selection_queue, 1)
@@ -431,8 +436,9 @@ function Engine:advance_tech_selection()
                 options = {}
             }
 
-            for index, tech in ipairs(available_techs) do
-                local source_part = tech and tech._source_part or nil
+            for index, entry in ipairs(available_entries) do
+                local tech = entry.tech
+                local source_part = entry.source_part
                 metadata.options[index] = {
                     index = index,
                     tech = tech,
@@ -452,7 +458,8 @@ function Engine:advance_tech_selection()
 
             local function handle_input(engine, raw_input)
                 local choice = tonumber(raw_input)
-                local selected_tech = choice and available_techs[choice] or nil
+                local selected_entry = choice and available_entries[choice] or nil
+                local selected_tech = selected_entry and selected_entry.tech or nil
                 local selected_option = choice and metadata.options[choice] or nil
 
                 if not selected_tech then
@@ -557,7 +564,7 @@ function Engine:prompt_select_crest(combatant, options, continue_callback)
         local selection = choice and crest_options[choice] or nil
 
         if not selection then
-            engine:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+            engine:request_input("Select a crest to expend", handle_selection, metadata)
             return
         end
 
@@ -569,7 +576,7 @@ function Engine:prompt_select_crest(combatant, options, continue_callback)
         end)
     end
 
-    self:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+    self:request_input("Select a crest to expend", handle_selection, metadata)
 end
 
 function Engine:prompt_crest_expenditure(combatant, on_complete)
@@ -616,11 +623,11 @@ function Engine:prompt_crest_expenditure(combatant, on_complete)
                 engine:clear_input()
                 finish()
             else
-                engine:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+                engine:request_input("Expend a crest?", handle_yes_no, metadata)
             end
         end
 
-        self:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+        self:request_input("Expend a crest?", handle_yes_no, metadata)
     end
 
     combatant._crest_prompt_in_progress = true
@@ -900,6 +907,7 @@ function Engine:advance_attack_assignment()
             else
                 local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "attack"
                 local base_prompt = string.format("Assign attack %d for %s", entry.next_index, entry.combatant.name)
+                local prompt_text = string.format("%s: %s", base_prompt, action_label)
 
                 local options = {}
                 for index, part in ipairs(targetable_parts) do
@@ -928,7 +936,7 @@ function Engine:advance_attack_assignment()
                     local selection = choice and metadata.options[choice] or nil
 
                     if not selection then
-                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
                         return
                     end
 
@@ -943,7 +951,7 @@ function Engine:advance_attack_assignment()
                     engine:advance_attack_assignment()
                 end
 
-                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                self:request_input(prompt_text, handle_input, metadata)
                 return
             end
         end
@@ -1088,6 +1096,7 @@ function Engine:advance_defense_assignment()
             else
                 local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "defense"
                 local base_prompt = string.format("Assign defense %d for %s", entry.next_index, entry.combatant.name)
+                local prompt_text = string.format("%s: %s", base_prompt, action_label)
 
                 local options = {}
                 for index, part in ipairs(available_parts) do
@@ -1115,7 +1124,7 @@ function Engine:advance_defense_assignment()
                     local selection = choice and metadata.options[choice] or nil
 
                     if not selection then
-                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
                         return
                     end
 
@@ -1130,7 +1139,7 @@ function Engine:advance_defense_assignment()
                     engine:advance_defense_assignment()
                 end
 
-                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                self:request_input(prompt_text, handle_input, metadata)
                 return
             end
         end
