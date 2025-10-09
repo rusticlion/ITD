@@ -23,3 +23,7 @@ end
 function love.keyreleased(key)
     GameState.keyreleased(key)
 end
+
+function love.mousepressed(x, y, button, istouch, presses)
+    GameState.mousepressed(x, y, button, istouch, presses)
+end

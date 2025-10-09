@@ -51,9 +51,10 @@ function Combatant:get_available_techs()
     for _, part in ipairs(self.body_parts) do
         for _, tech in ipairs(part.techs or {}) do
             if type(tech) == "table" then
+                tech._source_part = part
                 table.insert(techs, tech)
             elseif type(tech) == "string" then
-                table.insert(techs, { id = tech, name = tech, actions = {} })
+                table.insert(techs, { id = tech, name = tech, actions = {}, _source_part = part })
             end
         end
     end
