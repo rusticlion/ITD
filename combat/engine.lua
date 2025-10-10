@@ -111,6 +111,35 @@ local function apply_consistent_keyword(result, keywords)
     return consistent_value
 end
 
+local function get_pre_roll_bucket_key(action_type)
+    if action_type == "defense_roll" then
+        return "defense"
+    end
+
+    return "attack"
+end
+
+local function clone_roll_result(result)
+    if not result then
+        return nil
+    end
+
+    local copy = {}
+
+    for key, value in pairs(result) do
+        if key == "rolls" and type(value) == "table" then
+            copy.rolls = {}
+            for index, roll in ipairs(value) do
+                copy.rolls[index] = roll
+            end
+        else
+            copy[key] = value
+        end
+    end
+
+    return copy
+end
+
 local AttackPipeline = {}
 
 function AttackPipeline.apply_base_totals(_, context)
@@ -198,11 +227,129 @@ function Engine:new()
         attack_assignment_ready = false,
         defense_assignment_ready = false,
         winner = nil,
+        pre_rolled_dice = {},
         states = States,
         untargetable_parts = setmetatable({}, { __mode = "k" })
     }
 
     return setmetatable(instance, Engine)
+end
+
+function Engine:clear_pre_rolled_dice()
+    self.pre_rolled_dice = {}
+end
+
+function Engine:reset_pre_roll_store(combatant)
+    if not combatant then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+    self.pre_rolled_dice[combatant] = {
+        attack = {},
+        defense = {}
+    }
+end
+
+function Engine:get_pre_roll_bucket(combatant, action_type)
+    if not combatant then
+        return nil
+    end
+
+    if not self.pre_rolled_dice then
+        return nil
+    end
+
+    local store = self.pre_rolled_dice[combatant]
+    if not store then
+        return nil
+    end
+
+    local key = get_pre_roll_bucket_key(action_type)
+    return store and store[key] or nil
+end
+
+function Engine:set_pre_rolled_result(combatant, action_index, action_type, result)
+    if not combatant or not action_index or not result then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+    local store = self.pre_rolled_dice[combatant]
+    if not store then
+        store = {
+            attack = {},
+            defense = {}
+        }
+        self.pre_rolled_dice[combatant] = store
+    end
+
+    local key = get_pre_roll_bucket_key(action_type)
+    store[key] = store[key] or {}
+    store[key][action_index] = clone_roll_result(result)
+end
+
+function Engine:get_pre_rolled_result(combatant, action_index, action_type)
+    if not combatant or not action_index then
+        return nil
+    end
+
+    local bucket = self:get_pre_roll_bucket(combatant, action_type)
+    if not bucket then
+        return nil
+    end
+
+    return bucket[action_index]
+end
+
+function Engine:get_pre_rolled_total(combatant, action_index, action_type)
+    local result = self:get_pre_rolled_result(combatant, action_index, action_type)
+    return result and result.total or nil
+end
+
+function Engine:get_pre_rolled_totals(combatant, action_type)
+    local totals = {}
+    local bucket = self:get_pre_roll_bucket(combatant, action_type)
+
+    if not bucket then
+        return totals
+    end
+
+    for index, result in pairs(bucket) do
+        if result and result.total ~= nil then
+            totals[index] = result.total
+        end
+    end
+
+    return totals
+end
+
+function Engine:pre_roll_player_dice()
+    if not self.combatants then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+
+    for _, combatant in ipairs(self.combatants) do
+        if combatant.is_player then
+            self:reset_pre_roll_store(combatant)
+
+            local tech = combatant.selected_tech
+            if tech and tech.actions then
+                for index, action in ipairs(tech.actions) do
+                    if action.type == "attack_roll" or action.type == "defense_roll" then
+                        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                        local keywords = collect_keywords(tech, action)
+                        apply_consistent_keyword(result, keywords)
+                        self:set_pre_rolled_result(combatant, index, action.type, result)
+                    end
+                end
+            else
+                self:reset_pre_roll_store(combatant)
+            end
+        end
+    end
 end
 
 function Engine:get_attack_pipeline()
@@ -263,6 +410,7 @@ function Engine:start_combat()
     self.attack_assignment_ready = false
     self.defense_assignment_ready = false
     self.winner = nil
+    self:clear_pre_rolled_dice()
     self.untargetable_parts = setmetatable({}, { __mode = "k" })
     self:clear_combatant_modifiers()
 
@@ -767,6 +915,9 @@ function Engine:prepare_attack_assignments()
     self.attack_assignments = {}
     self.attack_assignment_queue = {}
 
+    self:clear_pre_rolled_dice()
+    self:pre_roll_player_dice()
+
     for _, combatant in ipairs(self.combatants) do
         self.attack_assignments[combatant] = {}
 
@@ -928,7 +1079,9 @@ function Engine:advance_attack_assignment()
                     action = action_data.action,
                     action_index = action_data.action_index,
                     action_label = action_label,
-                    options = options
+                    options = options,
+                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
+                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
                 }
 
                 local function handle_input(engine, raw_input)
@@ -1116,7 +1269,9 @@ function Engine:advance_defense_assignment()
                     action = action_data.action,
                     action_index = action_data.action_index,
                     action_label = action_label,
-                    options = options
+                    options = options,
+                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
+                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
                 }
 
                 local function handle_input(engine, raw_input)
@@ -1313,7 +1468,12 @@ function Engine:roll_defense_assignments()
             local target_part = assignment.target_part
 
             if action and target_part then
-                local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                local stored_result = nil
+                if combatant.is_player then
+                    stored_result = self:get_pre_rolled_result(combatant, assignment.action_index, action.type)
+                end
+
+                local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
                 result = self:apply_forced_reroll(combatant, result, {
                     type = "defense",
                     action = action,
@@ -1362,7 +1522,12 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             self:apply_damage(attacker, opponent, body_part, amount, context)
         end
     elseif action.type == "attack_roll" then
-        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+        local stored_result = nil
+        if attacker and attacker.is_player then
+            stored_result = self:get_pre_rolled_result(attacker, action_index, action.type)
+        end
+
+        local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
         result = self:apply_forced_reroll(attacker, result, {
             type = "attack",
             action = action,
