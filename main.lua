@@ -27,3 +27,7 @@ end
 function love.mousepressed(x, y, button, istouch, presses)
     GameState.mousepressed(x, y, button, istouch, presses)
 end
+
+function love.mousereleased(x, y, button, istouch, presses)
+    GameState.mousereleased(x, y, button, istouch, presses)
+end

@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-10-10 18:20 UTC_
+_Generated on 2025-10-10 18:59 UTC_
 
 ## AGENTS.md
 
@@ -824,6 +824,35 @@ local function apply_consistent_keyword(result, keywords)
     return consistent_value
 end
 
+local function get_pre_roll_bucket_key(action_type)
+    if action_type == "defense_roll" then
+        return "defense"
+    end
+
+    return "attack"
+end
+
+local function clone_roll_result(result)
+    if not result then
+        return nil
+    end
+
+    local copy = {}
+
+    for key, value in pairs(result) do
+        if key == "rolls" and type(value) == "table" then
+            copy.rolls = {}
+            for index, roll in ipairs(value) do
+                copy.rolls[index] = roll
+            end
+        else
+            copy[key] = value
+        end
+    end
+
+    return copy
+end
+
 local AttackPipeline = {}
 
 function AttackPipeline.apply_base_totals(_, context)
@@ -911,11 +940,129 @@ function Engine:new()
         attack_assignment_ready = false,
         defense_assignment_ready = false,
         winner = nil,
+        pre_rolled_dice = {},
         states = States,
         untargetable_parts = setmetatable({}, { __mode = "k" })
     }
 
     return setmetatable(instance, Engine)
+end
+
+function Engine:clear_pre_rolled_dice()
+    self.pre_rolled_dice = {}
+end
+
+function Engine:reset_pre_roll_store(combatant)
+    if not combatant then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+    self.pre_rolled_dice[combatant] = {
+        attack = {},
+        defense = {}
+    }
+end
+
+function Engine:get_pre_roll_bucket(combatant, action_type)
+    if not combatant then
+        return nil
+    end
+
+    if not self.pre_rolled_dice then
+        return nil
+    end
+
+    local store = self.pre_rolled_dice[combatant]
+    if not store then
+        return nil
+    end
+
+    local key = get_pre_roll_bucket_key(action_type)
+    return store and store[key] or nil
+end
+
+function Engine:set_pre_rolled_result(combatant, action_index, action_type, result)
+    if not combatant or not action_index or not result then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+    local store = self.pre_rolled_dice[combatant]
+    if not store then
+        store = {
+            attack = {},
+            defense = {}
+        }
+        self.pre_rolled_dice[combatant] = store
+    end
+
+    local key = get_pre_roll_bucket_key(action_type)
+    store[key] = store[key] or {}
+    store[key][action_index] = clone_roll_result(result)
+end
+
+function Engine:get_pre_rolled_result(combatant, action_index, action_type)
+    if not combatant or not action_index then
+        return nil
+    end
+
+    local bucket = self:get_pre_roll_bucket(combatant, action_type)
+    if not bucket then
+        return nil
+    end
+
+    return bucket[action_index]
+end
+
+function Engine:get_pre_rolled_total(combatant, action_index, action_type)
+    local result = self:get_pre_rolled_result(combatant, action_index, action_type)
+    return result and result.total or nil
+end
+
+function Engine:get_pre_rolled_totals(combatant, action_type)
+    local totals = {}
+    local bucket = self:get_pre_roll_bucket(combatant, action_type)
+
+    if not bucket then
+        return totals
+    end
+
+    for index, result in pairs(bucket) do
+        if result and result.total ~= nil then
+            totals[index] = result.total
+        end
+    end
+
+    return totals
+end
+
+function Engine:pre_roll_player_dice()
+    if not self.combatants then
+        return
+    end
+
+    self.pre_rolled_dice = self.pre_rolled_dice or {}
+
+    for _, combatant in ipairs(self.combatants) do
+        if combatant.is_player then
+            self:reset_pre_roll_store(combatant)
+
+            local tech = combatant.selected_tech
+            if tech and tech.actions then
+                for index, action in ipairs(tech.actions) do
+                    if action.type == "attack_roll" or action.type == "defense_roll" then
+                        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                        local keywords = collect_keywords(tech, action)
+                        apply_consistent_keyword(result, keywords)
+                        self:set_pre_rolled_result(combatant, index, action.type, result)
+                    end
+                end
+            else
+                self:reset_pre_roll_store(combatant)
+            end
+        end
+    end
 end
 
 function Engine:get_attack_pipeline()
@@ -976,6 +1123,7 @@ function Engine:start_combat()
     self.attack_assignment_ready = false
     self.defense_assignment_ready = false
     self.winner = nil
+    self:clear_pre_rolled_dice()
     self.untargetable_parts = setmetatable({}, { __mode = "k" })
     self:clear_combatant_modifiers()
 
@@ -1480,6 +1628,9 @@ function Engine:prepare_attack_assignments()
     self.attack_assignments = {}
     self.attack_assignment_queue = {}
 
+    self:clear_pre_rolled_dice()
+    self:pre_roll_player_dice()
+
     for _, combatant in ipairs(self.combatants) do
         self.attack_assignments[combatant] = {}
 
@@ -1641,7 +1792,9 @@ function Engine:advance_attack_assignment()
                     action = action_data.action,
                     action_index = action_data.action_index,
                     action_label = action_label,
-                    options = options
+                    options = options,
+                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
+                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
                 }
 
                 local function handle_input(engine, raw_input)
@@ -1829,7 +1982,9 @@ function Engine:advance_defense_assignment()
                     action = action_data.action,
                     action_index = action_data.action_index,
                     action_label = action_label,
-                    options = options
+                    options = options,
+                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
+                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
                 }
 
                 local function handle_input(engine, raw_input)
@@ -2026,7 +2181,12 @@ function Engine:roll_defense_assignments()
             local target_part = assignment.target_part
 
             if action and target_part then
-                local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+                local stored_result = nil
+                if combatant.is_player then
+                    stored_result = self:get_pre_rolled_result(combatant, assignment.action_index, action.type)
+                end
+
+                local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
                 result = self:apply_forced_reroll(combatant, result, {
                     type = "defense",
                     action = action,
@@ -2075,7 +2235,12 @@ function Engine:resolve_action(attacker, action, action_index, defense_totals)
             self:apply_damage(attacker, opponent, body_part, amount, context)
         end
     elseif action.type == "attack_roll" then
-        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
+        local stored_result = nil
+        if attacker and attacker.is_player then
+            stored_result = self:get_pre_rolled_result(attacker, action_index, action.type)
+        end
+
+        local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
         result = self:apply_forced_reroll(attacker, result, {
             type = "attack",
             action = action,
@@ -2356,7 +2521,7 @@ return States
 ```lua
 function love.conf(t)
     t.window.title = "Into the Dreamlands"
-    t.window.width = 800
+    t.window.width = 1056
     t.window.height = 768
     t.console = true
 end
@@ -2539,6 +2704,10 @@ end
 
 function GameState.mousepressed(x, y, button, istouch, presses)
     call(GameState.current, "mousepressed", x, y, button, istouch, presses)
+end
+
+function GameState.mousereleased(x, y, button, istouch, presses)
+    call(GameState.current, "mousereleased", x, y, button, istouch, presses)
 end
 
 return GameState
@@ -4631,6 +4800,40 @@ State Decoupling: This fix is a practical lesson in UI state management. We are 
 "Stickiness": The trickiest part will be determining the "stickiness" of the active card fan. A simple solution is to define a larger bounding box around the body part and its card fan; as long as the mouse is within this larger box, the active_part_entry remains. If the mouse leaves this box, clear it.
 ```
 
+## docs/tickets/S5_InteractiveCombatLoop/T5_5_ImplementPlayerDicePreRolling.md
+
+```markdown
+Implement Player Dice Pre-Rolling
+Goal: Modify the combat engine to pre-roll the player's dice before the assignment phase and update the UI to display these settled values, aligning the implementation with the CombatPresentation.md design.
+Tasks:
+Engine: In combat/engine.lua, create a new internal structure to hold pre-rolled dice results for the current round.
+Engine: At the beginning of the ATTACK_ASSIGN phase (within prepare_attack_assignments), iterate through the player combatant's tech. For any attack_roll or defense_roll actions, roll the dice immediately using core/dice.lua and store the result in your new structure.
+Engine: When creating the metadata for an attack_assignment or defense_assignment input request, include the pre-rolled result for that specific action.
+UI: In states/combat.lua, modify the build_assignment_context and sync_assignment_dice functions. The dice tokens should now source their primary display value from the new rolled_value field in the metadata, rather than just showing the die type.
+Deliverables:
+When the assignment phase begins, the player's dice on the Dice Shelf now display a specific number (e.g., "6") instead of the die type ("1d6").
+The enemy's dice on their shelf remain visually "unsettled" (this is a visual effect we'll add later, for now they can just not display a value).
+Design Notes/Pitfalls:
+This change only affects the player's dice. The AI does not need pre-rolled dice as it makes its decisions instantly. The engine should continue to roll the AI's dice during the RESOLUTION phase as it does now. This maintains the information asymmetry that is key to the design.
+```
+
+## docs/tickets/S5_InteractiveCombatLoop/T5_6_CorrectUIEventHandlingForDnD.md
+
+```markdown
+Correct UI Event Handling for Drag-and-Drop
+Goal: Resolve the drag-and-drop failure by refactoring the UI event handling to prevent premature state destruction.
+Tasks:
+Refactor love.mousereleased: In states/combat.lua, simplify the mousereleased callback. Remove the logic that checks metadata and rebuilds self.assignment_ui. The function should now only do two things: update the mouse position and, if self.assignment_ui exists, call handle_assignment_mousereleased.
+Verify update Loop: Confirm that the main update_interactive_input function is correctly handling the creation and destruction of the self.assignment_ui context once per frame based on the engine's state. This is the correct location for that logic.
+Test: Perform a full drag-and-drop assignment. The handle_assignment_mousereleased function should now execute correctly, using the state that was present during the drag, successfully find the hovered_target, and call engine:provide_input().
+Deliverables:
+The player can successfully click and drag a die from their Dice Shelf.
+Dropping the die onto a valid, highlighted enemy (for attack) or friendly (for defense) body part correctly assigns the die.
+The engine receives the input, and the UI updates to show the next assignment prompt or advances to the next combat phase.
+Design Notes/Pitfalls:
+This is a classic case of separating state updates from event handling. Events should be lightweight notifications. The main update loop is responsible for observing the game state and synchronizing the UI to it. This fix will make our UI architecture much more stable and predictable.
+```
+
 ## docs/tickets/S6_Polish+Animation+Clarity/T6_1_AnimatedResolutionSequence.md
 
 ```markdown
@@ -4700,6 +4903,9 @@ function love.mousepressed(x, y, button, istouch, presses)
     GameState.mousepressed(x, y, button, istouch, presses)
 end
 
+function love.mousereleased(x, y, button, istouch, presses)
+    GameState.mousereleased(x, y, button, istouch, presses)
+end
 ```
 
 ## states/combat.lua
@@ -5504,6 +5710,25 @@ function CombatState:sync_assignment_dice(context)
     local tech = combatant and combatant.selected_tech
     local desired_type = context.mode == "attack" and "attack_roll" or "defense_roll"
 
+    local rolled_values = {}
+    if context.metadata and context.metadata.action_index then
+        local metadata_value = context.metadata.rolled_value
+        if metadata_value ~= nil then
+            rolled_values[context.metadata.action_index] = metadata_value
+        end
+    end
+
+    if self.engine and combatant and combatant.is_player then
+        local totals = self.engine:get_pre_rolled_totals(combatant, desired_type)
+        for index, value in pairs(totals or {}) do
+            if value ~= nil then
+                rolled_values[index] = value
+            end
+        end
+    end
+
+    context.rolled_values = rolled_values
+
     context.dice_map = context.dice_map or {}
     local new_order = {}
     local seen = {}
@@ -5532,8 +5757,16 @@ function CombatState:sync_assignment_dice(context)
 
         die.action = action
         die.action_index = action_index
-        die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
-        die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+        local rolled_total = rolled_values[action_index]
+        if rolled_total ~= nil then
+            die.label = tostring(rolled_total)
+            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+            die.rolled_value = rolled_total
+        else
+            die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
+            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+            die.rolled_value = nil
+        end
         die.assigned = false
         die.assigned_option = nil
         die.assigned_part_view = nil
@@ -5774,6 +6007,7 @@ function CombatState:build_assignment_context(metadata)
         target_entries = {},
         dice_map = {},
         dice = {},
+        rolled_values = {},
         mouse_x = self.mouse_position and self.mouse_position.x or 0,
         mouse_y = self.mouse_position and self.mouse_position.y or 0,
         shelf_rect = nil,
@@ -6770,30 +7004,12 @@ function CombatState:mousereleased(x, y, button)
         return
     end
 
-    if not (self.engine and self.engine:needs_input()) then
-        return
-    end
-
-    local metadata = self.engine:get_pending_input_metadata()
-    if not metadata then
-        return
-    end
-
     self:update_mouse_position(x, y)
 
-    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
-        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
-            self.assignment_ui = self:build_assignment_context(metadata)
-            if self.assignment_ui then
-                self.assignment_ui.metadata = metadata
-            end
-        end
-
-        if self.assignment_ui then
-            self.assignment_ui.mouse_x = x
-            self.assignment_ui.mouse_y = y
-            self:handle_assignment_mousereleased(self.assignment_ui, x, y)
-        end
+    if self.assignment_ui then
+        self.assignment_ui.mouse_x = x
+        self.assignment_ui.mouse_y = y
+        self:handle_assignment_mousereleased(self.assignment_ui, x, y)
     end
 end
 

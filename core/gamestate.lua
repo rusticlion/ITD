@@ -38,4 +38,8 @@ function GameState.mousepressed(x, y, button, istouch, presses)
     call(GameState.current, "mousepressed", x, y, button, istouch, presses)
 end
 
+function GameState.mousereleased(x, y, button, istouch, presses)
+    call(GameState.current, "mousereleased", x, y, button, istouch, presses)
+end
+
 return GameState
