@@ -797,6 +797,25 @@ function CombatState:sync_assignment_dice(context)
     local tech = combatant and combatant.selected_tech
     local desired_type = context.mode == "attack" and "attack_roll" or "defense_roll"
 
+    local rolled_values = {}
+    if context.metadata and context.metadata.action_index then
+        local metadata_value = context.metadata.rolled_value
+        if metadata_value ~= nil then
+            rolled_values[context.metadata.action_index] = metadata_value
+        end
+    end
+
+    if self.engine and combatant and combatant.is_player then
+        local totals = self.engine:get_pre_rolled_totals(combatant, desired_type)
+        for index, value in pairs(totals or {}) do
+            if value ~= nil then
+                rolled_values[index] = value
+            end
+        end
+    end
+
+    context.rolled_values = rolled_values
+
     context.dice_map = context.dice_map or {}
     local new_order = {}
     local seen = {}
@@ -825,8 +844,16 @@ function CombatState:sync_assignment_dice(context)
 
         die.action = action
         die.action_index = action_index
-        die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
-        die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+        local rolled_total = rolled_values[action_index]
+        if rolled_total ~= nil then
+            die.label = tostring(rolled_total)
+            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+            die.rolled_value = rolled_total
+        else
+            die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
+            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
+            die.rolled_value = nil
+        end
         die.assigned = false
         die.assigned_option = nil
         die.assigned_part_view = nil
@@ -1067,6 +1094,7 @@ function CombatState:build_assignment_context(metadata)
         target_entries = {},
         dice_map = {},
         dice = {},
+        rolled_values = {},
         mouse_x = self.mouse_position and self.mouse_position.x or 0,
         mouse_y = self.mouse_position and self.mouse_position.y or 0,
         shelf_rect = nil,
