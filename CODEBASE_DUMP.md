@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-10-09 21:54 UTC_
+_Generated on 2025-10-09 22:19 UTC_
 
 ## AGENTS.md
 
@@ -183,15 +183,29 @@ local function score_tech(ai_combatant, opponent, tech)
 end
 
 local function get_tech_list(ai_combatant, provided)
-    if provided and #provided > 0 then
-        return provided
+    local source = provided
+
+    if not source or #source == 0 then
+        if ai_combatant and ai_combatant.get_available_techs then
+            source = ai_combatant:get_available_techs()
+        else
+            source = {}
+        end
     end
 
-    if ai_combatant and ai_combatant.get_available_techs then
-        return ai_combatant:get_available_techs()
+    local techs = {}
+
+    for _, entry in ipairs(source) do
+        if entry then
+            if entry.tech then
+                table.insert(techs, entry.tech)
+            else
+                table.insert(techs, entry)
+            end
+        end
     end
 
-    return {}
+    return techs
 end
 
 function AI.choose_tech(ai_combatant, opponent, available_techs)
@@ -451,10 +465,12 @@ function Combatant:get_available_techs()
     for _, part in ipairs(self.body_parts) do
         for _, tech in ipairs(part.techs or {}) do
             if type(tech) == "table" then
-                tech._source_part = part
-                table.insert(techs, tech)
+                table.insert(techs, { tech = tech, source_part = part })
             elseif type(tech) == "string" then
-                table.insert(techs, { id = tech, name = tech, actions = {}, _source_part = part })
+                table.insert(techs, {
+                    tech = { id = tech, name = tech, actions = {} },
+                    source_part = part
+                })
             end
         end
     end
@@ -639,7 +655,7 @@ EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
         local selection = choice and metadata.options[choice] or nil
 
         if not selection then
-            engine_instance:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+            engine_instance:request_input("Select a body part to shroud", handle_input, metadata)
             return
         end
 
@@ -654,7 +670,7 @@ EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
         end
     end
 
-    engine:request_input("Select a body part to shroud (enter number)", handle_input, metadata)
+    engine:request_input("Select a body part to shroud", handle_input, metadata)
 end
 
 EXPEND_REGISTRY.Valor = function(_, combatant, on_complete)
@@ -1113,7 +1129,12 @@ function Engine:advance_tech_selection()
     end
 
     local combatant = self.selection_queue[1]
-    local available_techs = combatant:get_available_techs()
+    local available_entries = combatant:get_available_techs()
+    local available_techs = {}
+
+    for index, entry in ipairs(available_entries) do
+        available_techs[index] = entry.tech
+    end
 
     local function advance_queue()
         table.remove(self.selection_queue, 1)
@@ -1128,8 +1149,9 @@ function Engine:advance_tech_selection()
                 options = {}
             }
 
-            for index, tech in ipairs(available_techs) do
-                local source_part = tech and tech._source_part or nil
+            for index, entry in ipairs(available_entries) do
+                local tech = entry.tech
+                local source_part = entry.source_part
                 metadata.options[index] = {
                     index = index,
                     tech = tech,
@@ -1149,7 +1171,8 @@ function Engine:advance_tech_selection()
 
             local function handle_input(engine, raw_input)
                 local choice = tonumber(raw_input)
-                local selected_tech = choice and available_techs[choice] or nil
+                local selected_entry = choice and available_entries[choice] or nil
+                local selected_tech = selected_entry and selected_entry.tech or nil
                 local selected_option = choice and metadata.options[choice] or nil
 
                 if not selected_tech then
@@ -1254,7 +1277,7 @@ function Engine:prompt_select_crest(combatant, options, continue_callback)
         local selection = choice and crest_options[choice] or nil
 
         if not selection then
-            engine:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+            engine:request_input("Select a crest to expend", handle_selection, metadata)
             return
         end
 
@@ -1266,7 +1289,7 @@ function Engine:prompt_select_crest(combatant, options, continue_callback)
         end)
     end
 
-    self:request_input("Select crest to expend (enter number)", handle_selection, metadata)
+    self:request_input("Select a crest to expend", handle_selection, metadata)
 end
 
 function Engine:prompt_crest_expenditure(combatant, on_complete)
@@ -1313,11 +1336,11 @@ function Engine:prompt_crest_expenditure(combatant, on_complete)
                 engine:clear_input()
                 finish()
             else
-                engine:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+                engine:request_input("Expend a crest?", handle_yes_no, metadata)
             end
         end
 
-        self:request_input("Expend a crest? (y/n)", handle_yes_no, metadata)
+        self:request_input("Expend a crest?", handle_yes_no, metadata)
     end
 
     combatant._crest_prompt_in_progress = true
@@ -1597,6 +1620,7 @@ function Engine:advance_attack_assignment()
             else
                 local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "attack"
                 local base_prompt = string.format("Assign attack %d for %s", entry.next_index, entry.combatant.name)
+                local prompt_text = string.format("%s: %s", base_prompt, action_label)
 
                 local options = {}
                 for index, part in ipairs(targetable_parts) do
@@ -1625,7 +1649,7 @@ function Engine:advance_attack_assignment()
                     local selection = choice and metadata.options[choice] or nil
 
                     if not selection then
-                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
                         return
                     end
 
@@ -1640,7 +1664,7 @@ function Engine:advance_attack_assignment()
                     engine:advance_attack_assignment()
                 end
 
-                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                self:request_input(prompt_text, handle_input, metadata)
                 return
             end
         end
@@ -1785,6 +1809,7 @@ function Engine:advance_defense_assignment()
             else
                 local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "defense"
                 local base_prompt = string.format("Assign defense %d for %s", entry.next_index, entry.combatant.name)
+                local prompt_text = string.format("%s: %s", base_prompt, action_label)
 
                 local options = {}
                 for index, part in ipairs(available_parts) do
@@ -1812,7 +1837,7 @@ function Engine:advance_defense_assignment()
                     local selection = choice and metadata.options[choice] or nil
 
                     if not selection then
-                        engine:request_input(base_prompt .. " - enter a valid option number", handle_input, metadata)
+                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
                         return
                     end
 
@@ -1827,7 +1852,7 @@ function Engine:advance_defense_assignment()
                     engine:advance_defense_assignment()
                 end
 
-                self:request_input(base_prompt .. " (enter option number)", handle_input, metadata)
+                self:request_input(prompt_text, handle_input, metadata)
                 return
             end
         end
@@ -4639,8 +4664,6 @@ end
 ## states/combat.lua
 
 ```lua
-local utf8 = require("utf8")
-
 local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Layouts = require("ui.layouts")
@@ -4668,6 +4691,13 @@ local DIE_TOKEN_SIZE = 64
 local DIE_TOKEN_RADIUS = 10
 local DIE_TOKEN_SPACING = 14
 local DICE_SHELF_HEIGHT = DIE_TOKEN_SIZE + 32
+
+local PROMPT_BUTTON_WIDTH = 220
+local PROMPT_BUTTON_HEIGHT = 56
+local PROMPT_BUTTON_SPACING = 12
+local PROMPT_BUTTON_RADIUS = 12
+local PROMPT_PANEL_HEADER = 72
+local PROMPT_PANEL_BOTTOM_PADDING = 24
 
 local function point_in_rect(x, y, rect)
     if not rect then
@@ -4838,6 +4868,34 @@ local function draw_tech_card(option, is_hovered)
         love.graphics.printf("#" .. tostring(option.selection_index), rect.x + rect.w - 34, rect.y + 8, 24, "right")
         love.graphics.setColor(1, 1, 1, 1)
     end
+end
+
+local function draw_prompt_button(button, is_hovered)
+    if not button or not button.rect then
+        return
+    end
+
+    local rect = button.rect
+    local fill = is_hovered and { 0.16, 0.4, 0.72, 0.92 } or { 0.12, 0.26, 0.42, 0.85 }
+    local outline = is_hovered and { 0.96, 0.98, 1, 1 } or { 0.58, 0.86, 1, 0.9 }
+
+    love.graphics.setColor(fill)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, PROMPT_BUTTON_RADIUS, PROMPT_BUTTON_RADIUS)
+
+    love.graphics.setColor(outline)
+    love.graphics.setLineWidth(2)
+    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, PROMPT_BUTTON_RADIUS, PROMPT_BUTTON_RADIUS)
+    love.graphics.setLineWidth(1)
+
+    love.graphics.setColor(1, 1, 1, 0.96)
+    love.graphics.printf(button.label or "", rect.x + 14, rect.y + 12, rect.w - 28, "center")
+
+    if button.subtitle and button.subtitle ~= "" then
+        love.graphics.setColor(0.82, 0.92, 1, 0.85)
+        love.graphics.printf(button.subtitle, rect.x + 14, rect.y + rect.h - 26, rect.w - 28, "center")
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
 end
 
 local function build_tech_summary(tech)
@@ -5209,11 +5267,11 @@ end
 
 function CombatState:enter()
     self.engine = Engine:new()
-    self.input_buffer = ""
     self.background_color = { 0.05, 0.06, 0.09, 1 }
     self.mouse_position = { x = 0, y = 0 }
     self.tech_selection_ui = nil
     self.assignment_ui = nil
+    self.prompt_ui = nil
 
     local player = create_player_combatant()
     local enemy = create_enemy_combatant()
@@ -5300,19 +5358,6 @@ function CombatState:update_mouse_position(x, y)
     end
 end
 
-function CombatState:is_text_input_active()
-    if not (self.engine and self.engine:needs_input()) then
-        return false
-    end
-
-    local metadata = self.engine:get_pending_input_metadata()
-    if metadata and metadata.type == "tech_select_phase" then
-        return false
-    end
-
-    return true
-end
-
 function CombatState:build_tech_selection_context(metadata)
     if not metadata then
         return nil
@@ -5344,7 +5389,7 @@ function CombatState:build_tech_selection_context(metadata)
 
     for option_index, option in ipairs(metadata.options or {}) do
         local tech = option.tech or option
-        local body_part = option.body_part or (tech and tech._source_part) or nil
+        local body_part = option.body_part or option.source_part or nil
         local part_view = body_part and self:get_body_part_view(body_part) or nil
 
         local entry = nil
@@ -5810,6 +5855,7 @@ function CombatState:update_interactive_input()
     if not self.engine then
         self.tech_selection_ui = nil
         self.assignment_ui = nil
+        self.prompt_ui = nil
         return
     end
 
@@ -5817,15 +5863,16 @@ function CombatState:update_interactive_input()
     if not (self.engine:needs_input() and metadata) then
         self.tech_selection_ui = nil
         self.assignment_ui = nil
+        self.prompt_ui = nil
         return
     end
 
     if metadata.type == "tech_select_phase" then
         self.assignment_ui = nil
+        self.prompt_ui = nil
 
         if not self.tech_selection_ui or self.tech_selection_ui.metadata ~= metadata then
             self.tech_selection_ui = self:build_tech_selection_context(metadata)
-            self.input_buffer = ""
         end
 
         if not self.tech_selection_ui then
@@ -5841,6 +5888,7 @@ function CombatState:update_interactive_input()
 
     if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
         self.tech_selection_ui = nil
+        self.prompt_ui = nil
 
         if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
             self.assignment_ui = self:build_assignment_context(metadata)
@@ -5858,8 +5906,23 @@ function CombatState:update_interactive_input()
         return
     end
 
+    if metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select" then
+        self.tech_selection_ui = nil
+        self.assignment_ui = nil
+
+        self.prompt_ui = self:build_prompt_context(metadata)
+
+        if self.prompt_ui then
+            self.prompt_ui.metadata = metadata
+            self:update_prompt_context(self.prompt_ui)
+        end
+
+        return
+    end
+
     self.tech_selection_ui = nil
     self.assignment_ui = nil
+    self.prompt_ui = nil
 end
 
 function CombatState:handle_bp_status_changed(data)
@@ -6124,6 +6187,182 @@ function CombatState:draw_dice_preview_panel(context, preview_option)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
+function CombatState:build_prompt_context(metadata)
+    if not metadata then
+        return nil
+    end
+
+    local prompt_text = self.engine and self.engine:get_input_prompt() or ""
+    local x, anchor_y, width = Layouts.get_prompt_region()
+
+    local built_options = {}
+    local layout = "vertical"
+    local description = nil
+
+    if metadata.type == "crest_prompt" then
+        built_options = {
+            { label = "Yes", value = "y" },
+            { label = "No", value = "n" }
+        }
+        layout = "horizontal"
+        description = "Choose whether to expend a crest this round."
+    elseif metadata.type == "crest_select" then
+        for index, option in ipairs(metadata.options or {}) do
+            local name = option.name or option.id or ("Option " .. index)
+            local count = tonumber(option.count) or 0
+            table.insert(built_options, {
+                label = name,
+                subtitle = string.format("Available: %d", count),
+                value = tostring(option.index or index),
+                payload = option
+            })
+        end
+        description = "Select a crest to expend."
+    elseif metadata.type == "crest_target_select" then
+        for index, option in ipairs(metadata.options or {}) do
+            local name = option.name or option.id or ("Target " .. index)
+            local subtitle_parts = {}
+            if option.status and option.status ~= "" then
+                local status_text = tostring(option.status)
+                status_text = status_text:gsub("^%l", string.upper)
+                table.insert(subtitle_parts, status_text)
+            end
+            local toughness_value = tonumber(option.toughness)
+            if toughness_value and toughness_value >= 0 then
+                table.insert(subtitle_parts, "Toughness " .. tostring(toughness_value))
+            end
+            local subtitle = table.concat(subtitle_parts, " • ")
+            table.insert(built_options, {
+                label = name,
+                subtitle = subtitle ~= "" and subtitle or nil,
+                value = tostring(option.index or index),
+                payload = option
+            })
+        end
+        description = "Select a body part to shroud."
+    else
+        return nil
+    end
+
+    if #built_options == 0 then
+        return nil
+    end
+
+    local button_height = PROMPT_BUTTON_HEIGHT
+    local button_width = math.min(360, width - 64)
+    local button_area_height = button_height
+
+    if layout == "horizontal" then
+        local available_width = width - 48
+        button_width = math.min(PROMPT_BUTTON_WIDTH, (available_width - (#built_options - 1) * PROMPT_BUTTON_SPACING) / #built_options)
+        if button_width <= 0 then
+            button_width = available_width / math.max(1, #built_options)
+        end
+        button_area_height = button_height
+    else
+        button_area_height = #built_options * button_height + (#built_options - 1) * PROMPT_BUTTON_SPACING
+    end
+
+    local panel_height = PROMPT_PANEL_HEADER + button_area_height + PROMPT_PANEL_BOTTOM_PADDING
+    local panel_y = anchor_y - panel_height - 24
+    if panel_y < 40 then
+        panel_y = 40
+    end
+
+    local context = {
+        metadata = metadata,
+        prompt_text = prompt_text,
+        description = description,
+        buttons = {},
+        layout = layout,
+        panel = { x = x, y = panel_y, w = width, h = panel_height },
+        hovered_button = nil
+    }
+
+    if layout == "horizontal" then
+        local available_width = width - 48
+        local total_width = #built_options * button_width + (#built_options - 1) * PROMPT_BUTTON_SPACING
+        if total_width > available_width then
+            button_width = (available_width - (#built_options - 1) * PROMPT_BUTTON_SPACING) / #built_options
+            total_width = #built_options * button_width + (#built_options - 1) * PROMPT_BUTTON_SPACING
+        end
+        local start_x = x + (width - total_width) * 0.5
+        local button_y = context.panel.y + PROMPT_PANEL_HEADER
+
+        for index, option in ipairs(built_options) do
+            local bx = start_x + (index - 1) * (button_width + PROMPT_BUTTON_SPACING)
+            context.buttons[index] = {
+                label = option.label,
+                subtitle = option.subtitle,
+                value = option.value,
+                option = option.payload,
+                rect = { x = bx, y = button_y, w = button_width, h = button_height }
+            }
+        end
+    else
+        button_width = math.min(380, width - 64)
+        local start_x = x + (width - button_width) * 0.5
+        local start_y = context.panel.y + PROMPT_PANEL_HEADER
+
+        for index, option in ipairs(built_options) do
+            local by = start_y + (index - 1) * (button_height + PROMPT_BUTTON_SPACING)
+            context.buttons[index] = {
+                label = option.label,
+                subtitle = option.subtitle,
+                value = option.value,
+                option = option.payload,
+                rect = { x = start_x, y = by, w = button_width, h = button_height }
+            }
+        end
+    end
+
+    return context
+end
+
+function CombatState:update_prompt_context(context)
+    if not context then
+        return
+    end
+
+    local mx = self.mouse_position and self.mouse_position.x or 0
+    local my = self.mouse_position and self.mouse_position.y or 0
+
+    context.mouse_x = mx
+    context.mouse_y = my
+    context.hovered_button = nil
+
+    for _, button in ipairs(context.buttons or {}) do
+        if point_in_rect(mx, my, button.rect) then
+            context.hovered_button = button
+            break
+        end
+    end
+end
+
+function CombatState:draw_prompt_ui(context)
+    if not context or not context.panel then
+        return
+    end
+
+    local panel = context.panel
+
+    draw_panel_background(panel.x, panel.y, panel.w, panel.h)
+
+    love.graphics.setColor(1, 1, 1, 0.96)
+    love.graphics.printf(context.prompt_text or "", panel.x + 18, panel.y + 16, panel.w - 36, "center")
+
+    if context.description and context.description ~= "" then
+        love.graphics.setColor(0.82, 0.9, 1, 0.85)
+        love.graphics.printf(context.description, panel.x + 18, panel.y + 44, panel.w - 36, "center")
+    end
+
+    love.graphics.setColor(1, 1, 1, 1)
+
+    for _, button in ipairs(context.buttons or {}) do
+        draw_prompt_button(button, context.hovered_button == button)
+    end
+end
+
 function CombatState:draw_tech_selection_ui(context)
     if not context or not context.active then
         return
@@ -6326,12 +6565,17 @@ function CombatState:draw()
             love.graphics.setColor(0.82, 0.9, 1, 0.85)
             love.graphics.printf("Drag a defense die onto one of your body parts.", x, y + 20, width, "center")
             love.graphics.setColor(1, 1, 1, 1)
+        elseif metadata and (metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select") then
+            if self.prompt_ui then
+                self:draw_prompt_ui(self.prompt_ui)
+            else
+                love.graphics.setColor(1, 1, 1, 0.95)
+                love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
+                love.graphics.setColor(1, 1, 1, 1)
+            end
         else
-            love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "left")
-            love.graphics.printf("> " .. (self.input_buffer or ""), x, y + 18, width, "left")
-            love.graphics.setColor(1, 1, 1, 0.3)
-            love.graphics.rectangle("line", x - 4, y - 6, width + 8, 36)
+            love.graphics.setColor(1, 1, 1, 0.95)
+            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
             love.graphics.setColor(1, 1, 1, 1)
         end
     else
@@ -6370,7 +6614,6 @@ function CombatState:mousepressed(x, y, button)
         if context.hovered_option and context.hovered_option.selection_index then
             self.engine:provide_input(context.hovered_option.selection_index)
             self.tech_selection_ui = nil
-            self.input_buffer = ""
         end
 
         return
@@ -6388,6 +6631,22 @@ function CombatState:mousepressed(x, y, button)
             self.assignment_ui.mouse_x = x
             self.assignment_ui.mouse_y = y
             self:handle_assignment_mousepressed(self.assignment_ui, x, y)
+        end
+
+        return
+    end
+
+    if metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select" then
+        self.prompt_ui = self:build_prompt_context(metadata)
+
+        if self.prompt_ui then
+            self.prompt_ui.metadata = metadata
+            self:update_prompt_context(self.prompt_ui)
+            local hovered = self.prompt_ui.hovered_button
+            if hovered and hovered.value then
+                self.engine:provide_input(hovered.value)
+                self.prompt_ui = nil
+            end
         end
 
         return
@@ -6429,29 +6688,6 @@ end
 function CombatState:keypressed(key)
     if key == "escape" then
         GameState.switch(require("states.overworld"))
-        return
-    end
-
-    if key == "return" or key == "kpenter" then
-        if self:is_text_input_active() then
-            self.engine:provide_input(self.input_buffer or "")
-            self.input_buffer = ""
-        end
-    elseif key == "backspace" then
-        if self:is_text_input_active() and self.input_buffer and #self.input_buffer > 0 then
-            local byteoffset = utf8.offset(self.input_buffer, -1)
-            if byteoffset then
-                self.input_buffer = self.input_buffer:sub(1, byteoffset - 1)
-            else
-                self.input_buffer = ""
-            end
-        end
-    end
-end
-
-function CombatState:textinput(text)
-    if self:is_text_input_active() then
-        self.input_buffer = (self.input_buffer or "") .. text
     end
 end
 
