@@ -2091,30 +2091,12 @@ function CombatState:mousereleased(x, y, button)
         return
     end
 
-    if not (self.engine and self.engine:needs_input()) then
-        return
-    end
-
-    local metadata = self.engine:get_pending_input_metadata()
-    if not metadata then
-        return
-    end
-
     self:update_mouse_position(x, y)
 
-    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
-        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
-            self.assignment_ui = self:build_assignment_context(metadata)
-            if self.assignment_ui then
-                self.assignment_ui.metadata = metadata
-            end
-        end
-
-        if self.assignment_ui then
-            self.assignment_ui.mouse_x = x
-            self.assignment_ui.mouse_y = y
-            self:handle_assignment_mousereleased(self.assignment_ui, x, y)
-        end
+    if self.assignment_ui then
+        self.assignment_ui.mouse_x = x
+        self.assignment_ui.mouse_y = y
+        self:handle_assignment_mousereleased(self.assignment_ui, x, y)
     end
 end
 
