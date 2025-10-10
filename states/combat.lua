@@ -15,6 +15,7 @@ local TECH_CARD_HEIGHT = 72
 local TECH_CARD_SPACING = 10
 local TECH_CARD_GAP = 20
 local TECH_CARD_CORNER_RADIUS = 12
+local TECH_FAN_STICKY_MARGIN = 28
 
 local PANEL_CORNER_RADIUS = 14
 local PANEL_SPACING = 14
@@ -707,9 +708,11 @@ function CombatState:build_tech_selection_context(metadata)
         parts_by_view = {},
         hovered_part_entry = nil,
         hovered_option = nil,
+        active_part_entry = nil,
         preview_option = nil,
         mouse_x = self.mouse_position and self.mouse_position.x or 0,
         mouse_y = self.mouse_position and self.mouse_position.y or 0,
+        sticky_margin = TECH_FAN_STICKY_MARGIN,
         active = true
     }
 
@@ -1135,6 +1138,46 @@ function CombatState:update_tech_card_layout(context, entry)
         option.card_rect.w = TECH_CARD_WIDTH
         option.card_rect.h = TECH_CARD_HEIGHT
     end
+
+    local min_x, min_y, max_x, max_y
+
+    if entry.rect then
+        min_x = entry.rect.x
+        min_y = entry.rect.y
+        max_x = entry.rect.x + entry.rect.w
+        max_y = entry.rect.y + entry.rect.h
+    end
+
+    for _, option in ipairs(entry.options) do
+        local rect = option.card_rect
+        if rect then
+            if not min_x or rect.x < min_x then
+                min_x = rect.x
+            end
+            if not min_y or rect.y < min_y then
+                min_y = rect.y
+            end
+            local rect_max_x = rect.x + rect.w
+            local rect_max_y = rect.y + rect.h
+            if not max_x or rect_max_x > max_x then
+                max_x = rect_max_x
+            end
+            if not max_y or rect_max_y > max_y then
+                max_y = rect_max_y
+            end
+        end
+    end
+
+    if min_x and min_y and max_x and max_y then
+        local margin = context.sticky_margin or TECH_FAN_STICKY_MARGIN
+        entry.sticky_bounds = entry.sticky_bounds or {}
+        entry.sticky_bounds.x = min_x - margin
+        entry.sticky_bounds.y = min_y - margin
+        entry.sticky_bounds.w = (max_x - min_x) + margin * 2
+        entry.sticky_bounds.h = (max_y - min_y) + margin * 2
+    else
+        entry.sticky_bounds = nil
+    end
 end
 
 function CombatState:evaluate_tech_selection_hover(context)
@@ -1169,17 +1212,44 @@ function CombatState:evaluate_tech_selection_hover(context)
         end
     end
 
-    if context.hovered_part_entry then
-        self:update_tech_card_layout(context, context.hovered_part_entry)
+    local active_entry = context.active_part_entry
 
-        for _, option in ipairs(context.hovered_part_entry.options) do
+    if context.hovered_part_entry then
+        active_entry = context.hovered_part_entry
+    end
+
+    if active_entry then
+        self:update_tech_card_layout(context, active_entry)
+    end
+
+    local hovered_option = nil
+    local within_card_fan = false
+
+    if active_entry then
+        for _, option in ipairs(active_entry.options) do
             if point_in_rect(mx, my, option.card_rect) then
-                context.hovered_option = option
+                hovered_option = option
+                within_card_fan = true
                 break
             end
         end
+    end
 
-        context.preview_option = context.hovered_option or context.hovered_part_entry.options[1]
+    local within_sticky_bounds = false
+    if active_entry and active_entry.sticky_bounds then
+        within_sticky_bounds = point_in_rect(mx, my, active_entry.sticky_bounds)
+    end
+
+    if not context.hovered_part_entry and active_entry and not within_card_fan and not within_sticky_bounds then
+        active_entry = nil
+        hovered_option = nil
+    end
+
+    context.active_part_entry = active_entry
+    context.hovered_option = hovered_option
+
+    if context.active_part_entry then
+        context.preview_option = context.hovered_option or context.active_part_entry.options[1]
     else
         context.preview_option = nil
     end
@@ -1702,10 +1772,11 @@ function CombatState:draw_tech_selection_ui(context)
         return
     end
 
-    if context.hovered_part_entry then
-        self:update_tech_card_layout(context, context.hovered_part_entry)
+    local entry = context.active_part_entry or context.hovered_part_entry
+    if entry then
+        self:update_tech_card_layout(context, entry)
 
-        for _, option in ipairs(context.hovered_part_entry.options) do
+        for _, option in ipairs(entry.options) do
             draw_tech_card(option, context.hovered_option == option)
         end
     end
