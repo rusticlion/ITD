@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-10-09 22:19 UTC_
+_Generated on 2025-10-10 18:20 UTC_
 
 ## AGENTS.md
 
@@ -2357,7 +2357,7 @@ return States
 function love.conf(t)
     t.window.title = "Into the Dreamlands"
     t.window.width = 800
-    t.window.height = 608
+    t.window.height = 768
     t.console = true
 end
 
@@ -4590,6 +4590,47 @@ UI State Management: The UI will need its own state variables to manage the drag
 Clear Affordances: Use visual cues (highlighting, glowing outlines) to clearly show the player which targets are valid drop zones for the die they are currently dragging.
 ```
 
+## docs/tickets/S5_InteractiveCombatLoop/T5_3_ResolveUILayoutOverlap.md
+
+```markdown
+Resolve UI Layout Overlap
+Goal: Adjust the screen resolution and UI layout anchoring to eliminate the visual overlap between the central UI panels (Tech/Dice Preview) and the combatants' anatomical displays, creating a clean and readable combat screen.
+Tasks:
+Increase Screen Resolution: In conf.lua, increase the vertical resolution of the game window. Change t.window.height from 608 to 768 to provide more vertical space for the UI elements.
+Adjust Anatomical Display Anchors: In ui/layouts.lua, modify the get_anchor function. The goal is to shift the vertical center of the combatant displays higher on the screen. Change the line local center_y = height * 0.45 to local center_y = height * 0.40.
+Verify All Layouts: After making the changes, run the combat state and ensure all layout calculations in ui/layouts.lua (for body parts, nameplates, heart points, crests) are still positioned correctly relative to the new anchor point.
+Deliverables:
+The game window now opens with a 800x768 resolution.
+The combatant displays are visibly shifted higher on the screen.
+There is a clear, empty space between the lowest body parts and the UI panels at the bottom of the screen, with no visual overlap at any stage of combat.
+Design Notes/Pitfalls:
+The "Why": The original layout failed because it mixed two anchoring strategies without enough space: the combatants were anchored to the vertical center, while the UI panels were anchored to the bottom. By increasing the space and shifting the center anchor up, we are creating dedicated zones for each, which is a much more robust layout strategy.
+Magic Numbers: Continue to ensure that all layout calculations are done within ui/layouts.lua. The states/combat.lua file should remain free of hardcoded coordinates. This fix should only require changes in conf.lua and ui/layouts.lua.
+```
+
+## docs/tickets/S5_InteractiveCombatLoop/T5_4_ImplementRobustTechSelection.md
+
+```markdown
+ Implement Robust Tech Selection Interaction
+Goal: Fix the bug preventing Tech card selection by refactoring the UI's hover and click logic. The system should allow a player to move their mouse from a body part onto its "fan" of Tech cards and click one without the fan disappearing.
+Tasks:
+Refactor UI State: In states/combat.lua, modify the build_tech_selection_context function. The context it builds (stored in self.tech_selection_ui) needs a new field to track the currently "active" fan of cards, e.g., context.active_part_entry.
+Update Hover Logic: Modify the evaluate_tech_selection_hover function.
+When the mouse is over a new body part, set that part's entry as the active_part_entry.
+The logic that calculates the layout for the Tech cards (update_tech_card_layout) should now be called for the active_part_entry, not just the hovered_part_entry.
+The draw_tech_selection_ui function must be updated to draw the cards for the active_part_entry so they remain visible.
+Implement Clearing Logic: The active_part_entry should only be set to nil when the mouse moves a significant distance away from both the active body part and its fan of cards. This prevents the fan from vanishing the moment the cursor leaves the body part's rectangle.
+Verify Click Logic: In love.mousepressed (within CombatState), ensure the check for a context.hovered_option now works correctly, as it will be continuously updated against the visible fan of cards.
+Deliverables:
+Hovering over a player body part causes its fan of Tech cards to appear and stay visible.
+The player can then move their mouse off the body part and onto one of the displayed Tech cards.
+The card being hovered is highlighted.
+Clicking a highlighted Tech card successfully provides the input to the engine and advances the combat state.
+Design Notes/Pitfalls:
+State Decoupling: This fix is a practical lesson in UI state management. We are decoupling the "currently open menu" (active_part_entry) from the "currently highlighted button" (hovered_option). This is a common and essential pattern for creating non-frustrating user interfaces.
+"Stickiness": The trickiest part will be determining the "stickiness" of the active card fan. A simple solution is to define a larger bounding box around the body part and its card fan; as long as the mouse is within this larger box, the active_part_entry remains. If the mouse leaves this box, clear it.
+```
+
 ## docs/tickets/S6_Polish+Animation+Clarity/T6_1_AnimatedResolutionSequence.md
 
 ```markdown
@@ -4681,6 +4722,7 @@ local TECH_CARD_HEIGHT = 72
 local TECH_CARD_SPACING = 10
 local TECH_CARD_GAP = 20
 local TECH_CARD_CORNER_RADIUS = 12
+local TECH_FAN_STICKY_MARGIN = 28
 
 local PANEL_CORNER_RADIUS = 14
 local PANEL_SPACING = 14
@@ -5373,9 +5415,11 @@ function CombatState:build_tech_selection_context(metadata)
         parts_by_view = {},
         hovered_part_entry = nil,
         hovered_option = nil,
+        active_part_entry = nil,
         preview_option = nil,
         mouse_x = self.mouse_position and self.mouse_position.x or 0,
         mouse_y = self.mouse_position and self.mouse_position.y or 0,
+        sticky_margin = TECH_FAN_STICKY_MARGIN,
         active = true
     }
 
@@ -5801,6 +5845,46 @@ function CombatState:update_tech_card_layout(context, entry)
         option.card_rect.w = TECH_CARD_WIDTH
         option.card_rect.h = TECH_CARD_HEIGHT
     end
+
+    local min_x, min_y, max_x, max_y
+
+    if entry.rect then
+        min_x = entry.rect.x
+        min_y = entry.rect.y
+        max_x = entry.rect.x + entry.rect.w
+        max_y = entry.rect.y + entry.rect.h
+    end
+
+    for _, option in ipairs(entry.options) do
+        local rect = option.card_rect
+        if rect then
+            if not min_x or rect.x < min_x then
+                min_x = rect.x
+            end
+            if not min_y or rect.y < min_y then
+                min_y = rect.y
+            end
+            local rect_max_x = rect.x + rect.w
+            local rect_max_y = rect.y + rect.h
+            if not max_x or rect_max_x > max_x then
+                max_x = rect_max_x
+            end
+            if not max_y or rect_max_y > max_y then
+                max_y = rect_max_y
+            end
+        end
+    end
+
+    if min_x and min_y and max_x and max_y then
+        local margin = context.sticky_margin or TECH_FAN_STICKY_MARGIN
+        entry.sticky_bounds = entry.sticky_bounds or {}
+        entry.sticky_bounds.x = min_x - margin
+        entry.sticky_bounds.y = min_y - margin
+        entry.sticky_bounds.w = (max_x - min_x) + margin * 2
+        entry.sticky_bounds.h = (max_y - min_y) + margin * 2
+    else
+        entry.sticky_bounds = nil
+    end
 end
 
 function CombatState:evaluate_tech_selection_hover(context)
@@ -5835,17 +5919,44 @@ function CombatState:evaluate_tech_selection_hover(context)
         end
     end
 
-    if context.hovered_part_entry then
-        self:update_tech_card_layout(context, context.hovered_part_entry)
+    local active_entry = context.active_part_entry
 
-        for _, option in ipairs(context.hovered_part_entry.options) do
+    if context.hovered_part_entry then
+        active_entry = context.hovered_part_entry
+    end
+
+    if active_entry then
+        self:update_tech_card_layout(context, active_entry)
+    end
+
+    local hovered_option = nil
+    local within_card_fan = false
+
+    if active_entry then
+        for _, option in ipairs(active_entry.options) do
             if point_in_rect(mx, my, option.card_rect) then
-                context.hovered_option = option
+                hovered_option = option
+                within_card_fan = true
                 break
             end
         end
+    end
 
-        context.preview_option = context.hovered_option or context.hovered_part_entry.options[1]
+    local within_sticky_bounds = false
+    if active_entry and active_entry.sticky_bounds then
+        within_sticky_bounds = point_in_rect(mx, my, active_entry.sticky_bounds)
+    end
+
+    if not context.hovered_part_entry and active_entry and not within_card_fan and not within_sticky_bounds then
+        active_entry = nil
+        hovered_option = nil
+    end
+
+    context.active_part_entry = active_entry
+    context.hovered_option = hovered_option
+
+    if context.active_part_entry then
+        context.preview_option = context.hovered_option or context.active_part_entry.options[1]
     else
         context.preview_option = nil
     end
@@ -6368,10 +6479,11 @@ function CombatState:draw_tech_selection_ui(context)
         return
     end
 
-    if context.hovered_part_entry then
-        self:update_tech_card_layout(context, context.hovered_part_entry)
+    local entry = context.active_part_entry or context.hovered_part_entry
+    if entry then
+        self:update_tech_card_layout(context, entry)
 
-        for _, option in ipairs(context.hovered_part_entry.options) do
+        for _, option in ipairs(entry.options) do
             draw_tech_card(option, context.hovered_option == option)
         end
     end
@@ -7431,7 +7543,7 @@ local function get_anchor(side)
     local height = love.graphics.getHeight()
 
     local center_x = width * (side == "right" and 0.72 or 0.28)
-    local center_y = height * 0.45
+    local center_y = height * 0.40
 
     return center_x, center_y
 end
