@@ -116,7 +116,7 @@ local function get_anchor(side)
     local height = love.graphics.getHeight()
 
     local center_x = width * (side == "right" and 0.72 or 0.28)
-    local center_y = height * 0.45
+    local center_y = height * 0.40
 
     return center_x, center_y
 end
