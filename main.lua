@@ -2,10 +2,23 @@ local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Overworld = require("states.overworld")
 
+local function has_launch_arg(name)
+    for _, value in ipairs(arg or {}) do
+        if value == name then
+            return true
+        end
+    end
+    return false
+end
+
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     Assets:load()
-    GameState.switch(Overworld)
+    if has_launch_arg("--v2-combat") then
+        GameState.switch(require("states.v2_combat"))
+    else
+        GameState.switch(Overworld)
+    end
 end
 
 function love.update(dt)

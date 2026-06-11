@@ -25,6 +25,9 @@ end
 
 function Overworld:keypressed(key)
     if key == "c" then
+        GameState.switch(require("states.v2_combat"))
+        return
+    elseif key == "v" then
         GameState.switch(require("states.combat"))
         return
     elseif key == "space" then

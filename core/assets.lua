@@ -2,6 +2,7 @@ local Assets = {
     images = {},
     directories = {
         "assets/sprites/bodyparts",
+        "assets/sprites/combat",
         "assets/sprites/icons",
     }
 }

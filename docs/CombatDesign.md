@@ -1,6 +1,6 @@
-# Into the Dreamlands — Combat Design Document v2.1
+# Into the Dreamlands — Combat Design Document v2.2
 **The Symbol Dice System**
-*Drafted June 2026. Supersedes v1 (numeric dice / Tech-Action model). v2.1 clarifies destination capacity, mixed-symbol validity, immediate Spend timing, and the initial crest prototype set.*
+*Drafted June 2026. Supersedes v1 (numeric dice / Tech-Action model). v2.2 clarifies destination capacity, mixed-symbol validity, immediate Spend timing, the initial crest prototype set, and the Lua content definition shape.*
 
 ---
 
@@ -74,6 +74,28 @@ Each Body Part defines:
 | Overworld tags | STRONG, SCHOLARLY, etc. **Never displayed in combat.** Drives exploration interactions and resonance. |
 
 The v1 concepts of **Toughness** (dissolved into die composition and the rare Armored keyword) and **Techs** (collapsed into slots) no longer exist.
+
+### 3.1 Combat Content Definitions
+
+Prototype combat content lives in Lua table modules under `data/combat/`. The engine does not construct ad hoc parts directly; content definitions pass through `combat/v2_content.lua`, which validates references and builds runtime `BodyPart` / `Combatant` objects.
+
+Each content module returns three top-level tables:
+
+| Table | Purpose |
+|---|---|
+| `slots` | Reusable named slot definitions: `id`, `name`, `cost`, `timing`, `effect`. |
+| `parts` | Body Part definitions: `id`, `name`, `type`, `hp_value`, `die`, optional `slot`, optional `keywords`, optional overworld `tags`. |
+| `loadouts` | Combatant assembly definitions: `id`, `name`, optional `is_player`, optional `crest_pool`, and ordered `parts`. |
+
+Authoring rules:
+
+- A die must define exactly 6 faces. Each face may be a symbol string (`"strike"`) or a list (`{ "strike", "ward" }`).
+- `wound_faces` and `maim_faces` are face-index lists, 1–6.
+- A part's `slot` may be a key into `slots` or an inline slot table.
+- A loadout's `parts` order is also its first-pass panel order in the current UI prototype. The UI reserves six fixed card slots per combatant.
+- Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, and loadouts pointing at unknown parts.
+
+The first live example is `data/combat/v2_demo_parts.lua`. Keep it intentionally tiny: it exists to validate the pattern, not to balance real content.
 
 ---
 
@@ -202,4 +224,4 @@ Testable with blank dice + stickers (or d6s + lookup cards), index cards per par
 
 ---
 
-*Companion document: `itd-combat-presentation-spec.md` — UI, shape grammar, animation choreography, art pipeline.*
+*Companion document: `docs/CombatPresentation.md` — UI, shape grammar, animation choreography, art pipeline.*

@@ -853,17 +853,21 @@ function Engine:get_valid_destinations(combatant, die_or_id)
 
     for _, part in ipairs(combatant.body_parts or {}) do
         if part:is_slot_online() then
+            local matched = false
             local cost = slot_cost(part.slot)
             for _, symbol in ipairs(effective) do
                 for index, required in ipairs(cost) do
                     if not (part.slot_charge and part.slot_charge[index]) and (part:has_keyword("Hungry") or part.slot.hungry or required == symbol) then
                         table.insert(destinations.slots, part)
-                        goto next_part
+                        matched = true
+                        break
                     end
+                end
+                if matched then
+                    break
                 end
             end
         end
-        ::next_part::
     end
 
     return destinations
@@ -884,6 +888,7 @@ function Engine:auto_allocate(combatant)
 
     for _, die in ipairs(pool_snapshot) do
         if self:find_die(combatant, die.id) then
+            local assigned = false
             local effective = self:get_effective_symbols(combatant, die)
 
             if Symbols.has(effective, Symbols.STRIKE) and opponent then
@@ -891,27 +896,28 @@ function Engine:auto_allocate(combatant)
                     return is_part_targetable(self, part) and not self.assignments.rims[part]
                 end)
                 if target and self:assign_die_to_rim(combatant, die.id, target) then
-                    goto continue
+                    assigned = true
                 end
             end
 
-            if Symbols.has(effective, Symbols.WARD) then
+            if not assigned and Symbols.has(effective, Symbols.WARD) then
                 local target = first_available_part(combatant.body_parts, function(part)
                     return part.status ~= "maimed" and not self.assignments.sockets[part]
                 end)
                 if target and self:assign_die_to_socket(combatant, die.id, target) then
-                    goto continue
+                    assigned = true
                 end
             end
 
-            for _, part in ipairs(combatant.body_parts or {}) do
-                if self:feed_die_to_slot(combatant, die.id, part) then
-                    goto continue
+            if not assigned then
+                for _, part in ipairs(combatant.body_parts or {}) do
+                    if self:feed_die_to_slot(combatant, die.id, part) then
+                        assigned = true
+                        break
+                    end
                 end
             end
         end
-
-        ::continue::
     end
 end
 

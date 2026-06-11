@@ -1,121 +1,14 @@
 local Engine = require("combat.v2_engine")
 local Events = require("combat.events")
-local Combatant = require("combat.combatant")
 local Symbols = require("core.symbols")
+local Demo = require("combat.v2_demo")
 
 math.randomseed(20260611)
-
-local function face(symbols)
-    return symbols
-end
-
-local function fixed_die(symbols, wound_faces, maim_faces)
-    return {
-        faces = {
-            face(symbols),
-            face(symbols),
-            face(symbols),
-            face(symbols),
-            face(symbols),
-            face(symbols)
-        },
-        wound_faces = wound_faces or { 1, 2 },
-        maim_faces = maim_faces or { 3, 4 }
-    }
-end
 
 local function assert_true(condition, message)
     if not condition then
         error(message or "assertion failed", 2)
     end
-end
-
-local function create_demo_combatants()
-    local insight_slot = {
-        id = "insight",
-        name = "Insight",
-        cost = { Symbols.ESSENCE },
-        timing = "spend",
-        effect = {
-            type = "gain_crest",
-            crest = "Valor",
-            amount = 1
-        }
-    }
-
-    local player = Combatant:new({
-        id = "player",
-        name = "Dreamer",
-        is_player = true,
-        crest_pool = {
-            Valor = 1,
-            Shadow = 1
-        }
-    })
-
-    player:add_body_part({
-        id = "player_head",
-        name = "Lucid Head",
-        type = "HEAD",
-        hp_value = 1,
-        die = fixed_die({ Symbols.WARD })
-    })
-
-    player:add_body_part({
-        id = "player_cleaver",
-        name = "Butcher's Cleaver Arm",
-        type = "ARM",
-        hp_value = 1,
-        die = fixed_die({ Symbols.STRIKE, Symbols.STRIKE })
-    })
-
-    player:add_body_part({
-        id = "player_scholar",
-        name = "Scholar's Hand",
-        type = "ARM",
-        hp_value = 1,
-        die = fixed_die({ Symbols.ESSENCE }),
-        slot = insight_slot
-    })
-
-    player:add_body_part({
-        id = "player_mixed",
-        name = "Hedging Palm",
-        type = "ARM",
-        hp_value = 1,
-        die = fixed_die({ Symbols.STRIKE, Symbols.WARD })
-    })
-
-    local enemy = Combatant:new({
-        id = "enemy",
-        name = "Nightmare"
-    })
-
-    enemy:add_body_part({
-        id = "enemy_head",
-        name = "Glass Head",
-        type = "HEAD",
-        hp_value = 1,
-        die = fixed_die({ Symbols.WARD }, { 1, 2, 3, 4, 5, 6 }, {})
-    })
-
-    enemy:add_body_part({
-        id = "enemy_body",
-        name = "Brittle Body",
-        type = "BODY",
-        hp_value = 1,
-        die = fixed_die({ Symbols.BLANK })
-    })
-
-    enemy:add_body_part({
-        id = "enemy_claw",
-        name = "Gnarled Claw",
-        type = "ARM",
-        hp_value = 1,
-        die = fixed_die({ Symbols.STRIKE })
-    })
-
-    return player, enemy
 end
 
 local function die_for(engine, combatant, part_id)
@@ -195,7 +88,10 @@ local function log_events(engine)
 end
 
 local function run()
-    local player, enemy = create_demo_combatants()
+    local content_errors = Demo.validate()
+    assert_true(#content_errors == 0, table.concat(content_errors, "\n"))
+
+    local player, enemy = Demo.create_combatants()
     local engine = Engine:new()
 
     log_events(engine)
