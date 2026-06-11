@@ -1,248 +1,205 @@
-Combat Design Document
-Into the Dreamlands
-Core Philosophy
-Combat is a strategic puzzle about resource management and calculated risk. Every decision should feel meaningful, with no optimal strategy that works in all situations. Players succeed through understanding system interactions, not grinding or RNG luck.
+# Into the Dreamlands — Combat Design Document v2.1
+**The Symbol Dice System**
+*Drafted June 2026. Supersedes v1 (numeric dice / Tech-Action model). v2.1 clarifies destination capacity, mixed-symbol validity, immediate Spend timing, and the initial crest prototype set.*
 
-1. COMBAT STRUCTURE
-1.1 Participants
+---
 
-Two combatants: Player vs Enemy (1v1 only)
-Each combatant consists of 6 Body Parts maximum
-Each combatant has 3 Heart Points
-Combat ends when one combatant reaches 0 Heart Points
+## 0. The Index Card
 
-1.2 Round Structure
-Each round proceeds through these phases in strict order:
+The complete universal ruleset. Everything else in this document is content, exception, or elaboration.
 
-Upkeep Phase
+1. Each combatant is up to 6 Body Parts and 3 Hearts. Maiming a part costs its owner that part's Heart value. 0 Hearts = defeat.
+2. Each Body Part carries one symbol die. Every round, all dice are rolled into the owner's pool.
+3. During Allocation, each die goes to exactly one destination:
+   - **Socket** (own part; capacity 1) — accepts a die showing at least one 🛡️; its 🛡️ defend that part.
+   - **Rim** (enemy part; capacity 1) — accepts a die showing at least one 🗡️; its 🗡️ attack that part.
+   - **Slot** (any number of dice) — accepts a die only if at least one shown symbol lights an unfilled cost pip; the die is consumed; surplus symbols are lost.
+4. A die travels whole. Mixed-symbol faces are legal if any shown symbol is relevant to the destination; irrelevant symbols burn off. Unallocated dice are lost.
+5. At Resolution, per part: if assigned 🗡️ exceed assigned 🛡️, the part takes one damage step (Healthy → Wounded → Maimed).
+6. A slot triggers automatically the moment its cost track fills, enqueued FIFO, resolving at its declared timing window. Wounding a part vents its slot's charge. Maiming takes the slot offline.
+7. Initiative governs allocation visibility (see §5). The player has initiative by default.
 
-Trigger start-of-round effects
-Expire end-of-round effects from previous round
-Process passive crest effects
+---
 
+## 1. Core Philosophy
 
-Tech Selection Phase
+Combat is a strategic puzzle about reading a position and spending a hand of dice. Resolution is counting, not arithmetic. Depth lives in allocation decisions, slot timing, and target selection — never in rules text. **Universal rules stay on the index card; everything expressive lives in content** (dice layouts, slots, crests, rare keywords).
 
-Both combatants simultaneously select one Tech
-Techs come from currently equipped Body Parts
-Some Techs have requirements (must be met to select)
+Design north stars carried forward from v1: no dominant strategy, meaningful damage, calculated risk, build expression, readable complexity, failforward.
 
+---
 
-Attack Assignment Phase
+## 2. Symbols & Dice
 
-Each combatant assigns any attack rolls from their Tech to enemy Body Parts
-Multiple attacks can target the same Body Part
-Unassigned attacks are lost
+### 2.1 The Symbol Set
+| Symbol | Name | Role |
+|---|---|---|
+| 🗡️ | Strike | Offense. Assigned via rims. |
+| 🛡️ | Ward | Defense. Assigned via sockets. |
+| ⚡️ | Essence | Slot fuel; primary crest-generation vector. |
+| 🩸 | Blood | Injury byproduct. Generally inert; fuels specific slots. |
+| ⚪ | Blank | Nothing. The variance dial. |
 
+Faces may carry one, two, or (rarely) three symbols. Multi-symbol faces (🗡️🗡️, 🗡️🛡️, ⚡️⚡️) are how force concentrates under the one-die-per-destination cap, making them the premium design currency.
 
-Defense Assignment Phase
+### 2.2 The Die as Character Portrait
+Each Body Part's die is its mechanical fingerprint. Face distribution communicates personality at a glance:
 
-Each combatant assigns any defense rolls from their Tech to their own Body Parts
-Multiple defenses can protect the same Body Part
-Unassigned defenses are lost
+- Reliable defender: `[🛡️][🛡️][🛡️][🛡️][🛡️][🗡️]`
+- Glass cannon: `[🗡️🗡️🗡️][🗡️🗡️][⚪][⚪][⚪][⚪]`
+- Versatile caster: `[⚡️][⚡️][🛡️][🗡️][⚡️🛡️][⚪]`
 
+### 2.3 Degradation (🩸 Gunking)
+Each part's data **predetermines** its wound-faces and maim-faces:
 
-Resolution Phase
+- **Wounded:** two specified faces are struck and replaced with 🩸.
+- **Maimed:** two further specified faces are struck and replaced with 🩸. The part's die still rolls.
 
-Roll all dice simultaneously
-For each attack: Compare (Attack Roll + Keywords) vs (Target Toughness + Defense Roll)
-If attack exceeds threshold: Body Part takes damage
-Process damage triggers and state changes
-Apply any additional Tech effects
+The player never loses dice; their pool gunks up with blood. Degradation paths are part of the fingerprint: a part that loses its blanks first *hardens under pain*; one that loses its 🗡️🗡️ faces first is *fragile brilliance*. Authoring rule: choose struck faces to express character, and remember 🩸 output makes blood-cost slots easier to feed — wounded combatants drift toward desperate techniques.
 
+---
 
-End Phase
+## 3. Body Parts
 
-Check for combat end (either combatant at 0 HP)
-Process end-of-round effects
-Increment round counter
+Each Body Part defines:
 
+| Field | Notes |
+|---|---|
+| Name, type | HEAD / BODY / ARM ×2 / LEG ×2. Fewer than 6 parts is legal. |
+| Heart value | Hearts lost by owner when this part is maimed (1–3). |
+| Status | Healthy → Wounded → Maimed. |
+| Die | 6 faces + predetermined wound-faces and maim-faces. |
+| Slot | Usually exactly one (see §6). Zero or two are rare exceptions. |
+| Keyword | Rare. Most parts have none (see §8). |
+| Overworld tags | STRONG, SCHOLARLY, etc. **Never displayed in combat.** Drives exploration interactions and resonance. |
 
+The v1 concepts of **Toughness** (dissolved into die composition and the rare Armored keyword) and **Techs** (collapsed into slots) no longer exist.
 
+---
 
-2. BODY PARTS
-2.1 Properties
-Each Body Part has:
+## 4. Round Structure
 
-Name: Display name
-Type: HEAD, BODY, ARM (×2), LEG (×2)
-Status: Healthy → Wounded → Maimed
-Toughness: Base defense value (typically 1-4)
-HP Value: Heart Points lost when Maimed (typically 1-3)
-Techs: List of available Techs (typically 1-3)
-Tags: Properties for overworld/requirements (STRONG, SCHOLARLY, etc.)
+1. **Upkeep** — trigger/expire effects; resolve Upkeep-window queued slots; process crest passives.
+2. **Roll** — all equipped dice roll into each combatant's pool. Automatic.
+3. **Allocation** — the round's single input phase. Each combatant distributes dice to sockets, rims, and slots, and may expend crests. Visibility per initiative (§5). Ends on Confirm.
+4. **Resolution** — per contested part, compare assigned 🗡️ vs assigned 🛡️; apply damage steps; fire On-Hit and On-Wound/Maim queued slots in FIFO order; process venting and gunking.
+5. **End** — check victory; increment round.
 
-2.2 Damage States
+### 4.1 Damage
+A part is **hit** when assigned 🗡️ > assigned 🛡️ on that part. A hit advances status one step. Margin of overkill has no additional effect (open question — see §10).
 
-Healthy: Full functionality
-Wounded: Still functional, may trigger effects
-Maimed: No longer usable, owner loses HP Value in Heart Points
+---
 
-2.3 Body Part Configuration
+## 5. Initiative
 
-Combatants may have fewer than 6 Body Parts
-Body Parts must be of appropriate types (max 1 HEAD, 1 BODY, 2 ARMS, 2 LEGS)
-Empty slots are valid (combatant with only 3 Body Parts is legal)
+Initiative is a combat state governing allocation information. **The player holds initiative by default** — the tilt is deliberate: against an AI, hidden commitment is a coin flip wearing a trenchcoat; visible enemy allocation makes every round a legible puzzle.
 
+| State | Allocation visibility |
+|---|---|
+| **Player initiative** (default) | Enemy allocates first, fully visible. Player allocates with complete information. |
+| **Contested** | Hidden simultaneous allocation; reveal at Resolution. Elite encounters. |
+| **Enemy initiative** | Player commits first; enemy responds with full information. Boss phases. Oppressive; use rarely. |
 
-3. TECHS
-3.1 Structure
-Each Tech consists of:
+Game effects shift initiative: crest expends (Knowledge), enemy abilities that steal it, boss phase transitions. Difficulty escalates through information, not stat inflation. **Balance every standard encounter assuming the player sees enemy allocation**; if ordinary fights need initiative theft to threaten, the dice need sharpening instead.
 
-Name: Display name
-Actions: Ordered list of effects (see 3.2)
-Requirements: Conditions to use (see 3.3)
-Keywords: Modifiers that affect resolution
+---
 
-3.2 Action Types
+## 6. Slots
 
-Attack Roll: Roll Xd6 for attack (assigned in Attack Phase)
-Defense Roll: Roll Xd6 for defense (assigned in Defense Phase)
-Gain Crest: Add specified crest to pool
-Consume Crest: Remove specified crest from pool (requirement)
-Damage Body Part: Direct damage to specific part (no roll)
-Heal Body Part: Restore status one step
-Special Effect: Unique mechanical effect
+A slot is: **a name + a cost track of symbol pips + an effect + a timing window.**
 
-3.3 Requirements
-Techs may require:
+### 6.1 Feeding
+- During Allocation, any number of dice may be fed to a slot.
+- A fed die is consumed. Each of its symbols lights a matching unlit pip; symbols with no matching pip **burn off** (lost).
+- A feed is only legal if at least one pip would light (enforced at the affordance layer — the hatch won't open).
 
-Crests: Minimum count of specific crest type
-Body Part Status: Number of Wounded/Maimed parts
-Tags: Body Part must have specific tag
-Round Count: Only available on certain rounds
-Unique: Cannot be used if opponent uses same Tech
+### 6.2 Charge
+- Partially lit tracks **persist between rounds**. No decay.
+- No overcharge: a track cannot hold more than its cost.
+- **Mandatory trigger:** the instant the last pip lights, the slot fires — enqueued FIFO, resolving at its timing window. **Spend-window effects resolve immediately during Allocation**, before the player assigns later dice. Timing control is preserved because feeding is voluntary: hold at cost-minus-one and choose your round.
+- **Venting:** wounding a part shatters all charge on its slot (slot remains operational).
+- **Offline:** maiming a part disables its slot entirely. Wound *robs*; maim *disables*.
+- All charge resets between combats.
 
+Banked charge is self-balancing: it paints a target (the battery demands a socket every round) while the attacker allocates with that knowledge. Turtling taxes itself.
 
-4. DICE SYSTEM
-4.1 Die Types
+### 6.3 Timing Windows
+Every slot declares exactly one: **Spend** (fires immediately during Allocation), **On Hit**, **On Wound/Maim**, **Upkeep**. The engine exposes exactly these four hooks. Allocation is a sequence of committed moves, not a draft to be rewound; immediate Spend effects are allowed to modify the remaining allocation state (rerolls, symbol changes, next-die bonuses, sealed destinations, etc.).
 
-d4: Low variance (1-4), reliable
-d6: Standard die (1-6), baseline
-d8: High variance (1-8), risky
+### 6.4 Queue
+Filled slots enqueue in fill order and resolve FIFO within their window. Deliberately untutorialized — discoverable through the queue ticker.
 
-4.2 Rolling
+### 6.5 Example Slots
+- **Bloodlust** — 🗡️🗡️🗡️ · Spend · This round's attacks from this combatant gain Brutal.
+- **Hex** — ⚡️🗡️ · Spend · Target enemy part's socket is sealed this round.
+- **Insight** — ⚡️⚡️ · Spend · Gain a Knowledge crest.
+- **Last Resort** — 🩸🩸🩸 · Spend · Heal one of your parts one step. *(Blood costs come online as you bleed — the built-in comeback vector.)*
+- **Overload** *(enemy ability)* — injects a charge into one of the player's tracks, weaponizing mandatory trigger by detonating the effect on the wrong round.
 
-Roll specified number and type of dice
-Sum all results for total
-Keywords may modify results (see 5.0)
+---
 
-4.3 Attack Resolution
-Attack Success if: (Attack Roll + Attack Modifiers) > (Target Toughness + Defense Roll + Defense Modifiers)
+## 7. Crests
 
-5. KEYWORDS
-Keywords modify Tech behavior. Examples:
+Combatant-level resources held in a tray; never attached to parts; reset between combats. The beneficial/detrimental split and the expend paradigm carry forward from v1. Primary generation: ⚡️-fed slots and Resonance (overworld, capped — see v1 Resonance design, unchanged).
 
-Consistent X: Force all dice to show X
-Reliable X-Y: Dice cannot roll below X or above Y
-Piercing: Ignore X points of defense
-Brutal: +1 damage
+For the first v2 prototype, implement only enough crests to validate the pattern. Crests are the manipulation layer over dice, allocation timing, initiative, and targeting state:
 
-6. CREST SYSTEM
-6.1 Crest Types
-Beneficial (want to accumulate):
+| Crest | Expend |
+|---|---|
+| Valor | Add one 🗡️ to the next die you assign this Allocation. This may make a die rim-valid; if the die is assigned elsewhere, the added 🗡️ burns off like any irrelevant symbol. |
+| Shadow | Until the next Upkeep, whenever one of your Body Part slots activates, that Body Part becomes Untargetable. If an attack die is already latched to that part, the latch is ejected and the attack die is lost. |
+| Knowledge, Cunning | Hold for later prototypes; likely initiative/allocation manipulation. |
+| Madness, Greed, Corruption | Detrimental set: expends function as costs paid to purge. TBD. |
 
-Shadow: Defensive utility
-Valor: Offensive bonuses
-Knowledge: Information/tactical advantage
-Cunning: Flexibility/control
+Shadow is intentionally near the complexity ceiling for crest expends in the first implementation. If Shadow is readable and implementable, simpler expends should fit the model.
 
-Detrimental (want to remove):
+---
 
-Madness: Chaotic effects
-Greed: Resource lock
-Corruption: Spreading damage
+## 8. Keywords (Expressive Exceptions)
 
-6.2 Crest Mechanics
-Each crest has:
+Rare, badge-displayed, one per part at most. The universal rules never reference them. Provisional catalog:
 
-Expend Effect: Activated by player choice, removes crest
-Passive Effect: May trigger at threshold counts
-Stack Limit: None (can accumulate infinitely)
+- **Armored** — ignores the first assigned 🗡️ each round. (For enemies whose puzzle is "you cannot chip this; commit.")
+- **Hungry** — this part's slot accepts any die; every symbol lights a generic pip. (Visual tell: hatch always open.)
+- **Brace** *(slot effect)* — add one 🛡️ to every part where you assigned a 🛡️. Wide defense.
+- **Flurry** *(slot effect)* — add one 🗡️ to every enemy part where you assigned a 🗡️. Wide offense.
+- **Bulwark** *(slot effect)* — one defended part cannot be maimed this round. Tall defense.
+- **Split** *(slot effect)* — divide one mixed-face die's symbols between two destinations. (Makes 🗡️🛡️-heavy dice a build-around.)
+- **Meld** *(slot effect)* — combine two dice into one assignment token before placement. The target socket/rim still has capacity 1; Meld changes the token, not the destination rule.
 
-6.3 Example Crest Effects
-Shadow
+---
 
-Expend: Target Body Part becomes Untargetable this round
-Passive: None
+## 9. Strategy Space (Design Intent)
 
-Madness
+The system must support two coherent archetypes, each demanding different dice, slots, and defensive answers:
 
-Expend: Reroll one die (forced), gain random crest
-Passive: At 3+, all your dice become "chaotic"
+- **Tall** — concentrate multi-symbol faces on one part; maim it; race Hearts. Counterplay: Bulwark, Armored, Shadow.
+- **Wide** — chip wounds across many parts; gunk the opponent's entire pool with 🩸; win the symbol economy. Counterplay: Brace, healing, fast aggression.
 
-Valor
+Head-punching is kept honest not by toughness stats but by: the one-die-per-destination cap, asymmetric part value across enemies (the scary die on a 1-Heart arm forces the disarm-vs-race fork), venting (wounding *any* charged part steals tempo), and wide play's pool-degradation payoff.
 
-Expend: +2 to one attack roll
-Passive: At 2+, gain +1 die value to all attacks
+---
 
+## 10. Open Questions — Paper Prototype Checklist
 
-7. COMBAT FLOW EXAMPLE
-Round 1: Upkeep
+Testable with blank dice + stickers (or d6s + lookup cards), index cards per part, coins for pips. Run before any engine code.
 
-No effects to process
+1. **Pacing.** With ~6 attack-capable dice and a 1-net-🗡️ wound threshold, do fights end in 2 rounds of mutual shredding? If too fast, candidate brake: hits on Healthy wound; only hits on Wounded maim (already implied by steps — verify it's enough).
+2. **Overkill margin.** Should beating defense by 3+ matter (e.g., skip Wounded)? Default: no.
+3. **Blanks.** Pure whiffs, or soft currency (two blanks → a reroll)? Default: pure whiffs; revisit if feel-bad.
+4. **Allocation time.** Must stay under ~1 minute at the table with 6 dice + slots + crests. If it drags physically, no UI saves it.
+5. **Mixed faces.** Do the validity and burn-off affordances make whole-die travel read as "flexible hedge" rather than "wasteful trap"? Split's value depends on the answer.
+6. **Hidden-feed leakage.** Under contested initiative, the swallow animation reveals feed *counts* but not pips. Keep (bluffing layer) or fully hide? Current lean: keep.
+7. **Crest expansion.** After Valor and Shadow validate the pattern, which crests earn prototype slots next?
+8. **Multi-slot parts / slotless parts.** How rare? Default: exactly one slot per part for the alpha.
 
-Round 1: Tech Selection
+## 11. Balance Targets (carried from v1, revised)
 
-Player selects "Cleave" from Butcher's Arm
-Enemy selects "Shamble" from Zombie Legs
+- Average combat: 3–5 rounds. Decisions per round: one allocation puzzle of 6–8 placements.
+- Player win rate: ~40% learning → ~80% mastered.
+- RNG impact: the roll sets the hand; the allocation plays it. Variance is authored per part via blanks and multi-faces, not global.
+- Combat remains strictly 1v1.
 
-Round 1: Attack Assignment
+---
 
-Player assigns Cleave's 2d6 attack to Enemy's Head
-Enemy assigns Shamble's 1d6 attack to Player's Arm
-
-Round 1: Defense Assignment
-
-Player has no defense from Cleave
-Enemy assigns Shamble's 1d4 defense to Head
-
-Round 1: Resolution
-
-Player rolls 2d6: [4,3] = 7
-Enemy Head has Toughness 2, Defense 1d4: [2] = 2
-Total defense: 4
-7 > 4, Enemy Head becomes Wounded
-Enemy rolls 1d6: [5] = 5
-Player Arm has Toughness 3, no defense
-5 > 3, Player Arm becomes Wounded
-
-Round 1: End
-
-Check combat end: Both still have HP
-Continue to Round 2
-
-
-8. VICTORY & REWARDS
-8.1 Combat End
-Combat ends when either combatant reaches 0 Heart Points
-8.2 Player Victory
-
-May claim ONE non-Maimed Body Part from enemy
-Gains any combat completion rewards (items, progress)
-Crests do NOT persist to next combat
-
-8.3 Player Defeat
-
-Returns to wake state
-Loses progress in current dream run
-Knowledge/routing information persists
-
-
-9. DESIGN PRINCIPLES
-
-No Dominant Strategy: Rock-paper-scissors dynamics between offensive/defensive/tactical approaches
-Meaningful Damage: Every hit matters with only 3 HP and 6 body parts
-Calculated Risk: Dice provide uncertainty but not chaos
-Build Expression: Body Part collection enables diverse strategies
-Readable Complexity: Systems are deep but parseable
-Failforward: Defeat teaches rather than frustrates
-
-
-10. BALANCE TARGETS
-
-Average combat: 3-5 rounds
-Player win rate (learning): ~40%
-Player win rate (mastered): ~80%
-Decisions per round: 3-4 meaningful choices
-RNG impact: 30% (tactics > luck)
+*Companion document: `itd-combat-presentation-spec.md` — UI, shape grammar, animation choreography, art pipeline.*

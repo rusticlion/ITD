@@ -16,7 +16,12 @@ function BodyPart:new(data)
         toughness = data.toughness or 2,
         hp_value = data.hp_value or 1,
         techs = data.techs or {},
-        tags = data.tags or {}
+        tags = data.tags or {},
+        die = data.die,
+        slot = data.slot,
+        keyword = data.keyword,
+        keywords = data.keywords or {},
+        slot_charge = {}
     }
 
     return setmetatable(instance, BodyPart)
@@ -49,6 +54,52 @@ function BodyPart:advance_damage_state()
     end
 
     return self.status
+end
+
+function BodyPart:is_slot_online()
+    return self.slot ~= nil and self.status ~= "maimed"
+end
+
+function BodyPart:reset_slot_charge()
+    self.slot_charge = {}
+end
+
+function BodyPart:vent_slot_charge()
+    local had_charge = false
+
+    for _, charged in pairs(self.slot_charge or {}) do
+        if charged then
+            had_charge = true
+            break
+        end
+    end
+
+    self.slot_charge = {}
+    return had_charge
+end
+
+function BodyPart:has_keyword(keyword)
+    if not keyword then
+        return false
+    end
+
+    if self.keyword == keyword then
+        return true
+    end
+
+    if type(self.keywords) == "table" then
+        if self.keywords[keyword] then
+            return true
+        end
+
+        for _, existing in ipairs(self.keywords) do
+            if existing == keyword then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 function BodyPart:regress_damage_state()

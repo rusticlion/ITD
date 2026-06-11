@@ -14,7 +14,9 @@ function Combatant:new(data)
         selected_tech = nil,
         is_player = data.is_player or false,
         pending_forced_rerolls = 0,
-        attack_bonus_tokens = {}
+        attack_bonus_tokens = {},
+        pending_next_symbols = {},
+        shadow_slot_shroud = false
     }
 
     local combatant = setmetatable(instance, Combatant)
@@ -128,6 +130,30 @@ function Combatant:get_modifier(key)
     end
 
     return self.modifiers[key] or 0
+end
+
+function Combatant:add_next_symbol(symbol)
+    if not symbol then
+        return
+    end
+
+    self.pending_next_symbols = self.pending_next_symbols or {}
+    table.insert(self.pending_next_symbols, symbol)
+end
+
+function Combatant:get_pending_next_symbols()
+    return self.pending_next_symbols or {}
+end
+
+function Combatant:consume_pending_next_symbols()
+    local symbols = self.pending_next_symbols or {}
+    self.pending_next_symbols = {}
+    return symbols
+end
+
+function Combatant:clear_v2_round_effects()
+    self.pending_next_symbols = {}
+    self.shadow_slot_shroud = false
 end
 
 return Combatant
