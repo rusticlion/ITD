@@ -16,7 +16,8 @@ function Combatant:new(data)
         pending_forced_rerolls = 0,
         attack_bonus_tokens = {},
         pending_next_symbols = {},
-        shadow_slot_shroud = false
+        shadow_slot_shroud = false,
+        ai_personality = data.ai_personality or data.ai_profile or data.ai or "balanced"
     }
 
     local combatant = setmetatable(instance, Combatant)

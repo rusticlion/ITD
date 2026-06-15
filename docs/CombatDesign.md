@@ -50,7 +50,7 @@ Each Body Part's die is its mechanical fingerprint. Face distribution communicat
 - Versatile caster: `[⚡️][⚡️][🛡️][🗡️][⚡️🛡️][⚪]`
 
 ### 2.3 Degradation (🩸 Gunking)
-Each part's data **predetermines** its wound-faces and maim-faces:
+Each part's data **predetermines** its wound-faces and maim-faces. This is an ironclad 2/2/2 structure: exactly two faces fall to Wounded, exactly two further faces fall to Maimed, and exactly two faces remain durable.
 
 - **Wounded:** two specified faces are struck and replaced with 🩸.
 - **Maimed:** two further specified faces are struck and replaced with 🩸. The part's die still rolls.
@@ -90,7 +90,7 @@ Each content module returns three top-level tables:
 Authoring rules:
 
 - A die must define exactly 6 faces. Each face may be a symbol string (`"strike"`) or a list (`{ "strike", "ward" }`).
-- `wound_faces` and `maim_faces` are face-index lists, 1–6.
+- `wound_faces` and `maim_faces` are face-index lists, 1–6. Each list must contain exactly two unique indexes, and the two lists may not overlap.
 - A part's `slot` may be a key into `slots` or an inline slot table.
 - A loadout's `parts` order is also its first-pass panel order in the current UI prototype. The UI reserves six fixed card slots per combatant.
 - Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, and loadouts pointing at unknown parts.

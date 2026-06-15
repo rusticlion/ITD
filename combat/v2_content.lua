@@ -77,17 +77,39 @@ local function validate_die(errors, part_id, die)
         end
     end
 
+    local face_sets = {}
     local function validate_face_indexes(field)
+        local indexes = die[field]
+        if type(indexes) ~= "table" then
+            add_error(errors, part_id .. " " .. field .. " must define exactly two face indexes")
+            return
+        end
+
+        if #indexes ~= 2 then
+            add_error(errors, part_id .. " " .. field .. " must define exactly two face indexes")
+        end
+
+        face_sets[field] = {}
         for _, face_index in ipairs(die[field] or {}) do
             local numeric = tonumber(face_index)
             if not numeric or numeric < 1 or numeric > 6 then
                 add_error(errors, part_id .. " " .. field .. " contains invalid face index " .. tostring(face_index))
+            elseif face_sets[field][numeric] then
+                add_error(errors, part_id .. " " .. field .. " contains duplicate face index " .. tostring(face_index))
+            else
+                face_sets[field][numeric] = true
             end
         end
     end
 
     validate_face_indexes("wound_faces")
     validate_face_indexes("maim_faces")
+
+    for index in pairs(face_sets.wound_faces or {}) do
+        if face_sets.maim_faces and face_sets.maim_faces[index] then
+            add_error(errors, part_id .. " wound_faces and maim_faces both include face index " .. tostring(index))
+        end
+    end
 end
 
 local function validate_slot(errors, slot_id, slot)
@@ -197,6 +219,7 @@ function Content.build_combatant(definitions, loadout_id)
         id = loadout.id or loadout_id,
         name = loadout.name or loadout_id,
         is_player = loadout.is_player or false,
+        ai_personality = copy_table(loadout.ai_personality or loadout.ai_profile or loadout.ai),
         crest_pool = copy_table(loadout.crest_pool or {}),
         heart_points = loadout.heart_points or 3
     })

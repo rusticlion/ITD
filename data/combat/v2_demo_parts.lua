@@ -1,121 +1,136 @@
 local Symbols = require("core.symbols")
 
-local function fixed_face(symbols)
+local S = Symbols.STRIKE
+local W = Symbols.WARD
+local E = Symbols.ESSENCE
+local B = Symbols.BLOOD
+local O = Symbols.BLANK
+
+local function die(wound_a, wound_b, maim_a, maim_b, durable_a, durable_b)
     return {
-        symbols,
-        symbols,
-        symbols,
-        symbols,
-        symbols,
-        symbols
+        faces = {
+            wound_a,
+            wound_b,
+            maim_a,
+            maim_b,
+            durable_a,
+            durable_b
+        },
+        wound_faces = { 1, 2 },
+        maim_faces = { 3, 4 }
     }
 end
 
 return {
     slots = {
-        insight = {
-            id = "insight",
-            name = "Insight",
-            cost = { Symbols.ESSENCE },
-            timing = "spend",
-            effect = {
-                type = "gain_crest",
-                crest = "Valor",
-                amount = 1
-            }
-        },
-        bloodlust = {
-            id = "bloodlust",
-            name = "Bloodlust",
-            cost = { Symbols.STRIKE, Symbols.STRIKE, Symbols.STRIKE },
+        moment_of_valor = {
+            id = "moment_of_valor",
+            name = "Moment of Valor",
+            cost = { E },
             timing = "spend",
             effect = {
                 type = "add_next_symbol",
-                symbol = Symbols.STRIKE
+                symbol = S
+            }
+        },
+        recuperation = {
+            id = "recuperation",
+            name = "Recuperation",
+            cost = { B, B, B },
+            timing = "spend",
+            effect = {
+                type = "heal_self",
+                amount = 1
+            }
+        },
+        speak_doom = {
+            id = "speak_doom",
+            name = "Speak Doom",
+            cost = { E, E, E, E },
+            timing = "spend",
+            effect = {
+                type = "damage_opponent_part",
+                target_type = "HEAD",
+                amount = 1
             }
         }
     },
 
     parts = {
-        player_head = {
-            id = "player_head",
-            name = "Lucid Head",
+        dreamer_head = {
+            id = "dreamer_head",
+            name = "Dreamer's Head",
             type = "HEAD",
-            hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.WARD }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            }
+            hp_value = 3,
+            die = die(O, W, S, E, E, { E, E }),
+            slot = "moment_of_valor",
+            tags = { "LUCID" }
         },
-        player_cleaver = {
-            id = "player_cleaver",
-            name = "Butcher's Cleaver Arm",
+        dreamer_body = {
+            id = "dreamer_body",
+            name = "Dreamer's Body",
+            type = "BODY",
+            hp_value = 2,
+            die = die(W, S, W, { W, S }, { W, W }, { S, S }),
+            slot = "recuperation"
+        },
+        dreamer_right_arm = {
+            id = "dreamer_right_arm",
+            name = "Dreamer's Right Arm",
             type = "ARM",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.STRIKE, Symbols.STRIKE }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            },
-            slot = "bloodlust"
+            die = die(O, W, S, S, S, { S, E })
         },
-        player_scholar = {
-            id = "player_scholar",
-            name = "Scholar's Hand",
+        dreamer_left_arm = {
+            id = "dreamer_left_arm",
+            name = "Dreamer's Left Arm",
             type = "ARM",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.ESSENCE }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            },
-            slot = "insight"
+            die = die(O, W, W, S, { W, E }, S)
         },
-        player_mixed = {
-            id = "player_mixed",
-            name = "Hedging Palm",
-            type = "ARM",
+        dreamer_right_leg = {
+            id = "dreamer_right_leg",
+            name = "Dreamer's Right Leg",
+            type = "LEG",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.STRIKE, Symbols.WARD }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            }
+            die = die(O, W, O, S, W, S)
+        },
+        dreamer_left_leg = {
+            id = "dreamer_left_leg",
+            name = "Dreamer's Left Leg",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, W, O, S, W, S)
         },
 
-        enemy_head = {
-            id = "enemy_head",
-            name = "Glass Head",
+        bone_demon_skull = {
+            id = "bone_demon_skull",
+            name = "Bone Skull",
             type = "HEAD",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.WARD }),
-                wound_faces = { 1, 2, 3, 4, 5, 6 },
-                maim_faces = {}
-            }
+            die = die(E, S, E, { S, E }, { E, E }, S),
+            slot = "speak_doom"
         },
-        enemy_body = {
-            id = "enemy_body",
-            name = "Brittle Body",
+        bone_demon_rib_cage = {
+            id = "bone_demon_rib_cage",
+            name = "Rib Cage",
             type = "BODY",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.BLANK }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            }
+            die = die(O, S, E, S, { S, E }, S)
         },
-        enemy_claw = {
-            id = "enemy_claw",
-            name = "Gnarled Claw",
+        bone_demon_right_claw = {
+            id = "bone_demon_right_claw",
+            name = "Right Bone Claw",
             type = "ARM",
             hp_value = 1,
-            die = {
-                faces = fixed_face({ Symbols.STRIKE }),
-                wound_faces = { 1, 2 },
-                maim_faces = { 3, 4 }
-            }
+            die = die(O, S, S, E, S, { S, S })
+        },
+        bone_demon_left_claw = {
+            id = "bone_demon_left_claw",
+            name = "Left Bone Claw",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, E, S, E, S, { S, E })
         }
     },
 
@@ -124,24 +139,24 @@ return {
             id = "player",
             name = "Dreamer",
             is_player = true,
-            crest_pool = {
-                Valor = 1,
-                Shadow = 1
-            },
             parts = {
-                "player_head",
-                "player_cleaver",
-                "player_scholar",
-                "player_mixed"
+                "dreamer_head",
+                "dreamer_body",
+                "dreamer_right_arm",
+                "dreamer_left_arm",
+                "dreamer_right_leg",
+                "dreamer_left_leg"
             }
         },
         enemy_demo = {
             id = "enemy",
-            name = "Nightmare",
+            name = "Bone Demon",
+            ai_personality = "doom_caster",
             parts = {
-                "enemy_head",
-                "enemy_body",
-                "enemy_claw"
+                "bone_demon_skull",
+                "bone_demon_rib_cage",
+                "bone_demon_right_claw",
+                "bone_demon_left_claw"
             }
         }
     }

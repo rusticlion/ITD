@@ -2,8 +2,9 @@ local Engine = require("combat.v2_engine")
 local Events = require("combat.events")
 local Symbols = require("core.symbols")
 local Demo = require("combat.v2_demo")
+local V2AI = require("combat.v2_ai")
 
-math.randomseed(20260611)
+math.randomseed(20260615)
 
 local function assert_true(condition, message)
     if not condition then
@@ -33,13 +34,6 @@ local function log_events(engine)
             data.source_part.name))
     end)
 
-    engine:on(Events.CREST_EXPENDED, function(data)
-        print(string.format("%s expends %s (remaining %d)",
-            data.combatant.name,
-            data.crest,
-            data.remaining or 0))
-    end)
-
     engine:on(Events.DIE_ASSIGNED, function(data)
         local target = data.part and data.part.name or "?"
         local burned = #data.burned_symbols > 0 and (" burn " .. Symbols.format_face(data.burned_symbols)) or ""
@@ -60,23 +54,12 @@ local function log_events(engine)
     end)
 
     engine:on(Events.SLOT_RESOLVED, function(data)
-        print(string.format("%s resolves %s",
+        local target = data.effect and data.effect.target_part
+        local target_text = target and (" -> " .. target.name) or ""
+        print(string.format("%s resolves %s%s",
             data.combatant.name,
-            data.slot.name))
-    end)
-
-    engine:on(Events.LATCH_EJECTED, function(data)
-        print(string.format("Latch on %s is ejected by %s",
-            data.part.name,
-            data.source and data.source.type or "effect"))
-    end)
-
-    engine:on(Events.PART_RESOLVED, function(data)
-        print(string.format("%s resolves ATK %d vs DEF %d -> %s",
-            data.part.name,
-            data.strike_count,
-            data.ward_count,
-            data.hit and "hit" or "block"))
+            data.slot.name,
+            target_text))
     end)
 
     engine:on(Events.DAMAGE_DEALT, function(data)
@@ -87,64 +70,93 @@ local function log_events(engine)
     end)
 end
 
-local function run()
-    local content_errors = Demo.validate()
-    assert_true(#content_errors == 0, table.concat(content_errors, "\n"))
-
+local function start_engine()
     local player, enemy = Demo.create_combatants()
     local engine = Engine:new()
-
     log_events(engine)
     engine:add_combatant(player)
     engine:add_combatant(enemy)
     engine:start_combat()
+    return engine, player, enemy
+end
 
-    local enemy_claw = die_for(engine, enemy, "enemy_claw")
-    local player_scholar = player:get_body_part_by_id("player_scholar")
-    local ok, reason = engine:assign_die_to_rim(enemy, enemy_claw.id, player_scholar)
-    assert_true(ok, "enemy claw should latch onto scholar: " .. tostring(reason))
+local function run()
+    local content_errors = Demo.validate()
+    assert_true(#content_errors == 0, table.concat(content_errors, "\n"))
 
-    ok, reason = engine:expend_crest(player, "Shadow")
-    assert_true(ok, "Shadow should expend: " .. tostring(reason))
+    local engine, player, enemy = start_engine()
+    assert_true(#player.body_parts == 6, "baseline Dreamer should have six body parts")
+    assert_true(#enemy.body_parts == 4, "Bone Demon should have four body parts")
+    assert_true(enemy.ai_personality == "doom_caster", "Bone Demon should use the doom caster AI personality")
 
-    local scholar_die = die_for(engine, player, "player_scholar")
-    ok, reason = engine:feed_die_to_slot(player, scholar_die.id, player_scholar)
-    assert_true(ok, "Scholar die should feed Insight: " .. tostring(reason))
-    assert_true(engine.assignments.rims[player_scholar] == nil, "Shadow slot trigger should eject the existing latch")
-    assert_true(player:get_crest_count("Valor") == 2, "Insight should grant a Valor crest")
+    local head = player:get_body_part_by_id("dreamer_head")
+    local skull = enemy:get_body_part_by_id("bone_demon_skull")
+    local head_die = die_for(engine, player, "dreamer_head")
+    local leg_die = die_for(engine, player, "dreamer_right_leg")
 
-    ok, reason = engine:expend_crest(player, "Valor")
-    assert_true(ok, "Valor should expend: " .. tostring(reason))
+    head_die.symbols = { Symbols.ESSENCE }
+    leg_die.symbols = { Symbols.BLANK }
 
-    local cleaver_die = die_for(engine, player, "player_cleaver")
-    local enemy_head = enemy:get_body_part_by_id("enemy_head")
-    ok, reason = engine:assign_die_to_rim(player, cleaver_die.id, enemy_head)
-    assert_true(ok, "Cleaver should attack enemy head: " .. tostring(reason))
-    assert_true(Symbols.count(engine.assignments.rims[enemy_head].symbols, Symbols.STRIKE) == 3, "Valor should add one strike to the cleaver die")
+    local ok, reason = engine:feed_die_to_slot(player, head_die.id, head)
+    assert_true(ok, "Moment of Valor should accept Essence: " .. tostring(reason))
 
-    local mixed_die = die_for(engine, player, "player_mixed")
-    ok, reason = engine:assign_die_to_rim(player, mixed_die.id, enemy_head)
-    assert_true(not ok and reason == "rim_full", "rim capacity should reject a second die")
+    ok, reason = engine:assign_die_to_rim(player, leg_die.id, skull)
+    assert_true(ok, "Moment of Valor should make the next blank die rim-valid: " .. tostring(reason))
+    assert_true(Symbols.count(engine.assignments.rims[skull].symbols, Symbols.STRIKE) == 1,
+        "Moment of Valor should add exactly one Strike")
 
-    local enemy_body = enemy:get_body_part_by_id("enemy_body")
-    ok, reason = engine:assign_die_to_rim(player, mixed_die.id, enemy_body)
-    assert_true(ok, "Mixed die should be rim-valid because it shows strike: " .. tostring(reason))
-    assert_true(#engine.assignments.rims[enemy_body].burned_symbols == 1, "Mixed die should burn its ward on a rim")
+    local engine2, player2, enemy2 = start_engine()
+    local skull2 = enemy2:get_body_part_by_id("bone_demon_skull")
+    local player_head2 = player2:get_body_part_by_id("dreamer_head")
 
-    local head_die = die_for(engine, player, "player_head")
-    ok, reason = engine:assign_die_to_socket(player, head_die.id, player:get_body_part_by_id("player_head"))
-    assert_true(ok, "Head die should defend own head: " .. tostring(reason))
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_rib_cage",
+        "bone_demon_right_claw",
+        "bone_demon_left_claw"
+    }) do
+        local die = die_for(engine2, enemy2, part_id)
+        die.symbols = { Symbols.ESSENCE }
+    end
 
-    engine:resolve_round()
+    local ai_move = V2AI.choose_next_allocation(engine2, enemy2)
+    assert_true(ai_move and ai_move.kind == "slot" and ai_move.part == skull2,
+        "doom_caster AI should prioritize charging Speak Doom")
 
-    assert_true(enemy_head.status == "wounded", "Enemy head should be wounded")
-    assert_true(enemy_body.status == "wounded", "Enemy body should be wounded")
-    assert_true(player_scholar.status == "healthy", "Ejected latch should prevent scholar damage")
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_rib_cage",
+        "bone_demon_right_claw",
+        "bone_demon_left_claw"
+    }) do
+        local die = die_for(engine2, enemy2, part_id)
+        ok, reason = engine2:feed_die_to_slot(enemy2, die.id, skull2)
+        assert_true(ok, "Bone Demon should feed Speak Doom with Essence: " .. tostring(reason))
+    end
 
-    engine:start_round()
-    local wounded_head_die = die_for(engine, enemy, "enemy_head")
-    assert_true(Symbols.has(wounded_head_die.symbols, Symbols.BLOOD), "Wounded head die should roll blood through degradation")
-    assert_true(not engine:is_part_untargetable(player_scholar), "Shadow untargetable should clear on upkeep")
+    assert_true(player_head2.status == "wounded", "Speak Doom should wound the Dreamer's Head")
+
+    local engine3, player3, enemy3 = start_engine()
+    local skull3 = enemy3:get_body_part_by_id("bone_demon_skull")
+    local player_head3 = player3:get_body_part_by_id("dreamer_head")
+    player_head3.status = "wounded"
+
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_rib_cage",
+        "bone_demon_right_claw",
+        "bone_demon_left_claw"
+    }) do
+        local die = die_for(engine3, enemy3, part_id)
+        die.symbols = { Symbols.ESSENCE }
+        ok, reason = engine3:feed_die_to_slot(enemy3, die.id, skull3)
+        assert_true(ok, "Speak Doom should be able to charge for a finishing cast: " .. tostring(reason))
+    end
+
+    assert_true(player_head3.status == "maimed", "Speak Doom should maim an already wounded Head")
+    assert_true(player3.heart_points == 0, "Maiming the Dreamer's Head should deplete baseline Hearts")
+    assert_true(engine3.state == "COMPLETE", "A slot-caused defeat should complete combat immediately")
+    assert_true(engine3.winner == enemy3, "Bone Demon should win after a lethal Speak Doom")
 
     print("\nV2 combat smoke test passed.")
 end

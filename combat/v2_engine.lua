@@ -18,12 +18,6 @@ local function copy_list(source)
     return copy
 end
 
-local function append_list(destination, source)
-    for _, value in ipairs(source or {}) do
-        table.insert(destination, value)
-    end
-end
-
 local function slot_cost(slot)
     local cost = slot and slot.cost or {}
     local normalized = {}
@@ -68,6 +62,21 @@ local function find_part(combatant, part_or_id)
 
     if combatant and combatant.get_body_part_by_id then
         return combatant:get_body_part_by_id(part_or_id)
+    end
+
+    return nil
+end
+
+local function find_first_part_by_type(combatant, part_type)
+    local wanted = part_type and tostring(part_type):upper()
+    if not wanted then
+        return nil
+    end
+
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.type and tostring(part.type):upper() == wanted and part.status ~= "maimed" then
+            return part
+        end
     end
 
     return nil
@@ -573,6 +582,33 @@ function Engine:resolve_slot_entry(entry)
             entry.combatant:add_next_symbol(effect.symbol or Symbols.STRIKE)
         end
         result.symbol = effect.symbol or Symbols.STRIKE
+    elseif effect.type == "damage_opponent_part" then
+        local opponent = self:get_opponent(entry.combatant)
+        local target_part = nil
+
+        if effect.target_part_id and opponent then
+            target_part = opponent:get_body_part_by_id(effect.target_part_id)
+        elseif effect.target_type then
+            target_part = find_first_part_by_type(opponent, effect.target_type)
+        end
+
+        if not target_part and effect.target == "head" then
+            target_part = find_first_part_by_type(opponent, "HEAD")
+        end
+
+        result.target_part = target_part
+        result.amount = effect.amount or 1
+        result.damaged = false
+
+        for _ = 1, result.amount do
+            if target_part and target_part.status ~= "maimed" then
+                result.damaged = self:apply_damage(entry.combatant, opponent, target_part, {
+                    source = "slot",
+                    slot = entry.slot,
+                    effect = effect
+                }) or result.damaged
+            end
+        end
     end
 
     self:emit(Events.SLOT_RESOLVED, {
@@ -582,6 +618,11 @@ function Engine:resolve_slot_entry(entry)
         slot = entry.slot,
         effect = result
     })
+
+    if self.state ~= "COMPLETE" and self:check_combat_end() then
+        self.state = "COMPLETE"
+        self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+    end
 end
 
 function Engine:grant_crest(combatant, crest, amount, extra)
@@ -792,8 +833,11 @@ function Engine:resolve_round()
     end
 
     if self:check_combat_end() then
+        local was_complete = self.state == "COMPLETE"
         self.state = "COMPLETE"
-        self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+        if not was_complete then
+            self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+        end
     else
         self.state = "ROUND_END"
         self:emit(Events.ROUND_END, { round = self.current_round })
@@ -873,52 +917,20 @@ function Engine:get_valid_destinations(combatant, die_or_id)
     return destinations
 end
 
-function Engine:auto_allocate(combatant)
-    local opponent = self:get_opponent(combatant)
-    local pool_snapshot = copy_list(self:get_pool(combatant))
-
-    local function first_available_part(parts, predicate)
-        for _, part in ipairs(parts or {}) do
-            if predicate(part) then
-                return part
-            end
-        end
-        return nil
+function Engine:commit_allocation_move(combatant, move)
+    if not move or not move.kind or not move.die or not move.part then
+        return false, "invalid_move"
     end
 
-    for _, die in ipairs(pool_snapshot) do
-        if self:find_die(combatant, die.id) then
-            local assigned = false
-            local effective = self:get_effective_symbols(combatant, die)
-
-            if Symbols.has(effective, Symbols.STRIKE) and opponent then
-                local target = first_available_part(opponent.body_parts, function(part)
-                    return is_part_targetable(self, part) and not self.assignments.rims[part]
-                end)
-                if target and self:assign_die_to_rim(combatant, die.id, target) then
-                    assigned = true
-                end
-            end
-
-            if not assigned and Symbols.has(effective, Symbols.WARD) then
-                local target = first_available_part(combatant.body_parts, function(part)
-                    return part.status ~= "maimed" and not self.assignments.sockets[part]
-                end)
-                if target and self:assign_die_to_socket(combatant, die.id, target) then
-                    assigned = true
-                end
-            end
-
-            if not assigned then
-                for _, part in ipairs(combatant.body_parts or {}) do
-                    if self:feed_die_to_slot(combatant, die.id, part) then
-                        assigned = true
-                        break
-                    end
-                end
-            end
-        end
+    if move.kind == "rim" then
+        return self:assign_die_to_rim(combatant, move.die.id, move.part)
+    elseif move.kind == "socket" then
+        return self:assign_die_to_socket(combatant, move.die.id, move.part)
+    elseif move.kind == "slot" then
+        return self:feed_die_to_slot(combatant, move.die.id, move.part)
     end
+
+    return false, "unknown_destination"
 end
 
 return Engine

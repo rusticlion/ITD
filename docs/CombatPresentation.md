@@ -192,6 +192,7 @@ One fixed surface (right rail) for all text, all objects, one gesture: hover or 
 - **Live during drag:** cost preview, burn warning, pip forecast — readable mid-drag, when pop-ins would flicker.
 - **Drag focus:** while a die is held, the rail shows only the resolved face, source Body Part, and current drop-target preview. Full die distribution / unfolded-cube detail is intentionally suppressed during drag; the player is placing a resolved token, not evaluating the part's whole die anatomy.
 - **Idle state:** queue detail, initiative explanation, collapsible combat log (a free renderer over the engine's event stream — debugging tool and player-trust tool in one).
+- **Unfolded die view:** when inspecting a Body Part or idle pool die, show its six faces in a three-column break-order grid: woundable faces on the left, maimable faces in the center, durable faces on the right. No header row. Crack overlays are dynamic proximity tells: heavy cracks mean "breaks on the next damage step," light cracks mean "breaks after one more step," and 🩸 means already broken.
 - **Collapsible with pin toggle** for minimalists, who fall back to cursor-adjacent mini-tooltips.
 - Rejected alternative, for the record: far-side-from-cursor pop-in. It places the same object's text in different screen locations depending on approach direction, preventing reading-reflex formation, and it fights the drag state.
 
@@ -199,7 +200,7 @@ One fixed surface (right rail) for all text, all objects, one gesture: hover or 
 
 ## 7. The Planning Screen (Out of Combat)
 
-Each owned part displays as **one unfolded cube with its wounds painted on**: the healthy face layout shown directly, wound-struck faces marked with a light overlay (crack motif), maim-struck faces with a heavy one. One layout, all three states legible — the degradation path read as annotation. Overworld tags (STRONG, SCHOLARLY) display here and only here. Slot text via the same inspector pattern.
+Each owned part displays as **one unfolded cube with its break order painted on**: woundable faces in the left column, maimable faces in the center column, durable faces in the right column. The same dynamic proximity overlay used by the combat inspector applies here: heavy cracks mark the next faces to become 🩸, light cracks mark the following break tier, and already-broken faces render as 🩸. Overworld tags (STRONG, SCHOLARLY) display here and only here. Slot text via the same inspector pattern.
 
 ---
 
