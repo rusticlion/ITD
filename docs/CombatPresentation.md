@@ -40,7 +40,7 @@ Destination validity is symbol-aware:
 ### 3.1 Per Body Part — the Panel
 Fixed-size BP card sprite · external name label · left combat sector · right slot sector · damage-state surface treatment.
 
-The left sector holds the direct inputs to combat resolution: **defense socket** (internal, shield-rimmed, holds one of the owner's assigned dice), **rim latch** (outer edge, holds one enemy attack die), compact HP value indicator, and future keyword badges. The right sector holds the Slot apparatus: hatch/intake, short slot title, and pip track. Defense lives *inside* the body; attacks *arrive at* it. The socket and rim are visual neighbors on the card edge facing the conduit space. The card interior is an interaction surface, not a status sheet: exact health text and effect explanations live outside the surface or in the inspector.
+The left sector holds the direct inputs to combat resolution: **defense socket** (internal, shield-rimmed, holds one of the owner's assigned dice), **rim latch** (outer edge, holds one enemy attack die), compact HP value indicator, and future keyword badges. The right sector holds the Slot apparatus: hatch/intake, short slot title, and pip grid. Costs up to three pips render as one centered row; higher costs render as two centered rows, making six pips the clean practical ceiling. Defense lives *inside* the body; attacks *arrive at* it. The socket and rim are visual neighbors on the card edge facing the conduit space. The card interior is an interaction surface, not a status sheet: exact health text and effect explanations live outside the surface or in the inspector.
 
 There is **no resident die** on a Body Part panel. The originating die does not sit on the part during combat; it appears in the rolled pool and becomes meaningful only when allocated. The panel is the part's destination/control surface, not a storage place for its die.
 
@@ -106,7 +106,7 @@ This is the working asset/component inventory for the real combat screen. Wirefr
 **Slot/hatch layer**
 
 - Hatch/intake sprite states: rest, hover-open, swallow, charging, full/enqueued, vented, offline.
-- Slot track symbol cells: unlit/outline, preview, lit/charged, armed, vented, disabled.
+- Slot pip grid symbol cells: unlit/outline, preview, lit/charged, armed, vented, disabled.
 - Slot name short label.
 - Pip burn-off ghosts for surplus symbols.
 - Queue-chip spawn point and slot-to-queue animation anchor.

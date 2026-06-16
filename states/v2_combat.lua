@@ -30,6 +30,9 @@ local CREST_SIZE = 24
 local HEART_STACK_MAX = 3
 local HEART_ICON_SIZE = 24
 local HEART_ICON_GAP = 4
+local SLOT_PIP_ROW_LIMIT = 3
+local SLOT_PIP_GAP = 1
+local SLOT_PIP_ROW_GAP = 1
 local AUTO_ALLOC_MOVE_DURATION = 0.42
 local AUTO_ALLOC_SETTLE_DURATION = 0.14
 local HATCH_SWALLOW_DURATION = 0.4
@@ -925,9 +928,9 @@ function V2Combat:layout_cards(combatant, strip, side)
         local rim = rect(left_x + 2, rim_y, DIE_SIZE, DIE_SIZE)
         local socket_y = side == "enemy" and (rim_y - DIE_SIZE) or (card.y + 6)
         local socket = rect(left_x + 2, socket_y, DIE_SIZE, DIE_SIZE)
-        local hatch = rect(right_x + math.floor((right_w - DIE_SIZE) / 2), card.y + 34, DIE_SIZE, DIE_SIZE)
-        local track = rect(right_x + 2, card.y + 73, right_w - 4, SYMBOL_SIZE)
-        local slot_label = rect(right_x + 1, card.y + 10, right_w - 2, 12)
+        local hatch = rect(right_x + math.floor((right_w - DIE_SIZE) / 2), card.y + 24, DIE_SIZE, DIE_SIZE)
+        local track = rect(right_x + 2, card.y + 62, right_w - 4, SYMBOL_SIZE * 2 + SLOT_PIP_ROW_GAP)
+        local slot_label = rect(right_x + 1, card.y + 7, right_w - 2, 12)
         local label_y = side == "enemy" and (card.y - TITLE_HEIGHT) or (card.y + card.h)
         local label = rect(card.x, label_y, card.w, TITLE_HEIGHT)
         local meta_y = side == "enemy" and (card.y + 10) or (card.y + card.h - 16)
@@ -2161,23 +2164,34 @@ function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
     end
 
     local cost = slot.cost or {}
-    local pip_gap = 1
-    local cost_width = #cost * SYMBOL_SIZE + math.max(0, #cost - 1) * pip_gap
-    local track_start_x = layout.track.x + math.floor(math.max(0, layout.track.w - cost_width) / 2)
+    local row_count = #cost > SLOT_PIP_ROW_LIMIT and 2 or 1
+    local columns_per_row = math.max(1, math.ceil(#cost / row_count))
+    local first_row_y = layout.track.y + math.floor(math.max(0, layout.track.h - (row_count * SYMBOL_SIZE + (row_count - 1) * SLOT_PIP_ROW_GAP)) / 2)
+    local last_pip_x = layout.track.x
+    local last_pip_y = first_row_y
+
     for index, symbol in ipairs(cost) do
         local lit = part.slot_charge and part.slot_charge[index]
         local previewed = preview_by_index[index] ~= nil
-        local pip_x = track_start_x + (index - 1) * (SYMBOL_SIZE + pip_gap)
+        local row_index = math.floor((index - 1) / columns_per_row) + 1
+        local column_index = ((index - 1) % columns_per_row) + 1
+        local row_start_index = (row_index - 1) * columns_per_row + 1
+        local pips_in_row = math.min(columns_per_row, #cost - row_start_index + 1)
+        local row_width = pips_in_row * SYMBOL_SIZE + math.max(0, pips_in_row - 1) * SLOT_PIP_GAP
+        local row_start_x = layout.track.x + math.floor(math.max(0, layout.track.w - row_width) / 2)
+        local pip_x = row_start_x + (column_index - 1) * (SYMBOL_SIZE + SLOT_PIP_GAP)
+        local pip_y = first_row_y + (row_index - 1) * (SYMBOL_SIZE + SLOT_PIP_ROW_GAP)
         if previewed then
             set_color({ 1, 0.88, 0.35, 0.5 })
-            love.graphics.rectangle("fill", pip_x - 1, layout.track.y - 1, SYMBOL_SIZE + 2, SYMBOL_SIZE + 2, 2, 2)
+            love.graphics.rectangle("fill", pip_x - 1, pip_y - 1, SYMBOL_SIZE + 2, SYMBOL_SIZE + 2, 2, 2)
         end
-        draw_symbol_sprite(symbol, pip_x, layout.track.y, SYMBOL_SIZE, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85))
+        draw_symbol_sprite(symbol, pip_x, pip_y, SYMBOL_SIZE, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85))
+        last_pip_x = pip_x
+        last_pip_y = pip_y
     end
 
     if preview and preview.valid and #preview.burned > 0 then
-        local burn_x = track_start_x + cost_width + 4
-        draw_burned_symbols(preview.burned, burn_x, layout.track.y)
+        draw_burned_symbols(preview.burned, last_pip_x + SYMBOL_SIZE + 4, last_pip_y)
     end
 
     love.graphics.setFont(self.fonts.tiny)

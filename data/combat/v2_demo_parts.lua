@@ -167,6 +167,84 @@ return {
                 timing = "spend",
                 effect = { type = "add_next_symbol", symbol = Symbols.WARD }
             }
+        },
+        ["robot_head"] = {
+            id = "robot_head",
+            name = "Robot Head",
+            flavor = "",
+            type = "HEAD",
+            hp_value = 2,
+            die = {
+                faces = {
+                    { Symbols.STRIKE, Symbols.WARD },
+                    Symbols.STRIKE,
+                    { Symbols.STRIKE, Symbols.WARD },
+                    Symbols.WARD,
+                    Symbols.ESSENCE,
+                    { Symbols.WARD, Symbols.WARD }
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "robot_head_slot",
+                name = "Drone",
+                cost = { Symbols.STRIKE, Symbols.WARD },
+                timing = "spend",
+                effect = { type = "assign_symbol_to_each_part", destination = "socket", target = "self", symbol = Symbols.WARD, amount = 1 }
+            }
+        },
+        ["withered_arm"] = {
+            id = "withered_arm",
+            name = "Withered Arm",
+            flavor = "",
+            type = "ARM",
+            hp_value = 1,
+            die = {
+                faces = {
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE,
+                    Symbols.STRIKE,
+                    Symbols.WARD,
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "withered_arm_slot",
+                name = "Vengeance",
+                cost = { Symbols.BLOOD },
+                timing = "spend",
+                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1, duration = "allocation" }
+            }
+        },
+        ["gaunt_cloak"] = {
+            id = "gaunt_cloak",
+            name = "Gaunt Cloak",
+            flavor = "",
+            type = "BODY",
+            hp_value = 2,
+            die = {
+                faces = {
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    { Symbols.WARD, Symbols.WARD },
+                    Symbols.ESSENCE,
+                    Symbols.WARD,
+                    Symbols.BLANK,
+                    Symbols.BLANK
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "gaunt_cloak_slot",
+                name = "Enshroud",
+                cost = { Symbols.WARD, Symbols.ESSENCE, Symbols.ESSENCE, Symbols.ESSENCE },
+                timing = "spend",
+                effect = { type = "assign_symbol_to_each_part", destination = "socket", target = "self", symbol = Symbols.WARD, amount = 1 }
+            }
         }
     },
 

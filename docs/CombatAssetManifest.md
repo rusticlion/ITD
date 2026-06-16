@@ -49,7 +49,7 @@ BP card slots:
 - Enemy title edge: far side from opponent, above/on top of the card.
 - Player title edge: far side from opponent, below/on bottom of the card.
 - BP card left sector: card x+4 to x+44; holds rim, socket, HP value, and future keyword badges.
-- BP card right sector: card x+44 to x+112; holds slot title, hatch, and centered pip track.
+- BP card right sector: card x+44 to x+112; holds slot title at y+7, hatch at y+24, and centered pip grid at y+62.
 
 Settled dice and crest strips:
 

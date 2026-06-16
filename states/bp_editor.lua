@@ -46,7 +46,7 @@ local SYMBOLS = {
     { id = Symbols.BLANK, label = "BLANK" }
 }
 local BODY_PART_NAME_LIMIT = 15
-local SLOT_NAME_LIMIT = 8
+local SLOT_NAME_LIMIT = 9
 
 local COLORS = {
     bg = { 0.93, 0.92, 0.88, 1 },
