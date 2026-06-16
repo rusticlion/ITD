@@ -1,5 +1,6 @@
 local Assets = require("core.assets")
 local GameState = require("core.gamestate")
+local Input = require("core.input")
 local Overworld = require("states.overworld")
 
 local function has_launch_arg(name)
@@ -9,6 +10,22 @@ local function has_launch_arg(name)
         end
     end
     return false
+end
+
+local function dispatch_actionpressed(actions, source)
+    local handled = false
+    for _, action in ipairs(actions or {}) do
+        handled = GameState.actionpressed(action, source) or handled
+    end
+    return handled
+end
+
+local function dispatch_actionreleased(actions, source)
+    local handled = false
+    for _, action in ipairs(actions or {}) do
+        handled = GameState.actionreleased(action, source) or handled
+    end
+    return handled
 end
 
 function love.load()
@@ -25,6 +42,7 @@ end
 
 function love.update(dt)
     GameState.update(dt)
+    Input.update()
 end
 
 function love.draw()
@@ -32,11 +50,25 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    GameState.keypressed(key)
+    local handled = dispatch_actionpressed(Input.keypressed(key), { type = "key", key = key })
+    if not handled then
+        GameState.keypressed(key)
+    end
 end
 
 function love.keyreleased(key)
-    GameState.keyreleased(key)
+    local handled = dispatch_actionreleased(Input.keyreleased(key), { type = "key", key = key })
+    if not handled then
+        GameState.keyreleased(key)
+    end
+end
+
+function love.gamepadpressed(_, button)
+    dispatch_actionpressed(Input.gamepadpressed(button), { type = "gamepad", button = button })
+end
+
+function love.gamepadreleased(_, button)
+    dispatch_actionreleased(Input.gamepadreleased(button), { type = "gamepad", button = button })
 end
 
 function love.textinput(text)

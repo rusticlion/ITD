@@ -10,13 +10,12 @@ local VALID_STATUSES = {
 function BodyPart:new(data)
     local instance = {
         id = data.id,
+        instance_id = data.instance_id,
         name = data.name,
         flavor = data.flavor,
         type = data.type,
         status = data.status or "healthy",
-        toughness = data.toughness or 2,
         hp_value = data.hp_value or 1,
-        techs = data.techs or {},
         tags = data.tags or {},
         die = data.die,
         slot = data.slot,

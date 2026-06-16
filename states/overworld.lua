@@ -2,55 +2,83 @@ local Overworld = {}
 Overworld.__index = Overworld
 
 local GameState = require("core.gamestate")
-local Player = require("systems.player")
-local TileMap = require("systems.tilemap")
+local Save = require("core.save")
+local World = require("systems.world")
 
 function Overworld:enter()
-    self.player = Player.new(5, 5)
-    self.map = TileMap.new("data.rooms.basement_1")
+    local save_data, save_error = Save.load()
+    if save_error then
+        print("Save load failed: " .. tostring(save_error))
+    end
+
+    self.world = World.new({ save = save_data })
+    self.world.on_encounter = function(encounter)
+        self:start_combat(encounter)
+    end
+    self.world.on_dialog = function(dialog)
+        self:start_dialog(dialog)
+    end
+end
+
+function Overworld:start_combat(encounter)
+    GameState.push(require("states.v2_combat"), {
+        encounter_id = encounter and encounter.encounter_id or "debug.demo",
+        encounter = encounter,
+        run = self.world and self.world.run
+    })
+end
+
+function Overworld:start_dialog(dialog)
+    GameState.push(require("states.dialog"), {
+        world = self.world,
+        dialog = dialog and dialog.dialog,
+        dialog_id = dialog and dialog.dialog_id,
+        actor = dialog and self.world.room and self.world.room.actor_by_id[dialog.actor_id]
+    })
+end
+
+function Overworld:resume(_, result)
+    if self.world and result and result.type == "combat_result" then
+        local summary = self.world:apply_combat_result(result)
+        if summary then
+            GameState.push(require("states.post_combat"), summary)
+        end
+    elseif self.world and result and result.type == "dialog_result" then
+        self.world:apply_dialog_result(result)
+    end
 end
 
 function Overworld:update(dt)
-    self.player:update(dt, self.map)
+    self.world:update(dt)
 end
 
 function Overworld:draw()
-    self.map:draw()
-    self.player:draw()
-
-    if self.player.equipped then
-        love.graphics.print("[" .. self.player.equipped .. "]", 10, 10)
-    end
+    self.world:draw()
 end
 
 function Overworld:keypressed(key)
     if key == "c" then
-        GameState.switch(require("states.v2_combat"))
+        self:start_combat({ encounter_id = "debug.demo" })
         return
-    elseif key == "v" then
-        GameState.switch(require("states.combat"))
-        return
-    elseif key == "space" then
-        local entity = self.map:getEntityAt(self.player.x, self.player.y)
-        if entity then
-            local action, param = entity:interact(self.player)
-
-            if action == "message" then
-                print(param)
-            elseif action == "item" then
-                self.player:addItem(param)
-                print("Found: " .. param .. "!")
-            elseif action == "dig" then
-                print("You dig through the wall...")
-            end
-        end
-    else
-        self.player:keypressed(key, self.map)
     end
+
+    self.world:keypressed(key)
+end
+
+function Overworld:actionpressed(action)
+    if action == "debug_combat" then
+        self:start_combat({ encounter_id = "debug.demo" })
+        return true
+    elseif action == "menu" or action == "cancel" then
+        GameState.push(require("states.menu_sidebar"), { world = self.world })
+        return true
+    end
+
+    return self.world:actionpressed(action)
 end
 
 function Overworld:keyreleased(key)
-    self.player:keyreleased(key)
+    self.world:keyreleased(key)
 end
 
 return Overworld

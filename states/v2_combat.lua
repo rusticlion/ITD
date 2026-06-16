@@ -6,9 +6,12 @@ local Demo = require("combat.v2_demo")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
 local V2AI = require("combat.v2_ai")
+local BPInspector = require("ui.bp_inspector")
+local BPCard = require("ui.bp_card")
 
 local V2Combat = {}
 V2Combat.__index = V2Combat
+V2Combat.opaque = true
 
 local MARGIN = 8
 local RAIL_WIDTH = 152
@@ -754,9 +757,14 @@ local function make_log_line(event, data)
     return nil
 end
 
-function V2Combat:enter()
+function V2Combat:enter(context)
+    self.context = context or {}
+    self.encounter_id = self.context.encounter_id
+        or (self.context.encounter and self.context.encounter.encounter_id)
+        or "debug.demo"
+    self.context.encounter_id = self.encounter_id
     self.engine = Engine:new()
-    self.player, self.enemy = Demo.create_combatants()
+    self.player, self.enemy = Demo.create_combatants(self.context)
     self.engine:add_combatant(self.player)
     self.engine:add_combatant(self.enemy)
 
@@ -777,6 +785,7 @@ function V2Combat:enter()
     self.player_can_allocate = false
     self.enemy_response_pending = false
     self.event_visibility_context = nil
+    self.returned_to_overworld = false
     self.log = {}
     self.message = "Drag a die to a rim, socket, or hatch. C confirms."
     self.fonts = {
@@ -1161,8 +1170,80 @@ function V2Combat:update_combat_end(dt)
     end
 end
 
-function V2Combat:return_to_overworld()
-    GameState.switch(require("states.overworld"))
+local function snapshot_part(part)
+    return {
+        instance_id = part.instance_id,
+        def_id = part.id,
+        id = part.id,
+        name = part.name,
+        type = part.type,
+        status = part.status or "healthy",
+        hp_value = part.hp_value
+    }
+end
+
+local function snapshot_parts(combatant)
+    local parts = {}
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        table.insert(parts, snapshot_part(part))
+    end
+    return parts
+end
+
+function V2Combat:outcome()
+    if self.combat_end then
+        if self.combat_end.result == "win" then
+            return "victory"
+        elseif self.combat_end.result == "lose" then
+            return "defeat"
+        end
+        return "draw"
+    end
+
+    local winner = self.engine and self.engine.winner
+    if winner == self.player then
+        return "victory"
+    elseif winner == self.enemy then
+        return "defeat"
+    end
+    return "draw"
+end
+
+function V2Combat:build_combat_result(forced_outcome)
+    local outcome = forced_outcome or self:outcome()
+    local claimable_parts = {}
+
+    if outcome == "victory" then
+        for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+            if part.status ~= "maimed" then
+                table.insert(claimable_parts, snapshot_part(part))
+            end
+        end
+    end
+
+    return {
+        type = "combat_result",
+        outcome = outcome,
+        encounter_id = self.encounter_id,
+        player_parts = snapshot_parts(self.player),
+        enemy_parts = snapshot_parts(self.enemy),
+        claimable_parts = claimable_parts,
+        claimed_part = nil
+    }
+end
+
+function V2Combat:return_to_overworld(forced_outcome)
+    if self.returned_to_overworld then
+        return
+    end
+
+    self.returned_to_overworld = true
+    local result = self:build_combat_result(forced_outcome)
+    if GameState.size and GameState.size() > 1 then
+        GameState.pop(result)
+    else
+        GameState.switch(require("states.overworld"))
+    end
 end
 
 function V2Combat:update_hover(mx, my)
@@ -1857,7 +1938,7 @@ end
 
 function V2Combat:keypressed(key)
     if key == "escape" then
-        GameState.switch(require("states.overworld"))
+        self:return_to_overworld("fled")
     elseif self.combat_end and (key == "space" or key == "c" or key == "return") then
         self:return_to_overworld()
     elseif self.resolution_playback and (key == "space" or key == "c" or key == "return") then
@@ -1865,7 +1946,7 @@ function V2Combat:keypressed(key)
     elseif key == "c" or key == "return" then
         self:confirm_round()
     elseif key == "r" then
-        self:enter()
+        self:enter(self.context)
     end
 end
 
@@ -2360,15 +2441,9 @@ function V2Combat:draw_socket_or_rim_frame(kind, part, layout, display_status, v
 end
 
 function V2Combat:draw_part_card(part, layout)
-    love.graphics.setFont(self.fonts.small)
-    local card = layout.card
     local display_status = self:display_status_for_part(part)
     local source_highlight = self.hover and self.hover.kind == "die" and self.hover.die.source_part == part
     local selected_source = self.selected_die and self.selected_die.source_part == part
-
-    if not draw_image("bp_card", card) then
-        draw_box(card, COLORS.panel, COLORS.line, 6)
-    end
 
     local socket_valid = self:is_valid_destination("socket", part)
     local rim_valid = self:is_valid_destination("rim", part)
@@ -2377,51 +2452,48 @@ function V2Combat:draw_part_card(part, layout)
     local auto_rim_target = self:auto_target_matches("rim", part)
     local auto_slot_target = self:auto_target_matches("slot", part)
 
-    local hatch_outline = auto_slot_target and COLORS.enemy or (slot_valid and COLORS.valid or COLORS.line)
-
-    self:draw_card_state_overlays(
-        part,
-        layout,
-        display_status,
-        socket_valid or rim_valid or slot_valid or auto_socket_target or auto_rim_target or auto_slot_target,
-        selected_source,
-        source_highlight)
-
-    draw_hp_badge(part.hp_value or 1, layout.meta.x, layout.meta.y)
-
-    self:draw_socket_or_rim_frame("socket", part, layout, display_status, socket_valid, auto_socket_target)
-    self:draw_socket_or_rim_frame("rim", part, layout, display_status, rim_valid, auto_rim_target)
-
-    self:draw_assignment_die(self.engine.assignments.sockets[part], layout.socket)
-    self:draw_assignment_die(self.engine.assignments.rims[part], layout.rim)
-    self:draw_socket_or_rim_preview("socket", part, layout.socket)
-    self:draw_socket_or_rim_preview("rim", part, layout.rim)
-
-    local previous_color = COLORS.line
-    if slot_valid then
-        previous_color = COLORS.valid
-    elseif display_status == "maimed" then
-        previous_color = COLORS.invalid
-    else
-        previous_color = hatch_outline
-    end
-    self:draw_slot_track(part, layout, previous_color, display_status)
-
-    local label_color = (source_highlight or selected_source) and COLORS.selected or COLORS.ink
-    self:draw_title_strip(part, layout, label_color)
+    BPCard.draw(part, layout, {
+        fonts = self.fonts,
+        time = self.ui_time or 0,
+        status = display_status,
+        active_die = self:active_die() ~= nil,
+        hovered = self.hover and self.hover.part == part,
+        source_highlight = source_highlight,
+        selected_source = selected_source,
+        socket_valid = socket_valid,
+        rim_valid = rim_valid,
+        slot_valid = slot_valid,
+        auto_socket_target = auto_socket_target,
+        auto_rim_target = auto_rim_target,
+        auto_slot_target = auto_slot_target,
+        socket_assignment = self.engine.assignments.sockets[part],
+        rim_assignment = self.engine.assignments.rims[part],
+        assignment_hidden = function(assignment)
+            return self:is_assignment_hidden(assignment)
+        end,
+        destination_preview = function(kind, target_part)
+            return self:destination_preview(kind, target_part)
+        end,
+        destination_has_spellmark = function(kind, target_part)
+            return self:destination_has_spellmark(kind, target_part)
+        end,
+        draw_socket_or_rim_preview = function(kind, target_part, target_rect)
+            return self:draw_socket_or_rim_preview(kind, target_part, target_rect)
+        end,
+        hover_matches = function(kind, target_part)
+            return self:hover_matches(kind, target_part)
+        end,
+        hatch_swallow_frame = function(target_part)
+            return self:hatch_swallow_frame(target_part)
+        end,
+        warn_title_overflow = function(target_part, name, width, max_width)
+            return self:warn_title_overflow(target_part, name, width, max_width)
+        end
+    })
 end
 
 function V2Combat:draw_empty_card(layout)
-    love.graphics.setFont(self.fonts.small)
-    if not draw_image("bp_card_empty", layout.card) then
-        set_color({ COLORS.surface_low[1], COLORS.surface_low[2], COLORS.surface_low[3], 0.18 })
-        love.graphics.rectangle("fill", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
-        set_color({ COLORS.dashed[1], COLORS.dashed[2], COLORS.dashed[3], 0.38 })
-        love.graphics.setLineWidth(1)
-        love.graphics.rectangle("line", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
-    end
-    draw_text("empty", layout.card.x, layout.card.y + layout.card.h * 0.42, layout.card.w, "center",
-        { COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.52 })
+    BPCard.draw_empty(layout, { fonts = self.fonts })
 end
 
 function V2Combat:draw_center()
@@ -2711,9 +2783,8 @@ function V2Combat:draw_inspector()
     if not draw_image("combat_inspector_rail", rail) then
         draw_box(rail, COLORS.rail, COLORS.line, 8)
     end
-    draw_text("Inspector", rail.x + 14, rail.y + 12, rail.w - 28, "left", COLORS.ink)
 
-    local y = rail.y + 42
+    local y = rail.y + 14
     local lines = {}
 
     if self.drag or self.selected_die then
@@ -2727,14 +2798,18 @@ function V2Combat:draw_inspector()
             end
             table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
             table.insert(lines, "Face: " .. tostring(die.face_index))
-        elseif self.hover.kind == "part" or self.hover.kind == "socket" or self.hover.kind == "rim" or self.hover.kind == "slot" then
+        elseif self.hover.kind == "slot" then
             local part = self.hover.part
-            table.insert(lines, string.format("%s · %s", part.name or part.id or "Part", self:display_status_for_part(part) or "healthy"))
-            table.insert(lines, "Heart value: " .. tostring(part.hp_value or 0))
             if part.slot then
-                table.insert(lines, "Slot: " .. (part.slot.name or part.slot.id))
-                table.insert(lines, "Cost: " .. Symbols.format_face(part.slot.cost))
+                lines = BPInspector.slot_lines(part.slot)
+                table.insert(lines, 1, "Installed in: " .. tostring(part.name or part.id or "Body Part"))
+            else
+                table.insert(lines, tostring(part.name or part.id or "Body Part") .. " has no Slot.")
             end
+        elseif self.hover.kind == "part" or self.hover.kind == "socket" or self.hover.kind == "rim" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
         elseif self.hover.kind == "crest" then
             local owner = self.hover.combatant and (self.hover.combatant.name or "?") or "?"
             local count = self.hover.combatant and self.hover.combatant:get_crest_count(self.hover.crest) or 0
@@ -2756,28 +2831,18 @@ function V2Combat:draw_inspector()
     end
 
     local inspected_part, current_face_index = self:inspected_die_source()
-    local beat_rule_y = rail.y + rail.h - 222
-    local log_rule_y = rail.y + rail.h - 150
-    if inspected_part and y + 108 < beat_rule_y then
+    local flavor_rule_y = rail.y + rail.h - 158
+    if inspected_part and y + 108 < flavor_rule_y then
         y = y + 4
         self:draw_unfolded_die_view(inspected_part, current_face_index, rail.x + 14, y, rail.w - 28)
     end
 
     set_color(COLORS.line)
-    love.graphics.line(rail.x + 14, beat_rule_y, rail.x + rail.w - 14, beat_rule_y)
+    love.graphics.line(rail.x + 14, flavor_rule_y, rail.x + rail.w - 14, flavor_rule_y)
     love.graphics.setFont(self.fonts.tiny)
-    draw_text("Now", rail.x + 14, beat_rule_y + 10, rail.w - 28, "left", COLORS.muted)
-    draw_wrapped_text(self.message or "", rail.x + 14, beat_rule_y + 26, rail.w - 28, "left", COLORS.ink, 2)
-
-    set_color(COLORS.line)
-    love.graphics.line(rail.x + 14, log_rule_y, rail.x + rail.w - 14, log_rule_y)
+    draw_text("Flavor", rail.x + 14, flavor_rule_y + 10, rail.w - 28, "left", COLORS.muted)
     love.graphics.setFont(self.fonts.body)
-    draw_text("Log", rail.x + 14, log_rule_y + 12, rail.w - 28, "left", COLORS.ink)
-
-    y = log_rule_y + 36
-    for _, line in ipairs(self.log) do
-        y = draw_wrapped_text(line, rail.x + 14, y, rail.w - 28, "left", COLORS.muted, 4)
-    end
+    draw_wrapped_text(BPInspector.flavor(inspected_part), rail.x + 14, flavor_rule_y + 30, rail.w - 28, "left", COLORS.ink, 2)
 end
 
 function V2Combat:draw_combat_end_overlay()

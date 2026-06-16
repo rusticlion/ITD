@@ -1,0 +1,145 @@
+local Content = require("combat.v2_content")
+
+local Catalog = {}
+
+Catalog.MODULE_NAME = "data.combat.v2_demo_parts"
+
+Catalog.SLOT_ORDER = {
+    { id = "head", label = "Head" },
+    { id = "body", label = "Body" },
+    { id = "arm_l", label = "Left Arm" },
+    { id = "arm_r", label = "Right Arm" },
+    { id = "leg_l", label = "Left Leg" },
+    { id = "leg_r", label = "Right Leg" }
+}
+
+local definitions_cache = nil
+
+local function definitions()
+    if not definitions_cache then
+        definitions_cache = Content.load_module(Catalog.MODULE_NAME)
+    end
+
+    return definitions_cache
+end
+
+local function first_owned_instance(world, def_id)
+    local run = world and world.run
+    for instance_id, instance in pairs(run and run.parts or {}) do
+        if instance and instance.def_id == def_id then
+            return instance_id, instance
+        end
+    end
+
+    return nil, nil
+end
+
+local function decorate_part(part, instance_id, instance, slot)
+    if not part then
+        return nil
+    end
+
+    part.def_id = part.id
+    part.instance_id = instance_id
+    part.status = instance and (instance.status or "healthy") or part.status or "healthy"
+    part.source = instance and instance.source or nil
+    part.claimed_from = instance and instance.claimed_from or nil
+    part.menu_slot = slot
+    return part
+end
+
+function Catalog.definitions()
+    return definitions()
+end
+
+function Catalog.build_part(def_id, instance_id, instance, slot)
+    if not def_id then
+        return nil
+    end
+
+    return decorate_part(Content.build_part(definitions(), def_id), instance_id, instance, slot)
+end
+
+function Catalog.part_from_instance(instance_id, instance, slot)
+    if not (instance and instance.def_id) then
+        return nil
+    end
+
+    return Catalog.build_part(instance.def_id, instance_id, instance, slot)
+end
+
+function Catalog.active_parts(world)
+    local run = world and world.run or {}
+    local parts = run.parts or {}
+    local active = {}
+
+    for _, slot in ipairs(Catalog.SLOT_ORDER) do
+        local instance_id = run.dreamform and run.dreamform[slot.id]
+        local instance = instance_id and parts[instance_id]
+        active[#active + 1] = {
+            slot = slot,
+            instance_id = instance_id,
+            instance = instance,
+            part = Catalog.part_from_instance(instance_id, instance, slot)
+        }
+    end
+
+    return active
+end
+
+function Catalog.active_body_parts(world)
+    local parts = {}
+    for _, entry in ipairs(Catalog.active_parts(world)) do
+        if entry.part then
+            table.insert(parts, entry.part)
+        end
+    end
+    return parts
+end
+
+function Catalog.discovered_part_ids(world)
+    local run = world and world.run or {}
+    local discovered = {}
+
+    for def_id, value in pairs(run.discovered_parts or {}) do
+        if value then
+            discovered[def_id] = true
+        end
+    end
+
+    for _, instance in pairs(run.parts or {}) do
+        if instance and instance.def_id then
+            discovered[instance.def_id] = true
+        end
+    end
+
+    local ids = {}
+    for def_id in pairs(discovered) do
+        table.insert(ids, def_id)
+    end
+
+    table.sort(ids, function(left, right)
+        local defs = definitions()
+        local left_name = defs.parts[left] and defs.parts[left].name or left
+        local right_name = defs.parts[right] and defs.parts[right].name or right
+        if left_name == right_name then
+            return left < right
+        end
+        return left_name < right_name
+    end)
+
+    return ids
+end
+
+function Catalog.discovered_parts(world)
+    local parts = {}
+
+    for _, def_id in ipairs(Catalog.discovered_part_ids(world)) do
+        local instance_id, instance = first_owned_instance(world, def_id)
+        table.insert(parts, Catalog.build_part(def_id, instance_id, instance))
+    end
+
+    return parts
+end
+
+return Catalog

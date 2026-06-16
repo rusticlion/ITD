@@ -10,11 +10,7 @@ function Combatant:new(data)
         body_parts = {},
         heart_points = data.heart_points or 3,
         crest_pool = data.crest_pool or {},
-        modifiers = {},
-        selected_tech = nil,
         is_player = data.is_player or false,
-        pending_forced_rerolls = 0,
-        attack_bonus_tokens = {},
         pending_next_symbols = {},
         allocation_symbol_modifiers = {},
         pending_spellmarks = {},
@@ -48,25 +44,6 @@ function Combatant:get_body_part_by_id(id)
         end
     end
     return nil
-end
-
-function Combatant:get_available_techs()
-    local techs = {}
-
-    for _, part in ipairs(self.body_parts) do
-        for _, tech in ipairs(part.techs or {}) do
-            if type(tech) == "table" then
-                table.insert(techs, { tech = tech, source_part = part })
-            elseif type(tech) == "string" then
-                table.insert(techs, {
-                    tech = { id = tech, name = tech, actions = {} },
-                    source_part = part
-                })
-            end
-        end
-    end
-
-    return techs
 end
 
 function Combatant:get_first_healthy_part()
@@ -113,26 +90,6 @@ end
 
 function Combatant:get_crest_count(crest)
     return self.crest_pool[crest] or 0
-end
-
-function Combatant:clear_modifiers()
-    self.modifiers = {}
-end
-
-function Combatant:add_modifier(key, value)
-    if not key then
-        return
-    end
-
-    self.modifiers[key] = (self.modifiers[key] or 0) + (value or 0)
-end
-
-function Combatant:get_modifier(key)
-    if not key then
-        return 0
-    end
-
-    return self.modifiers[key] or 0
 end
 
 function Combatant:add_next_symbol(symbol)
