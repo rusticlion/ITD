@@ -11,6 +11,7 @@ function BodyPart:new(data)
     local instance = {
         id = data.id,
         name = data.name,
+        flavor = data.flavor,
         type = data.type,
         status = data.status or "healthy",
         toughness = data.toughness or 2,

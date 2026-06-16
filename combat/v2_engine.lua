@@ -18,6 +18,130 @@ local function copy_list(source)
     return copy
 end
 
+local function copy_result_fields(target, source)
+    for key, value in pairs(source or {}) do
+        if key ~= "actions" and target[key] == nil then
+            target[key] = value
+        end
+    end
+end
+
+local function amount_or_default(value, default)
+    local numeric = tonumber(value)
+    if not numeric or numeric < 1 then
+        return default or 1
+    end
+    return math.floor(numeric)
+end
+
+local function repeated_symbol(symbol, amount)
+    local symbols = {}
+    local normalized = Symbols.normalize(symbol)
+    for _ = 1, amount_or_default(amount, 1) do
+        if normalized and normalized ~= Symbols.BLANK then
+            table.insert(symbols, normalized)
+        end
+    end
+    return symbols
+end
+
+local function normalize_destination(destination)
+    local value = destination and tostring(destination):lower()
+    if value == "sockets" then
+        return "socket"
+    elseif value == "rims" then
+        return "rim"
+    elseif value == "slots" then
+        return "slot"
+    end
+    return value
+end
+
+local function normalize_effect_actions(effect)
+    if type(effect) ~= "table" then
+        return {}
+    end
+
+    if type(effect.actions) == "table" then
+        return effect.actions
+    elseif type(effect.sequence) == "table" then
+        return effect.sequence
+    elseif type(effect[1]) == "table" and effect.type == nil then
+        return effect
+    end
+
+    return { effect }
+end
+
+local function modifier_applies_to_destination(modifier, destination)
+    local wanted = normalize_destination(modifier and (modifier.destination or modifier.destination_kind))
+    if not wanted then
+        return true
+    end
+
+    local actual = normalize_destination(destination)
+    return actual == nil or actual == wanted
+end
+
+local function modifier_matches_symbols(modifier, symbols)
+    local match = modifier and (modifier.match or modifier.match_symbol or modifier.source_symbol)
+    if not match or match == "any" then
+        return true
+    end
+
+    if type(match) == "table" then
+        for _, symbol in ipairs(match) do
+            if Symbols.has(symbols, symbol) then
+                return true
+            end
+        end
+        return false
+    end
+
+    return Symbols.has(symbols, match)
+end
+
+local function default_spellmark_target(destination)
+    return normalize_destination(destination) == "rim" and "opponent" or "self"
+end
+
+local function spellmark_accepts_symbol(spellmark, symbols)
+    local accepted = spellmark and (spellmark.symbol or spellmark.accept_symbol or Symbols.ESSENCE)
+    return accepted and Symbols.has(symbols, accepted)
+end
+
+local function spellmark_part_matches(spellmark, part)
+    if not spellmark or not part then
+        return false
+    end
+
+    if spellmark.target_part_id and spellmark.target_part_id ~= part.id then
+        return false
+    end
+
+    local wanted_type = spellmark.target_type or spellmark.part_type
+    if wanted_type and tostring(wanted_type):upper() ~= tostring(part.type or ""):upper() then
+        return false
+    end
+
+    return true
+end
+
+local function classify_symbols_for_relevance(symbols, relevant_symbols)
+    local used = {}
+    local burned = {}
+
+    for _, symbol in ipairs(symbols or {}) do
+        if relevant_symbols[symbol] then
+            table.insert(used, symbol)
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    return used, burned
+end
+
 local function slot_cost(slot)
     local cost = slot and slot.cost or {}
     local normalized = {}
@@ -114,6 +238,7 @@ function Engine:new()
         slot_queue = {},
         token_counter = 0,
         queue_counter = 0,
+        spellmark_counter = 0,
         untargetable_parts = setmetatable({}, { __mode = "k" })
     }
 
@@ -222,6 +347,11 @@ function Engine:next_token_id()
     return "die_" .. tostring(self.token_counter)
 end
 
+function Engine:next_spellmark_id()
+    self.spellmark_counter = (self.spellmark_counter or 0) + 1
+    return "spellmark_" .. tostring(self.spellmark_counter)
+end
+
 function Engine:roll_all_dice()
     self.state = "ROLL"
     self:emit(Events.ROLL_PHASE, { round = self.current_round })
@@ -284,10 +414,23 @@ function Engine:remove_die_from_pool(combatant, die)
     return false
 end
 
-function Engine:get_effective_symbols(combatant, die)
+function Engine:get_effective_symbols(combatant, die, destination)
     local base = die and die.symbols or {}
     local pending = combatant and combatant.get_pending_next_symbols and combatant:get_pending_next_symbols() or {}
-    return Symbols.with_added_symbols(base, pending), copy_list(pending)
+    local added = copy_list(pending)
+    local modifiers = combatant and combatant.get_allocation_symbol_modifiers and combatant:get_allocation_symbol_modifiers() or {}
+
+    for _, modifier in ipairs(modifiers) do
+        if modifier_applies_to_destination(modifier, destination) and modifier_matches_symbols(modifier, base) then
+            local symbol = modifier.symbol or modifier.add_symbol
+            local amount = amount_or_default(modifier.amount, 1)
+            for _, added_symbol in ipairs(repeated_symbol(symbol, amount)) do
+                table.insert(added, added_symbol)
+            end
+        end
+    end
+
+    return Symbols.with_added_symbols(base, added), copy_list(added)
 end
 
 function Engine:consume_pending_symbols(combatant)
@@ -322,6 +465,41 @@ function Engine:classify_assignment_symbols(symbols, relevant_symbol)
     return used, burned
 end
 
+function Engine:get_assignment_spellmark(combatant, destination, part, symbols)
+    local normalized_destination = normalize_destination(destination)
+    local spellmarks = combatant and combatant.get_spellmarks and combatant:get_spellmarks() or {}
+
+    for _, spellmark in ipairs(spellmarks) do
+        local mark_destination = normalize_destination(spellmark.destination) or "rim"
+        local target_side = spellmark.target or spellmark.target_side or default_spellmark_target(mark_destination)
+
+        if mark_destination == normalized_destination
+            and target_side == default_spellmark_target(normalized_destination)
+            and spellmark_part_matches(spellmark, part)
+            and spellmark_accepts_symbol(spellmark, symbols) then
+            return spellmark
+        end
+    end
+
+    return nil
+end
+
+function Engine:classify_destination_symbols(combatant, destination, part, symbols)
+    local normalized_destination = normalize_destination(destination)
+    local primary_symbol = normalized_destination == "rim" and Symbols.STRIKE or Symbols.WARD
+    local relevant = {
+        [primary_symbol] = true
+    }
+    local spellmark = self:get_assignment_spellmark(combatant, normalized_destination, part, symbols)
+
+    if spellmark then
+        relevant[Symbols.normalize(spellmark.symbol or spellmark.accept_symbol or Symbols.ESSENCE)] = true
+    end
+
+    local used, burned = classify_symbols_for_relevance(symbols, relevant)
+    return used, burned, spellmark
+end
+
 function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
     local die = self:find_die(combatant, die_or_id)
     local part = find_part(combatant, part_or_id)
@@ -338,21 +516,24 @@ function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
         return false, "socket_full"
     end
 
-    local effective, added = self:get_effective_symbols(combatant, die)
-    if not Symbols.has(effective, Symbols.WARD) then
+    local effective, added = self:get_effective_symbols(combatant, die, "socket")
+    local used, burned, spellmark = self:classify_destination_symbols(combatant, "socket", part, effective)
+    if not Symbols.has(effective, Symbols.WARD) and not spellmark then
         return false, "no_ward"
     end
 
-    local used, burned = self:classify_assignment_symbols(effective, Symbols.WARD)
     self:commit_die(combatant, die, effective, added)
-    self.assignments.sockets[part] = {
+    local assignment = {
         die = die,
         combatant = combatant,
         part = part,
         symbols = effective,
         used_symbols = used,
-        burned_symbols = burned
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
     }
+    self.assignments.sockets[part] = assignment
 
     self:emit(Events.DIE_ASSIGNED, {
         combatant = combatant,
@@ -361,8 +542,13 @@ function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
         part = part,
         used_symbols = used,
         burned_symbols = burned,
-        added_symbols = added
+        added_symbols = added,
+        spellmark = spellmark
     })
+
+    if spellmark then
+        self:resolve_spellmark_assignment(combatant, spellmark, assignment)
+    end
 
     return true
 end
@@ -384,22 +570,25 @@ function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
         return false, "rim_full"
     end
 
-    local effective, added = self:get_effective_symbols(attacker, die)
-    if not Symbols.has(effective, Symbols.STRIKE) then
+    local effective, added = self:get_effective_symbols(attacker, die, "rim")
+    local used, burned, spellmark = self:classify_destination_symbols(attacker, "rim", target_part, effective)
+    if not Symbols.has(effective, Symbols.STRIKE) and not spellmark then
         return false, "no_strike"
     end
 
-    local used, burned = self:classify_assignment_symbols(effective, Symbols.STRIKE)
     self:commit_die(attacker, die, effective, added)
-    self.assignments.rims[target_part] = {
+    local assignment = {
         die = die,
         attacker = attacker,
         defender = defender,
         part = target_part,
         symbols = effective,
         used_symbols = used,
-        burned_symbols = burned
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
     }
+    self.assignments.rims[target_part] = assignment
 
     self:emit(Events.DIE_ASSIGNED, {
         combatant = attacker,
@@ -409,8 +598,13 @@ function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
         part = target_part,
         used_symbols = used,
         burned_symbols = burned,
-        added_symbols = added
+        added_symbols = added,
+        spellmark = spellmark
     })
+
+    if spellmark then
+        self:resolve_spellmark_assignment(attacker, spellmark, assignment)
+    end
 
     return true
 end
@@ -433,7 +627,7 @@ function Engine:feed_die_to_slot(combatant, die_or_id, part_or_id)
         return false, "slot_has_no_cost"
     end
 
-    local effective, added = self:get_effective_symbols(combatant, die)
+    local effective, added = self:get_effective_symbols(combatant, die, "slot")
     local to_light = {}
     local burned = {}
     local hungry = part:has_keyword("Hungry") or (slot and slot.hungry)
@@ -554,35 +748,274 @@ function Engine:resolve_slot_window(timing)
     end
 end
 
-function Engine:resolve_slot_entry(entry)
-    if not entry then
-        return
+function Engine:create_virtual_assignment_die(owner, source_part, symbols, source)
+    local effective = Symbols.with_added_symbols(symbols or {}, {})
+    return {
+        id = self:next_token_id(),
+        owner = owner,
+        source_part = source_part,
+        symbols = copy_list(effective),
+        effective_symbols = copy_list(effective),
+        added_symbols = {},
+        assigned = true,
+        virtual = true,
+        source = source
+    }
+end
+
+function Engine:auto_assign_symbols(entry, effect)
+    local destination = normalize_destination(effect.destination) or "socket"
+    local actor = entry.combatant
+    local target_side = effect.target or effect.target_side
+    if not target_side then
+        target_side = destination == "rim" and "opponent" or "self"
     end
 
-    self:remove_slot_entry(entry)
+    local target = target_side == "opponent" and self:get_opponent(actor) or actor
+    local relevant = destination == "rim" and Symbols.STRIKE or Symbols.WARD
+    local symbols = repeated_symbol(effect.symbol or relevant, effect.amount or 1)
+    local assigned = {}
+    local wanted_type = effect.part_type and tostring(effect.part_type):upper()
 
-    local effect = entry.effect or {}
-    local result = {
-        type = effect.type or "none"
+    if not actor or not target or #symbols == 0 or not Symbols.has(symbols, relevant) then
+        return {
+            type = effect.type,
+            destination = destination,
+            assigned = assigned
+        }
+    end
+
+    for _, part in ipairs(target.body_parts or {}) do
+        local type_ok = not wanted_type or (part.type and tostring(part.type):upper() == wanted_type)
+        local destination_free = destination == "rim" and not self.assignments.rims[part]
+            or destination == "socket" and not self.assignments.sockets[part]
+        local targetable = destination ~= "rim" or is_part_targetable(self, part)
+
+        if type_ok and destination_free and targetable and part.status ~= "maimed" then
+            local token_owner = destination == "rim" and actor or target
+            local token = self:create_virtual_assignment_die(token_owner, entry.part, symbols, {
+                type = "slot",
+                slot = entry.slot,
+                effect = effect
+            })
+            local used, burned = self:classify_assignment_symbols(token.effective_symbols, relevant)
+
+            if destination == "rim" then
+                self.assignments.rims[part] = {
+                    die = token,
+                    attacker = actor,
+                    defender = target,
+                    part = part,
+                    symbols = token.effective_symbols,
+                    used_symbols = used,
+                    burned_symbols = burned,
+                    added_symbols = {},
+                    virtual = true,
+                    source_slot = entry.slot
+                }
+            else
+                self.assignments.sockets[part] = {
+                    die = token,
+                    combatant = target,
+                    part = part,
+                    symbols = token.effective_symbols,
+                    used_symbols = used,
+                    burned_symbols = burned,
+                    added_symbols = {},
+                    virtual = true,
+                    source_slot = entry.slot
+                }
+            end
+
+            table.insert(assigned, {
+                part = part,
+                die = token,
+                symbols = token.effective_symbols
+            })
+
+            self:emit(Events.DIE_ASSIGNED, {
+                combatant = actor,
+                die = token,
+                destination = destination,
+                target_combatant = destination == "rim" and target or nil,
+                part = part,
+                used_symbols = used,
+                burned_symbols = burned,
+                added_symbols = {},
+                virtual = true,
+                source = token.source
+            })
+        end
+    end
+
+    return {
+        type = effect.type,
+        destination = destination,
+        symbol = effect.symbol or relevant,
+        amount = amount_or_default(effect.amount, 1),
+        target = target,
+        assigned = assigned
+    }
+end
+
+function Engine:open_spellmark(entry, effect)
+    local destination = normalize_destination(effect.destination) or "rim"
+    local spellmark = {
+        id = self:next_spellmark_id(),
+        name = effect.name or effect.mark_name or (entry.slot and entry.slot.name) or "Spellmark",
+        destination = destination,
+        target = effect.target or effect.target_side or default_spellmark_target(destination),
+        symbol = Symbols.normalize(effect.symbol or effect.accept_symbol or Symbols.ESSENCE),
+        target_type = effect.target_type or effect.part_type,
+        target_part_id = effect.target_part_id,
+        single_use = effect.single_use ~= false,
+        payload = effect.on_mark or effect.payload or effect.effect or { type = "none" },
+        source = {
+            type = "slot",
+            slot = entry.slot,
+            part = entry.part
+        }
     }
 
-    if type(effect) == "function" then
-        result = effect(self, entry) or result
-    elseif effect.type == "gain_crest" then
-        local amount = effect.amount or 1
+    if entry.combatant and entry.combatant.add_spellmark then
+        entry.combatant:add_spellmark(spellmark)
+    end
+
+    self:emit(Events.SPELLMARK_OPENED, {
+        combatant = entry.combatant,
+        part = entry.part,
+        slot = entry.slot,
+        spellmark = spellmark
+    })
+
+    return {
+        type = effect.type,
+        spellmark = spellmark,
+        destination = destination,
+        symbol = spellmark.symbol,
+        target = spellmark.target
+    }
+end
+
+function Engine:resolve_spellmark_assignment(combatant, spellmark, assignment)
+    if not (combatant and spellmark and assignment) then
+        return nil
+    end
+
+    if spellmark.single_use ~= false and combatant.remove_spellmark then
+        combatant:remove_spellmark(spellmark)
+    end
+
+    local payload = spellmark.payload or { type = "none" }
+    local payload_type = payload.type or "none"
+    local result = {
+        type = "spellmark",
+        payload_type = payload_type,
+        spellmark = spellmark,
+        assignment = assignment,
+        target_part = assignment.part
+    }
+
+    if payload_type == "damage_marked_part" or payload_type == "damage_target_part" or payload_type == "damage_assigned_part" then
+        local amount = amount_or_default(payload.amount, 1)
+        local target = assignment.defender or assignment.combatant or self:get_opponent(combatant)
+        result.amount = amount
+        result.damaged = false
+
+        for _ = 1, amount do
+            if target and assignment.part and assignment.part.status ~= "maimed" then
+                result.damaged = self:apply_damage(combatant, target, assignment.part, {
+                    source = "spellmark",
+                    spellmark = spellmark,
+                    payload = payload,
+                    assignment = assignment
+                }) or result.damaged
+            end
+        end
+    elseif payload_type ~= "none" then
+        result.payload = self:resolve_effect_action({
+            combatant = combatant,
+            part = spellmark.source and spellmark.source.part,
+            slot = spellmark.source and spellmark.source.slot
+        }, payload)
+    end
+
+    self:emit(Events.SPELLMARK_RESOLVED, {
+        combatant = combatant,
+        spellmark = spellmark,
+        assignment = assignment,
+        part = assignment.part,
+        effect = result
+    })
+
+    if self.state ~= "COMPLETE" and self:check_combat_end() then
+        self.state = "COMPLETE"
+        self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+    end
+
+    return result
+end
+
+function Engine:resolve_effect_action(entry, effect)
+    effect = effect or {}
+
+    local effect_type = effect.type or "none"
+    local result = {
+        type = effect_type
+    }
+
+    if effect_type == "gain_crest" then
+        local amount = amount_or_default(effect.amount, 1)
         self:grant_crest(entry.combatant, effect.crest, amount, { source = "slot", slot = entry.slot })
         result.crest = effect.crest
         result.amount = amount
-    elseif effect.type == "heal_self" then
+    elseif effect_type == "heal_self" then
+        local amount = amount_or_default(effect.amount, 1)
         local target_part = self:find_most_damaged_part(entry.combatant)
         result.target_part = target_part
-        result.healed = self:apply_healing(entry.combatant, entry.combatant, target_part, effect.amount or 1, { source = "slot", slot = entry.slot })
-    elseif effect.type == "add_next_symbol" then
+        result.amount = amount
+        result.healed = self:apply_healing(entry.combatant, entry.combatant, target_part, amount, { source = "slot", slot = entry.slot })
+    elseif effect_type == "add_next_symbol" then
+        local symbol = effect.symbol or Symbols.STRIKE
+        local amount = amount_or_default(effect.amount, 1)
         if entry.combatant and entry.combatant.add_next_symbol then
-            entry.combatant:add_next_symbol(effect.symbol or Symbols.STRIKE)
+            for _ = 1, amount do
+                entry.combatant:add_next_symbol(symbol)
+            end
         end
-        result.symbol = effect.symbol or Symbols.STRIKE
-    elseif effect.type == "damage_opponent_part" then
+        result.symbol = symbol
+        result.amount = amount
+    elseif effect_type == "add_symbol_to_matching_dice" or effect_type == "channel_symbol" then
+        local symbol = Symbols.normalize(effect.symbol or effect.add_symbol or Symbols.STRIKE)
+        local match = effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE
+        local amount = amount_or_default(effect.amount, 1)
+
+        if entry.combatant and entry.combatant.add_allocation_symbol_modifier and symbol then
+            entry.combatant:add_allocation_symbol_modifier({
+                match = match,
+                symbol = symbol,
+                amount = amount,
+                destination = effect.destination,
+                duration = effect.duration or "allocation",
+                source = {
+                    type = "slot",
+                    slot = entry.slot,
+                    part = entry.part
+                }
+            })
+        end
+
+        result.type = "add_symbol_to_matching_dice"
+        result.match = match
+        result.symbol = symbol
+        result.amount = amount
+        result.destination = normalize_destination(effect.destination)
+        result.duration = effect.duration or "allocation"
+    elseif effect_type == "assign_symbol_to_each_part" or effect_type == "auto_assign_symbol" then
+        result = self:auto_assign_symbols(entry, effect)
+    elseif effect_type == "open_spellmark" or effect_type == "spellmark" then
+        result = self:open_spellmark(entry, effect)
+    elseif effect_type == "damage_opponent_part" then
         local opponent = self:get_opponent(entry.combatant)
         local target_part = nil
 
@@ -597,7 +1030,7 @@ function Engine:resolve_slot_entry(entry)
         end
 
         result.target_part = target_part
-        result.amount = effect.amount or 1
+        result.amount = amount_or_default(effect.amount, 1)
         result.damaged = false
 
         for _ = 1, result.amount do
@@ -607,6 +1040,39 @@ function Engine:resolve_slot_entry(entry)
                     slot = entry.slot,
                     effect = effect
                 }) or result.damaged
+            end
+        end
+    end
+
+    return result
+end
+
+function Engine:resolve_slot_entry(entry)
+    if not entry then
+        return
+    end
+
+    self:remove_slot_entry(entry)
+
+    local effect = entry.effect or {}
+    local result = {
+        type = effect.type or "none"
+    }
+
+    if type(effect) == "function" then
+        result = effect(self, entry) or result
+    else
+        local actions = normalize_effect_actions(effect)
+        result = {
+            type = #actions > 1 and "sequence" or ((actions[1] and actions[1].type) or "none"),
+            actions = {}
+        }
+
+        for _, action in ipairs(actions) do
+            local action_result = self:resolve_effect_action(entry, action)
+            table.insert(result.actions, action_result)
+            if #actions == 1 then
+                copy_result_fields(result, action_result)
             end
         end
     end
@@ -876,20 +1342,26 @@ function Engine:get_valid_destinations(combatant, die_or_id)
         return destinations
     end
 
-    local effective = self:get_effective_symbols(combatant, die)
+    local socket_symbols = self:get_effective_symbols(combatant, die, "socket")
+    local rim_symbols = self:get_effective_symbols(combatant, die, "rim")
+    local slot_symbols = self:get_effective_symbols(combatant, die, "slot")
     local opponent = self:get_opponent(combatant)
 
-    if Symbols.has(effective, Symbols.WARD) then
-        for _, part in ipairs(combatant.body_parts or {}) do
-            if part.status ~= "maimed" and not self.assignments.sockets[part] then
+    for _, part in ipairs(combatant.body_parts or {}) do
+        if part.status ~= "maimed" and not self.assignments.sockets[part] then
+            local spellmark = self:get_assignment_spellmark(combatant, "socket", part, socket_symbols)
+            if Symbols.has(socket_symbols, Symbols.WARD) or spellmark then
                 table.insert(destinations.sockets, part)
             end
         end
     end
 
-    if opponent and Symbols.has(effective, Symbols.STRIKE) then
+    if opponent then
         for _, part in ipairs(opponent.body_parts or {}) do
-            if is_part_targetable(self, part) and not self.assignments.rims[part] then
+            local spellmark = self:get_assignment_spellmark(combatant, "rim", part, rim_symbols)
+            if is_part_targetable(self, part)
+                and not self.assignments.rims[part]
+                and (Symbols.has(rim_symbols, Symbols.STRIKE) or spellmark) then
                 table.insert(destinations.rims, part)
             end
         end
@@ -899,7 +1371,7 @@ function Engine:get_valid_destinations(combatant, die_or_id)
         if part:is_slot_online() then
             local matched = false
             local cost = slot_cost(part.slot)
-            for _, symbol in ipairs(effective) do
+            for _, symbol in ipairs(slot_symbols) do
                 for index, required in ipairs(cost) do
                     if not (part.slot_charge and part.slot_charge[index]) and (part:has_keyword("Hungry") or part.slot.hungry or required == symbol) then
                         table.insert(destinations.slots, part)

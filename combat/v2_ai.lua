@@ -256,7 +256,9 @@ end
 
 local function score_die_moves(engine, combatant, die, profile)
     local destinations = engine:get_valid_destinations(combatant, die)
-    local symbols = engine:get_effective_symbols(combatant, die)
+    local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
+    local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
+    local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
     local best = nil
 
     for _, part in ipairs(destinations.slots or {}) do
@@ -264,7 +266,7 @@ local function score_die_moves(engine, combatant, die, profile)
             kind = "slot",
             die = die,
             part = part,
-            score = score_slot(profile, symbols, part)
+            score = score_slot(profile, slot_symbols, part)
         })
     end
 
@@ -273,7 +275,7 @@ local function score_die_moves(engine, combatant, die, profile)
             kind = "rim",
             die = die,
             part = part,
-            score = score_rim(profile, symbols, part)
+            score = score_rim(profile, rim_symbols, part)
         })
     end
 
@@ -282,7 +284,7 @@ local function score_die_moves(engine, combatant, die, profile)
             kind = "socket",
             die = die,
             part = part,
-            score = score_socket(profile, symbols, part)
+            score = score_socket(profile, socket_symbols, part)
         })
     end
 
@@ -316,14 +318,16 @@ function AI.choose_next_allocation(engine, combatant)
 
     for _, die in ipairs(engine:get_pool(combatant)) do
         local destinations = engine:get_valid_destinations(combatant, die)
-        local symbols = engine:get_effective_symbols(combatant, die)
+        local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
+        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
+        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
 
         for _, part in ipairs(destinations.slots or {}) do
             best = consider(best, {
                 kind = "slot",
                 die = die,
                 part = part,
-                score = score_slot(profile, symbols, part)
+                score = score_slot(profile, slot_symbols, part)
             })
         end
 
@@ -332,7 +336,7 @@ function AI.choose_next_allocation(engine, combatant)
                 kind = "rim",
                 die = die,
                 part = part,
-                score = score_rim(profile, symbols, part)
+                score = score_rim(profile, rim_symbols, part)
             })
         end
 
@@ -341,7 +345,7 @@ function AI.choose_next_allocation(engine, combatant)
                 kind = "socket",
                 die = die,
                 part = part,
-                score = score_socket(profile, symbols, part)
+                score = score_socket(profile, socket_symbols, part)
             })
         end
     end

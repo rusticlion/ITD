@@ -14,7 +14,9 @@ end
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     Assets:load()
-    if has_launch_arg("--v2-combat") then
+    if has_launch_arg("--bp-editor") then
+        GameState.switch(require("states.bp_editor"))
+    elseif has_launch_arg("--v2-combat") then
         GameState.switch(require("states.v2_combat"))
     else
         GameState.switch(Overworld)
@@ -35,6 +37,10 @@ end
 
 function love.keyreleased(key)
     GameState.keyreleased(key)
+end
+
+function love.textinput(text)
+    GameState.textinput(text)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)

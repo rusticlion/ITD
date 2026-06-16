@@ -1,5 +1,6 @@
 local Assets = {
     images = {},
+    sources = {},
     directories = {
         "assets/sprites/bodyparts",
         "assets/sprites/combat",
@@ -18,6 +19,7 @@ end
 
 function Assets:load()
     self.images = {}
+    self.sources = {}
 
     for _, directory in ipairs(self.directories) do
         local info = love.filesystem.getInfo(directory)
@@ -25,9 +27,19 @@ function Assets:load()
             for _, file in ipairs(love.filesystem.getDirectoryItems(directory)) do
                 if file:sub(-4):lower() == ".png" then
                     local id = file:sub(1, -5)
-                    local image = loadImage(directory .. "/" .. file)
+                    local path = directory .. "/" .. file
+                    local image = loadImage(path)
                     if image then
-                        self.images[id] = image
+                        if self.images[id] then
+                            print(string.format(
+                                "[Assets] Duplicate asset id '%s' at %s; keeping first loaded image from %s.",
+                                id,
+                                path,
+                                self.sources[id] or "unknown"))
+                        else
+                            self.images[id] = image
+                            self.sources[id] = path
+                        end
                     end
                 end
             end

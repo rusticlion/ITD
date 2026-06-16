@@ -66,6 +66,7 @@ Each Body Part defines:
 | Field | Notes |
 |---|---|
 | Name, type | HEAD / BODY / ARM ×2 / LEG ×2. Fewer than 6 parts is legal. |
+| Flavor | Optional short prose string for planning screens, editors, claiming text, and other non-combat surfaces. |
 | Heart value | Hearts lost by owner when this part is maimed (1–3). |
 | Status | Healthy → Wounded → Maimed. |
 | Die | 6 faces + predetermined wound-faces and maim-faces. |
@@ -157,6 +158,48 @@ Filled slots enqueue in fill order and resolve FIFO within their window. Deliber
 - **Insight** — ⚡️⚡️ · Spend · Gain a Knowledge crest.
 - **Last Resort** — 🩸🩸🩸 · Spend · Heal one of your parts one step. *(Blood costs come online as you bleed — the built-in comeback vector.)*
 - **Overload** *(enemy ability)* — injects a charge into one of the player's tracks, weaponizing mandatory trigger by detonating the effect on the wrong round.
+
+### 6.6 Prototype Effect Vocabulary
+
+Slot effects may be authored as a single effect table:
+
+```lua
+effect = { type = "add_next_symbol", symbol = Symbols.STRIKE }
+```
+
+or as an ordered sequence:
+
+```lua
+effect = {
+    actions = {
+        { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, destination = "rim" },
+        { type = "add_next_symbol", symbol = Symbols.WARD }
+    }
+}
+```
+
+Current structured effect types:
+
+- `add_next_symbol` — add one or more symbols to the next die assigned this Allocation.
+- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`.
+- `assign_symbol_to_each_part` — create virtual assignments on every open matching destination, e.g. a Force Field that assigns one 🛡️ to each unwarded friendly socket.
+- `open_spellmark` — temporarily alters existing rims or sockets to accept Essence; the first matching Essence assignment marks that part and resolves an `on_mark` payload.
+- `heal_self`, `damage_opponent_part`, `gain_crest` — early prototype utility effects.
+
+This vocabulary intentionally models magical conversion as visible added symbols rather than hidden “counts as” state. Essence remains Essence; a Slot can temporarily make Essence dice carry extra tactical weight.
+
+Prototype spellmark shape:
+
+```lua
+effect = {
+    type = "open_spellmark",
+    destination = "rim",
+    symbol = Symbols.ESSENCE,
+    on_mark = { type = "damage_marked_part", amount = 1 }
+}
+```
+
+Spellmarks are not a third placement zone. They temporarily make an existing destination accept Essence, so an Essence-only die can mark an enemy rim but applies no Strike pressure, while a Strike+Essence face can both attack and mark.
 
 ---
 

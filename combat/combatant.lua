@@ -16,6 +16,8 @@ function Combatant:new(data)
         pending_forced_rerolls = 0,
         attack_bonus_tokens = {},
         pending_next_symbols = {},
+        allocation_symbol_modifiers = {},
+        pending_spellmarks = {},
         shadow_slot_shroud = false,
         ai_personality = data.ai_personality or data.ai_profile or data.ai or "balanced"
     }
@@ -152,8 +154,47 @@ function Combatant:consume_pending_next_symbols()
     return symbols
 end
 
+function Combatant:add_allocation_symbol_modifier(modifier)
+    if type(modifier) ~= "table" or not modifier.symbol then
+        return
+    end
+
+    self.allocation_symbol_modifiers = self.allocation_symbol_modifiers or {}
+    table.insert(self.allocation_symbol_modifiers, modifier)
+end
+
+function Combatant:get_allocation_symbol_modifiers()
+    return self.allocation_symbol_modifiers or {}
+end
+
+function Combatant:add_spellmark(spellmark)
+    if type(spellmark) ~= "table" then
+        return
+    end
+
+    self.pending_spellmarks = self.pending_spellmarks or {}
+    table.insert(self.pending_spellmarks, spellmark)
+end
+
+function Combatant:get_spellmarks()
+    return self.pending_spellmarks or {}
+end
+
+function Combatant:remove_spellmark(spellmark)
+    for index = #(self.pending_spellmarks or {}), 1, -1 do
+        if self.pending_spellmarks[index] == spellmark then
+            table.remove(self.pending_spellmarks, index)
+            return true
+        end
+    end
+
+    return false
+end
+
 function Combatant:clear_v2_round_effects()
     self.pending_next_symbols = {}
+    self.allocation_symbol_modifiers = {}
+    self.pending_spellmarks = {}
     self.shadow_slot_shroud = false
 end
 

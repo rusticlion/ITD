@@ -20,55 +20,66 @@ local DRAWER_GAP = 6
 local BODY_PART_SLOTS = 6
 local CARD_WIDTH = 116
 local CARD_HEIGHT = 88
+local TITLE_HEIGHT = 16
+local TITLE_MARGIN = 10
+local BP_LEFT_SECTOR_WIDTH = 44
 local CARD_GAP = 8
 local DIE_SIZE = 36
 local SYMBOL_SIZE = 12
 local CREST_SIZE = 24
+local HEART_STACK_MAX = 3
+local HEART_ICON_SIZE = 24
+local HEART_ICON_GAP = 4
 local AUTO_ALLOC_MOVE_DURATION = 0.42
 local AUTO_ALLOC_SETTLE_DURATION = 0.14
+local HATCH_SWALLOW_DURATION = 0.4
 local RESOLUTION_STEP_DURATION = 1.05
 local RESOLUTION_REVEAL_TIME = 0.68
 local SLOT_EFFECT_DURATION = 1.1
 local COMBAT_END_RETURN_DELAY = 2.35
 local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
 local TEXT_TRACKING = 1
+local OVERLAY_ANIMATION_FPS = 8
 local CREST_ORDER = { "Valor", "Shadow" }
 
 local COLORS = {
-    bg = { 0.94, 0.93, 0.89, 1 },
-    panel = { 0.98, 0.98, 0.95, 1 },
-    rail = { 0.97, 0.97, 0.94, 1 },
-    ink = { 0.12, 0.12, 0.12, 1 },
-    muted = { 0.42, 0.42, 0.38, 1 },
-    line = { 0.72, 0.72, 0.66, 1 },
-    dashed = { 0.58, 0.58, 0.54, 1 },
-    player = { 0.0, 0.47, 0.36, 1 },
-    enemy = { 0.67, 0.18, 0.12, 1 },
-    selected = { 0.17, 0.2, 0.92, 1 },
-    valid = { 0.0, 0.52, 0.39, 1 },
-    invalid = { 0.55, 0.55, 0.55, 0.45 },
-    attack = { 0.7, 0.2, 0.15, 1 },
-    defense = { 0.12, 0.36, 0.72, 1 },
-    essence = { 0.9, 0.62, 0.14, 1 },
-    blood = { 0.55, 0.05, 0.08, 1 }
+    bg = { 34 / 255, 32 / 255, 52 / 255, 1 },
+    panel = { 44 / 255, 41 / 255, 64 / 255, 0.96 },
+    rail = { 26 / 255, 25 / 255, 40 / 255, 0.98 },
+    surface = { 38 / 255, 36 / 255, 56 / 255, 0.88 },
+    surface_low = { 18 / 255, 17 / 255, 29 / 255, 0.4 },
+    surface_high = { 70 / 255, 66 / 255, 96 / 255, 0.72 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.68, 0.66, 0.78, 1 },
+    line = { 0.86, 0.84, 0.94, 0.52 },
+    dashed = { 0.58, 0.55, 0.68, 0.58 },
+    player = { 0.16, 0.78, 0.61, 1 },
+    enemy = { 0.96, 0.35, 0.31, 1 },
+    selected = { 0.62, 0.78, 1, 1 },
+    valid = { 0.25, 0.88, 0.68, 1 },
+    invalid = { 0.48, 0.48, 0.56, 0.48 },
+    attack = { 0.98, 0.39, 0.32, 1 },
+    defense = { 0.35, 0.63, 1, 1 },
+    essence = { 1, 0.79, 0.28, 1 },
+    blood = { 0.88, 0.12, 0.22, 1 }
 }
 
 local STATUS_COLORS = {
-    healthy = { 0.08, 0.55, 0.22, 1 },
-    wounded = { 0.86, 0.58, 0.08, 1 },
-    maimed = { 0.42, 0.42, 0.42, 1 }
+    healthy = { 0.22, 0.76, 0.38, 1 },
+    wounded = { 1, 0.68, 0.2, 1 },
+    maimed = { 0.68, 0.66, 0.78, 1 }
 }
 
 local CREST_VISUALS = {
     Valor = {
         symbol = Symbols.STRIKE,
-        fill = { 0.97, 0.82, 0.52, 1 },
+        fill = { 0.58, 0.34, 0.15, 1 },
         line = COLORS.attack
     },
     Shadow = {
         symbol = Symbols.WARD,
-        fill = { 0.82, 0.84, 0.9, 1 },
-        line = { 0.24, 0.24, 0.32, 1 }
+        fill = { 0.25, 0.25, 0.38, 1 },
+        line = COLORS.defense
     }
 }
 
@@ -203,6 +214,39 @@ local function draw_image(id, r, color, flip_y)
     end
     love.graphics.draw(image, r.x, y, 0, sx, sy)
     return true
+end
+
+local function animated_asset_id(base_id, time, max_frames)
+    local frame_count = 0
+    local limit = max_frames or 4
+
+    for index = 1, limit do
+        if Assets.images and Assets.images[base_id .. tostring(index)] then
+            frame_count = index
+        elseif frame_count > 0 then
+            break
+        end
+    end
+
+    if frame_count > 0 then
+        local frame = (math.floor((time or 0) * OVERLAY_ANIMATION_FPS) % frame_count) + 1
+        return base_id .. tostring(frame)
+    end
+
+    if Assets.images and Assets.images[base_id] then
+        return base_id
+    end
+
+    return nil
+end
+
+local function draw_animated_image(base_id, r, time, color, flip_y, max_frames)
+    local asset_id = animated_asset_id(base_id, time, max_frames)
+    if not asset_id then
+        return false
+    end
+
+    return draw_image(asset_id, r, color, flip_y)
 end
 
 local function draw_sprite_outline(r, color, radius)
@@ -404,6 +448,22 @@ local function draw_text(text, x, y, w, align, color)
     end
 end
 
+local function draw_single_line_text(text, x, y, w, align, color)
+    local width = w or 200
+    local line = tostring(text or "")
+    local line_width = tracked_text_width(line)
+    local line_x = x
+
+    if align == "center" then
+        line_x = x + math.floor((width - line_width) / 2)
+    elseif align == "right" then
+        line_x = x + width - line_width
+    end
+
+    draw_tracked_line(line, line_x, y, color)
+    return line_width <= width, line_width
+end
+
 local function wrapped_text_height(text, w)
     local font = love.graphics.getFont()
     if not font then
@@ -423,10 +483,6 @@ local function draw_status_dot(part, x, y)
     love.graphics.circle("fill", x, y, 4)
 end
 
-local function draw_hearts(value, x, y)
-    draw_text("H " .. tostring(value or 0), x, y, 42, "left", COLORS.ink)
-end
-
 local function draw_hp_badge(value, x, y)
     local total = math.max(1, value or 1)
     for index = 1, total do
@@ -440,6 +496,41 @@ local function draw_hp_badge(value, x, y)
     end
 end
 
+local function draw_heart_icon(r, active, color)
+    local asset_id = active and "heart_point" or "heart_point_depleted"
+    if draw_image(asset_id, r) then
+        return
+    end
+
+    local fill = color or COLORS.player
+    local outline = active and COLORS.ink or COLORS.dashed
+    local alpha = active and 0.72 or 0.18
+    local cx = r.x + r.w / 2
+    local top = r.y + 4
+
+    set_color({ fill[1], fill[2], fill[3], alpha })
+    love.graphics.circle("fill", r.x + r.w * 0.32, top + 3, r.w * 0.22)
+    love.graphics.circle("fill", r.x + r.w * 0.68, top + 3, r.w * 0.22)
+    love.graphics.polygon("fill",
+        r.x + 2, top + 5,
+        r.x + r.w - 2, top + 5,
+        cx, r.y + r.h - 2)
+
+    set_color({ outline[1], outline[2], outline[3], active and 0.92 or 0.5 })
+    love.graphics.setLineWidth(1)
+    love.graphics.circle("line", r.x + r.w * 0.32, top + 3, r.w * 0.22)
+    love.graphics.circle("line", r.x + r.w * 0.68, top + 3, r.w * 0.22)
+    love.graphics.line(r.x + 2, top + 5, cx, r.y + r.h - 2, r.x + r.w - 2, top + 5)
+
+    if not active then
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.62 })
+        love.graphics.line(r.x + 5, r.y + 4, r.x + 9, r.y + 9)
+        love.graphics.line(r.x + 9, r.y + 9, r.x + 6, r.y + 14)
+        love.graphics.line(r.x + 11, r.y + 5, r.x + 8, r.y + 10)
+        love.graphics.line(r.x + 8, r.y + 10, r.x + 12, r.y + 15)
+    end
+end
+
 local function draw_damage_decoration(part, card, display_status)
     local status = display_status or (part and part.status)
     if not part or status == "healthy" then
@@ -447,16 +538,16 @@ local function draw_damage_decoration(part, card, display_status)
     end
 
     if status == "wounded" then
-        set_color({ 0.86, 0.58, 0.08, 0.16 })
+        set_color({ STATUS_COLORS.wounded[1], STATUS_COLORS.wounded[2], STATUS_COLORS.wounded[3], 0.16 })
         love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
-        set_color({ 0.3, 0.25, 0.2, 0.72 })
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.72 })
         love.graphics.setLineWidth(1)
         love.graphics.line(card.x + card.w - 24, card.y + 12, card.x + card.w - 16, card.y + 21)
         love.graphics.line(card.x + card.w - 16, card.y + 21, card.x + card.w - 22, card.y + 31)
     elseif status == "maimed" then
-        set_color({ 0.12, 0.12, 0.12, 0.18 })
+        set_color({ 0, 0, 0, 0.24 })
         love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
-        set_color({ 0.12, 0.12, 0.12, 0.72 })
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.68 })
         love.graphics.setLineWidth(1)
         love.graphics.line(card.x + 12, card.y + 12, card.x + card.w - 12, card.y + card.h - 12)
         love.graphics.line(card.x + card.w - 16, card.y + 14, card.x + 20, card.y + card.h - 16)
@@ -465,7 +556,7 @@ end
 
 local function draw_symbol_chip(symbol, x, y, w, h)
     local chip = rect(x, y, w, h)
-    draw_box(chip, { 1, 1, 1, 0.9 }, symbol_color(symbol), 4)
+    draw_box(chip, COLORS.surface, symbol_color(symbol), 4)
     draw_text(Symbols.display(symbol), x + 2, y + 7, w - 4, "center", symbol_color(symbol))
 end
 
@@ -555,7 +646,7 @@ local function draw_burned_symbols(symbols, x, y)
     for index, symbol in ipairs(symbols or {}) do
         local px = x + (index - 1) * (SYMBOL_SIZE + 2)
         draw_symbol_sprite(symbol, px, y, SYMBOL_SIZE, false, 0.42)
-        set_color({ 0.42, 0.18, 0.12, 0.7 })
+        set_color({ COLORS.attack[1], COLORS.attack[2], COLORS.attack[3], 0.78 })
         love.graphics.setLineWidth(1)
         love.graphics.line(px - 1, y + SYMBOL_SIZE + 1, px + SYMBOL_SIZE + 1, y - 1)
     end
@@ -564,7 +655,7 @@ end
 local function draw_die_face(symbols, r, is_selected)
     local outline = is_selected and COLORS.selected or COLORS.line
     if not draw_image("empty_die", r) then
-        draw_box(r, { 1, 1, 1, 0.95 }, outline, 5)
+        draw_box(r, COLORS.surface, outline, 5)
     end
 
     draw_symbol_cluster(symbols, r, 1, false)
@@ -575,8 +666,8 @@ local function draw_die_face(symbols, r, is_selected)
 end
 
 local function draw_die_back(r, color)
-    if not draw_image("empty_die", r, { 0.92, 0.92, 0.88, 1 }) then
-        draw_box(r, { 0.92, 0.92, 0.88, 0.96 }, color or COLORS.line, 5)
+    if not draw_image("empty_die", r, { 1, 1, 1, 0.82 }) then
+        draw_box(r, COLORS.surface_low, color or COLORS.line, 5)
     end
 
     set_color(color or COLORS.muted)
@@ -598,16 +689,16 @@ end
 
 local function draw_crack_overlay(r, level)
     if level == "heavy" then
-        set_color({ 0.12, 0.12, 0.12, 0.22 })
+        set_color({ 0, 0, 0, 0.28 })
         love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
-        set_color({ 0.14, 0.12, 0.11, 0.9 })
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.82 })
         love.graphics.setLineWidth(2)
         love.graphics.line(r.x + 6, r.y + 7, r.x + r.w - 7, r.y + r.h - 8)
         love.graphics.line(r.x + r.w - 8, r.y + 8, r.x + 8, r.y + r.h - 7)
     elseif level == "light" then
-        set_color({ 0.86, 0.58, 0.08, 0.18 })
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.18 })
         love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
-        set_color({ 0.44, 0.28, 0.12, 0.85 })
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.85 })
         love.graphics.setLineWidth(1)
         love.graphics.line(r.x + r.w - 11, r.y + 7, r.x + r.w - 7, r.y + 14)
         love.graphics.line(r.x + r.w - 7, r.y + 14, r.x + r.w - 12, r.y + 22)
@@ -646,6 +737,10 @@ local function make_log_line(event, data)
         return string.format("%s feeds %s.", data.combatant.name, data.slot.name)
     elseif event == Events.SLOT_RESOLVED then
         return string.format("%s resolves %s.", data.combatant.name, data.slot.name)
+    elseif event == Events.SPELLMARK_OPENED then
+        return string.format("%s opens %s.", data.combatant.name, data.spellmark.name or "a spellmark")
+    elseif event == Events.SPELLMARK_RESOLVED then
+        return string.format("%s marks %s.", data.combatant.name, data.part.name)
     elseif event == Events.LATCH_EJECTED then
         return string.format("Latch ejected from %s.", data.part.name)
     elseif event == Events.DAMAGE_DEALT then
@@ -672,7 +767,10 @@ function V2Combat:enter()
     self.auto_allocation = nil
     self.assignment_visibility = setmetatable({}, { __mode = "k" })
     self.slot_activation_effects = {}
+    self.hatch_swallow_effects = setmetatable({}, { __mode = "k" })
     self.combat_end = nil
+    self.ui_time = 0
+    self.title_overflow_warnings = {}
     self.player_can_allocate = false
     self.enemy_response_pending = false
     self.event_visibility_context = nil
@@ -695,6 +793,8 @@ function V2Combat:register_events()
         Events.CREST_EXPENDED,
         Events.SLOT_FED,
         Events.SLOT_RESOLVED,
+        Events.SPELLMARK_OPENED,
+        Events.SPELLMARK_RESOLVED,
         Events.LATCH_EJECTED,
         Events.PART_RESOLVED,
         Events.DAMAGE_DEALT
@@ -809,23 +909,29 @@ function V2Combat:layout_cards(combatant, strip, side)
     local start_x = strip.x + math.floor((strip.w - total_w) / 2)
     local card_w = CARD_WIDTH
     local card_h = CARD_HEIGHT
-    local y = strip.y + (side == "enemy" and 26 or 28)
+    local y = strip.y + TITLE_MARGIN + TITLE_HEIGHT
+    if side == "player" then
+        y = strip.y + strip.h - TITLE_MARGIN - TITLE_HEIGHT - card_h
+    end
 
     for index = 1, BODY_PART_SLOTS do
         local part = (combatant.body_parts or {})[index]
         local x = start_x + (index - 1) * (card_w + CARD_GAP)
         local card = rect(x, y, card_w, card_h)
+        local left_x = card.x + 4
+        local right_x = card.x + BP_LEFT_SECTOR_WIDTH
+        local right_w = card.w - BP_LEFT_SECTOR_WIDTH - 4
         local rim_y = side == "enemy" and (card.y + card.h - 6) or (card.y - DIE_SIZE + 6)
-        local rim = rect(card.x + 6, rim_y, DIE_SIZE, DIE_SIZE)
+        local rim = rect(left_x + 2, rim_y, DIE_SIZE, DIE_SIZE)
         local socket_y = side == "enemy" and (rim_y - DIE_SIZE) or (card.y + 6)
-        local socket = rect(card.x + 6, socket_y, DIE_SIZE, DIE_SIZE)
-        local hatch = rect(card.x + 64, card.y + 34, DIE_SIZE, DIE_SIZE)
-        local track = rect(card.x + 64, card.y + 74, card.w - 68, SYMBOL_SIZE)
-        local slot_label = rect(card.x + 58, card.y + 9, card.w - 62, 12)
-        local label_y = side == "enemy" and (card.y - 14) or (card.y + card.h + 2)
-        local label = rect(card.x, label_y, card.w, 12)
+        local socket = rect(left_x + 2, socket_y, DIE_SIZE, DIE_SIZE)
+        local hatch = rect(right_x + math.floor((right_w - DIE_SIZE) / 2), card.y + 34, DIE_SIZE, DIE_SIZE)
+        local track = rect(right_x + 2, card.y + 73, right_w - 4, SYMBOL_SIZE)
+        local slot_label = rect(right_x + 1, card.y + 10, right_w - 2, 12)
+        local label_y = side == "enemy" and (card.y - TITLE_HEIGHT) or (card.y + card.h)
+        local label = rect(card.x, label_y, card.w, TITLE_HEIGHT)
         local meta_y = side == "enemy" and (card.y + 10) or (card.y + card.h - 16)
-        local meta = rect(card.x + 12, meta_y, 42, 10)
+        local meta = rect(left_x + 8, meta_y, 28, 10)
 
         if part then
             self.card_rects[part] = {
@@ -899,20 +1005,44 @@ function V2Combat:layout()
     layout_crests(self.enemy, self.enemy_crest_rects, self.drawers.enemy, "enemy")
     layout_crests(self.player, self.crest_rects, self.drawers.player, "player")
 
-    self.confirm_rect = rect(self.drawers.player.x + self.drawers.player.w - 92, self.drawers.player.y + 3, 84, 24)
+    self.confirm_rect = rect(self.drawers.player.x + self.drawers.player.w - 92, self.drawers.player.y + 3, 84, 48)
 
     local spine = self:global_spine_rect()
-    self.round_rect = rect(spine.x + 4, spine.y + 8, 24, 24)
-    self.initiative_rect = rect(spine.x + 4, spine.y + 40, 24, 24)
-    self.queue_rect = rect(spine.x + 4, spine.y + 74, 24, math.min(190, spine.h - 116))
+    local heart_stack_h = HEART_STACK_MAX * HEART_ICON_SIZE + (HEART_STACK_MAX - 1) * HEART_ICON_GAP
+    local heart_x = spine.x + math.floor((spine.w - HEART_ICON_SIZE) / 2)
+    local enemy_heart_y = spine.y + 10
+    local player_heart_y = spine.y + spine.h - 10 - heart_stack_h
+
+    local function layout_heart_stack(start_y)
+        local rects = {}
+        for index = 1, HEART_STACK_MAX do
+            rects[index] = rect(heart_x, start_y + (index - 1) * (HEART_ICON_SIZE + HEART_ICON_GAP), HEART_ICON_SIZE, HEART_ICON_SIZE)
+        end
+        return rects
+    end
+
+    self.enemy_heart_rects = layout_heart_stack(enemy_heart_y)
+    self.player_heart_rects = layout_heart_stack(player_heart_y)
+    self.queue_rect = rect(spine.x + 4, spine.y + math.floor((spine.h - 190) / 2), 24, 190)
+
+    local initiative = tostring(self.engine and self.engine.initiative or "player")
+    local initiative_y = spine.y + math.floor((spine.h - 24) / 2)
+    if initiative == "enemy" then
+        initiative_y = enemy_heart_y + heart_stack_h + 10
+    elseif initiative == "player" then
+        initiative_y = player_heart_y - 34
+    end
+    self.initiative_rect = rect(spine.x + 4, initiative_y, 24, 24)
 end
 
 function V2Combat:update(dt)
     self:layout()
     local delta = dt or 0
+    self.ui_time = (self.ui_time or 0) + delta
     local mx, my = love.mouse.getPosition()
 
     if self.combat_end then
+        self:update_hatch_swallow_effects(delta)
         self:update_slot_activation_effects(delta)
         self:update_combat_end(delta)
         self:update_hover(mx, my)
@@ -925,6 +1055,7 @@ function V2Combat:update(dt)
     end
     self:update_auto_allocation(delta)
     self:update_resolution_playback(delta)
+    self:update_hatch_swallow_effects(delta)
     self:update_slot_activation_effects(delta)
 
     if self.engine.state == "COMPLETE" and not self.resolution_playback and not self.auto_allocation then
@@ -942,6 +1073,53 @@ function V2Combat:update_slot_activation_effects(dt)
             table.remove(self.slot_activation_effects, index)
         end
     end
+end
+
+function V2Combat:show_hatch_swallow(part)
+    if not part then
+        return
+    end
+
+    self.hatch_swallow_effects = self.hatch_swallow_effects or setmetatable({}, { __mode = "k" })
+    self.hatch_swallow_effects[part] = HATCH_SWALLOW_DURATION
+end
+
+function V2Combat:update_hatch_swallow_effects(dt)
+    local effects = self.hatch_swallow_effects
+    if not effects then
+        return
+    end
+
+    for part, remaining in pairs(effects) do
+        local next_remaining = (remaining or 0) - (dt or 0)
+        if next_remaining <= 0 then
+            effects[part] = nil
+        else
+            effects[part] = next_remaining
+        end
+    end
+end
+
+function V2Combat:is_hatch_swallowing(part)
+    return part and self.hatch_swallow_effects and self.hatch_swallow_effects[part] ~= nil
+end
+
+function V2Combat:hatch_swallow_frame(part)
+    local remaining = part and self.hatch_swallow_effects and self.hatch_swallow_effects[part]
+    if not remaining then
+        return nil
+    end
+
+    local progress = 1 - math.max(0, math.min(1, remaining / HATCH_SWALLOW_DURATION))
+    if progress < 0.25 then
+        return "die-hatch4"
+    elseif progress < 0.5 then
+        return "die-hatch3"
+    elseif progress < 0.75 then
+        return "die-hatch2"
+    end
+
+    return "die-hatch1"
 end
 
 function V2Combat:begin_combat_end()
@@ -1069,7 +1247,7 @@ function V2Combat:is_valid_destination(kind, part)
 end
 
 function V2Combat:slot_feed_preview(die, part)
-    local effective = self.engine:get_effective_symbols(self.player, die)
+    local effective = self.engine:get_effective_symbols(self.player, die, "slot")
     local slot = part and part.slot
     local cost = slot and slot.cost or {}
     local lit = {}
@@ -1122,24 +1300,25 @@ function V2Combat:active_die_preview_lines()
         return lines
     end
 
-    local effective = self.engine:get_effective_symbols(self.player, die)
+    local hover = self.hover
+    local preview_destination = hover and is_destination_kind(hover.kind) and hover.kind or nil
+    local effective = self.engine:get_effective_symbols(self.player, die, preview_destination)
     table.insert(lines, (self.drag and "Held: " or "Selected: ") .. Symbols.format_face(effective))
     table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
 
-    local hover = self.hover
     if hover and is_destination_kind(hover.kind) then
         local valid = self:is_valid_destination(hover.kind, hover.part)
         table.insert(lines, "")
         if hover.kind == "socket" then
-            table.insert(lines, "Drop: defend " .. (hover.part.name or hover.part.id))
-            local used, burned = classify_preview_symbols(effective, Symbols.WARD)
+            local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", hover.part, effective)
+            table.insert(lines, (spellmark and "Drop: mark " or "Drop: defend ") .. (hover.part.name or hover.part.id))
             table.insert(lines, "Uses: " .. Symbols.format_face(used))
             if #burned > 0 then
                 table.insert(lines, "Burns: " .. Symbols.format_face(burned))
             end
         elseif hover.kind == "rim" then
-            table.insert(lines, "Drop: attack " .. (hover.part.name or hover.part.id))
-            local used, burned = classify_preview_symbols(effective, Symbols.STRIKE)
+            local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "rim", hover.part, effective)
+            table.insert(lines, (spellmark and "Drop: mark " or "Drop: attack ") .. (hover.part.name or hover.part.id))
             table.insert(lines, "Uses: " .. Symbols.format_face(used))
             if #burned > 0 then
                 table.insert(lines, "Burns: " .. Symbols.format_face(burned))
@@ -1330,6 +1509,9 @@ function V2Combat:commit_auto_allocation_current()
     self.event_visibility_context = nil
 
     if ok then
+        if current.move and current.move.kind == "slot" then
+            self:show_hatch_swallow(current.move.part)
+        end
         local assignment = self:assignment_for_move(current.move)
         if assignment and sequence.visibility == "hidden" then
             self.assignment_visibility[assignment] = "hidden"
@@ -1540,6 +1722,9 @@ function V2Combat:try_destination(kind, part)
 
     self:message_for_result(ok, reason)
     if ok then
+        if kind == "slot" then
+            self:show_hatch_swallow(part)
+        end
         self.selected_die = nil
     end
 end
@@ -1681,12 +1866,23 @@ function V2Combat:keypressed(key)
     end
 end
 
-function V2Combat:draw_strip(strip, title, combatant)
+function V2Combat:draw_tableau_band(strip, side, combatant)
     love.graphics.setFont(self.fonts.body)
-    draw_box(strip, COLORS.panel, COLORS.line, 8)
-    draw_hearts(combatant.heart_points or 0, strip.x + strip.w - 72, strip.y + 6)
-    love.graphics.setFont(self.fonts.tiny)
-    draw_text((combatant and combatant.name) or title or "", strip.x + 12, strip.y + 7, 160, "left", COLORS.muted)
+    local accent = side == "enemy" and COLORS.enemy or COLORS.player
+    local asset_id = side == "enemy" and "combat_enemy_tableau" or "combat_player_tableau"
+
+    if not draw_image(asset_id, strip) then
+        set_color(COLORS.panel)
+        love.graphics.rectangle("fill", strip.x, strip.y, strip.w, strip.h, 8, 8)
+        set_color({ COLORS.line[1], COLORS.line[2], COLORS.line[3], 0.24 })
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle("line", strip.x, strip.y, strip.w, strip.h, 8, 8)
+
+        local edge_y = side == "enemy" and (strip.y + strip.h - 1) or strip.y
+        set_color({ accent[1], accent[2], accent[3], 0.2 })
+        love.graphics.line(strip.x + 12, edge_y, strip.x + strip.w - 12, edge_y)
+    end
+
 end
 
 function V2Combat:hover_matches(kind, part)
@@ -1700,21 +1896,23 @@ function V2Combat:destination_preview(kind, part)
     end
 
     local valid = self:is_valid_destination(kind, part)
-    local effective = self.engine:get_effective_symbols(self.player, die)
+    local effective = self.engine:get_effective_symbols(self.player, die, kind)
 
     if kind == "socket" then
-        local used, burned = classify_preview_symbols(effective, Symbols.WARD)
+        local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", part, effective)
         return {
             valid = valid,
             used = used,
-            burned = burned
+            burned = burned,
+            spellmark = spellmark
         }
     elseif kind == "rim" then
-        local used, burned = classify_preview_symbols(effective, Symbols.STRIKE)
+        local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "rim", part, effective)
         return {
             valid = valid,
             used = used,
-            burned = burned
+            burned = burned,
+            spellmark = spellmark
         }
     elseif kind == "slot" then
         local lit, burned, lit_entries = self:slot_feed_preview(die, part)
@@ -1740,7 +1938,7 @@ function V2Combat:draw_socket_or_rim_preview(kind, part, target_rect)
         return
     end
 
-    set_color({ 1, 1, 1, 0.64 })
+    set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.1 })
     love.graphics.rectangle("fill", target_rect.x + 3, target_rect.y + 3, target_rect.w - 6, target_rect.h - 6, 3, 3)
     draw_symbol_cluster(preview.used, target_rect, 0.9, false)
 
@@ -1750,19 +1948,33 @@ function V2Combat:draw_socket_or_rim_preview(kind, part, target_rect)
     end
 end
 
-function V2Combat:draw_pool_tray(combatant, area, die_rects, accent)
-    draw_box(area, { 1, 1, 1, 0.24 }, { accent[1], accent[2], accent[3], 0.46 }, 5)
-
+function V2Combat:draw_settled_dice_row(side, combatant, area, die_rects, accent)
     local pool = self.engine:get_pool(combatant)
     local current = self.auto_allocation and self.auto_allocation.current
     local hidden = self.auto_allocation
         and self.auto_allocation.combatant == combatant
         and self.auto_allocation.visibility == "hidden"
 
+    if #pool > 0 then
+        local guide_asset = side == "enemy" and "die_row_guideline_enemy" or "die_row_guideline_player"
+        local guide_y = side == "enemy" and (area.y - 6) or (area.y + area.h + 4)
+        local guide = rect(area.x, guide_y, area.w, 4)
+
+        if not draw_image(guide_asset, guide) then
+            set_color({ accent[1], accent[2], accent[3], 0.12 })
+            love.graphics.rectangle("fill", guide.x, guide.y + 1, guide.w, 2)
+            set_color({ accent[1], accent[2], accent[3], 0.34 })
+            love.graphics.setLineWidth(1)
+            love.graphics.line(guide.x, guide.y + 2, guide.x + guide.w, guide.y + 2)
+        end
+    end
+
     for _, die in ipairs(pool) do
         if not (current and current.die == die) and not (self.drag and self.drag.die == die) then
             local die_rect = die_rects[die]
             if die_rect then
+                set_color({ 0, 0, 0, 0.18 })
+                love.graphics.rectangle("fill", die_rect.x + 3, die_rect.y + die_rect.h + 2, die_rect.w - 6, 3, 2, 2)
                 if hidden then
                     draw_die_back(die_rect, accent)
                 else
@@ -1774,33 +1986,24 @@ function V2Combat:draw_pool_tray(combatant, area, die_rects, accent)
 end
 
 function V2Combat:draw_queue_ticker(r)
-    draw_box(r, { 1, 1, 1, 0.38 }, COLORS.line, 5)
-    love.graphics.setFont(self.fonts.tiny)
-    draw_text("Q", r.x + 2, r.y + 5, r.w - 4, "center", COLORS.muted)
+    if not draw_image("combat_queue_stack", r) then
+        draw_box(r, COLORS.surface_low, COLORS.line, 5)
+    end
 
     local entries = self.engine.slot_queue or {}
     local cell_size = 16
     local cell_gap = 4
     local cell_x = r.x + math.floor((r.w - cell_size) / 2)
-    local cell_y = r.y + 22
-    local max_cells = math.max(1, math.floor((r.h - 28) / (cell_size + cell_gap)))
+    local cell_y = r.y + 10
+    local max_cells = math.max(1, math.floor((r.h - 20) / (cell_size + cell_gap)))
 
-    for index = 1, math.min(max_cells, 8) do
+    for index = 1, math.min(#entries, max_cells, 8) do
         local cell = rect(cell_x, cell_y + (index - 1) * (cell_size + cell_gap), cell_size, cell_size)
         local entry = entries[index]
         if entry then
-            draw_box(cell, { 1, 1, 1, 0.85 }, COLORS.essence, 3)
-            draw_symbol_sprite(queue_entry_symbol(entry), cell.x + 1, cell.y + 1, cell_size - 2, false, 0.95)
-        else
-            draw_box(cell, { 1, 1, 1, 0.15 }, COLORS.dashed, 3)
+            draw_symbol_sprite(queue_entry_symbol(entry), cell.x + 2, cell.y + 2, cell_size - 4, false, 0.95)
         end
     end
-end
-
-function V2Combat:draw_round_badge(r)
-    draw_box(r, { 1, 1, 1, 0.62 }, COLORS.line, 5)
-    love.graphics.setFont(self.fonts.tiny)
-    draw_text("R" .. tostring(self.engine.current_round), r.x + 4, r.y + 6, r.w - 8, "center", COLORS.ink)
 end
 
 function V2Combat:draw_initiative_badge(r)
@@ -1815,9 +2018,25 @@ function V2Combat:draw_initiative_badge(r)
         label = "C"
     end
 
-    draw_box(r, { 1, 1, 1, 0.62 }, color, 5)
+    if not draw_image("combat_initiative_badge", r) then
+        draw_box(r, COLORS.surface, color, 5)
+    end
     love.graphics.setFont(self.fonts.tiny)
     draw_text(label, r.x + 4, r.y + 6, r.w - 8, "center", color)
+end
+
+function V2Combat:draw_heart_stack(combatant, rects, color, side)
+    local current = math.max(0, math.min(HEART_STACK_MAX, combatant and combatant.heart_points or 0))
+    for index = 1, HEART_STACK_MAX do
+        local r = rects and rects[index]
+        if r then
+            local active = index <= current
+            if side == "player" then
+                active = index > HEART_STACK_MAX - current
+            end
+            draw_heart_icon(r, active, color)
+        end
+    end
 end
 
 function V2Combat:draw_crest_chip(combatant, crest, r)
@@ -1830,7 +2049,7 @@ function V2Combat:draw_crest_chip(combatant, crest, r)
     local hovered = self.hover and self.hover.kind == "crest" and self.hover.crest == crest and self.hover.combatant == combatant
     local visual = CREST_VISUALS[crest] or {
         symbol = Symbols.ESSENCE,
-        fill = { 1, 1, 1, 1 },
+        fill = COLORS.surface,
         line = COLORS.line
     }
 
@@ -1839,7 +2058,7 @@ function V2Combat:draw_crest_chip(combatant, crest, r)
 
     if count > 0 then
         local badge = rect(r.x + r.w - 10, r.y + r.h - 11, 13, 11)
-        draw_box(badge, { 1, 1, 1, 0.92 }, visual.line, 4)
+        draw_box(badge, COLORS.rail, visual.line, 4)
         love.graphics.setFont(self.fonts.tiny)
         draw_text(tostring(count), badge.x + 1, badge.y + 2, badge.w - 2, "center", COLORS.ink)
     end
@@ -1847,25 +2066,44 @@ end
 
 function V2Combat:draw_global_spine()
     local spine = self:global_spine_rect()
-    draw_box(spine, COLORS.panel, COLORS.line, 7)
-    self:draw_round_badge(self.round_rect)
+    if not draw_image("combat_spine", spine) then
+        draw_box(spine, COLORS.panel, COLORS.line, 7)
+    end
+    self:draw_heart_stack(self.enemy, self.enemy_heart_rects, COLORS.enemy, "enemy")
+    self:draw_heart_stack(self.player, self.player_heart_rects, COLORS.player, "player")
     self:draw_initiative_badge(self.initiative_rect)
     self:draw_queue_ticker(self.queue_rect)
 end
 
-function V2Combat:draw_combatant_drawer(side, combatant, drawer, die_rects, crest_rects)
+function V2Combat:draw_combatant_resource_row(side, combatant, drawer, die_rects, crest_rects)
     local accent = side == "enemy" and COLORS.enemy or COLORS.player
-    local lip_y = side == "enemy" and (drawer.y + drawer.h - 14) or drawer.y
+    self:draw_settled_dice_row(side, combatant, self:drawer_dice_area(drawer), die_rects, accent)
 
-    set_color({ accent[1], accent[2], accent[3], 0.08 })
-    love.graphics.rectangle("fill", drawer.x, drawer.y, drawer.w, drawer.h, 7, 7)
-    set_color({ accent[1], accent[2], accent[3], 0.46 })
-    love.graphics.setLineWidth(1)
-    love.graphics.rectangle("line", drawer.x, drawer.y, drawer.w, drawer.h, 7, 7)
-    set_color({ accent[1], accent[2], accent[3], 0.24 })
-    love.graphics.rectangle("fill", drawer.x + 1, lip_y, drawer.w - 2, 14, 6, 6)
+    local first_crest = nil
+    local last_crest = nil
+    for _, crest in ipairs(CREST_ORDER) do
+        local crest_rect = crest_rects[crest]
+        if crest_rect then
+            first_crest = first_crest or crest_rect
+            last_crest = crest_rect
+        end
+    end
 
-    self:draw_pool_tray(combatant, self:drawer_dice_area(drawer), die_rects, accent)
+    if first_crest and last_crest then
+        local strip_rect = rect(
+            first_crest.x - 6,
+            first_crest.y + math.floor(first_crest.h / 2) - 2,
+            last_crest.x + last_crest.w - first_crest.x + 12,
+            4)
+        local strip_asset = side == "enemy" and "crest_strip_enemy" or "crest_strip_player"
+        if not draw_image(strip_asset, strip_rect) then
+            set_color({ accent[1], accent[2], accent[3], 0.16 })
+            love.graphics.rectangle("fill", strip_rect.x, strip_rect.y, strip_rect.w, strip_rect.h, 2, 2)
+            set_color({ accent[1], accent[2], accent[3], 0.36 })
+            love.graphics.setLineWidth(1)
+            love.graphics.line(strip_rect.x, strip_rect.y + 2, strip_rect.x + strip_rect.w, strip_rect.y + 2)
+        end
+    end
 
     for _, crest in ipairs(CREST_ORDER) do
         if crest_rects[crest] then
@@ -1874,48 +2112,42 @@ function V2Combat:draw_combatant_drawer(side, combatant, drawer, die_rects, cres
     end
 end
 
-function V2Combat:draw_stage_anchor(anchor, color)
-    set_color({ color[1], color[2], color[3], 0.08 })
-    love.graphics.rectangle("fill", anchor.x, anchor.y, anchor.w, anchor.h, 6, 6)
-    set_color({ color[1], color[2], color[3], 0.28 })
-    love.graphics.setLineWidth(1)
-    love.graphics.rectangle("line", anchor.x, anchor.y, anchor.w, anchor.h, 6, 6)
-    love.graphics.line(anchor.x + 10, anchor.y + anchor.h * 0.5, anchor.x + anchor.w - 10, anchor.y + anchor.h * 0.5)
-    love.graphics.line(anchor.x + anchor.w * 0.5, anchor.y + 8, anchor.x + anchor.w * 0.5, anchor.y + anchor.h - 8)
-end
-
 function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
     local slot = part.slot
     if not slot then
-        draw_image("die-hatch4", layout.hatch, { 1, 1, 1, 0.45 })
+        if not draw_image("die-hatch1", layout.hatch, { 1, 1, 1, 0.35 }) then
+            draw_box(layout.hatch, COLORS.surface_low, COLORS.invalid, 3)
+        end
+        draw_sprite_outline(layout.hatch, COLORS.invalid, 3)
         return
     end
 
-    local has_charge = false
-    for _, charged in pairs(part.slot_charge or {}) do
-        if charged then
-            has_charge = true
-            break
-        end
-    end
-
     local hatch_id = "die-hatch1"
-    if display_status == "maimed" then
-        hatch_id = "die-hatch4"
-    elseif hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy then
-        hatch_id = "die-hatch2"
-    elseif has_charge then
+    local hungry = part:has_keyword("Hungry") or slot.hungry
+    local accepting = hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy
+    local hovered = hatch_outline == COLORS.valid and self:hover_matches("slot", part)
+    local swallow_frame = self:hatch_swallow_frame(part)
+    if swallow_frame then
+        hatch_id = swallow_frame
+    elseif display_status == "maimed" then
+        hatch_id = "die-hatch1"
+    elseif accepting and hovered then
         hatch_id = "die-hatch3"
+    elseif accepting or hungry then
+        hatch_id = "die-hatch2"
     end
 
-    if not draw_image(hatch_id, layout.hatch) then
-        draw_box(layout.hatch, { 1, 1, 1, 0.8 }, hatch_outline or COLORS.line, 3)
+    local hatch_tint = display_status == "maimed" and { 1, 1, 1, 0.45 } or nil
+    if not draw_image(hatch_id, layout.hatch, hatch_tint) then
+        draw_box(layout.hatch, COLORS.surface, hatch_outline or COLORS.line, 3)
     end
 
     if hatch_outline == COLORS.valid then
         draw_sprite_outline(layout.hatch, COLORS.valid, 3)
     elseif hatch_outline == COLORS.enemy then
         draw_sprite_outline(layout.hatch, COLORS.enemy, 3)
+    elseif display_status == "maimed" then
+        draw_sprite_outline(layout.hatch, COLORS.invalid, 3)
     end
 
     local preview = self:destination_preview("slot", part)
@@ -1929,10 +2161,13 @@ function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
     end
 
     local cost = slot.cost or {}
+    local pip_gap = 1
+    local cost_width = #cost * SYMBOL_SIZE + math.max(0, #cost - 1) * pip_gap
+    local track_start_x = layout.track.x + math.floor(math.max(0, layout.track.w - cost_width) / 2)
     for index, symbol in ipairs(cost) do
         local lit = part.slot_charge and part.slot_charge[index]
         local previewed = preview_by_index[index] ~= nil
-        local pip_x = layout.track.x + (index - 1) * (SYMBOL_SIZE + 1)
+        local pip_x = track_start_x + (index - 1) * (SYMBOL_SIZE + pip_gap)
         if previewed then
             set_color({ 1, 0.88, 0.35, 0.5 })
             love.graphics.rectangle("fill", pip_x - 1, layout.track.y - 1, SYMBOL_SIZE + 2, SYMBOL_SIZE + 2, 2, 2)
@@ -1941,7 +2176,7 @@ function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
     end
 
     if preview and preview.valid and #preview.burned > 0 then
-        local burn_x = layout.track.x + #cost * (SYMBOL_SIZE + 1) + 4
+        local burn_x = track_start_x + cost_width + 4
         draw_burned_symbols(preview.burned, burn_x, layout.track.y)
     end
 
@@ -1966,26 +2201,160 @@ function V2Combat:draw_assignment_die(assignment, target_rect)
     end
 end
 
+function V2Combat:destination_has_spellmark(kind, part)
+    if not (self.engine and self.engine.get_assignment_spellmark) then
+        return false
+    end
+
+    for _, combatant in ipairs(self.engine.combatants or {}) do
+        local spellmarks = combatant.get_spellmarks and combatant:get_spellmarks() or {}
+        for _, pending in ipairs(spellmarks) do
+            local target_side = pending.target or pending.target_side or (kind == "rim" and "opponent" or "self")
+            local target_combatant = target_side == "opponent" and self.engine:get_opponent(combatant) or combatant
+            local owns_part = false
+            for _, owned_part in ipairs(target_combatant and target_combatant.body_parts or {}) do
+                if owned_part == part then
+                    owns_part = true
+                    break
+                end
+            end
+
+            if owns_part and self.engine:get_assignment_spellmark(combatant, kind, part, { Symbols.ESSENCE }) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function V2Combat:warn_title_overflow(part, name, width, max_width)
+    local key = part and (part.id or part.name) or name
+    if not key then
+        return
+    end
+
+    self.title_overflow_warnings = self.title_overflow_warnings or {}
+    if self.title_overflow_warnings[key] then
+        return
+    end
+
+    self.title_overflow_warnings[key] = true
+    print(string.format(
+        "[V2Combat] BP title '%s' is %.0fpx wide; title strip allows %.0fpx. Shorten the authored name.",
+        tostring(name),
+        width or 0,
+        max_width or 0))
+end
+
+function V2Combat:draw_title_strip(part, layout, color)
+    local title = layout and layout.label
+    if not title then
+        return
+    end
+
+    local flip_y = layout.side == "player"
+    if not draw_image("bp_title", title, nil, flip_y) then
+        draw_box(title, COLORS.surface_low, COLORS.line, 3)
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    local font = love.graphics.getFont()
+    local text_h = font and font:getHeight() or 12
+    local text = part.name or part.id or "Part"
+    local text_rect = rect(title.x + 4, title.y, title.w - 8, title.h)
+    local text_y = text_rect.y + math.floor((text_rect.h - text_h) / 2)
+    local fits, width = draw_single_line_text(text, text_rect.x, text_y, text_rect.w, "center", color or COLORS.ink)
+
+    if not fits then
+        self:warn_title_overflow(part, text, width, text_rect.w)
+    end
+end
+
+function V2Combat:draw_card_state_overlays(part, layout, display_status, any_valid, selected_source, source_highlight)
+    local card = layout.card
+    local time = self.ui_time or 0
+    local hovered = self.hover and self.hover.part == part
+    local damage_asset = nil
+
+    if display_status == "wounded" then
+        damage_asset = "bp_card_wounded"
+    elseif display_status == "maimed" then
+        damage_asset = "bp_card_maimed"
+    end
+
+    if damage_asset then
+        if not draw_image(damage_asset, card) then
+            draw_damage_decoration(part, card, display_status)
+        end
+    end
+
+    if self:active_die() then
+        if any_valid then
+            draw_animated_image("bp_card_valid", card, time)
+        elseif hovered then
+            draw_animated_image("bp_card_invalid", card, time)
+        end
+    end
+
+    if source_highlight then
+        if not draw_animated_image("bp_card_hover", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    end
+
+    if selected_source then
+        if not draw_animated_image("bp_card_selected", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    elseif hovered and not source_highlight then
+        draw_animated_image("bp_card_hover", card, time)
+    end
+end
+
+function V2Combat:draw_socket_or_rim_frame(kind, part, layout, display_status, valid, auto_target)
+    local is_socket = kind == "socket"
+    local target = is_socket and layout.socket or layout.rim
+    local prefix = is_socket and "die_socket" or "die_rim"
+    local assignment = is_socket and self.engine.assignments.sockets[part] or self.engine.assignments.rims[part]
+    local flip_y = layout.side == "enemy"
+    local outline = auto_target and COLORS.enemy or (valid and COLORS.valid or COLORS.dashed)
+
+    if not draw_image(prefix, target, nil, flip_y) then
+        draw_box(target, COLORS.surface_low, outline, 3)
+    end
+
+    local state_prefix = nil
+    local state_color = outline
+    if display_status == "maimed" then
+        state_prefix = prefix .. "_locked"
+        state_color = COLORS.invalid
+    elseif assignment then
+        state_prefix = prefix .. "_occupied"
+        state_color = COLORS.line
+    elseif valid or auto_target then
+        state_prefix = prefix .. "_valid"
+        state_color = outline
+    elseif self:destination_has_spellmark(kind, part) then
+        state_prefix = prefix .. "_spellmarked"
+        state_color = COLORS.essence
+    end
+
+    if state_prefix and not draw_animated_image(state_prefix, target, self.ui_time or 0, nil, flip_y) then
+        draw_sprite_outline(target, state_color, 3)
+    end
+end
+
 function V2Combat:draw_part_card(part, layout)
     love.graphics.setFont(self.fonts.small)
     local card = layout.card
     local display_status = self:display_status_for_part(part)
     local source_highlight = self.hover and self.hover.kind == "die" and self.hover.die.source_part == part
     local selected_source = self.selected_die and self.selected_die.source_part == part
-    local outline = COLORS.line
-    if source_highlight or selected_source then
-        outline = COLORS.selected
-    end
 
     if not draw_image("bp_card", card) then
-        draw_box(card, COLORS.panel, outline, 6)
+        draw_box(card, COLORS.panel, COLORS.line, 6)
     end
-    draw_damage_decoration(part, card, display_status)
-    if outline ~= COLORS.line then
-        draw_sprite_outline(card, outline, 2)
-    end
-
-    draw_hp_badge(part.hp_value or 1, layout.meta.x, layout.meta.y)
 
     local socket_valid = self:is_valid_destination("socket", part)
     local rim_valid = self:is_valid_destination("rim", part)
@@ -1994,28 +2363,20 @@ function V2Combat:draw_part_card(part, layout)
     local auto_rim_target = self:auto_target_matches("rim", part)
     local auto_slot_target = self:auto_target_matches("slot", part)
 
-    local socket_outline = auto_socket_target and COLORS.enemy or (socket_valid and COLORS.valid or COLORS.dashed)
-    local rim_outline = auto_rim_target and COLORS.enemy or (rim_valid and COLORS.valid or COLORS.dashed)
     local hatch_outline = auto_slot_target and COLORS.enemy or (slot_valid and COLORS.valid or COLORS.line)
 
-    if not draw_image("die_socket", layout.socket) then
-        draw_box(layout.socket, { 1, 1, 1, 0.35 }, socket_outline, 3)
-    end
-    if not draw_image("die_rim", layout.rim, nil, layout.side == "enemy") then
-        draw_box(layout.rim, { 1, 1, 1, 0.2 }, rim_outline, 3)
-    end
-    if socket_valid then
-        draw_sprite_outline(layout.socket, COLORS.valid, 3)
-    end
-    if rim_valid then
-        draw_sprite_outline(layout.rim, COLORS.valid, 3)
-    end
-    if auto_socket_target then
-        draw_sprite_outline(layout.socket, COLORS.enemy, 3)
-    end
-    if auto_rim_target then
-        draw_sprite_outline(layout.rim, COLORS.enemy, 3)
-    end
+    self:draw_card_state_overlays(
+        part,
+        layout,
+        display_status,
+        socket_valid or rim_valid or slot_valid or auto_socket_target or auto_rim_target or auto_slot_target,
+        selected_source,
+        source_highlight)
+
+    draw_hp_badge(part.hp_value or 1, layout.meta.x, layout.meta.y)
+
+    self:draw_socket_or_rim_frame("socket", part, layout, display_status, socket_valid, auto_socket_target)
+    self:draw_socket_or_rim_frame("rim", part, layout, display_status, rim_valid, auto_rim_target)
 
     self:draw_assignment_die(self.engine.assignments.sockets[part], layout.socket)
     self:draw_assignment_die(self.engine.assignments.rims[part], layout.rim)
@@ -2032,36 +2393,54 @@ function V2Combat:draw_part_card(part, layout)
     end
     self:draw_slot_track(part, layout, previous_color, display_status)
 
-    love.graphics.setFont(self.fonts.small)
     local label_color = (source_highlight or selected_source) and COLORS.selected or COLORS.ink
-    draw_text(part.name or part.id, layout.label.x, layout.label.y, layout.label.w, "center", label_color)
+    self:draw_title_strip(part, layout, label_color)
 end
 
 function V2Combat:draw_empty_card(layout)
     love.graphics.setFont(self.fonts.small)
-    if not draw_image("bp_card", layout.card, { 1, 1, 1, 0.32 }) then
-        draw_box(layout.card, { 1, 1, 1, 0.18 }, COLORS.dashed, 6)
+    if not draw_image("bp_card_empty", layout.card) then
+        set_color({ COLORS.surface_low[1], COLORS.surface_low[2], COLORS.surface_low[3], 0.18 })
+        love.graphics.rectangle("fill", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
+        set_color({ COLORS.dashed[1], COLORS.dashed[2], COLORS.dashed[3], 0.38 })
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle("line", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
     end
-    draw_text("empty", layout.card.x, layout.card.y + layout.card.h * 0.42, layout.card.w, "center", COLORS.muted)
+    draw_text("empty", layout.card.x, layout.card.y + layout.card.h * 0.42, layout.card.w, "center",
+        { COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.52 })
 end
 
 function V2Combat:draw_center()
     love.graphics.setFont(self.fonts.body)
     local center = self:center_rect()
-    draw_box(center, { 0.98, 0.98, 0.95, 1 }, { COLORS.line[1], COLORS.line[2], COLORS.line[3], 0.62 }, 8)
-
-    self:draw_stage_anchor(rect(center.x + center.w * 0.58, center.y + 16, center.w * 0.28, 44), COLORS.enemy)
-    self:draw_stage_anchor(rect(center.x + center.w * 0.14, center.y + center.h - 78, center.w * 0.28, 44), COLORS.player)
+    if not draw_image("combat_conduit_field", center) then
+        set_color({ COLORS.surface_low[1], COLORS.surface_low[2], COLORS.surface_low[3], 0.32 })
+        love.graphics.rectangle("fill", center.x, center.y, center.w, center.h, 8, 8)
+        set_color({ COLORS.line[1], COLORS.line[2], COLORS.line[3], 0.12 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(center.x + 12, center.y, center.x + center.w - 12, center.y)
+        love.graphics.line(center.x + 12, center.y + center.h, center.x + center.w - 12, center.y + center.h)
+    end
 end
 
 function V2Combat:draw_pool()
-    self:draw_combatant_drawer("enemy", self.enemy, self.drawers.enemy, self.enemy_die_rects, self.enemy_crest_rects)
-    self:draw_combatant_drawer("player", self.player, self.drawers.player, self.die_rects, self.crest_rects)
+    self:draw_combatant_resource_row("enemy", self.enemy, self.drawers.enemy, self.enemy_die_rects, self.enemy_crest_rects)
+    self:draw_combatant_resource_row("player", self.player, self.drawers.player, self.die_rects, self.crest_rects)
 
     local confirm_outline = self.hover and self.hover.kind == "confirm" and COLORS.selected or COLORS.line
-    draw_box(self.confirm_rect, { 1, 1, 1, 0.88 }, confirm_outline, 6)
-    love.graphics.setFont(self.fonts.tiny)
-    draw_text("confirm", self.confirm_rect.x + 4, self.confirm_rect.y + 7, self.confirm_rect.w - 8, "center", COLORS.ink)
+    local confirm_asset = self.hover and self.hover.kind == "confirm" and "combat_confirm_chit_hover" or "combat_confirm_chit"
+    local drew_confirm_asset = draw_image(confirm_asset, self.confirm_rect)
+    if not drew_confirm_asset then
+        draw_box(self.confirm_rect, COLORS.surface, confirm_outline, 6)
+    elseif self.hover and self.hover.kind == "confirm" then
+        draw_sprite_outline(self.confirm_rect, confirm_outline, 6)
+    end
+    if not drew_confirm_asset then
+        love.graphics.setFont(self.fonts.tiny)
+        local font = love.graphics.getFont()
+        local text_y = self.confirm_rect.y + math.floor((self.confirm_rect.h - (font and font:getHeight() or 12)) / 2)
+        draw_text("confirm", self.confirm_rect.x + 4, text_y, self.confirm_rect.w - 8, "center", COLORS.ink)
+    end
 end
 
 function V2Combat:draw_drag_ghost()
@@ -2095,7 +2474,7 @@ function V2Combat:draw_auto_allocation_ghost()
     if sequence.visibility == "hidden" then
         draw_die_back(r, COLORS.enemy)
     else
-        local effective = self.engine:get_effective_symbols(sequence.combatant, current.die)
+        local effective = self.engine:get_effective_symbols(sequence.combatant, current.die, current.kind)
         draw_die_face(effective, r, true)
     end
 end
@@ -2150,7 +2529,7 @@ function V2Combat:draw_resolution_effects()
         label_y = card.y + card.h + 8
     end
 
-    draw_box(rect(label_x, label_y, label_w, label_h), { 1, 1, 1, 0.94 }, focus_color, 6)
+    draw_box(rect(label_x, label_y, label_w, label_h), COLORS.rail, focus_color, 6)
     love.graphics.setFont(self.fonts.small)
     draw_text("ATK " .. tostring(current.strike_count) .. " / DEF " .. tostring(current.ward_count),
         label_x + 6, label_y + 6, label_w - 12, "center", COLORS.ink)
@@ -2196,7 +2575,12 @@ function V2Combat:draw_slot_activation_effects()
             local label_x = math.max(main_x, math.min(card.x + card.w / 2 - label_w / 2, main_right - label_w))
             local label_y = card.y + card.h / 2 - label_h / 2
 
-            draw_box(rect(label_x, label_y, label_w, label_h), { 1, 1, 1, 0.94 * (1 - progress * 0.25) }, color, 6)
+            draw_box(rect(label_x, label_y, label_w, label_h), {
+                COLORS.rail[1],
+                COLORS.rail[2],
+                COLORS.rail[3],
+                0.94 * (1 - progress * 0.25)
+            }, color, 6)
             love.graphics.setFont(self.fonts.small)
             draw_text(truncate_tracked_text(slot_name, label_w - 12),
                 label_x + 6, label_y + 7, label_w - 12, "center", COLORS.ink)
@@ -2310,7 +2694,9 @@ end
 function V2Combat:draw_inspector()
     love.graphics.setFont(self.fonts.body)
     local rail = self:rail_rect()
-    draw_box(rail, COLORS.rail, COLORS.line, 8)
+    if not draw_image("combat_inspector_rail", rail) then
+        draw_box(rail, COLORS.rail, COLORS.line, 8)
+    end
     draw_text("Inspector", rail.x + 14, rail.y + 12, rail.w - 28, "left", COLORS.ink)
 
     local y = rail.y + 42
@@ -2398,9 +2784,9 @@ function V2Combat:draw_combat_end_overlay()
         color = COLORS.enemy
     end
 
-    set_color({ 0, 0, 0, 0.28 })
+    set_color({ 0, 0, 0, 0.48 })
     love.graphics.rectangle("fill", 0, 0, width, height)
-    draw_box(panel, { 1, 1, 1, 0.96 }, color, 8)
+    draw_box(panel, COLORS.rail, color, 8)
 
     love.graphics.setFont(self.fonts.title)
     draw_text(self.combat_end.title, panel.x + 14, panel.y + 18, panel.w - 28, "center", color)
@@ -2415,6 +2801,7 @@ end
 
 function V2Combat:draw()
     love.graphics.clear(COLORS.bg)
+    draw_image("combat_tabletop", rect(0, 0, love.graphics.getWidth(), love.graphics.getHeight()))
     love.graphics.setFont(self.fonts.body)
     self:layout()
 
@@ -2424,8 +2811,8 @@ function V2Combat:draw()
         love.graphics.translate(shake_x, shake_y)
     end
 
-    self:draw_strip(self:enemy_strip_rect(), "enemy strip", self.enemy)
-    self:draw_strip(self:player_strip_rect(), "player strip", self.player)
+    self:draw_tableau_band(self:enemy_strip_rect(), "enemy", self.enemy)
+    self:draw_tableau_band(self:player_strip_rect(), "player", self.player)
     self:draw_center()
     self:draw_pool()
 

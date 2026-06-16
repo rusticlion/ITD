@@ -34,6 +34,10 @@ function GameState.keyreleased(key)
     call(GameState.current, "keyreleased", key)
 end
 
+function GameState.textinput(text)
+    call(GameState.current, "textinput", text)
+end
+
 function GameState.mousepressed(x, y, button, istouch, presses)
     call(GameState.current, "mousepressed", x, y, button, istouch, presses)
 end

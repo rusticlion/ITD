@@ -60,6 +60,7 @@ return {
         dreamer_head = {
             id = "dreamer_head",
             name = "Dreamer's Head",
+            flavor = "The part of you that knows this is a dream, however dimly.",
             type = "HEAD",
             hp_value = 3,
             die = die(O, W, S, E, E, { E, E }),
@@ -69,6 +70,7 @@ return {
         dreamer_body = {
             id = "dreamer_body",
             name = "Dreamer's Body",
+            flavor = "A sleeping shape that still remembers how to keep breathing.",
             type = "BODY",
             hp_value = 2,
             die = die(W, S, W, { W, S }, { W, W }, { S, S }),
@@ -77,6 +79,7 @@ return {
         dreamer_right_arm = {
             id = "dreamer_right_arm",
             name = "Dreamer's Right Arm",
+            flavor = "A plain hand for grabbing, guarding, and striking in the dark.",
             type = "ARM",
             hp_value = 1,
             die = die(O, W, S, S, S, { S, E })
@@ -84,6 +87,7 @@ return {
         dreamer_left_arm = {
             id = "dreamer_left_arm",
             name = "Dreamer's Left Arm",
+            flavor = "A plain hand with a little more hesitation than force.",
             type = "ARM",
             hp_value = 1,
             die = die(O, W, W, S, { W, E }, S)
@@ -91,6 +95,7 @@ return {
         dreamer_right_leg = {
             id = "dreamer_right_leg",
             name = "Dreamer's Right Leg",
+            flavor = "A foot that has not yet learned where it is running.",
             type = "LEG",
             hp_value = 1,
             die = die(O, W, O, S, W, S)
@@ -98,6 +103,7 @@ return {
         dreamer_left_leg = {
             id = "dreamer_left_leg",
             name = "Dreamer's Left Leg",
+            flavor = "A foot that has not yet learned what follows behind.",
             type = "LEG",
             hp_value = 1,
             die = die(O, W, O, S, W, S)
@@ -106,6 +112,7 @@ return {
         bone_demon_skull = {
             id = "bone_demon_skull",
             name = "Bone Skull",
+            flavor = "It speaks with no tongue, and the words still arrive.",
             type = "HEAD",
             hp_value = 1,
             die = die(E, S, E, { S, E }, { E, E }, S),
@@ -114,6 +121,7 @@ return {
         bone_demon_rib_cage = {
             id = "bone_demon_rib_cage",
             name = "Rib Cage",
+            flavor = "A dry cage around nothing at all.",
             type = "BODY",
             hp_value = 1,
             die = die(O, S, E, S, { S, E }, S)
@@ -121,6 +129,7 @@ return {
         bone_demon_right_claw = {
             id = "bone_demon_right_claw",
             name = "Right Bone Claw",
+            flavor = "The fingers click like counting sticks.",
             type = "ARM",
             hp_value = 1,
             die = die(O, S, S, E, S, { S, S })
@@ -128,9 +137,36 @@ return {
         bone_demon_left_claw = {
             id = "bone_demon_left_claw",
             name = "Left Bone Claw",
+            flavor = "It points before it cuts.",
             type = "ARM",
             hp_value = 1,
             die = die(O, E, S, E, S, { S, E })
+        },
+        scholars_head = {
+            id = "scholars_head",
+            name = "Scholar's Head",
+            flavor = "\"The library will endure; it is the universe.\" - Jorge Luis Borges",
+            type = "HEAD",
+            hp_value = 3,
+            die = {
+                faces = {
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE,
+                    { Symbols.WARD, Symbols.WARD },
+                    Symbols.WARD
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "scholars_head_slot",
+                name = "Anticipate",
+                cost = { Symbols.ESSENCE },
+                timing = "spend",
+                effect = { type = "add_next_symbol", symbol = Symbols.WARD }
+            }
         }
     },
 

@@ -158,6 +158,126 @@ local function run()
     assert_true(engine3.state == "COMPLETE", "A slot-caused defeat should complete combat immediately")
     assert_true(engine3.winner == enemy3, "Bone Demon should win after a lethal Speak Doom")
 
+    local engine4, player4, enemy4 = start_engine()
+    local channel_head = player4:get_body_part_by_id("dreamer_head")
+    local channel_target = enemy4:get_body_part_by_id("bone_demon_skull")
+    channel_head.slot = {
+        id = "spellblade",
+        name = "Spellblade",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            actions = {
+                {
+                    type = "add_symbol_to_matching_dice",
+                    match = Symbols.ESSENCE,
+                    symbol = Symbols.STRIKE,
+                    amount = 1,
+                    destination = "rim"
+                },
+                {
+                    type = "add_next_symbol",
+                    symbol = Symbols.WARD,
+                    amount = 1
+                }
+            }
+        }
+    }
+
+    local channel_feed = die_for(engine4, player4, "dreamer_head")
+    local channel_die = die_for(engine4, player4, "dreamer_body")
+    channel_feed.symbols = { Symbols.ESSENCE }
+    channel_die.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine4:feed_die_to_slot(player4, channel_feed.id, channel_head)
+    assert_true(ok, "Spellblade should accept Essence: " .. tostring(reason))
+
+    ok, reason = engine4:assign_die_to_rim(player4, channel_die.id, channel_target)
+    assert_true(ok, "Spellblade should make an Essence die rim-valid: " .. tostring(reason))
+    assert_true(Symbols.count(engine4.assignments.rims[channel_target].symbols, Symbols.STRIKE) == 1,
+        "Spellblade should add Strike to Essence dice on rims")
+    assert_true(Symbols.count(engine4.assignments.rims[channel_target].added_symbols, Symbols.WARD) == 1,
+        "Composed effects should still apply add-next-symbol actions")
+
+    local engine5, player5 = start_engine()
+    local field_head = player5:get_body_part_by_id("dreamer_head")
+    field_head.slot = {
+        id = "force_field",
+        name = "Force Field",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            type = "assign_symbol_to_each_part",
+            destination = "socket",
+            target = "self",
+            symbol = Symbols.WARD,
+            amount = 1
+        }
+    }
+
+    local field_feed = die_for(engine5, player5, "dreamer_head")
+    field_feed.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine5:feed_die_to_slot(player5, field_feed.id, field_head)
+    assert_true(ok, "Force Field should accept Essence: " .. tostring(reason))
+
+    local socket_count = 0
+    for _, part in ipairs(player5.body_parts) do
+        local assignment = engine5.assignments.sockets[part]
+        assert_true(assignment ~= nil, "Force Field should defend " .. tostring(part.name))
+        assert_true(assignment.virtual == true, "Force Field assignments should be marked virtual")
+        assert_true(Symbols.count(assignment.symbols, Symbols.WARD) == 1,
+            "Force Field should assign exactly one Ward")
+        socket_count = socket_count + 1
+    end
+    assert_true(socket_count == #player5.body_parts, "Force Field should cover every unmaimed player part")
+
+    local engine6, player6, enemy6 = start_engine()
+    local mark_head = player6:get_body_part_by_id("dreamer_head")
+    local marked_skull = enemy6:get_body_part_by_id("bone_demon_skull")
+    local unmarked_rib = enemy6:get_body_part_by_id("bone_demon_rib_cage")
+    mark_head.slot = {
+        id = "hexing_gaze",
+        name = "Hexing Gaze",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            type = "open_spellmark",
+            destination = "rim",
+            symbol = Symbols.ESSENCE,
+            on_mark = {
+                type = "damage_marked_part",
+                amount = 1
+            }
+        }
+    }
+
+    local mark_feed = die_for(engine6, player6, "dreamer_head")
+    local mark_die = die_for(engine6, player6, "dreamer_body")
+    local after_mark_die = die_for(engine6, player6, "dreamer_right_arm")
+    mark_feed.symbols = { Symbols.ESSENCE }
+    mark_die.symbols = { Symbols.ESSENCE }
+    after_mark_die.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine6:assign_die_to_rim(player6, mark_die.id, marked_skull)
+    assert_true(not ok and reason == "no_strike", "Essence should not target a rim before a spellmark")
+
+    ok, reason = engine6:feed_die_to_slot(player6, mark_feed.id, mark_head)
+    assert_true(ok, "Hexing Gaze should accept Essence: " .. tostring(reason))
+
+    ok, reason = engine6:assign_die_to_rim(player6, mark_die.id, marked_skull)
+    assert_true(ok, "Spellmark should let an Essence die assign to an enemy rim: " .. tostring(reason))
+    assert_true(engine6.assignments.rims[marked_skull].spellmark ~= nil,
+        "Spellmark assignment should retain spellmark metadata")
+    assert_true(Symbols.count(engine6.assignments.rims[marked_skull].used_symbols, Symbols.ESSENCE) == 1,
+        "Spellmark assignment should use Essence rather than burn it")
+    assert_true(Symbols.count(engine6.assignments.rims[marked_skull].symbols, Symbols.STRIKE) == 0,
+        "Essence-only spellmark assignment should not add direct Strike pressure")
+    assert_true(marked_skull.status == "wounded", "Spellmark payload should damage the marked part")
+
+    ok, reason = engine6:assign_die_to_rim(player6, after_mark_die.id, unmarked_rib)
+    assert_true(not ok and reason == "no_strike", "Single-use spellmark should not leave all rims Essence-valid")
+
     print("\nV2 combat smoke test passed.")
 end
 
