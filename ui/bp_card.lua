@@ -1,5 +1,7 @@
 local Assets = require("core.assets")
+local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
+local Text = require("ui.text")
 
 local BPCard = {}
 
@@ -12,7 +14,6 @@ local SYMBOL_SIZE = 12
 local SLOT_PIP_ROW_LIMIT = 3
 local SLOT_PIP_GAP = 1
 local SLOT_PIP_ROW_GAP = 1
-local TEXT_TRACKING = 1
 local OVERLAY_ANIMATION_FPS = 8
 local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
 
@@ -52,6 +53,13 @@ local SYMBOL_OUTLINE_ASSETS = {
     [Symbols.WARD] = "shield_symbol_outline",
     [Symbols.ESSENCE] = "lightning_symbol_outline",
     [Symbols.BLOOD] = "blood_symbol_outline"
+}
+
+local KEYWORD_BADGE_COLORS = {
+    Armored = { fill = { 0.13, 0.24, 0.34, 0.96 }, line = COLORS.defense },
+    Brittle = { fill = { 0.34, 0.12, 0.18, 0.96 }, line = COLORS.blood },
+    Absorbent = { fill = { 0.14, 0.28, 0.23, 0.96 }, line = COLORS.valid },
+    Hungry = { fill = { 0.34, 0.27, 0.12, 0.96 }, line = COLORS.essence }
 }
 
 local font_cache = {}
@@ -160,135 +168,12 @@ local function draw_sprite_outline(r, color, radius)
     love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 3, radius or 3)
 end
 
-local function utf8_char_size(first_byte)
-    if not first_byte or first_byte < 0x80 then
-        return 1
-    elseif first_byte >= 0xC2 and first_byte <= 0xDF then
-        return 2
-    elseif first_byte >= 0xE0 and first_byte <= 0xEF then
-        return 3
-    elseif first_byte >= 0xF0 and first_byte <= 0xF4 then
-        return 4
-    end
-
-    return 1
-end
-
-local function is_utf8_continuation(byte)
-    return byte and byte >= 0x80 and byte <= 0xBF
-end
-
-local function chars_for_text(text)
-    local source = tostring(text or "")
-    local chars = {}
-    local index = 1
-
-    while index <= #source do
-        local size = utf8_char_size(source:byte(index))
-        local stop = index + size - 1
-        local valid = stop <= #source
-
-        for offset = 1, size - 1 do
-            if not is_utf8_continuation(source:byte(index + offset)) then
-                valid = false
-                break
-            end
-        end
-
-        if valid then
-            table.insert(chars, source:sub(index, stop))
-            index = stop + 1
-        else
-            table.insert(chars, source:sub(index, index))
-            index = index + 1
-        end
-    end
-
-    return chars
-end
-
-local function tracked_text_width(text, tracking)
-    local font = love.graphics.getFont()
-    if not font then
-        return 0
-    end
-
-    local width = 0
-    local chars = chars_for_text(text)
-    for index, char in ipairs(chars) do
-        local ok, char_width = pcall(font.getWidth, font, char)
-        if not ok then
-            ok, char_width = pcall(font.getWidth, font, "?")
-        end
-        width = width + (ok and char_width or 0)
-        if index < #chars then
-            width = width + tracking
-        end
-    end
-
-    return width
-end
-
 local function truncate_tracked_text(text, max_width, tracking)
-    local source = tostring(text or "")
-    if tracked_text_width(source, tracking) <= max_width then
-        return source
-    end
-
-    local suffix = ".."
-    local available = math.max(0, (max_width or 0) - tracked_text_width(suffix, tracking))
-    local result = ""
-
-    for _, char in ipairs(chars_for_text(source)) do
-        local candidate = result .. char
-        if tracked_text_width(candidate, tracking) > available then
-            break
-        end
-        result = candidate
-    end
-
-    return result .. suffix
-end
-
-local function draw_tracked_line(text, x, y, color, tracking)
-    local font = love.graphics.getFont()
-    local cursor_x = x
-    set_color(color or COLORS.ink)
-
-    local characters = chars_for_text(text)
-    for index, char in ipairs(characters) do
-        local ok = pcall(love.graphics.print, char, cursor_x, y)
-        local measured_char = char
-        if not ok then
-            measured_char = "?"
-            love.graphics.print(measured_char, cursor_x, y)
-        end
-
-        local width_ok, char_width = pcall(font.getWidth, font, measured_char)
-        if not width_ok then
-            width_ok, char_width = pcall(font.getWidth, font, "?")
-        end
-        cursor_x = cursor_x + (width_ok and char_width or 0)
-        if index < #characters then
-            cursor_x = cursor_x + tracking
-        end
-    end
+    return Text.truncate(text, max_width, { tracking = tracking })
 end
 
 local function draw_text(text, x, y, w, align, color, tracking)
-    local width = w or 200
-    local line = tostring(text or "")
-    local line_width = tracked_text_width(line, tracking)
-    local line_x = x
-
-    if align == "center" then
-        line_x = x + math.floor((width - line_width) / 2)
-    elseif align == "right" then
-        line_x = x + width - line_width
-    end
-
-    draw_tracked_line(line, line_x, y, color, tracking)
-    return line_width <= width, line_width
+    return Text.draw_line(text, x, y, w, align, color, { tracking = tracking })
 end
 
 local function symbol_color(symbol)
@@ -319,6 +204,57 @@ local function draw_hp_badge(value, x, y, scale)
     end
 end
 
+local function draw_keyword_badge(definition, x, y, w, h, options)
+    local scale = options.scale or 1
+    local colors = KEYWORD_BADGE_COLORS[definition.name] or { fill = COLORS.surface, line = COLORS.line }
+    local badge = rect(x, y, w, h)
+    if definition.asset and draw_image(definition.asset, badge) then
+        return
+    end
+
+    draw_box(badge, colors.fill, colors.line, scaled(2, scale))
+
+    love.graphics.setFont((options.fonts and options.fonts.tiny) or BPCard.fonts(scale).tiny)
+    local font = love.graphics.getFont()
+    local text_h = font and font:getHeight() or h
+    local text_y = y + math.floor((h - text_h) / 2) - scaled(1, scale)
+    draw_text(definition.short or definition.name:sub(1, 2), x + scaled(1, scale), text_y,
+        w - scaled(2, scale), "center", COLORS.ink, 0)
+end
+
+local function draw_keyword_badges(part, layout, options)
+    local badges = Keywords.badges_for_part(part)
+    if #badges == 0 then
+        return
+    end
+
+    local scale = options.scale or 1
+    local badge_w = scaled(13, scale)
+    local badge_h = scaled(9, scale)
+    local gap = scaled(1, scale)
+    local max_per_row = math.max(1, math.floor((layout.meta.w + gap) / (badge_w + gap)))
+    local max_badges = max_per_row * 2
+    local first_row_y = layout.side == "enemy"
+        and (layout.meta.y + layout.meta.h + scaled(2, scale))
+        or (layout.meta.y - badge_h - scaled(2, scale))
+
+    for index, definition in ipairs(badges) do
+        if index > max_badges then
+            break
+        end
+
+        local row = math.floor((index - 1) / max_per_row)
+        local column = ((index - 1) % max_per_row) + 1
+        local remaining = math.min(max_per_row, #badges - row * max_per_row)
+        local row_width = remaining * badge_w + math.max(0, remaining - 1) * gap
+        local x = layout.meta.x + math.floor((layout.meta.w - row_width) / 2) + (column - 1) * (badge_w + gap)
+        local y = layout.side == "enemy"
+            and (first_row_y + row * (badge_h + gap))
+            or (first_row_y - row * (badge_h + gap))
+        draw_keyword_badge(definition, x, y, badge_w, badge_h, options)
+    end
+end
+
 local function draw_damage_decoration(part, card, display_status)
     local status = display_status or (part and part.status)
     if not part or status == "healthy" then
@@ -346,7 +282,7 @@ local function draw_symbol_chip(symbol, x, y, w, h, scale)
     local chip = rect(x, y, w, h)
     draw_box(chip, COLORS.surface, symbol_color(symbol), scaled(4, scale))
     draw_text(Symbols.display(symbol), x + scaled(2, scale), y + scaled(7, scale), w - scaled(4, scale),
-        "center", symbol_color(symbol), scaled(TEXT_TRACKING, scale))
+        "center", symbol_color(symbol), scaled(Text.TRACKING, scale))
 end
 
 local function draw_symbol_sprite(symbol, x, y, size, outlined, alpha, scale)
@@ -365,6 +301,40 @@ local function draw_symbol_sprite(symbol, x, y, size, outlined, alpha, scale)
     set_color({ 1, 1, 1, alpha or 1 })
     love.graphics.draw(image, x, y, 0, size / image:getWidth(), size / image:getHeight())
     return true
+end
+
+local function draw_wildcard_pip(x, y, size, lit, previewed)
+    local pip_rect = rect(x, y, size, size)
+    local tint = lit and { 1, 1, 1, 1 } or (previewed and { 1, 1, 1, 0.9 } or { 1, 1, 1, 0.72 })
+    if draw_image("slot_cell_wild", pip_rect, tint) then
+        if lit then
+            draw_sprite_outline(pip_rect, COLORS.essence, 2)
+        elseif previewed then
+            draw_sprite_outline(pip_rect, COLORS.valid, 2)
+        end
+        return
+    end
+
+    local cx = x + math.floor(size / 2)
+    local cy = y + math.floor(size / 2)
+    local radius = math.max(2, math.floor(size / 2) - 3)
+
+    if lit then
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.82 })
+        love.graphics.circle("fill", cx, cy, radius)
+        set_color(COLORS.ink)
+        love.graphics.circle("line", cx, cy, radius)
+    elseif previewed then
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.28 })
+        love.graphics.circle("fill", cx, cy, radius)
+        set_color(COLORS.essence)
+        love.graphics.circle("line", cx, cy, radius)
+    else
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.62 })
+        love.graphics.circle("line", cx, cy, radius)
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.38 })
+        love.graphics.circle("fill", cx, cy, math.max(1, math.floor(radius / 2)))
+    end
 end
 
 local function draw_burned_symbols(symbols, x, y, scale)
@@ -517,7 +487,7 @@ local function draw_title_strip(part, layout, options)
     local text = part.name or part.id or "Part"
     local text_rect = rect(title.x + scaled(4, scale), title.y, title.w - scaled(8, scale), title.h)
     local text_y = text_rect.y + math.floor((text_rect.h - text_h) / 2)
-    local tracking = scaled(TEXT_TRACKING, scale)
+    local tracking = scaled(Text.TRACKING, scale)
     local fits, width = draw_text(text, text_rect.x, text_y, text_rect.w, "center", options.label_color or COLORS.ink, tracking)
 
     if not fits and options.warn_title_overflow then
@@ -619,8 +589,7 @@ local function draw_slot_track(part, layout, options)
     end
 
     local hatch_id = "die-hatch1"
-    local has_keyword = part.has_keyword and part:has_keyword("Hungry")
-    local hungry = has_keyword or slot.hungry
+    local hungry = Keywords.slot_is_hungry(part, slot)
     local accepting = hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy
     local hovered = hatch_outline == COLORS.valid and options.hover_matches and options.hover_matches("slot", part)
     local swallow_frame = options.hatch_swallow_frame and options.hatch_swallow_frame(part)
@@ -680,7 +649,11 @@ local function draw_slot_track(part, layout, options)
             set_color({ 1, 0.88, 0.35, 0.5 })
             love.graphics.rectangle("fill", pip_x - 1, pip_y - 1, symbol_size + 2, symbol_size + 2, 2, 2)
         end
-        draw_symbol_sprite(symbol, pip_x, pip_y, symbol_size, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85), scale)
+        if hungry then
+            draw_wildcard_pip(pip_x, pip_y, symbol_size, lit, previewed)
+        else
+            draw_symbol_sprite(symbol, pip_x, pip_y, symbol_size, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85), scale)
+        end
         last_pip_x = pip_x
         last_pip_y = pip_y
     end
@@ -690,8 +663,8 @@ local function draw_slot_track(part, layout, options)
     end
 
     love.graphics.setFont((options.fonts and options.fonts.tiny) or BPCard.fonts(scale).tiny)
-    draw_text(truncate_tracked_text(slot.name or "Slot", layout.slot_label.w, scaled(TEXT_TRACKING, scale)),
-        layout.slot_label.x, layout.slot_label.y, layout.slot_label.w, "center", COLORS.muted, scaled(TEXT_TRACKING, scale))
+    draw_text(truncate_tracked_text(slot.name or "Slot", layout.slot_label.w, scaled(Text.TRACKING, scale)),
+        layout.slot_label.x, layout.slot_label.y, layout.slot_label.w, "center", COLORS.muted, scaled(Text.TRACKING, scale))
 end
 
 function BPCard.total_width(scale)
@@ -769,6 +742,7 @@ function BPCard.draw(part, layout, options)
     options.hatch_outline = options.auto_slot_target and COLORS.enemy or (options.slot_valid and COLORS.valid or COLORS.line)
     draw_card_state_overlays(part, layout, options)
     draw_hp_badge(part.hp_value or 1, layout.meta.x, layout.meta.y, options.scale)
+    draw_keyword_badges(part, layout, options)
 
     draw_socket_or_rim_frame("socket", part, layout, options)
     draw_socket_or_rim_frame("rim", part, layout, options)
@@ -801,7 +775,7 @@ function BPCard.draw_empty(layout, options)
         love.graphics.rectangle("line", layout.card.x, layout.card.y, layout.card.w, layout.card.h, scaled(6, scale), scaled(6, scale))
     end
     draw_text("empty", layout.card.x, layout.card.y + layout.card.h * 0.42, layout.card.w, "center",
-        { COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.52 }, scaled(TEXT_TRACKING, scale))
+        { COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.52 }, scaled(Text.TRACKING, scale))
 end
 
 return BPCard

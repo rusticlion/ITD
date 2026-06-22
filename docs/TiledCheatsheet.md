@@ -7,10 +7,24 @@
 ## Map Settings
 
 - Orientation: orthogonal.
+- Map type: finite map. Infinite/chunked maps are not supported yet.
+- Runtime export: Lua map export.
 - Logical tile size: **32x32**.
 - Target game canvas: **960x540**.
 - Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
 - Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
+
+---
+
+## Tilesets And Sprite Assets
+
+- Overworld art lives in `assets/sprites/overworld/`. The folder is scanned by `core/assets.lua`.
+- Asset IDs are filenames without `.png`.
+- Embedded Tiled tilesets are supported when they provide `firstgid`, `image`, `imagewidth`, `imageheight`, `tilewidth`, `tileheight`, and `columns`/`tilecount`.
+- Tileset images resolve to runtime assets by `asset_id` custom property first, then `image_id`, then the image filename. For example, `../overworld/basement_tiles.png` resolves to `basement_tiles`.
+- External `.tsx` tilesets are fine for authoring, but exported Lua maps must either embed enough tileset data or set an `asset_id` the runtime can resolve.
+- Horizontal and vertical tile flips render. Avoid diagonal tile flips for now; the validator reports them because diagonal rendering is not implemented.
+- If a tile has a nonzero GID but its tileset/image cannot be resolved, the runtime draws the old colored rectangle fallback and prints a room validation warning.
 
 ---
 
@@ -44,6 +58,9 @@ Required:
 Supported custom properties:
 
 - `actor_type`: optional override if Tiled's built-in `type` field is inconvenient.
+- `asset_id`: optional sprite asset ID from `assets/sprites/overworld/`.
+- `sprite_id` / `sprite`: accepted aliases for `asset_id`.
+- `resolved_asset_id`: optional sprite shown after an actor's one-shot interaction resolves.
 - `solid`: boolean; blocks movement when true.
 - `interactable`: boolean; can be examined/used when true.
 - `item`: item ID granted by a pickup-like actor.
@@ -83,6 +100,12 @@ Tiled exports should use dotted property names if nested custom classes are inco
 - `on_tool_use.once`: boolean; defaults to true for tool targets.
 
 Interim hand-authored Lua rooms may use `tile_x` and `tile_y` directly. Tiled imports should prefer pixel `x`/`y`.
+
+Default actor sprite IDs:
+
+- `pipe`: `actor_pipe`.
+- `crack`: `actor_crack`.
+- `message`: `actor_hidden_wall_marker`.
 
 ---
 
@@ -127,6 +150,7 @@ Dialog supports:
 - Persistent objects need stable `name` values.
 - Renaming a persistent object is a save migration.
 - Runtime state is saved by `room_id.actor_name`, not by Tiled numeric object ID.
+- The room validator warns when an actor falls back to Tiled's numeric object ID.
 - One-shot actor interactions should save generic `resolved = true` state. Presentation may render that as dug, opened, drained, or exhausted.
 - Prefer explicit flags for cross-room logic, e.g. `basement.shovel_found`, `basement.mad_butcher_defeated`.
 
@@ -139,3 +163,22 @@ Dialog supports:
 - `message`: simple inspectable text actor.
 
 Add new actor types here when they become runtime-supported.
+
+---
+
+## Current Runtime Validation
+
+Room load prints validation warnings/errors for:
+
+- duplicate layer names.
+- unknown layer names.
+- missing `ground` or `actors` layers.
+- tile layers with missing Lua `data`.
+- layer dimensions that disagree with the map dimensions.
+- missing tileset image assets.
+- nonzero GIDs that no tileset owns.
+- diagonal tile flips.
+- duplicate actor IDs.
+- actor objects that lack stable names and fall back to numeric Tiled IDs.
+- unknown actor types.
+- explicit missing actor sprite assets.

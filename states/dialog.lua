@@ -1,3 +1,4 @@
+local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 local Dialog = require("systems.dialog")
@@ -16,8 +17,66 @@ local COLORS = {
     selected_line = { 0.68, 0.90, 0.92, 1 }
 }
 
+local CONTINUE_PROMPT_SIZE = 12
+local CONTINUE_PROMPT_FPS = 4
+
 local function set_color(color)
     love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function draw_box(r, fill, outline, radius)
+    set_color(fill)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, radius or 5, radius or 5)
+    set_color(outline)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 5, radius or 5)
+end
+
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
+end
+
+local function animated_asset_id(base_id, time, max_frames)
+    local frame_count = 0
+    local limit = max_frames or 4
+
+    for index = 1, limit do
+        if Assets.images and Assets.images[base_id .. tostring(index)] then
+            frame_count = index
+        elseif frame_count > 0 then
+            break
+        end
+    end
+
+    if frame_count > 0 then
+        local frame = (math.floor((time or 0) * CONTINUE_PROMPT_FPS) % frame_count) + 1
+        return base_id .. tostring(frame)
+    end
+
+    if Assets.images and Assets.images[base_id] then
+        return base_id
+    end
+
+    return nil
+end
+
+local function draw_animated_image(base_id, r, time, max_frames)
+    local asset_id = animated_asset_id(base_id, time, max_frames)
+    if not asset_id then
+        return false
+    end
+
+    return draw_image(asset_id, r)
 end
 
 function DialogState:enter(context)
@@ -28,9 +87,12 @@ function DialogState:enter(context)
         actor = context.actor
     })
     self.selected_response = 1
+    self.time = 0
 end
 
 function DialogState:update(dt)
+    self.time = (self.time or 0) + (dt or 0)
+
     if self.world and self.world.update_ambient then
         self.world:update_ambient(dt)
     end
@@ -106,18 +168,18 @@ function DialogState:draw()
     local box_x = margin
     local box_y = height - box_h - margin
     local box_w = width - margin * 2
+    local box_rect = rect(box_x, box_y, box_w, box_h)
 
-    set_color(COLORS.box)
-    love.graphics.rectangle("fill", box_x, box_y, box_w, box_h, 5, 5)
-    set_color(COLORS.box_line)
-    love.graphics.rectangle("line", box_x, box_y, box_w, box_h, 5, 5)
+    if not draw_image("dialog_box_frame", box_rect) then
+        draw_box(box_rect, COLORS.box, COLORS.box_line, 5)
+    end
 
     if node.speaker then
         local speaker_w = math.min(220, box_w - 24)
-        set_color(COLORS.speaker)
-        love.graphics.rectangle("fill", box_x + 16, box_y - 18, speaker_w, 28, 4, 4)
-        set_color(COLORS.speaker_line)
-        love.graphics.rectangle("line", box_x + 16, box_y - 18, speaker_w, 28, 4, 4)
+        local speaker_rect = rect(box_x + 16, box_y - 18, speaker_w, 28)
+        if not draw_image("dialog_nameplate", speaker_rect) then
+            draw_box(speaker_rect, COLORS.speaker, COLORS.speaker_line, 4)
+        end
         set_color(COLORS.ink)
         love.graphics.printf(node.speaker, box_x + 28, box_y - 11, speaker_w - 24, "left")
     end
@@ -128,6 +190,7 @@ function DialogState:draw()
     if node.responses then
         local response_y = box_y + box_h - 42
         local response_w = math.min(112, (box_w - 64) / 2)
+        local has_cursor = Assets.images and Assets.images.dialog_choice_cursor
         for index, response in ipairs(node.responses) do
             if index > 2 then
                 break
@@ -135,10 +198,11 @@ function DialogState:draw()
 
             local x = box_x + box_w - 24 - (3 - index) * (response_w + 10)
             if index == self.selected_response then
-                set_color(COLORS.selected)
-                love.graphics.rectangle("fill", x, response_y, response_w, 26, 4, 4)
-                set_color(COLORS.selected_line)
-                love.graphics.rectangle("line", x, response_y, response_w, 26, 4, 4)
+                if has_cursor then
+                    draw_image("dialog_choice_cursor", rect(x - 14, response_y + 7, 8, 12))
+                elseif not draw_image("dialog_response_selected", rect(x, response_y, response_w, 26)) then
+                    draw_box(rect(x, response_y, response_w, 26), COLORS.selected, COLORS.selected_line, 4)
+                end
                 set_color(COLORS.ink)
             else
                 set_color(COLORS.muted)
@@ -146,8 +210,11 @@ function DialogState:draw()
             love.graphics.printf(response.label or (index == 1 and "Yes" or "No"), x, response_y + 6, response_w, "center")
         end
     else
-        set_color(COLORS.muted)
-        love.graphics.print("v", box_x + box_w - 34, box_y + box_h - 28)
+        local prompt = rect(box_x + box_w - 34, box_y + box_h - 28, CONTINUE_PROMPT_SIZE, CONTINUE_PROMPT_SIZE)
+        if not draw_animated_image("dialog_continue", prompt, self.time) then
+            set_color(COLORS.muted)
+            love.graphics.print("v", prompt.x, prompt.y)
+        end
     end
 end
 

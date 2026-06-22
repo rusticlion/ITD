@@ -2,6 +2,7 @@ local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 local Overworld = require("states.overworld")
+local Text = require("ui.text")
 
 local function has_launch_arg(name)
     for _, value in ipairs(arg or {}) do
@@ -30,6 +31,7 @@ end
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Text.install(love.graphics)
     Assets:load()
     if has_launch_arg("--bp-editor") then
         GameState.switch(require("states.bp_editor"))

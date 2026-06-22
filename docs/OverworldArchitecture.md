@@ -27,6 +27,8 @@ Runtime room loading should be designed around Tiled concepts even if early room
 - Stable object IDs or authored names for save-state keys.
 - Custom properties for behavior data such as `actor_type`, `on_tool_use`, `target_room`, `encounter_id`, or `flag`.
 
+Current runtime support accepts finite Lua exports with embedded tileset metadata. Tileset images resolve through `assets/sprites/overworld/` by `asset_id`, `image_id`, or image filename, and room load prints validation warnings for missing assets, unsupported layer shapes, duplicate IDs, unknown actor types, and diagonal tile flips.
+
 Do not couple game logic to Aseprite output details. Aseprite establishes the look; Tiled establishes the playable room.
 
 Keep `docs/TiledCheatsheet.md` current with exact layer names, object properties, and save-state invariants needed while authoring maps in Tiled.
@@ -148,7 +150,7 @@ Combat is a progression boundary, not just a win/loss minigame. The overworld/ru
 Run state should track:
 
 - `dreamform`: the currently equipped Body Part instance IDs by slot.
-- `parts`: claimed Body Part instances available for future dreamform editing.
+- `parts`: the currently embodied Body Part instances only. A replaced BP leaves the run; this is not an inventory.
 - `discovered_parts`: Body Part definition IDs that the Esoterica database can reveal.
 - `encounters`: defeated, cleared, or otherwise resolved encounter IDs.
 - `combat_history`: optional debug/playtest records such as round count, winner, claimed part, and defeat reason.
@@ -161,13 +163,14 @@ run = {
         head = "part_inst_dreamer_head",
         body = "part_inst_dreamer_body",
         arm_l = "part_inst_dreamer_left_arm",
-        arm_r = "part_inst_dreamer_right_arm",
+        arm_r = "part_inst_bone_demon_claw",
         leg_l = "part_inst_dreamer_left_leg",
         leg_r = "part_inst_dreamer_right_leg"
     },
     parts = {
         part_inst_dreamer_head = { def_id = "dreamer_head" },
-        part_inst_bone_demon_skull = { def_id = "bone_demon_skull", claimed_from = "basement.bone_demon" }
+        part_inst_dreamer_body = { def_id = "dreamer_body" },
+        part_inst_bone_demon_claw = { def_id = "bone_demon_right_claw", claimed_from = "basement.bone_demon" }
     }
 }
 ```
@@ -183,15 +186,17 @@ Combat entry should receive an `encounter_id` plus the current `dreamform`. Comb
         { def_id = "bone_demon_skull", status = "wounded" },
         { def_id = "bone_demon_right_claw", status = "healthy" }
     },
-    claimed_part = { def_id = "bone_demon_skull" } -- nil until claim UI exists
+    claimed_part = { def_id = "bone_demon_right_claw" }, -- nil if skipped
+    claimed_slot = "arm_r",
+    replaced_part = { def_id = "dreamer_right_arm" }
 }
 ```
 
-The claim ceremony can be a separate state after combat. Combat can identify claimable enemy parts, but the run layer should apply the selected claim to `run.parts` and, later, the dreamform-planning UI should decide whether it becomes equipped.
+The claim ceremony happens on the combat screen immediately after victory. Combat identifies non-maimed enemy parts as claimable; the player may skip the claim. If the player claims a BP, the result names both the claimed part and the target dreamform slot. The run layer then creates a new current part instance, equips it into that slot, records the definition in `discovered_parts`, and deletes the replaced instance from `run.parts`.
 
-Locked first-pass recovery rule: player Body Part damage persists through combat exit, then every equipped surviving Body Part heals one step before the next combat begins. `maimed` becomes `wounded`, `wounded` becomes `healthy`, and `healthy` remains `healthy`. This keeps damage pressure without allowing a BP to begin the next fight already offline.
+Locked first-pass recovery rule: Body Part damage persists through combat exit, then every equipped surviving Body Part heals one step before the next combat begins. `maimed` becomes `wounded`, `wounded` becomes `healthy`, and `healthy` remains `healthy`. Claimed non-maimed parts receive the same one-step recovery as they take root. This keeps damage pressure without allowing a BP to begin the next fight already offline.
 
-The first post-combat ceremony is a lightweight stack overlay after combat result application. It summarizes outcome, recovery, and claimable parts. Later, this should become the claim ceremony and dreamform-editing handoff.
+The post-combat stack overlay now summarizes outcome, recovery, and the chosen mutation. It is no longer the claim UI.
 
 ---
 

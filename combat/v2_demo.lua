@@ -41,6 +41,7 @@ local function build_player_from_run(definitions, run)
         if instance and instance.def_id then
             local part = Content.build_part(definitions, instance.def_id)
             part.instance_id = instance_id
+            part.dreamform_slot = slot
             part.status = instance.status or "healthy"
             combatant:add_body_part(part)
         end

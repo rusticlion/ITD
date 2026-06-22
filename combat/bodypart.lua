@@ -1,3 +1,5 @@
+local Keywords = require("combat.keywords")
+
 local BodyPart = {}
 BodyPart.__index = BodyPart
 
@@ -19,8 +21,8 @@ function BodyPart:new(data)
         tags = data.tags or {},
         die = data.die,
         slot = data.slot,
-        keyword = data.keyword,
-        keywords = data.keywords or {},
+        keyword = Keywords.normalize(data.keyword),
+        keywords = Keywords.normalize_collection(data.keywords or {}),
         slot_charge = {}
     }
 
@@ -79,21 +81,22 @@ function BodyPart:vent_slot_charge()
 end
 
 function BodyPart:has_keyword(keyword)
-    if not keyword then
+    local wanted = Keywords.normalize(keyword)
+    if not wanted then
         return false
     end
 
-    if self.keyword == keyword then
+    if Keywords.normalize(self.keyword) == wanted then
         return true
     end
 
     if type(self.keywords) == "table" then
-        if self.keywords[keyword] then
+        if self.keywords[wanted] then
             return true
         end
 
         for _, existing in ipairs(self.keywords) do
-            if existing == keyword then
+            if Keywords.normalize(existing) == wanted then
                 return true
             end
         end

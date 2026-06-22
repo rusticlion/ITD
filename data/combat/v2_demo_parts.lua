@@ -23,9 +23,9 @@ end
 
 return {
     slots = {
-        moment_of_valor = {
-            id = "moment_of_valor",
-            name = "Moment of Valor",
+        clarity = {
+            id = "clarity",
+            name = "Clarity",
             cost = { E },
             timing = "spend",
             effect = {
@@ -64,7 +64,7 @@ return {
             type = "HEAD",
             hp_value = 3,
             die = die(O, W, S, E, E, { E, E }),
-            slot = "moment_of_valor",
+            slot = "clarity",
             tags = { "LUCID" }
         },
         dreamer_body = {
@@ -174,6 +174,7 @@ return {
             flavor = "",
             type = "HEAD",
             hp_value = 2,
+            keywords = { "Armored" },
             die = {
                 faces = {
                     { Symbols.STRIKE, Symbols.WARD },
@@ -200,6 +201,7 @@ return {
             flavor = "",
             type = "ARM",
             hp_value = 1,
+            keywords = { "Brittle" },
             die = {
                 faces = {
                     Symbols.ESSENCE,
@@ -226,6 +228,7 @@ return {
             flavor = "",
             type = "BODY",
             hp_value = 2,
+            keywords = { "Absorbent" },
             die = {
                 faces = {
                     { Symbols.ESSENCE, Symbols.ESSENCE },
@@ -242,6 +245,7 @@ return {
                 id = "gaunt_cloak_slot",
                 name = "Enshroud",
                 cost = { Symbols.WARD, Symbols.ESSENCE, Symbols.ESSENCE, Symbols.ESSENCE },
+                hungry = true,
                 timing = "spend",
                 effect = { type = "assign_symbol_to_each_part", destination = "socket", target = "self", symbol = Symbols.WARD, amount = 1 }
             }

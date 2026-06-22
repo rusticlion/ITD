@@ -10,6 +10,10 @@ mocked UI layout used throughout the S4 UI Foundation sprint.
   - State-specific placeholders such as `placeholder_healthy.png`, `placeholder_wounded.png`, and `placeholder_maimed.png`.
 - `assets/sprites/icons/`
   - Generic UI glyphs, including the `placeholder_default.png` fallback used by the asset manager.
+- `assets/sprites/overworld/`
+  - Tiled tileset sheets, overworld actor sprites, and player sprites. See `docs/OverworldAssetManifest.md` and `docs/TiledCheatsheet.md`.
+- `assets/sprites/ui/`
+  - Dialog and menu presentation assets. See `docs/OverworldAssetManifest.md` for canvas sizes and IDs.
 - `assets/fonts/dotgothic16/`
   - DotGothic16 Regular and its bundled SIL Open Font License text. Used by the v2 combat UI.
 

@@ -5,6 +5,8 @@ local Assets = {
         "assets/sprites/bodyparts",
         "assets/sprites/combat",
         "assets/sprites/icons",
+        "assets/sprites/overworld",
+        "assets/sprites/ui",
     }
 }
 

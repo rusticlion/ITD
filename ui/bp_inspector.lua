@@ -1,5 +1,8 @@
+local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
+local BPCard = require("ui.bp_card")
+local Text = require("ui.text")
 
 local BPInspector = {}
 
@@ -67,6 +70,17 @@ local function format_destination(value)
     return text
 end
 
+local function slot_cost_text(slot, part)
+    local cost = slot and slot.cost or {}
+    if Keywords.slot_is_hungry(part, slot) then
+        local count = math.max(0, #cost)
+        local noun = count == 1 and "wildcard pip" or "wildcard pips"
+        return tostring(count) .. " " .. noun
+    end
+
+    return Symbols.format_face(cost)
+end
+
 function BPInspector.slot_effect_text(effect)
     if type(effect) ~= "table" then
         return "No effect recorded."
@@ -104,14 +118,14 @@ function BPInspector.slot_effect_text(effect)
     return "Effect: " .. tostring(effect.type or "unknown") .. "."
 end
 
-function BPInspector.slot_lines(slot)
+function BPInspector.slot_lines(slot, part)
     if not slot then
         return { "No Slot." }
     end
 
     local lines = {
         "Slot: " .. tostring(slot.name or slot.id or "Unnamed"),
-        "Cost: " .. Symbols.format_face(slot.cost or {}),
+        "Cost: " .. slot_cost_text(slot, part),
         "Timing: " .. title_case(slot.timing or "spend"),
         "Effect: " .. BPInspector.slot_effect_text(slot.effect)
     }
@@ -135,9 +149,14 @@ function BPInspector.part_lines(part, options)
         table.insert(lines, "Tags: " .. table.concat(part.tags, ", "))
     end
 
+    local badges = Keywords.badges_for_part(part)
+    for _, definition in ipairs(badges) do
+        table.insert(lines, tostring(definition.name) .. ": " .. tostring(definition.description))
+    end
+
     if part.slot then
         table.insert(lines, "Slot: " .. tostring(part.slot.name or part.slot.id or "Unnamed"))
-        table.insert(lines, "Cost: " .. Symbols.format_face(part.slot.cost or {}) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
+        table.insert(lines, "Cost: " .. slot_cost_text(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
         table.insert(lines, "Effect: " .. BPInspector.slot_effect_text(part.slot.effect))
     else
         table.insert(lines, "Slot: none")
@@ -242,10 +261,115 @@ end
 
 local function draw_wrapped(text, x, y, w, color, gap)
     set_color(color)
-    love.graphics.printf(tostring(text or ""), x, y, w, "left")
-    local font = love.graphics.getFont()
-    local _, wrapped = font:getWrap(tostring(text or ""), w)
-    return y + math.max(1, #wrapped) * font:getHeight() + (gap or 4)
+    Text.draw(text, x, y, w, "left", color)
+    return y + Text.height(text, w) + (gap or 4)
+end
+
+local function face_has_degradation(list, face_index)
+    for _, index in ipairs(list or {}) do
+        if tonumber(index) == face_index then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function sorted_face_indexes(list)
+    local indexes = {}
+    for _, index in ipairs(list or {}) do
+        local numeric = tonumber(index)
+        if numeric then
+            table.insert(indexes, numeric)
+        end
+    end
+
+    table.sort(indexes)
+    return indexes
+end
+
+local function durable_face_indexes(die)
+    local indexes = {}
+    for face_index = 1, 6 do
+        if not face_has_degradation(die and die.wound_faces, face_index)
+            and not face_has_degradation(die and die.maim_faces, face_index) then
+            table.insert(indexes, face_index)
+        end
+    end
+
+    return indexes
+end
+
+local function draw_crack_overlay(r, level, colors)
+    if level == "heavy" then
+        set_color({ 0, 0, 0, 0.28 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ colors.ink[1], colors.ink[2], colors.ink[3], 0.82 })
+        love.graphics.setLineWidth(2)
+        love.graphics.line(r.x + 6, r.y + 7, r.x + r.w - 7, r.y + r.h - 8)
+        love.graphics.line(r.x + r.w - 8, r.y + 8, r.x + 8, r.y + r.h - 7)
+    elseif level == "light" then
+        set_color({ colors.accent[1], colors.accent[2], colors.accent[3], 0.18 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ colors.accent[1], colors.accent[2], colors.accent[3], 0.85 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(r.x + r.w - 11, r.y + 7, r.x + r.w - 7, r.y + 14)
+        love.graphics.line(r.x + r.w - 7, r.y + 14, r.x + r.w - 12, r.y + 22)
+    end
+end
+
+local function draw_die_diagram(part, x, y, w, available_h, colors)
+    if not (part and part.die) then
+        return y
+    end
+
+    local face_gap = 4
+    local face_size = math.min(
+        32,
+        math.floor((w - face_gap * 2) / 3),
+        math.floor((available_h - face_gap) / 2))
+
+    if face_size < 12 then
+        return y
+    end
+
+    local grid_w = face_size * 3 + face_gap * 2
+    local grid_h = face_size * 2 + face_gap
+    local grid_x = x + math.floor(math.max(0, w - grid_w) / 2)
+    local face_columns = {
+        sorted_face_indexes(part.die.wound_faces),
+        sorted_face_indexes(part.die.maim_faces),
+        durable_face_indexes(part.die)
+    }
+
+    set_color(colors.line)
+    love.graphics.rectangle("line", grid_x - 6, y - 6, grid_w + 12, grid_h + 12, 4, 4)
+
+    for column = 1, 3 do
+        for row = 1, 2 do
+            local face_index = face_columns[column] and face_columns[column][row]
+            if face_index then
+                local face_rect = {
+                    x = grid_x + (column - 1) * (face_size + face_gap),
+                    y = y + (row - 1) * (face_size + face_gap),
+                    w = face_size,
+                    h = face_size
+                }
+                local face = SymbolDie.face_for_status(part.die, face_index, "healthy")
+                BPCard.draw_die_face(face, face_rect, {
+                    scale = face_size / 36
+                })
+
+                if column == 1 then
+                    draw_crack_overlay(face_rect, "heavy", colors)
+                elseif column == 2 then
+                    draw_crack_overlay(face_rect, "light", colors)
+                end
+            end
+        end
+    end
+
+    return y + grid_h + 12
 end
 
 function BPInspector.draw_panel(rect, data, options)
@@ -269,7 +393,7 @@ function BPInspector.draw_panel(rect, data, options)
     local y = rect.y + padding
     if not header_hidden then
         set_color(colors.ink)
-        love.graphics.printf(title, rect.x + padding, y, rect.w - padding * 2, "left")
+        Text.draw(title, rect.x + padding, y, rect.w - padding * 2, "left", colors.ink)
         y = y + 24
 
         if subtitle then
@@ -288,9 +412,16 @@ function BPInspector.draw_panel(rect, data, options)
         y = draw_wrapped(line, rect.x + padding, y, rect.w - padding * 2, colors.ink, 6)
     end
 
+    if options.show_die and data.part and data.part.die then
+        local available_h = flavor_rule_y - y - 12
+        if available_h >= 32 then
+            y = draw_die_diagram(data.part, rect.x + padding, y + 4, rect.w - padding * 2, available_h, colors)
+        end
+    end
+
     y = flavor_rule_y + 12
     set_color(colors.muted)
-    love.graphics.printf("Flavor", rect.x + padding, y, rect.w - padding * 2, "left")
+    Text.draw("Flavor", rect.x + padding, y, rect.w - padding * 2, "left", colors.muted)
     y = y + 20
     draw_wrapped(flavor or "No dream-memory recorded.", rect.x + padding, y, rect.w - padding * 2, colors.ink, 4)
 end

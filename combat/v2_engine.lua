@@ -1,4 +1,5 @@
 local Events = require("combat.events")
+local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
 
@@ -151,6 +152,52 @@ local function slot_cost(slot)
     end
 
     return normalized
+end
+
+local function rim_accepts_symbols(part, symbols)
+    if Keywords.has(part, "Armored") and Symbols.count(symbols, Symbols.STRIKE) < 2 then
+        return false, "armored_requires_two_strikes"
+    end
+
+    return true
+end
+
+local function match_slot_feed(part, slot, symbols)
+    local cost = slot_cost(slot)
+    local to_light = {}
+    local burned = {}
+    local hungry = Keywords.slot_is_hungry(part, slot)
+
+    for _, symbol in ipairs(symbols or {}) do
+        local matched_index = nil
+
+        if symbol ~= Symbols.BLANK then
+            for index, required in ipairs(cost) do
+                if not (part.slot_charge and part.slot_charge[index]) and not to_light[index] then
+                    if hungry or required == symbol then
+                        matched_index = index
+                        break
+                    end
+                end
+            end
+        end
+
+        if matched_index then
+            to_light[matched_index] = symbol
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    return cost, to_light, burned
+end
+
+local function lit_count(to_light)
+    local total = 0
+    for _ in pairs(to_light or {}) do
+        total = total + 1
+    end
+    return total
 end
 
 local function is_part_targetable(engine, part)
@@ -576,6 +623,11 @@ function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
         return false, "no_strike"
     end
 
+    local accepted, reason = rim_accepts_symbols(target_part, effective)
+    if not accepted then
+        return false, reason
+    end
+
     self:commit_die(attacker, die, effective, added)
     local assignment = {
         die = die,
@@ -628,41 +680,22 @@ function Engine:feed_die_to_slot(combatant, die_or_id, part_or_id)
     end
 
     local effective, added = self:get_effective_symbols(combatant, die, "slot")
-    local to_light = {}
-    local burned = {}
-    local hungry = part:has_keyword("Hungry") or (slot and slot.hungry)
+    local _, to_light, burned = match_slot_feed(part, slot, effective)
 
-    for _, symbol in ipairs(effective or {}) do
-        local matched_index = nil
-
-        if symbol ~= Symbols.BLANK then
-            for index, required in ipairs(cost) do
-                if not (part.slot_charge and part.slot_charge[index]) and not to_light[index] then
-                    if hungry or required == symbol then
-                        matched_index = index
-                        break
-                    end
-                end
-            end
-        end
-
-        if matched_index then
-            to_light[matched_index] = symbol
-        elseif symbol ~= Symbols.BLANK then
-            table.insert(burned, symbol)
-        end
-    end
-
-    local lit_count = 0
-    for _ in pairs(to_light) do
-        lit_count = lit_count + 1
-    end
-
-    if lit_count == 0 then
+    if lit_count(to_light) == 0 then
         return false, "no_matching_pips"
     end
 
     self:commit_die(combatant, die, effective, added)
+    return self:light_slot_from_symbols(combatant, die, part, slot, effective, added, to_light, burned)
+end
+
+function Engine:light_slot_from_symbols(combatant, die, part, slot, symbols, added, to_light, burned, extra)
+    if not part or not slot or lit_count(to_light) == 0 then
+        return false, "no_matching_pips"
+    end
+
+    local cost = slot_cost(slot)
     part.slot_charge = part.slot_charge or {}
 
     local lit = {}
@@ -677,22 +710,67 @@ function Engine:feed_die_to_slot(combatant, die_or_id, part_or_id)
 
     table.sort(lit, function(a, b) return a.index < b.index end)
 
-    self:emit(Events.SLOT_FED, {
+    local event = {
         combatant = combatant,
         die = die,
         part = part,
         slot = slot,
         lit = lit,
-        burned_symbols = burned,
-        added_symbols = added,
+        burned_symbols = burned or {},
+        added_symbols = added or {},
         filled = is_slot_filled(part, slot)
-    })
+    }
+
+    for key, value in pairs(extra or {}) do
+        if event[key] == nil then
+            event[key] = value
+        end
+    end
+
+    self:emit(Events.SLOT_FED, event)
 
     if is_slot_filled(part, slot) then
         self:trigger_slot(combatant, part, slot)
     end
 
     return true
+end
+
+function Engine:resolve_absorbent_socket(combatant, part, defense, context)
+    if not (combatant and part and defense and Keywords.has(part, "Absorbent")) then
+        return false
+    end
+
+    if not part:is_slot_online() then
+        return false
+    end
+
+    local slot = part.slot
+    if #slot_cost(slot) == 0 then
+        return false
+    end
+
+    local _, to_light, burned = match_slot_feed(part, slot, defense.symbols or {})
+    if lit_count(to_light) == 0 then
+        return false
+    end
+
+    self.assignments.sockets[part] = nil
+    self:emit(Events.KEYWORD_TRIGGERED, {
+        combatant = combatant,
+        part = part,
+        keyword = "Absorbent",
+        assignment = defense,
+        context = context
+    })
+
+    return self:light_slot_from_symbols(combatant, defense.die, part, slot,
+        defense.symbols or {}, defense.added_symbols or {}, to_light, burned, {
+            source = "keyword",
+            keyword = "Absorbent",
+            assignment = defense,
+            context = context
+        })
 end
 
 function Engine:trigger_slot(combatant, part, slot)
@@ -790,8 +868,9 @@ function Engine:auto_assign_symbols(entry, effect)
         local destination_free = destination == "rim" and not self.assignments.rims[part]
             or destination == "socket" and not self.assignments.sockets[part]
         local targetable = destination ~= "rim" or is_part_targetable(self, part)
+        local rim_accepted = destination ~= "rim" or rim_accepts_symbols(part, symbols)
 
-        if type_ok and destination_free and targetable and part.status ~= "maimed" then
+        if type_ok and destination_free and targetable and rim_accepted and part.status ~= "maimed" then
             local token_owner = destination == "rim" and actor or target
             local token = self:create_virtual_assignment_die(token_owner, entry.part, symbols, {
                 type = "slot",
@@ -1220,8 +1299,22 @@ function Engine:apply_damage(attacker, target, part, context)
     end
 
     local before = part.status
-    local after = part:advance_damage_state()
+    local brittle = Keywords.has(part, "Brittle")
+    local after = nil
     local heart_loss = 0
+
+    if brittle then
+        part:set_status("maimed")
+        after = part.status
+        self:emit(Events.KEYWORD_TRIGGERED, {
+            combatant = target,
+            part = part,
+            keyword = "Brittle",
+            context = context
+        })
+    else
+        after = part:advance_damage_state()
+    end
 
     if after == "wounded" then
         if part:vent_slot_charge() then
@@ -1270,10 +1363,6 @@ function Engine:resolve_round()
             local strike_count = attack and Symbols.count(attack.symbols, Symbols.STRIKE) or 0
             local ward_count = defense and Symbols.count(defense.symbols, Symbols.WARD) or 0
 
-            if part.has_keyword and part:has_keyword("Armored") and strike_count > 0 then
-                strike_count = strike_count - 1
-            end
-
             if attack or defense then
                 self:emit(Events.PART_RESOLVED, {
                     defender = defender,
@@ -1289,6 +1378,13 @@ function Engine:resolve_round()
             if attack and strike_count > ward_count then
                 self:resolve_slot_window(TIMING_ON_HIT)
                 self:apply_damage(attack.attacker, defender, part, {
+                    attack = attack,
+                    defense = defense,
+                    strike_count = strike_count,
+                    ward_count = ward_count
+                })
+            elseif attack and defense and strike_count <= ward_count then
+                self:resolve_absorbent_socket(defender, part, defense, {
                     attack = attack,
                     defense = defense,
                     strike_count = strike_count,
@@ -1361,7 +1457,8 @@ function Engine:get_valid_destinations(combatant, die_or_id)
             local spellmark = self:get_assignment_spellmark(combatant, "rim", part, rim_symbols)
             if is_part_targetable(self, part)
                 and not self.assignments.rims[part]
-                and (Symbols.has(rim_symbols, Symbols.STRIKE) or spellmark) then
+                and (Symbols.has(rim_symbols, Symbols.STRIKE) or spellmark)
+                and rim_accepts_symbols(part, rim_symbols) then
                 table.insert(destinations.rims, part)
             end
         end
@@ -1373,7 +1470,7 @@ function Engine:get_valid_destinations(combatant, die_or_id)
             local cost = slot_cost(part.slot)
             for _, symbol in ipairs(slot_symbols) do
                 for index, required in ipairs(cost) do
-                    if not (part.slot_charge and part.slot_charge[index]) and (part:has_keyword("Hungry") or part.slot.hungry or required == symbol) then
+                    if not (part.slot_charge and part.slot_charge[index]) and (Keywords.slot_is_hungry(part, part.slot) or required == symbol) then
                         table.insert(destinations.slots, part)
                         matched = true
                         break

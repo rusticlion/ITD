@@ -84,7 +84,7 @@ Each content module returns three top-level tables:
 
 | Table | Purpose |
 |---|---|
-| `slots` | Reusable named slot definitions: `id`, `name`, `cost`, `timing`, `effect`. |
+| `slots` | Reusable named slot definitions: `id`, `name`, `cost`, `timing`, `effect`, optional `hungry` / `keywords`. |
 | `parts` | Body Part definitions: `id`, `name`, `type`, `hp_value`, `die`, optional `slot`, optional `keywords`, optional overworld `tags`. |
 | `loadouts` | Combatant assembly definitions: `id`, `name`, optional `is_player`, optional `crest_pool`, and ordered `parts`. |
 
@@ -93,6 +93,7 @@ Authoring rules:
 - A die must define exactly 6 faces. Each face may be a symbol string (`"strike"`) or a list (`{ "strike", "ward" }`).
 - `wound_faces` and `maim_faces` are face-index lists, 1–6. Each list must contain exactly two unique indexes, and the two lists may not overlap.
 - A part's `slot` may be a key into `slots` or an inline slot table.
+- Hungry slots still author a `cost` list to define track length, but display and resolve those pips as wildcards. Author as `hungry = true` or `keywords = { "Hungry" }`.
 - A loadout's `parts` order is also its first-pass panel order in the current UI prototype. The UI reserves six fixed card slots per combatant.
 - Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, and loadouts pointing at unknown parts.
 
@@ -222,15 +223,12 @@ Shadow is intentionally near the complexity ceiling for crest expends in the fir
 
 ## 8. Keywords (Expressive Exceptions)
 
-Rare, badge-displayed, one per part at most. The universal rules never reference them. Provisional catalog:
+Rare, badge-displayed rules modifiers. Keep them sparse: usually one part keyword at most, with Hungry appearing as slot behavior. The universal rules never depend on a keyword being present.
 
-- **Armored** — ignores the first assigned 🗡️ each round. (For enemies whose puzzle is "you cannot chip this; commit.")
-- **Hungry** — this part's slot accepts any die; every symbol lights a generic pip. (Visual tell: hatch always open.)
-- **Brace** *(slot effect)* — add one 🛡️ to every part where you assigned a 🛡️. Wide defense.
-- **Flurry** *(slot effect)* — add one 🗡️ to every enemy part where you assigned a 🗡️. Wide offense.
-- **Bulwark** *(slot effect)* — one defended part cannot be maimed this round. Tall defense.
-- **Split** *(slot effect)* — divide one mixed-face die's symbols between two destinations. (Makes 🗡️🛡️-heavy dice a build-around.)
-- **Meld** *(slot effect)* — combine two dice into one assignment token before placement. The target socket/rim still has capacity 1; Meld changes the token, not the destination rule.
+- **Armored** *(rim)* — dice cannot be assigned to this BP's rim unless they show at least 🗡️🗡️. This is target legality, not damage reduction.
+- **Brittle** *(body)* — damage to this BP always maims it.
+- **Absorbent** *(socket)* — if this BP is attacked and takes no damage while its socket holds a die, feed that die to its Slot.
+- **Hungry** *(slot)* — this Slot uses wildcard pips. Any nonblank symbol lights one unfilled pip, regardless of identity. Visual tell: hatch always open; cost pips render as wildcard circles.
 
 ---
 

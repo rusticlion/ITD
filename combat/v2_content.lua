@@ -1,5 +1,6 @@
 local BodyPart = require("combat.bodypart")
 local Combatant = require("combat.combatant")
+local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 
 local Content = {}
@@ -9,6 +10,17 @@ local VALID_TIMINGS = {
     on_hit = true,
     on_wound_maim = true,
     upkeep = true
+}
+
+local PART_KEYWORDS = {
+    Armored = true,
+    Brittle = true,
+    Absorbent = true,
+    Hungry = true
+}
+
+local SLOT_KEYWORDS = {
+    Hungry = true
 }
 
 local function copy_table(source)
@@ -52,13 +64,25 @@ local function normalize_slot(slot)
 
     local normalized = copy_table(slot)
     normalized.cost = {}
+    normalized.keyword = Keywords.normalize(slot.keyword)
+    normalized.keywords = Keywords.normalize_collection(slot.keywords or {})
 
     for _, symbol in ipairs(slot.cost or {}) do
         table.insert(normalized.cost, Symbols.normalize(symbol))
     end
 
+    if Keywords.collection_has(normalized.keywords, "Hungry") or normalized.keyword == "Hungry" then
+        normalized.hungry = true
+    end
+
     normalized.timing = (normalized.timing or "spend"):lower()
     return normalized
+end
+
+local function validate_keywords(errors, owner_id, source, allowed)
+    for _, message in ipairs(Keywords.validate_collection(source, allowed)) do
+        add_error(errors, tostring(owner_id) .. " has " .. message)
+    end
 end
 
 local function validate_die(errors, part_id, die)
@@ -130,6 +154,9 @@ local function validate_slot(errors, slot_id, slot)
     if not VALID_TIMINGS[timing] then
         add_error(errors, "slot " .. tostring(slot_id) .. " has invalid timing " .. tostring(slot.timing))
     end
+
+    validate_keywords(errors, "slot " .. tostring(slot_id), slot.keyword, SLOT_KEYWORDS)
+    validate_keywords(errors, "slot " .. tostring(slot_id), slot.keywords, SLOT_KEYWORDS)
 end
 
 function Content.validate(definitions)
@@ -159,6 +186,8 @@ function Content.validate(definitions)
         end
 
         validate_die(errors, part_id, part.die)
+        validate_keywords(errors, part_id, part.keyword, PART_KEYWORDS)
+        validate_keywords(errors, part_id, part.keywords, PART_KEYWORDS)
 
         if type(part.slot) == "string" and not (definitions.slots and definitions.slots[part.slot]) then
             add_error(errors, part_id .. " references unknown slot " .. tostring(part.slot))
@@ -199,6 +228,8 @@ function Content.build_part(definitions, part_id)
 
     local data = copy_table(part_def)
     data.die = normalize_die(part_def.die)
+    data.keyword = Keywords.normalize(part_def.keyword)
+    data.keywords = Keywords.normalize_collection(part_def.keywords or {})
 
     if type(part_def.slot) == "string" then
         data.slot = normalize_slot(definitions.slots[part_def.slot])

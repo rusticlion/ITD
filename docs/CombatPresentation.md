@@ -40,7 +40,7 @@ Destination validity is symbol-aware:
 ### 3.1 Per Body Part — the Panel
 Fixed-size BP card sprite · external name label · left combat sector · right slot sector · damage-state surface treatment.
 
-The left sector holds the direct inputs to combat resolution: **defense socket** (internal, shield-rimmed, holds one of the owner's assigned dice), **rim latch** (outer edge, holds one enemy attack die), compact HP value indicator, and future keyword badges. The right sector holds the Slot apparatus: hatch/intake, short slot title, and pip grid. Costs up to three pips render as one centered row; higher costs render as two centered rows, making six pips the clean practical ceiling. Defense lives *inside* the body; attacks *arrive at* it. The socket and rim are visual neighbors on the card edge facing the conduit space. The card interior is an interaction surface, not a status sheet: exact health text and effect explanations live outside the surface or in the inspector.
+The left sector holds the direct inputs to combat resolution: **defense socket** (internal, shield-rimmed, holds one of the owner's assigned dice), **rim latch** (outer edge, holds one enemy attack die), compact HP value indicator, and rare keyword badges between socket and HP. The right sector holds the Slot apparatus: hatch/intake, short slot title, and pip grid. Costs up to three pips render as one centered row; higher costs render as two centered rows, making six pips the clean practical ceiling. Defense lives *inside* the body; attacks *arrive at* it. The socket and rim are visual neighbors on the card edge facing the conduit space. The card interior is an interaction surface, not a status sheet: exact health text and effect explanations live outside the surface or in the inspector.
 
 There is **no resident die** on a Body Part panel. The originating die does not sit on the part during combat; it appears in the rolled pool and becomes meaningful only when allocated. The panel is the part's destination/control surface, not a storage place for its die.
 
@@ -92,7 +92,7 @@ This is the working asset/component inventory for the real combat screen. Wirefr
 - External name label and optional truncation/focus marquee behavior.
 - Compact HP badge, eventually logographic rather than text.
 - Damage surface treatment: healthy, wounded, maimed (cracks, discoloration, offline/ruined treatment) instead of a colored status pip.
-- Rare keyword badge.
+- Rare keyword badge row, currently text-backed (`AR`, `BR`, `AB`, `HU`) until final icon assets land.
 - Status/effect badges: Untargetable, sealed socket, shrouded slot, etc.
 
 **Socket/rim assignment layer**
@@ -153,7 +153,7 @@ A die-shaped intake with a pip track extending from one fixed edge. Physical met
 8. **Vented** — on wound: pips shatter, hatch rattles.
 9. **Offline** — on maim: hatch rests closed under a disabled treatment until a dedicated sealed/offline hatch asset exists.
 
-Exception tell: a **Hungry** slot's hatch is always open — the visual exception matches the mechanical one, legible before any text is read.
+Exception tell: a **Hungry** slot's hatch is always open and its cost pips render as wildcard circles — the visual exception matches the mechanical one, legible before any text is read.
 
 **Skinning:** hatch art is diegetic per part (furnace door on the Butcher's arm; a textbook cover on the Scholar's hand; something wetly organic in the Jungle). Silhouette, footprint, track edge, and state set never vary.
 
@@ -208,7 +208,9 @@ Each owned part displays as **one unfolded cube with its break order painted on*
 
 ## 8. The Claiming Ceremony
 
-On victory, the enemy tableau remains on the table; the player selects a non-maimed part card, which is claimed, lifted out of the enemy spread, and grafted into the player's planning inventory before the next dream. Five seconds that make the entire progression system tangible — and the body-horror beat the jam playtesters loved before they understood a single rule. Budget polish here disproportionately.
+On victory, the enemy tableau remains on the table; the player may select one non-maimed part card or leave their dreamform unchanged. Maimed enemy BPs are unavailable to claim, so focusing down a powerful part can win the fight while destroying the prize.
+
+Claiming is mutation, not collection. The selected enemy card is lifted out of the enemy spread and grafted directly into the matching player dreamform slot. Head and Body have one destination; Arms and Legs ask the player which side is replaced. The discarded player BP leaves the run rather than entering an inventory. Five seconds that make the entire progression system tangible, and the body-horror beat the jam playtesters loved before they understood a single rule. Budget polish here disproportionately.
 
 ---
 

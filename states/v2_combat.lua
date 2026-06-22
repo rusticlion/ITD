@@ -2,12 +2,14 @@ local GameState = require("core.gamestate")
 local Assets = require("core.assets")
 local Engine = require("combat.v2_engine")
 local Events = require("combat.events")
+local Keywords = require("combat.keywords")
 local Demo = require("combat.v2_demo")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
 local V2AI = require("combat.v2_ai")
 local BPInspector = require("ui.bp_inspector")
 local BPCard = require("ui.bp_card")
+local Text = require("ui.text")
 
 local V2Combat = {}
 V2Combat.__index = V2Combat
@@ -43,10 +45,28 @@ local RESOLUTION_STEP_DURATION = 1.05
 local RESOLUTION_REVEAL_TIME = 0.68
 local SLOT_EFFECT_DURATION = 1.1
 local COMBAT_END_RETURN_DELAY = 2.35
+local CLAIM_ANIMATION_DURATION = 0.95
+local CLAIM_RETURN_DELAY = 0.28
 local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
-local TEXT_TRACKING = 1
 local OVERLAY_ANIMATION_FPS = 8
 local CREST_ORDER = { "Valor", "Shadow" }
+local CLAIM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
+local CLAIM_SLOT_TYPES = {
+    head = "HEAD",
+    body = "BODY",
+    arm_l = "ARM",
+    arm_r = "ARM",
+    leg_l = "LEG",
+    leg_r = "LEG"
+}
+local CLAIM_SLOT_LABELS = {
+    head = "Head",
+    body = "Body",
+    arm_l = "Left Arm",
+    arm_r = "Right Arm",
+    leg_l = "Left Leg",
+    leg_r = "Right Leg"
+}
 
 local COLORS = {
     bg = { 34 / 255, 32 / 255, 52 / 255, 1 },
@@ -78,11 +98,13 @@ local STATUS_COLORS = {
 
 local CREST_VISUALS = {
     Valor = {
+        asset = "crest_valor_chip",
         symbol = Symbols.STRIKE,
         fill = { 0.58, 0.34, 0.15, 1 },
         line = COLORS.attack
     },
     Shadow = {
+        asset = "crest_shadow_chip",
         symbol = Symbols.WARD,
         fill = { 0.25, 0.25, 0.38, 1 },
         line = COLORS.defense
@@ -136,6 +158,15 @@ local function copy_rect(r)
     return rect(r.x, r.y, r.w, r.h)
 end
 
+local function expand_rect(r, amount)
+    if not r then
+        return nil
+    end
+
+    local inset = amount or 0
+    return rect(r.x - inset, r.y - inset, r.w + inset * 2, r.h + inset * 2)
+end
+
 local function centered_rect(r, size)
     if not r then
         return rect(0, 0, size, size)
@@ -153,6 +184,60 @@ local function ease_out_cubic(t)
     return 1 - ((1 - clamped) * (1 - clamped) * (1 - clamped))
 end
 
+local function lerp_rect(a, b, t)
+    if not a then
+        return copy_rect(b)
+    elseif not b then
+        return copy_rect(a)
+    end
+
+    return rect(
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t),
+        lerp(a.w, b.w, t),
+        lerp(a.h, b.h, t))
+end
+
+local function copy_card_layout(layout)
+    if not layout then
+        return nil
+    end
+
+    return {
+        card = copy_rect(layout.card),
+        rim = copy_rect(layout.rim),
+        socket = copy_rect(layout.socket),
+        hatch = copy_rect(layout.hatch),
+        track = copy_rect(layout.track),
+        slot_label = copy_rect(layout.slot_label),
+        label = copy_rect(layout.label),
+        meta = copy_rect(layout.meta),
+        side = layout.side,
+        scale = layout.scale
+    }
+end
+
+local function interpolate_card_layout(source, target, t)
+    if not source then
+        return copy_card_layout(target)
+    elseif not target then
+        return copy_card_layout(source)
+    end
+
+    return {
+        card = lerp_rect(source.card, target.card, t),
+        rim = lerp_rect(source.rim, target.rim, t),
+        socket = lerp_rect(source.socket, target.socket, t),
+        hatch = lerp_rect(source.hatch, target.hatch, t),
+        track = lerp_rect(source.track, target.track, t),
+        slot_label = lerp_rect(source.slot_label, target.slot_label, t),
+        label = lerp_rect(source.label, target.label, t),
+        meta = lerp_rect(source.meta, target.meta, t),
+        side = t < 0.5 and source.side or target.side,
+        scale = lerp(source.scale or 1, target.scale or 1, t)
+    }
+end
+
 local function contains(list, value)
     for _, existing in ipairs(list or {}) do
         if existing == value then
@@ -160,6 +245,18 @@ local function contains(list, value)
         end
     end
     return false
+end
+
+local function normalized_part_type(part)
+    return part and part.type and tostring(part.type):upper() or nil
+end
+
+local function claim_slot_label(slot_id)
+    return CLAIM_SLOT_LABELS[slot_id] or tostring(slot_id or "Slot")
+end
+
+local function claim_part_name(part)
+    return part and (part.name or part.id or part.def_id) or "Body Part"
 end
 
 local function is_destination_kind(kind)
@@ -261,222 +358,20 @@ local function draw_sprite_outline(r, color, radius)
     love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 3, radius or 3)
 end
 
-local function utf8_char_size(first_byte)
-    if not first_byte or first_byte < 0x80 then
-        return 1
-    elseif first_byte >= 0xC2 and first_byte <= 0xDF then
-        return 2
-    elseif first_byte >= 0xE0 and first_byte <= 0xEF then
-        return 3
-    elseif first_byte >= 0xF0 and first_byte <= 0xF4 then
-        return 4
-    end
-
-    return 1
-end
-
-local function is_utf8_continuation(byte)
-    return byte and byte >= 0x80 and byte <= 0xBF
-end
-
-local function chars_for_text(text)
-    local source = tostring(text or "")
-    local chars = {}
-    local index = 1
-
-    while index <= #source do
-        local size = utf8_char_size(source:byte(index))
-        local stop = index + size - 1
-        local valid = stop <= #source
-
-        for offset = 1, size - 1 do
-            if not is_utf8_continuation(source:byte(index + offset)) then
-                valid = false
-                break
-            end
-        end
-
-        if valid then
-            table.insert(chars, source:sub(index, stop))
-            index = stop + 1
-        else
-            table.insert(chars, source:sub(index, index))
-            index = index + 1
-        end
-    end
-
-    return chars
-end
-
-local function tracked_text_width(text)
-    local font = love.graphics.getFont()
-    if not font then
-        return 0
-    end
-
-    local width = 0
-    local chars = chars_for_text(text)
-    for index, char in ipairs(chars) do
-        local ok, char_width = pcall(font.getWidth, font, char)
-        if not ok then
-            ok, char_width = pcall(font.getWidth, font, "?")
-        end
-        width = width + (ok and char_width or 0)
-        if index < #chars then
-            width = width + TEXT_TRACKING
-        end
-    end
-
-    return width
-end
-
-local function split_long_word(word, max_width)
-    local lines = {}
-    local current = ""
-
-    for _, char in ipairs(chars_for_text(word)) do
-        local candidate = current .. char
-        if current ~= "" and tracked_text_width(candidate) > max_width then
-            table.insert(lines, current)
-            current = char
-        else
-            current = candidate
-        end
-    end
-
-    if current ~= "" then
-        table.insert(lines, current)
-    end
-
-    return lines
-end
-
-local function wrap_tracked_text(text, max_width)
-    local width = max_width or 200
-    local lines = {}
-    local source = tostring(text or "")
-
-    for paragraph in (source .. "\n"):gmatch("(.-)\n") do
-        local current = ""
-        local saw_word = false
-
-        for word in paragraph:gmatch("%S+") do
-            saw_word = true
-            local candidate = current == "" and word or (current .. " " .. word)
-            if current == "" or tracked_text_width(candidate) <= width then
-                current = candidate
-            else
-                table.insert(lines, current)
-                if tracked_text_width(word) <= width then
-                    current = word
-                else
-                    local pieces = split_long_word(word, width)
-                    for index = 1, #pieces - 1 do
-                        table.insert(lines, pieces[index])
-                    end
-                    current = pieces[#pieces] or ""
-                end
-            end
-        end
-
-        if saw_word or current ~= "" then
-            table.insert(lines, current)
-        elseif #lines == 0 then
-            table.insert(lines, "")
-        end
-    end
-
-    return lines
-end
-
 local function truncate_tracked_text(text, max_width)
-    local source = tostring(text or "")
-    if tracked_text_width(source) <= max_width then
-        return source
-    end
-
-    local suffix = ".."
-    local available = math.max(0, (max_width or 0) - tracked_text_width(suffix))
-    local result = ""
-
-    for _, char in ipairs(chars_for_text(source)) do
-        local candidate = result .. char
-        if tracked_text_width(candidate) > available then
-            break
-        end
-        result = candidate
-    end
-
-    return result .. suffix
-end
-
-local function draw_tracked_line(text, x, y, color)
-    local font = love.graphics.getFont()
-    local cursor_x = x
-    set_color(color or COLORS.ink)
-
-    local characters = chars_for_text(text)
-    for index, char in ipairs(characters) do
-        local ok = pcall(love.graphics.print, char, cursor_x, y)
-        local measured_char = char
-        if not ok then
-            measured_char = "?"
-            love.graphics.print(measured_char, cursor_x, y)
-        end
-
-        local width_ok, char_width = pcall(font.getWidth, font, measured_char)
-        if not width_ok then
-            width_ok, char_width = pcall(font.getWidth, font, "?")
-        end
-        cursor_x = cursor_x + (width_ok and char_width or 0)
-        if index < #characters then
-            cursor_x = cursor_x + TEXT_TRACKING
-        end
-    end
+    return Text.truncate(text, max_width)
 end
 
 local function draw_text(text, x, y, w, align, color)
-    local width = w or 200
-    local font = love.graphics.getFont()
-    local line_height = font and font:getHeight() or 12
-    local lines = wrap_tracked_text(text, width)
-
-    for index, line in ipairs(lines) do
-        local line_width = tracked_text_width(line)
-        local line_x = x
-        if align == "center" then
-            line_x = x + math.floor((width - line_width) / 2)
-        elseif align == "right" then
-            line_x = x + width - line_width
-        end
-
-        draw_tracked_line(line, line_x, y + (index - 1) * line_height, color)
-    end
+    return Text.draw(text, x, y, w, align, color)
 end
 
 local function draw_single_line_text(text, x, y, w, align, color)
-    local width = w or 200
-    local line = tostring(text or "")
-    local line_width = tracked_text_width(line)
-    local line_x = x
-
-    if align == "center" then
-        line_x = x + math.floor((width - line_width) / 2)
-    elseif align == "right" then
-        line_x = x + width - line_width
-    end
-
-    draw_tracked_line(line, line_x, y, color)
-    return line_width <= width, line_width
+    return Text.draw_line(text, x, y, w, align, color)
 end
 
 local function wrapped_text_height(text, w)
-    local font = love.graphics.getFont()
-    if not font then
-        return 12
-    end
-
-    return math.max(1, #wrap_tracked_text(text, w or 200)) * font:getHeight()
+    return Text.height(text, w)
 end
 
 local function draw_wrapped_text(text, x, y, w, align, color, gap)
@@ -780,6 +675,8 @@ function V2Combat:enter(context)
     self.slot_activation_effects = {}
     self.hatch_swallow_effects = setmetatable({}, { __mode = "k" })
     self.combat_end = nil
+    self.claim_ceremony = nil
+    self.claim_result = nil
     self.ui_time = 0
     self.title_overflow_warnings = {}
     self.player_can_allocate = false
@@ -1053,6 +950,14 @@ function V2Combat:update(dt)
     self.ui_time = (self.ui_time or 0) + delta
     local mx, my = love.mouse.getPosition()
 
+    if self.claim_ceremony then
+        self:update_hatch_swallow_effects(delta)
+        self:update_slot_activation_effects(delta)
+        self:update_claim_ceremony(delta)
+        self:update_claim_hover(mx, my)
+        return
+    end
+
     if self.combat_end then
         self:update_hatch_swallow_effects(delta)
         self:update_slot_activation_effects(delta)
@@ -1134,6 +1039,345 @@ function V2Combat:hatch_swallow_frame(part)
     return "die-hatch1"
 end
 
+function V2Combat:claimable_enemy_parts()
+    local parts = {}
+
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        if part.status ~= "maimed" then
+            table.insert(parts, part)
+        end
+    end
+
+    return parts
+end
+
+function V2Combat:player_part_for_claim_slot(slot_id)
+    for _, part in ipairs(self.player and self.player.body_parts or {}) do
+        if part.dreamform_slot == slot_id then
+            return part
+        end
+    end
+
+    for index, existing_slot in ipairs(CLAIM_SLOT_ORDER) do
+        if existing_slot == slot_id then
+            return self.player and self.player.body_parts and self.player.body_parts[index] or nil
+        end
+    end
+
+    return nil
+end
+
+function V2Combat:claim_slot_options_for_part(part)
+    local wanted_type = normalized_part_type(part)
+    local options = {}
+
+    for _, slot_id in ipairs(CLAIM_SLOT_ORDER) do
+        if not wanted_type or CLAIM_SLOT_TYPES[slot_id] == wanted_type then
+            table.insert(options, {
+                slot_id = slot_id,
+                label = claim_slot_label(slot_id),
+                part = self:player_part_for_claim_slot(slot_id)
+            })
+        end
+    end
+
+    return options
+end
+
+function V2Combat:preferred_claim_slot_index(part, options)
+    if #options <= 1 then
+        return 1
+    end
+
+    local text = string.lower(tostring((part and part.id) or "") .. " " .. tostring(part and part.name or ""))
+    local preferred_suffix = nil
+    if text:find("left", 1, true) then
+        preferred_suffix = "_l"
+    elseif text:find("right", 1, true) then
+        preferred_suffix = "_r"
+    end
+
+    if preferred_suffix then
+        for index, option in ipairs(options) do
+            if option.slot_id and option.slot_id:sub(-2) == preferred_suffix then
+                return index
+            end
+        end
+    end
+
+    return 1
+end
+
+function V2Combat:begin_claim_ceremony(title)
+    local candidates = self:claimable_enemy_parts()
+    self.combat_end = nil
+    self.claim_result = nil
+    self.claim_ceremony = {
+        phase = #candidates > 0 and "part" or "empty",
+        title = title or "You Win",
+        candidates = candidates,
+        selected_part_index = 1,
+        selected_slot_index = 1,
+        slot_options = {},
+        animation = nil
+    }
+    self.player_can_allocate = false
+    self.enemy_response_pending = false
+    self.selected_die = nil
+    self.drag = nil
+
+    if #candidates > 0 then
+        self.message = "Choose one echo to graft, or leave your dreamform unchanged."
+    else
+        self.message = "No claimable echoes remain."
+    end
+end
+
+function V2Combat:selected_claim_part()
+    local ceremony = self.claim_ceremony
+    return ceremony and ceremony.candidates and ceremony.candidates[ceremony.selected_part_index] or nil
+end
+
+function V2Combat:selected_claim_slot()
+    local ceremony = self.claim_ceremony
+    return ceremony and ceremony.slot_options and ceremony.slot_options[ceremony.selected_slot_index] or nil
+end
+
+function V2Combat:move_claim_part(delta)
+    local ceremony = self.claim_ceremony
+    local count = ceremony and #(ceremony.candidates or {}) or 0
+    if count == 0 then
+        return false
+    end
+
+    ceremony.selected_part_index = ((ceremony.selected_part_index - 1 + delta) % count) + 1
+    self.message = "Claim: " .. claim_part_name(self:selected_claim_part()) .. "."
+    return true
+end
+
+function V2Combat:move_claim_slot(delta)
+    local ceremony = self.claim_ceremony
+    local count = ceremony and #(ceremony.slot_options or {}) or 0
+    if count == 0 then
+        return false
+    end
+
+    ceremony.selected_slot_index = ((ceremony.selected_slot_index - 1 + delta) % count) + 1
+    local option = self:selected_claim_slot()
+    self.message = "Replace: " .. (option and option.label or "Body Part") .. "."
+    return true
+end
+
+function V2Combat:confirm_claim_part()
+    local ceremony = self.claim_ceremony
+    local part = self:selected_claim_part()
+    if not (ceremony and part) then
+        return false
+    end
+
+    local options = self:claim_slot_options_for_part(part)
+    if #options == 0 then
+        self.message = "This echo has nowhere to take root."
+        return true
+    elseif #options == 1 then
+        self:start_claim_animation(part, options[1])
+        return true
+    end
+
+    ceremony.phase = "slot"
+    ceremony.slot_options = options
+    ceremony.selected_slot_index = self:preferred_claim_slot_index(part, options)
+    local option = self:selected_claim_slot()
+    self.message = "Choose which " .. string.lower(normalized_part_type(part) or "part") .. " changes."
+    if option then
+        self.message = self.message .. " " .. option.label .. " selected."
+    end
+    return true
+end
+
+function V2Combat:confirm_claim_slot()
+    local part = self:selected_claim_part()
+    local option = self:selected_claim_slot()
+    if not (part and option) then
+        return false
+    end
+
+    self:start_claim_animation(part, option)
+    return true
+end
+
+function V2Combat:start_claim_animation(part, slot_option)
+    if not (part and slot_option and slot_option.slot_id) then
+        return
+    end
+
+    self:layout()
+    local source_layout = copy_card_layout(self.card_rects[part])
+    local replaced_part = slot_option.part
+    local target_layout = copy_card_layout(replaced_part and self.card_rects[replaced_part])
+    if not target_layout then
+        target_layout = copy_card_layout(source_layout)
+    end
+
+    self.claim_result = {
+        part = part,
+        slot_id = slot_option.slot_id,
+        replaced_part = replaced_part
+    }
+    self.claim_ceremony.phase = "animate"
+    self.claim_ceremony.animation = {
+        claimed_part = part,
+        replaced_part = replaced_part,
+        source_layout = source_layout,
+        target_layout = target_layout,
+        elapsed = 0,
+        duration = CLAIM_ANIMATION_DURATION,
+        return_delay = CLAIM_RETURN_DELAY
+    }
+    self.message = claim_part_name(part) .. " takes root as " .. claim_slot_label(slot_option.slot_id) .. "."
+end
+
+function V2Combat:skip_claim_ceremony()
+    self.claim_result = nil
+    self:return_to_overworld()
+end
+
+function V2Combat:update_claim_ceremony(dt)
+    local ceremony = self.claim_ceremony
+    local animation = ceremony and ceremony.animation
+    if not animation then
+        return
+    end
+
+    animation.elapsed = (animation.elapsed or 0) + (dt or 0)
+    local total = (animation.duration or CLAIM_ANIMATION_DURATION) + (animation.return_delay or CLAIM_RETURN_DELAY)
+    if animation.elapsed >= total then
+        self:return_to_overworld()
+    end
+end
+
+function V2Combat:update_claim_hover(mx, my)
+    self.hover = nil
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return
+    end
+
+    if ceremony.phase == "part" then
+        for index, part in ipairs(ceremony.candidates or {}) do
+            local layout = self.card_rects[part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_part", part = part, candidate_index = index, data = layout }
+                return
+            end
+        end
+
+        for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+            local layout = self.card_rects[part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_unavailable", part = part, data = layout }
+                return
+            end
+        end
+    elseif ceremony.phase == "slot" then
+        for index, option in ipairs(ceremony.slot_options or {}) do
+            local layout = option.part and self.card_rects[option.part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_slot", part = option.part, slot_option = option, slot_index = index, data = layout }
+                return
+            end
+        end
+    end
+end
+
+function V2Combat:claim_actionpressed(action)
+    local ceremony = self.claim_ceremony
+    if not ceremony then
+        return false
+    end
+
+    if ceremony.phase == "animate" then
+        return true
+    end
+
+    if ceremony.phase == "empty" then
+        if action == "confirm" or action == "cancel" or action == "menu" then
+            self:return_to_overworld()
+            return true
+        end
+        return false
+    end
+
+    if ceremony.phase == "part" then
+        if action == "cancel" or action == "menu" then
+            self:skip_claim_ceremony()
+            return true
+        elseif action == "move_left" or action == "move_up" then
+            return self:move_claim_part(-1)
+        elseif action == "move_right" or action == "move_down" then
+            return self:move_claim_part(1)
+        elseif action == "confirm" then
+            return self:confirm_claim_part()
+        end
+    elseif ceremony.phase == "slot" then
+        if action == "cancel" then
+            ceremony.phase = "part"
+            self.message = "Choose one echo to graft, or leave your dreamform unchanged."
+            return true
+        elseif action == "menu" then
+            self:skip_claim_ceremony()
+            return true
+        elseif action == "move_left" or action == "move_up" then
+            return self:move_claim_slot(-1)
+        elseif action == "move_right" or action == "move_down" then
+            return self:move_claim_slot(1)
+        elseif action == "confirm" then
+            return self:confirm_claim_slot()
+        end
+    end
+
+    return false
+end
+
+function V2Combat:claim_mousepressed(x, y)
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return true
+    end
+
+    if ceremony.phase == "empty" then
+        self:return_to_overworld()
+        return true
+    end
+
+    self:update_claim_hover(x, y)
+    local hover = self.hover
+    if ceremony.phase == "part" then
+        if hover and hover.kind == "claim_part" then
+            if ceremony.selected_part_index == hover.candidate_index then
+                self:confirm_claim_part()
+            else
+                ceremony.selected_part_index = hover.candidate_index
+                self.message = "Claim: " .. claim_part_name(hover.part) .. "."
+            end
+            return true
+        elseif hover and hover.kind == "claim_unavailable" then
+            self.message = "Maimed echoes cannot be claimed."
+            return true
+        end
+    elseif ceremony.phase == "slot" and hover and hover.kind == "claim_slot" then
+        if ceremony.selected_slot_index == hover.slot_index then
+            self:confirm_claim_slot()
+        else
+            ceremony.selected_slot_index = hover.slot_index
+            self.message = "Replace: " .. (hover.slot_option and hover.slot_option.label or "Body Part") .. "."
+        end
+        return true
+    end
+
+    return true
+end
+
 function V2Combat:begin_combat_end()
     if self.combat_end then
         return
@@ -1148,6 +1392,11 @@ function V2Combat:begin_combat_end()
     elseif winner == self.enemy then
         result = "lose"
         title = "You Lose"
+    end
+
+    if result == "win" then
+        self:begin_claim_ceremony(title)
+        return
     end
 
     self.combat_end = {
@@ -1173,6 +1422,7 @@ end
 local function snapshot_part(part)
     return {
         instance_id = part.instance_id,
+        dreamform_slot = part.dreamform_slot,
         def_id = part.id,
         id = part.id,
         name = part.name,
@@ -1212,11 +1462,22 @@ end
 function V2Combat:build_combat_result(forced_outcome)
     local outcome = forced_outcome or self:outcome()
     local claimable_parts = {}
+    local claimed_part = nil
+    local claimed_slot = nil
+    local replaced_part = nil
 
     if outcome == "victory" then
         for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
             if part.status ~= "maimed" then
                 table.insert(claimable_parts, snapshot_part(part))
+            end
+        end
+
+        if self.claim_result and self.claim_result.part then
+            claimed_part = snapshot_part(self.claim_result.part)
+            claimed_slot = self.claim_result.slot_id
+            if self.claim_result.replaced_part then
+                replaced_part = snapshot_part(self.claim_result.replaced_part)
             end
         end
     end
@@ -1228,7 +1489,9 @@ function V2Combat:build_combat_result(forced_outcome)
         player_parts = snapshot_parts(self.player),
         enemy_parts = snapshot_parts(self.enemy),
         claimable_parts = claimable_parts,
-        claimed_part = nil
+        claimed_part = claimed_part,
+        claimed_slot = claimed_slot,
+        replaced_part = replaced_part
     }
 end
 
@@ -1336,7 +1599,7 @@ function V2Combat:slot_feed_preview(die, part)
     local cost = slot and slot.cost or {}
     local lit = {}
     local burned = {}
-    local hungry = part and (part:has_keyword("Hungry") or (slot and slot.hungry))
+    local hungry = part and Keywords.slot_is_hungry(part, slot)
 
     for _, symbol in ipairs(effective or {}) do
         local matched_index = nil
@@ -1429,7 +1692,11 @@ function V2Combat:active_die_preview_lines()
 end
 
 function V2Combat:is_input_locked()
-    return self.combat_end ~= nil or self.auto_allocation ~= nil or self.resolution_playback ~= nil or not self.player_can_allocate
+    return self.claim_ceremony ~= nil
+        or self.combat_end ~= nil
+        or self.auto_allocation ~= nil
+        or self.resolution_playback ~= nil
+        or not self.player_can_allocate
 end
 
 function V2Combat:begin_allocation_phase()
@@ -1858,6 +2125,11 @@ function V2Combat:mousepressed(x, y, button)
         return
     end
 
+    if self.claim_ceremony then
+        self:claim_mousepressed(x, y)
+        return
+    end
+
     if self.combat_end then
         self:return_to_overworld()
         return
@@ -1936,11 +2208,49 @@ function V2Combat:mousereleased(x, y, button)
     self:update_hover(x, y)
 end
 
-function V2Combat:keypressed(key)
-    if key == "escape" then
-        self:return_to_overworld("fled")
-    elseif self.combat_end and (key == "space" or key == "c" or key == "return") then
+function V2Combat:actionpressed(action)
+    if self.claim_ceremony then
+        return self:claim_actionpressed(action)
+    end
+
+    if self.combat_end and (action == "confirm" or action == "cancel" or action == "menu") then
         self:return_to_overworld()
+        return true
+    elseif action == "cancel" then
+        self:return_to_overworld("fled")
+        return true
+    elseif self.resolution_playback and action == "confirm" then
+        self:skip_resolution_playback()
+        return true
+    elseif action == "confirm" then
+        self:confirm_round()
+        return true
+    end
+
+    return false
+end
+
+function V2Combat:keypressed(key)
+    if self.claim_ceremony then
+        if key == "c" then
+            self:claim_actionpressed("confirm")
+        elseif key == "escape" then
+            self:claim_actionpressed("cancel")
+        elseif key == "up" or key == "w" then
+            self:claim_actionpressed("move_up")
+        elseif key == "down" or key == "s" then
+            self:claim_actionpressed("move_down")
+        elseif key == "left" or key == "a" then
+            self:claim_actionpressed("move_left")
+        elseif key == "right" or key == "d" then
+            self:claim_actionpressed("move_right")
+        elseif key == "space" or key == "return" then
+            self:claim_actionpressed("confirm")
+        end
+    elseif self.combat_end and (key == "space" or key == "c" or key == "return" or key == "escape") then
+        self:return_to_overworld()
+    elseif key == "escape" then
+        self:return_to_overworld("fled")
     elseif self.resolution_playback and (key == "space" or key == "c" or key == "return") then
         self:skip_resolution_playback()
     elseif key == "c" or key == "return" then
@@ -2009,6 +2319,11 @@ function V2Combat:destination_preview(kind, part)
     end
 
     return nil
+end
+
+function V2Combat:claim_animation_hides_part(part)
+    local animation = self.claim_ceremony and self.claim_ceremony.animation
+    return animation and animation.claimed_part == part
 end
 
 function V2Combat:draw_socket_or_rim_preview(kind, part, target_rect)
@@ -2137,8 +2452,15 @@ function V2Combat:draw_crest_chip(combatant, crest, r)
         line = COLORS.line
     }
 
-    draw_hex_chip(r, visual.fill, hovered and COLORS.selected or (active and visual.line or COLORS.dashed), active)
-    draw_symbol_sprite(visual.symbol, r.x + (r.w - SYMBOL_SIZE) / 2, r.y + (r.h - SYMBOL_SIZE) / 2, SYMBOL_SIZE, not active, active and 1 or 0.38)
+    local drew_asset = visual.asset and draw_image(visual.asset, r)
+    if drew_asset then
+        if hovered then
+            draw_sprite_outline(r, COLORS.selected, 4)
+        end
+    else
+        draw_hex_chip(r, visual.fill, hovered and COLORS.selected or (active and visual.line or COLORS.dashed), active)
+        draw_symbol_sprite(visual.symbol, r.x + (r.w - SYMBOL_SIZE) / 2, r.y + (r.h - SYMBOL_SIZE) / 2, SYMBOL_SIZE, not active, active and 1 or 0.38)
+    end
 
     if count > 0 then
         local badge = rect(r.x + r.w - 10, r.y + r.h - 11, 13, 11)
@@ -2207,7 +2529,7 @@ function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
     end
 
     local hatch_id = "die-hatch1"
-    local hungry = part:has_keyword("Hungry") or slot.hungry
+    local hungry = Keywords.slot_is_hungry(part, slot)
     local accepting = hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy
     local hovered = hatch_outline == COLORS.valid and self:hover_matches("slot", part)
     local swallow_frame = self:hatch_swallow_frame(part)
@@ -2441,6 +2763,10 @@ function V2Combat:draw_socket_or_rim_frame(kind, part, layout, display_status, v
 end
 
 function V2Combat:draw_part_card(part, layout)
+    if self:claim_animation_hides_part(part) then
+        return
+    end
+
     local display_status = self:display_status_for_part(part)
     local source_highlight = self.hover and self.hover.kind == "die" and self.hover.die.source_part == part
     local selected_source = self.selected_die and self.selected_die.source_part == part
@@ -2704,7 +3030,13 @@ function V2Combat:inspected_die_source()
 
     if self.hover.kind == "die" and self.hover.die then
         return self.hover.die.source_part, self.hover.die.face_index
-    elseif self.hover.kind == "part" or self.hover.kind == "socket" or self.hover.kind == "rim" or self.hover.kind == "slot" then
+    elseif self.hover.kind == "part"
+        or self.hover.kind == "socket"
+        or self.hover.kind == "rim"
+        or self.hover.kind == "slot"
+        or self.hover.kind == "claim_part"
+        or self.hover.kind == "claim_slot"
+        or self.hover.kind == "claim_unavailable" then
         return self.hover.part, nil
     end
 
@@ -2801,7 +3133,7 @@ function V2Combat:draw_inspector()
         elseif self.hover.kind == "slot" then
             local part = self.hover.part
             if part.slot then
-                lines = BPInspector.slot_lines(part.slot)
+                lines = BPInspector.slot_lines(part.slot, part)
                 table.insert(lines, 1, "Installed in: " .. tostring(part.name or part.id or "Body Part"))
             else
                 table.insert(lines, tostring(part.name or part.id or "Body Part") .. " has no Slot.")
@@ -2810,6 +3142,21 @@ function V2Combat:draw_inspector()
             lines = BPInspector.part_lines(self.hover.part, {
                 status = self:display_status_for_part(self.hover.part)
             })
+        elseif self.hover.kind == "claim_part" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Claim candidate.")
+        elseif self.hover.kind == "claim_slot" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Will be replaced: " .. tostring(self.hover.slot_option and self.hover.slot_option.label or "Body Part") .. ".")
+        elseif self.hover.kind == "claim_unavailable" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Maimed. Cannot be claimed.")
         elseif self.hover.kind == "crest" then
             local owner = self.hover.combatant and (self.hover.combatant.name or "?") or "?"
             local count = self.hover.combatant and self.hover.combatant:get_crest_count(self.hover.crest) or 0
@@ -2843,6 +3190,123 @@ function V2Combat:draw_inspector()
     draw_text("Flavor", rail.x + 14, flavor_rule_y + 10, rail.w - 28, "left", COLORS.muted)
     love.graphics.setFont(self.fonts.body)
     draw_wrapped_text(BPInspector.flavor(inspected_part), rail.x + 14, flavor_rule_y + 30, rail.w - 28, "left", COLORS.ink, 2)
+end
+
+function V2Combat:draw_claim_prompt()
+    local ceremony = self.claim_ceremony
+    if not ceremony then
+        return
+    end
+
+    local center = self:center_rect()
+    local panel_w = math.min(360, center.w - 28)
+    local panel_h = 78
+    local panel = rect(center.x + math.floor((center.w - panel_w) / 2), center.y + 14, panel_w, panel_h)
+    local title = "Claim an Echo"
+    local body = "Choose one non-maimed part, or leave your dreamform unchanged."
+
+    if ceremony.phase == "slot" then
+        local part = self:selected_claim_part()
+        title = "Choose the Graft"
+        body = claim_part_name(part) .. " will replace one " .. string.lower(normalized_part_type(part) or "part") .. "."
+    elseif ceremony.phase == "animate" then
+        local animation = ceremony.animation
+        title = "Dreamform Changes"
+        body = claim_part_name(animation and animation.claimed_part) .. " takes root."
+    elseif ceremony.phase == "empty" then
+        title = "No Claim"
+        body = "No non-maimed enemy parts remain to graft."
+    end
+
+    set_color({ 0, 0, 0, 0.46 })
+    love.graphics.rectangle("fill", panel.x - 6, panel.y - 6, panel.w + 12, panel.h + 12, 8, 8)
+    draw_box(panel, COLORS.rail, COLORS.player, 8)
+
+    love.graphics.setFont(self.fonts.body)
+    draw_text(title, panel.x + 12, panel.y + 10, panel.w - 24, "center", COLORS.player)
+    love.graphics.setFont(self.fonts.small)
+    draw_text(body, panel.x + 14, panel.y + 40, panel.w - 28, "center", COLORS.ink)
+end
+
+function V2Combat:draw_claim_card_outlines()
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return
+    end
+
+    local selected_part = self:selected_claim_part()
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        local layout = self.card_rects[part]
+        if layout then
+            if part.status == "maimed" then
+                set_color({ 0, 0, 0, 0.36 })
+                love.graphics.rectangle("fill", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
+                draw_sprite_outline(expand_rect(layout.card, 1), COLORS.invalid, 5)
+            else
+                local hovered = self.hover and self.hover.kind == "claim_part" and self.hover.part == part
+                local selected = selected_part == part
+                local color = selected and COLORS.selected or (hovered and COLORS.valid or { COLORS.valid[1], COLORS.valid[2], COLORS.valid[3], 0.45 })
+                draw_sprite_outline(expand_rect(layout.card, selected and 3 or 1), color, 5)
+            end
+        end
+    end
+
+    if ceremony.phase ~= "slot" then
+        return
+    end
+
+    local selected_slot = self:selected_claim_slot()
+    for _, option in ipairs(ceremony.slot_options or {}) do
+        local layout = option.part and self.card_rects[option.part]
+        if layout then
+            local hovered = self.hover and self.hover.kind == "claim_slot" and self.hover.slot_option == option
+            local selected = selected_slot == option
+            local color = selected and COLORS.selected or (hovered and COLORS.player or { COLORS.player[1], COLORS.player[2], COLORS.player[3], 0.45 })
+            draw_sprite_outline(expand_rect(layout.card, selected and 3 or 1), color, 5)
+            love.graphics.setFont(self.fonts.tiny)
+            draw_text(option.label, layout.label.x, layout.label.y, layout.label.w, "center", color)
+        end
+    end
+end
+
+function V2Combat:draw_claim_animation()
+    local animation = self.claim_ceremony and self.claim_ceremony.animation
+    if not animation then
+        return
+    end
+
+    local duration = animation.duration or CLAIM_ANIMATION_DURATION
+    local progress = ease_out_cubic(math.min(1, (animation.elapsed or 0) / duration))
+    local target = animation.target_layout
+
+    if animation.replaced_part and target and target.card then
+        set_color({ 0, 0, 0, 0.22 + 0.5 * progress })
+        love.graphics.rectangle("fill", target.card.x, target.card.y, target.card.w, target.card.h, 6, 6)
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.72 * progress })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(target.card.x + 10, target.card.y + 10, target.card.x + target.card.w - 10, target.card.y + target.card.h - 10)
+        love.graphics.line(target.card.x + target.card.w - 14, target.card.y + 12, target.card.x + 14, target.card.y + target.card.h - 12)
+    end
+
+    local layout = interpolate_card_layout(animation.source_layout, animation.target_layout, progress)
+    if layout then
+        BPCard.draw(animation.claimed_part, layout, {
+            fonts = self.fonts,
+            time = self.ui_time or 0,
+            status = animation.claimed_part and animation.claimed_part.status or "healthy"
+        })
+        draw_sprite_outline(expand_rect(layout.card, 2), COLORS.player, 5)
+    end
+end
+
+function V2Combat:draw_claim_ceremony()
+    if not self.claim_ceremony then
+        return
+    end
+
+    self:draw_claim_card_outlines()
+    self:draw_claim_animation()
+    self:draw_claim_prompt()
 end
 
 function V2Combat:draw_combat_end_overlay()
@@ -2911,6 +3375,7 @@ function V2Combat:draw()
     self:draw_auto_allocation_ghost()
     self:draw_resolution_effects()
     self:draw_drag_ghost()
+    self:draw_claim_ceremony()
 
     if love.graphics.pop then
         love.graphics.pop()

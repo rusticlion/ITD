@@ -44,6 +44,15 @@ local function part_name(part)
     return part.name or part.def_id or part.id or "Unknown Part"
 end
 
+local SLOT_LABELS = {
+    head = "Head",
+    body = "Body",
+    arm_l = "Left Arm",
+    arm_r = "Right Arm",
+    leg_l = "Left Leg",
+    leg_r = "Right Leg"
+}
+
 function PostCombat:enter(summary)
     self.summary = summary or {}
     self.elapsed = 0
@@ -103,24 +112,26 @@ function PostCombat:draw()
 
     line_y = line_y + 14
     set_color(COLORS.ink)
-    love.graphics.print("Claimable echoes", x + 28, line_y)
+    love.graphics.print("Dreamform change", x + 28, line_y)
     line_y = line_y + 22
 
-    local claimable = summary.claimable_parts or {}
-    if #claimable == 0 then
-        set_color(COLORS.muted)
-        love.graphics.print("None.", x + 40, line_y)
-    else
+    local claim = summary.claim_summary
+    if claim and claim.def_id then
+        local claimed = summary.claimed_part or claim
+        local slot_label = SLOT_LABELS[summary.claimed_slot or claim.slot_id] or tostring(summary.claimed_slot or claim.slot_id or "slot")
         set_color(COLORS.warning)
-        local names = {}
-        for index, part in ipairs(claimable) do
-            if index > 3 then
-                table.insert(names, "...")
-                break
-            end
-            table.insert(names, part_name(part))
+        love.graphics.printf(part_name(claimed) .. " took root as " .. slot_label .. ".", x + 40, line_y, panel_w - 80, "left")
+        line_y = line_y + 18
+        if claim.replaced_part then
+            set_color(COLORS.muted)
+            love.graphics.printf(part_name(claim.replaced_part) .. " faded away.", x + 40, line_y, panel_w - 80, "left")
         end
-        love.graphics.printf(table.concat(names, ", "), x + 40, line_y, panel_w - 80, "left")
+    elseif summary.outcome == "victory" then
+        set_color(COLORS.muted)
+        love.graphics.print("Dreamform left unchanged.", x + 40, line_y)
+    else
+        set_color(COLORS.muted)
+        love.graphics.print("No claim.", x + 40, line_y)
     end
 
     set_color(COLORS.muted)

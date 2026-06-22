@@ -1,3 +1,4 @@
+local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 
@@ -24,6 +25,32 @@ local MENU_ITEMS = {
 
 local function set_color(color)
     love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
+end
+
+local function draw_panel(r)
+    if draw_image("menu_sidebar_frame", r) then
+        return
+    end
+
+    set_color(COLORS.panel)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, 5, 5)
+    set_color(COLORS.line)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, 5, 5)
 end
 
 function MenuSidebar:enter(context)
@@ -102,11 +129,9 @@ function MenuSidebar:draw()
     local panel_h = 48 + #self.items * item_h + 16
     local x = width - panel_w - 18
     local y = 18
+    local panel = rect(x, y, panel_w, panel_h)
 
-    set_color(COLORS.panel)
-    love.graphics.rectangle("fill", x, y, panel_w, panel_h, 5, 5)
-    set_color(COLORS.line)
-    love.graphics.rectangle("line", x, y, panel_w, panel_h, 5, 5)
+    draw_panel(panel)
 
     set_color(COLORS.ink)
     love.graphics.printf("Menu", x + 16, y + 16, panel_w - 32, "left")
@@ -118,8 +143,11 @@ function MenuSidebar:draw()
         self.item_rects[index] = rect
 
         if index == self.selected_index then
+            if not draw_image("menu_cursor", { x = rect.x + 8, y = rect.y + 8, w = 8, h = 12 }) then
+                set_color(COLORS.ink)
+                love.graphics.print(">", rect.x + 8, rect.y + 7)
+            end
             set_color(COLORS.ink)
-            love.graphics.print(">", rect.x + 8, rect.y + 7)
         else
             set_color(COLORS.muted)
         end

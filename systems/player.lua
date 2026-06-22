@@ -1,3 +1,5 @@
+local Assets = require("core.assets")
+
 local Player = {}
 Player.__index = Player
 
@@ -139,6 +141,22 @@ end
 
 function Player:draw(tile_size)
     local size = tile_size or 32
+    local sprite_id = "player_idle_" .. tostring(self.facing or "down")
+    local image = Assets.images[sprite_id] or Assets.images.player_idle_down
+
+    if image then
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(
+            image,
+            (self.render_x - 1) * size,
+            (self.render_y - 1) * size,
+            0,
+            size / image:getWidth(),
+            size / image:getHeight()
+        )
+        return
+    end
+
     love.graphics.setColor(0.7, 0.7, 1)
     love.graphics.rectangle(
         "fill",

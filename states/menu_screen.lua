@@ -1,9 +1,11 @@
+local Assets = require("core.assets")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 local BPInspector = require("ui.bp_inspector")
 local BPCard = require("ui.bp_card")
 local Catalog = require("systems.bodypart_catalog")
 local SymbolDie = require("core.symbol_die")
+local Text = require("ui.text")
 
 local MenuScreen = {}
 MenuScreen.__index = MenuScreen
@@ -33,6 +35,10 @@ local INSPECTOR_COLORS = {
 
 local function set_color(color)
     love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
 end
 
 local function sorted_keys(tbl)
@@ -66,13 +72,28 @@ local function draw_box(rect, fill, line, radius)
     love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, radius or 4, radius or 4)
 end
 
-local function draw_cursor(rect, selected)
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
+end
+
+local function draw_cursor(row_rect, selected)
     if not selected then
         return
     end
 
+    if draw_image("menu_cursor", rect(row_rect.x + 6, row_rect.y + 7, 8, 12)) then
+        return
+    end
+
     set_color(COLORS.ink)
-    love.graphics.print(">", rect.x + 6, rect.y + 6)
+    love.graphics.print(">", row_rect.x + 6, row_rect.y + 6)
 end
 
 local function list_label(part)
@@ -84,29 +105,11 @@ local function list_label(part)
 end
 
 local function text_width(text)
-    local font = love.graphics.getFont()
-    return font and font:getWidth(tostring(text or "")) or 0
+    return Text.width(text)
 end
 
 local function truncate_text(text, max_width)
-    local source = tostring(text or "")
-    if text_width(source) <= max_width then
-        return source
-    end
-
-    local suffix = ".."
-    local available = math.max(0, max_width - text_width(suffix))
-    local result = ""
-
-    for index = 1, #source do
-        local candidate = source:sub(1, index)
-        if text_width(candidate) > available then
-            break
-        end
-        result = candidate
-    end
-
-    return result .. suffix
+    return Text.truncate(text, max_width)
 end
 
 function MenuScreen:enter(context)
@@ -240,23 +243,22 @@ end
 
 function MenuScreen:draw_pool_overview(parts, rect, selected_index)
     draw_box(rect, COLORS.surface_low, COLORS.line, 5)
-    set_color(COLORS.ink)
-    love.graphics.printf("Dice Pool", rect.x + 12, rect.y + 10, rect.w - 24, "left")
 
-    local pad = 12
+    local pad = 10
     local die_gap = 8
-    local strip_h = 50
-    local die_area_y = rect.y + 34
-    local die_area_h = math.max(42, rect.h - 34 - strip_h - 8)
+    local strip_h = 38
+    local strip_y = rect.y + rect.h - strip_h
+    local die_area_y = rect.y + 10
+    local die_area_h = math.max(72, strip_y - die_area_y - 8)
     local columns = 3
     local rows = 2
     local cell_w = math.floor((rect.w - pad * 2 - die_gap * (columns - 1)) / columns)
     local cell_h = math.floor((die_area_h - die_gap * (rows - 1)) / rows)
-    local face_gap = 3
-    local face_size = math.max(14, math.min(
-        26,
-        math.floor((cell_w - 14 - face_gap * 2) / 3),
-        math.floor((cell_h - 12 - face_gap) / 2)))
+    local face_gap = 4
+    local face_size = math.max(16, math.min(
+        36,
+        math.floor((cell_w - 12 - face_gap * 2) / 3),
+        math.floor((cell_h - 8 - face_gap) / 2)))
 
     for index, part in ipairs(parts or {}) do
         local die_column = (index - 1) % columns
@@ -270,9 +272,9 @@ function MenuScreen:draw_pool_overview(parts, rect, selected_index)
 
         if index == selected_index then
             set_color({ COLORS.accent[1], COLORS.accent[2], COLORS.accent[3], 0.18 })
-            love.graphics.rectangle("fill", cell_x + 2, cell_y + 2, cell_w - 4, cell_h - 4, 4, 4)
+            love.graphics.rectangle("fill", grid_x - 6, grid_y - 6, grid_w + 12, grid_h + 12, 4, 4)
             set_color(COLORS.accent)
-            love.graphics.rectangle("line", cell_x + 2, cell_y + 2, cell_w - 4, cell_h - 4, 4, 4)
+            love.graphics.rectangle("line", grid_x - 6, grid_y - 6, grid_w + 12, grid_h + 12, 4, 4)
         end
 
         for face_index = 1, 6 do
@@ -290,18 +292,17 @@ function MenuScreen:draw_pool_overview(parts, rect, selected_index)
         end
     end
 
-    local strip_y = rect.y + rect.h - strip_h
     set_color(COLORS.line)
     love.graphics.line(rect.x + pad, strip_y, rect.x + rect.w - pad, strip_y)
 
     local entries = BPInspector.die_face_count_entries(parts)
     local font = love.graphics.getFont()
-    local row_h = font and font:getHeight() + 7 or 19
+    local row_h = font and font:getHeight() + 4 or 16
     local symbol_size = 13
     local cursor_x = rect.x + pad
-    local cursor_y = strip_y + 10
+    local cursor_y = strip_y + 6
     local max_x = rect.x + rect.w - pad
-    local max_y = rect.y + rect.h - 6
+    local max_y = rect.y + rect.h - 2
 
     for _, entry in ipairs(entries) do
         local symbol_w = BPCard.symbol_sequence_width(entry.symbols, symbol_size)
@@ -479,7 +480,8 @@ function MenuScreen:draw_esoterica(x, y, w, h)
         part = self:selected_esoterica_part()
     }, {
         colors = INSPECTOR_COLORS,
-        hide_header = true
+        hide_header = true,
+        show_die = true
     })
 end
 
@@ -510,15 +512,21 @@ function MenuScreen:draw()
     local content_y = 92
     local content_w = width - margin * 2 - 56
     local content_h = height - content_y - margin - 28
+    local frame = rect(margin, margin, width - margin * 2, height - margin * 2)
 
     set_color(COLORS.bg)
     love.graphics.rectangle("fill", 0, 0, width, height)
-    draw_panel(margin, margin, width - margin * 2, height - margin * 2)
+    local drew_frame = draw_image("menu_full_frame", frame)
+    if not drew_frame then
+        draw_panel(frame.x, frame.y, frame.w, frame.h)
+    end
 
     set_color(COLORS.ink)
     love.graphics.printf(self.title, margin + 24, margin + 22, width - margin * 2 - 48, "left")
-    set_color(COLORS.line)
-    love.graphics.line(margin + 24, margin + 62, width - margin - 24, margin + 62)
+    if not drew_frame then
+        set_color(COLORS.line)
+        love.graphics.line(margin + 24, margin + 62, width - margin - 24, margin + 62)
+    end
 
     if self.screen == "inventory" then
         self:draw_inventory(content_x, content_y, content_w)

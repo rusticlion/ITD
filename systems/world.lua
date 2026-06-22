@@ -23,6 +23,15 @@ local DEFAULT_PARTS = {
     part_inst_dreamer_left_leg = { def_id = "dreamer_left_leg", status = "healthy", source = "initial" },
     part_inst_dreamer_right_leg = { def_id = "dreamer_right_leg", status = "healthy", source = "initial" }
 }
+local DREAMFORM_SLOT_TYPES = {
+    head = "HEAD",
+    body = "BODY",
+    arm_l = "ARM",
+    arm_r = "ARM",
+    leg_l = "LEG",
+    leg_r = "LEG"
+}
+local DREAMFORM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
 
 local function clamp(value, min_value, max_value)
     return math.max(min_value, math.min(max_value, value))
@@ -50,6 +59,43 @@ local function recover_status(status)
     return "healthy"
 end
 
+local function part_def_id(part)
+    return type(part) == "table" and (part.def_id or part.id) or part
+end
+
+local function part_type(part)
+    if type(part) == "table" and part.type then
+        return tostring(part.type):upper()
+    end
+
+    return nil
+end
+
+local function discover_part(run, part)
+    local def_id = part_def_id(part)
+    if not def_id then
+        return
+    end
+
+    run.discovered_parts = run.discovered_parts or {}
+    run.discovered_parts[def_id] = true
+end
+
+local function prune_unequipped_parts(run)
+    local equipped = {}
+    for _, instance_id in pairs(run.dreamform or {}) do
+        if instance_id then
+            equipped[instance_id] = true
+        end
+    end
+
+    for instance_id in pairs(run.parts or {}) do
+        if not equipped[instance_id] then
+            run.parts[instance_id] = nil
+        end
+    end
+end
+
 local function normalize_run_state(run)
     run = run or {}
     run.dreamform = run.dreamform or copy_table(DEFAULT_DREAMFORM)
@@ -69,14 +115,14 @@ local function normalize_run_state(run)
         end
         run.parts[instance_id].instance_id = instance_id
         run.parts[instance_id].status = run.parts[instance_id].status or "healthy"
-        run.discovered_parts[run.parts[instance_id].def_id] = true
+        discover_part(run, run.parts[instance_id])
     end
 
     for _, part in pairs(run.parts) do
-        if part and part.def_id then
-            run.discovered_parts[part.def_id] = true
-        end
+        discover_part(run, part)
     end
+
+    prune_unequipped_parts(run)
 
     return run
 end
@@ -402,10 +448,52 @@ function World:apply_player_part_statuses(parts)
     return recovered_parts
 end
 
-function World:add_claimed_part(part, encounter_id)
-    local def_id = type(part) == "table" and (part.def_id or part.id) or part
+function World:eligible_dreamform_slots_for_part(part)
+    local wanted_type = part_type(part)
+    local slots = {}
+
+    for _, slot_id in ipairs(DREAMFORM_SLOT_ORDER) do
+        if not wanted_type or DREAMFORM_SLOT_TYPES[slot_id] == wanted_type then
+            table.insert(slots, slot_id)
+        end
+    end
+
+    return slots
+end
+
+function World:claim_part_into_slot(part, slot_id, encounter_id)
+    local def_id = part_def_id(part)
     if not def_id then
-        return nil
+        return nil, "missing_def_id"
+    end
+
+    if type(part) == "table" and part.status == "maimed" then
+        return nil, "maimed_part_unclaimable"
+    end
+
+    local wanted_type = part_type(part)
+    local slot_type = slot_id and DREAMFORM_SLOT_TYPES[slot_id]
+    if not slot_type then
+        return nil, "unknown_slot"
+    end
+
+    if wanted_type and wanted_type ~= slot_type then
+        return nil, "slot_type_mismatch"
+    end
+
+    self.run.parts = self.run.parts or {}
+    self.run.dreamform = self.run.dreamform or copy_table(DEFAULT_DREAMFORM)
+    self.run.discovered_parts = self.run.discovered_parts or {}
+    self.run.next_part_instance_index = self.run.next_part_instance_index or 1
+
+    local replaced_instance_id = self.run.dreamform[slot_id]
+    local replaced_part = replaced_instance_id and self.run.parts[replaced_instance_id] and copy_table(self.run.parts[replaced_instance_id])
+    if replaced_part then
+        replaced_part.instance_id = replaced_instance_id
+    end
+
+    if replaced_instance_id then
+        self.run.parts[replaced_instance_id] = nil
     end
 
     local instance_id = "part_inst_" .. tostring(def_id)
@@ -419,14 +507,27 @@ function World:add_claimed_part(part, encounter_id)
     self.run.parts[instance_id] = {
         instance_id = instance_id,
         def_id = def_id,
-        status = type(part) == "table" and (part.status or "healthy") or "healthy",
+        status = type(part) == "table" and recover_status(part.status) or "healthy",
         name = type(part) == "table" and part.name or nil,
-        type = type(part) == "table" and part.type or nil,
+        type = wanted_type,
         claimed_from = encounter_id
     }
-    self.run.discovered_parts = self.run.discovered_parts or {}
-    self.run.discovered_parts[def_id] = true
+    self.run.dreamform[slot_id] = instance_id
+    discover_part(self.run, def_id)
 
+    return instance_id, {
+        instance_id = instance_id,
+        def_id = def_id,
+        slot_id = slot_id,
+        replaced_instance_id = replaced_instance_id,
+        replaced_part = replaced_part
+    }
+end
+
+function World:add_claimed_part(part, encounter_id, slot_id)
+    local slots = self:eligible_dreamform_slots_for_part(part)
+    local target_slot = slot_id or slots[1]
+    local instance_id = self:claim_part_into_slot(part, target_slot, encounter_id)
     return instance_id
 end
 
@@ -440,14 +541,23 @@ function World:apply_combat_result(result)
         encounter_id = result.encounter_id,
         outcome = result.outcome,
         claimable_parts = copy_table(result.claimable_parts or {}),
-        claimed_part = copy_table(result.claimed_part)
+        claimed_part = copy_table(result.claimed_part),
+        claimed_slot = result.claimed_slot,
+        replaced_part = copy_table(result.replaced_part)
     })
 
     local recovered_parts = self:apply_player_part_statuses(result.player_parts)
 
     local claimed_instance_id
+    local claim_summary
+    local claim_error
     if result.claimed_part then
-        claimed_instance_id = self:add_claimed_part(result.claimed_part, result.encounter_id)
+        claimed_instance_id, claim_summary = self:claim_part_into_slot(result.claimed_part, result.claimed_slot, result.encounter_id)
+        if not claimed_instance_id then
+            claim_error = claim_summary
+            claim_summary = nil
+            print("[World] Claim failed: " .. tostring(claim_error))
+        end
     end
 
     if result.encounter_id then
@@ -457,12 +567,16 @@ function World:apply_combat_result(result)
             or result.outcome == "victory"
             or result.outcome == "scripted"
         encounter_state.claimable_parts = copy_table(result.claimable_parts or {})
-        encounter_state.claimed_part = claimed_instance_id or result.claimed_part
+        encounter_state.claimed_part = claim_summary and copy_table(claim_summary) or nil
         self.run.encounters[result.encounter_id] = encounter_state
     end
 
     if result.outcome == "victory" then
-        self:set_message("Combat won. Your dreamform knits itself back together.")
+        if claim_summary then
+            self:set_message("Combat won. Your dreamform changes shape.")
+        else
+            self:set_message("Combat won. Your dreamform knits itself back together.")
+        end
     elseif result.outcome == "defeat" then
         self:set_message("Combat lost. Your dreamform knits enough to keep going.")
     elseif result.outcome == "fled" then
@@ -480,6 +594,9 @@ function World:apply_combat_result(result)
         recovered_parts = recovered_parts,
         claimable_parts = copy_table(result.claimable_parts or {}),
         claimed_part = result.claimed_part,
+        claimed_slot = result.claimed_slot,
+        claim_summary = copy_table(claim_summary),
+        claim_error = claim_error,
         claimed_instance_id = claimed_instance_id
     }
 end

@@ -1,3 +1,4 @@
+local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 
 local AI = {}
@@ -145,7 +146,7 @@ local function slot_feed_match_count(part, symbols)
     local slot = part and part.slot
     local cost = slot and slot.cost or {}
     local to_light = {}
-    local hungry = part and (part:has_keyword("Hungry") or (slot and slot.hungry))
+    local hungry = part and Keywords.slot_is_hungry(part, slot)
     local remaining_before = 0
 
     for index = 1, #cost do

@@ -278,6 +278,77 @@ local function run()
     ok, reason = engine6:assign_die_to_rim(player6, after_mark_die.id, unmarked_rib)
     assert_true(not ok and reason == "no_strike", "Single-use spellmark should not leave all rims Essence-valid")
 
+    local engine7, player7, enemy7 = start_engine()
+    local armored_skull = enemy7:get_body_part_by_id("bone_demon_skull")
+    local light_strike_die = die_for(engine7, player7, "dreamer_right_leg")
+    local heavy_strike_die = die_for(engine7, player7, "dreamer_right_arm")
+    armored_skull.keywords = { "Armored" }
+    light_strike_die.symbols = { Symbols.STRIKE }
+    heavy_strike_die.symbols = { Symbols.STRIKE, Symbols.STRIKE }
+
+    ok, reason = engine7:assign_die_to_rim(player7, light_strike_die.id, armored_skull)
+    assert_true(not ok and reason == "armored_requires_two_strikes",
+        "Armored rims should reject one-Strike dice: " .. tostring(reason))
+
+    ok, reason = engine7:assign_die_to_rim(player7, heavy_strike_die.id, armored_skull)
+    assert_true(ok, "Armored rims should accept dice showing two Strikes: " .. tostring(reason))
+
+    local engine8, player8, enemy8 = start_engine()
+    local brittle_rib = enemy8:get_body_part_by_id("bone_demon_rib_cage")
+    local brittle_attack = die_for(engine8, player8, "dreamer_right_leg")
+    brittle_rib.keywords = { "Brittle" }
+    brittle_attack.symbols = { Symbols.STRIKE }
+
+    ok, reason = engine8:assign_die_to_rim(player8, brittle_attack.id, brittle_rib)
+    assert_true(ok, "Brittle test should assign a simple attack: " .. tostring(reason))
+    engine8:resolve_round()
+    assert_true(brittle_rib.status == "maimed", "Brittle parts should maim from any damage")
+    assert_true(enemy8.heart_points == 2, "Brittle maim should still apply normal Heart loss")
+
+    local engine9, player9 = start_engine()
+    local hungry_head = player9:get_body_part_by_id("dreamer_head")
+    local hungry_feed = die_for(engine9, player9, "dreamer_head")
+    hungry_head.slot = {
+        id = "hungry_test",
+        name = "Hungry Test",
+        cost = { Symbols.ESSENCE, Symbols.ESSENCE, Symbols.ESSENCE },
+        hungry = true,
+        timing = "upkeep",
+        effect = { type = "none" }
+    }
+    hungry_feed.symbols = { Symbols.STRIKE, Symbols.WARD }
+
+    ok, reason = engine9:feed_die_to_slot(player9, hungry_feed.id, hungry_head)
+    assert_true(ok, "Hungry slots should accept any nonblank symbols: " .. tostring(reason))
+    assert_true(hungry_head.slot_charge[1] == true and hungry_head.slot_charge[2] == true and not hungry_head.slot_charge[3],
+        "Hungry slots should light one wildcard pip per ingested symbol")
+
+    local engine10, player10, enemy10 = start_engine()
+    local absorbent_body = player10:get_body_part_by_id("dreamer_body")
+    local absorbent_defense = die_for(engine10, player10, "dreamer_body")
+    local absorbent_attack = die_for(engine10, enemy10, "bone_demon_right_claw")
+    absorbent_body.keywords = { "Absorbent" }
+    absorbent_body.slot = {
+        id = "absorbent_test",
+        name = "Absorbent Test",
+        cost = { Symbols.WARD, Symbols.WARD },
+        timing = "upkeep",
+        effect = { type = "none" }
+    }
+    absorbent_defense.symbols = { Symbols.WARD }
+    absorbent_attack.symbols = { Symbols.STRIKE }
+
+    ok, reason = engine10:assign_die_to_rim(enemy10, absorbent_attack.id, absorbent_body)
+    assert_true(ok, "Absorbent test should assign an incoming attack: " .. tostring(reason))
+    ok, reason = engine10:assign_die_to_socket(player10, absorbent_defense.id, absorbent_body)
+    assert_true(ok, "Absorbent test should assign socket defense: " .. tostring(reason))
+    engine10:resolve_round()
+    assert_true(absorbent_body.status == "healthy", "Absorbent should only fire after a no-damage defense")
+    assert_true(absorbent_body.slot_charge[1] == true and not absorbent_body.slot_charge[2],
+        "Absorbent should feed the socket die into its Slot")
+    assert_true(engine10.assignments.sockets[absorbent_body] == nil,
+        "Absorbent should move the socket die out of the socket assignment")
+
     print("\nV2 combat smoke test passed.")
 end
 

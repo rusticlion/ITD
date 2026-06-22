@@ -18,6 +18,7 @@ local Events = {
     SLOT_CHARGE_VENTED = "slot_charge_vented",
     SPELLMARK_OPENED = "spellmark_opened",
     SPELLMARK_RESOLVED = "spellmark_resolved",
+    KEYWORD_TRIGGERED = "keyword_triggered",
     LATCH_EJECTED = "latch_ejected",
     PART_RESOLVED = "part_resolved",
     DAMAGE_DEALT = "damage_dealt",

@@ -48,7 +48,7 @@ BP card slots:
 - Player card y: 430
 - Enemy title edge: far side from opponent, above/on top of the card.
 - Player title edge: far side from opponent, below/on bottom of the card.
-- BP card left sector: card x+4 to x+44; holds rim, socket, HP value, and future keyword badges.
+- BP card left sector: card x+4 to x+44; holds rim, socket, HP value, and keyword badges between socket and HP.
 - BP card right sector: card x+44 to x+112; holds slot title at y+7, hatch at y+24, and centered pip grid at y+62.
 
 Settled dice and crest strips:
@@ -112,6 +112,7 @@ These are already used by `states/v2_combat.lua`:
 - `bp_card_wounded` - optional 116x88 wounded damage overlay
 - `bp_card_maimed` - optional 116x88 maimed damage overlay
 - `bp_title` - optional 116x16 BP title strip; drawn normally for enemies and flipped vertically for players
+- `bp_keyword_armored`, `bp_keyword_brittle`, `bp_keyword_absorbent`, `bp_keyword_hungry` - optional 13x9 keyword badge sprites; renderer falls back to text-backed badges
 - `die_socket` - 36x36 defense socket
 - `die_socket_valid1`...`die_socket_valid4` - optional animated valid socket frames
 - `die_socket_occupied1`...`die_socket_occupied4` - optional animated occupied socket frames
@@ -165,6 +166,10 @@ Prioritize assets that make the tabletop tableau feel complete without requiring
 - `bp_card_maimed` - 116x88 ruined/offline surface overlay
 - `bp_title` - 116x16 title strip treatment; enemy orientation is canonical, player render flips vertically
 - `bp_hp_badge` - compact HP badge frame
+- `bp_keyword_armored` - 13x9 Armored badge
+- `bp_keyword_brittle` - 13x9 Brittle badge
+- `bp_keyword_absorbent` - 13x9 Absorbent badge
+- `bp_keyword_hungry` - 13x9 Hungry badge
 
 ### Sockets, Rims, And Slots
 
@@ -185,6 +190,7 @@ Prioritize assets that make the tabletop tableau feel complete without requiring
 - `slot_cell_preview` - optional 12x12 backing behind an existing symbol sprite during charge preview
 - `slot_cell_lit` - optional 12x12 backing behind an existing symbol sprite for charged pips
 - `slot_cell_vent` - optional 12x12 backing/shatter frame for a vented pip
+- `slot_cell_wild` - optional 12x12 Hungry/wildcard pip; renderer falls back to procedural circles
 
 ### Dice And Symbols
 

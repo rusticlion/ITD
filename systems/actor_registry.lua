@@ -1,4 +1,5 @@
 local Actor = require("systems.actor")
+local Assets = require("core.assets")
 
 local Registry = {
     definitions = {}
@@ -15,6 +16,52 @@ local COLORS = {
 
 local function set_color(color)
     love.graphics.setColor(color)
+end
+
+local function sprite_property(actor, key)
+    return actor.properties and actor.properties[key]
+end
+
+local function actor_sprite_candidates(actor, default_id)
+    local explicit = sprite_property(actor, "asset_id")
+        or sprite_property(actor, "sprite_id")
+        or sprite_property(actor, "sprite")
+    local candidates = {}
+    local function add(id)
+        if id then
+            table.insert(candidates, id)
+        end
+    end
+
+    if actor.state and actor.state.resolved then
+        add(sprite_property(actor, "resolved_asset_id"))
+        add(sprite_property(actor, "resolved_sprite_id"))
+        if explicit then
+            add(explicit .. "_resolved")
+        end
+        if default_id then
+            add(default_id .. "_resolved")
+        end
+    end
+
+    add(explicit)
+    add(default_id)
+
+    return candidates
+end
+
+local function draw_actor_sprite(actor, default_id)
+    for _, id in ipairs(actor_sprite_candidates(actor, default_id)) do
+        local image = id and Assets.images[id]
+        if image then
+            local x, y, w, h = actor:tile_rect(TILE_SIZE)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.draw(image, x, y, 0, w / image:getWidth(), h / image:getHeight())
+            return true
+        end
+    end
+
+    return false
 end
 
 local function player_has_tool(player, tool)
@@ -120,6 +167,10 @@ local function tool_use_result(actor, player, defaults)
 end
 
 local function draw_pipe(actor)
+    if draw_actor_sprite(actor, "actor_pipe") then
+        return
+    end
+
     local x, y = actor:tile_rect(TILE_SIZE)
     set_color(COLORS.pipe)
     love.graphics.rectangle("fill", x + 4, y + 8, 24, 16)
@@ -131,6 +182,10 @@ local function draw_pipe(actor)
 end
 
 local function draw_crack(actor)
+    if draw_actor_sprite(actor, "actor_crack") then
+        return
+    end
+
     local x, y = actor:tile_rect(TILE_SIZE)
     set_color(COLORS.crack)
     love.graphics.rectangle("fill", x + 12, y + 4, 8, 24)
@@ -141,6 +196,10 @@ local function draw_crack(actor)
 end
 
 local function draw_message(actor)
+    if draw_actor_sprite(actor, "actor_hidden_wall_marker") then
+        return
+    end
+
     local x, y = actor:tile_rect(TILE_SIZE)
     set_color(COLORS.message)
     love.graphics.rectangle("fill", x + 8, y + 8, 16, 16)
@@ -148,6 +207,10 @@ end
 
 function Registry.register(actor_type, definition)
     Registry.definitions[actor_type] = definition
+end
+
+function Registry.has(actor_type)
+    return Registry.definitions[actor_type] ~= nil
 end
 
 function Registry.apply(actor)
