@@ -1,0 +1,229 @@
+{
+  "source": {
+    "repository": "https://github.com/rusticlion/IntoTheDreamlands.git",
+    "commit": "b8e4a35aa143728084ed97c8c1f7ab6d8b012f89"
+  },
+  "palette": {
+    "dark": "#222034",
+    "ink": "#f5f2ff",
+    "blood": "#e01f38"
+  },
+  "assets": [
+    {
+      "sprite": "spr_player_walkdown",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkup",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkleft",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkright",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkdown",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkup",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkleft",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkright",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_idle",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_idle",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_down",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_up",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_left",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_right",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_opening",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_crack",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_opening",
+      "frames": [2],
+      "output": "assets/sprites/overworld/actor_crack_resolved",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_skeleton",
+      "frames": [3],
+      "output": "assets/sprites/overworld/actor_crack_bone_demon_revealed",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_zombie",
+      "frames": [3],
+      "output": "assets/sprites/overworld/actor_crack_zombie_revealed",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_pipe_porthole",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_pipe",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_pipe_porthole_shovel",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_pipe_shovel",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_surgery_table",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_surgery_table",
+      "expected_size": [32, 48]
+    },
+    {
+      "sprite": "spr_bloody_table",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_bloody_table",
+      "expected_size": [32, 32]
+    },
+    {
+      "sprite": "spr_blood_buckets",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_blood_buckets",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_st_andrews_cross",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_st_andrews_cross",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_basement_door",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_basement_door",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_shovel",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_shovel",
+      "expected_size": [17, 16]
+    },
+    {
+      "sprite": "spr_key",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_rusty_key",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wrench",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_wrench",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_bolt_cutters",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_bolt_cutters",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_blindfold",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_blindfold",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_devils_brush",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_devils_brush",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_murderer",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_mad_butcher",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_demon_skull",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_bone_demon",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_blood_demon",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_blood_demon",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_demon_basement_bg",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_background",
+      "expected_size": [304, 384]
+    },
+    {
+      "sprite": "spr_demon_basement_actors",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_actor_layout",
+      "expected_size": [304, 384]
+    },
+    {
+      "sprite": "spr_demon_basement_mockup",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_mockup",
+      "expected_size": [304, 384]
+    }
+  ]
+}

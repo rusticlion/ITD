@@ -510,7 +510,7 @@ local function queue_entry_symbol(entry)
         return effect.symbol or Symbols.STRIKE
     elseif effect.type == "damage_opponent_part" then
         return Symbols.STRIKE
-    elseif effect.type == "heal_self" then
+    elseif effect.type == "heal_part" then
         return Symbols.BLOOD
     end
 
@@ -638,6 +638,13 @@ local function make_log_line(event, data)
         return string.format("%s feeds %s.", data.combatant.name, data.slot.name)
     elseif event == Events.SLOT_RESOLVED then
         return string.format("%s resolves %s.", data.combatant.name, data.slot.name)
+    elseif event == Events.SLOT_COST_CHANGED then
+        local verb = data.current_length < data.previous_length and "contracts" or "expands"
+        return string.format("%s %s to %d pip%s.",
+            data.slot.name,
+            verb,
+            data.current_length,
+            data.current_length == 1 and "" or "s")
     elseif event == Events.SPELLMARK_OPENED then
         return string.format("%s opens %s.", data.combatant.name, data.spellmark.name or "a spellmark")
     elseif event == Events.SPELLMARK_RESOLVED then
@@ -652,14 +659,72 @@ local function make_log_line(event, data)
     return nil
 end
 
+local function generated_seed()
+    local timer = love and love.timer and love.timer.getTime and love.timer.getTime() or 0
+    return math.floor((os.time() + timer * 100000) % 2147483647)
+end
+
+local function seeded_roller(seed)
+    if love and love.math and love.math.newRandomGenerator then
+        local generator = love.math.newRandomGenerator(seed)
+        return function(minimum, maximum)
+            return generator:random(minimum, maximum)
+        end
+    end
+
+    local state = seed % 2147483647
+    if state <= 0 then
+        state = 1
+    end
+    return function(minimum, maximum)
+        state = (state * 48271) % 2147483647
+        local span = maximum - minimum + 1
+        return minimum + (state % span)
+    end
+end
+
+local function apply_combatant_setup(combatant, setup)
+    if not (combatant and setup) then
+        return
+    end
+
+    if setup.heart_points then
+        combatant.heart_points = setup.heart_points
+    end
+
+    for part_id, status in pairs(setup.statuses or {}) do
+        local part = combatant:get_body_part_by_id(part_id)
+        if part then
+            part:set_status(status)
+        end
+    end
+
+    for part_id, indexes in pairs(setup.slot_charge or {}) do
+        local part = combatant:get_body_part_by_id(part_id)
+        if part then
+            part.slot_charge = {}
+            for _, index in ipairs(indexes or {}) do
+                part.slot_charge[tonumber(index) or index] = true
+            end
+        end
+    end
+end
+
 function V2Combat:enter(context)
     self.context = context or {}
     self.encounter_id = self.context.encounter_id
         or (self.context.encounter and self.context.encounter.encounter_id)
         or "debug.demo"
     self.context.encounter_id = self.encounter_id
-    self.engine = Engine:new()
+    self.seed = tonumber(self.context.seed) or generated_seed()
+    self.context.seed = self.seed
+    self.engine = Engine:new({
+        rng = seeded_roller(self.seed)
+    })
     self.player, self.enemy = Demo.create_combatants(self.context)
+    local setup = self.context.combat_setup or {}
+    apply_combatant_setup(self.player, setup.player)
+    apply_combatant_setup(self.enemy, setup.enemy)
     self.engine:add_combatant(self.player)
     self.engine:add_combatant(self.enemy)
 
@@ -684,6 +749,12 @@ function V2Combat:enter(context)
     self.event_visibility_context = nil
     self.returned_to_overworld = false
     self.log = {}
+    self.playtest_stats = {
+        slot_activation_count = 0,
+        slot_activations = {},
+        damage_events = 0,
+        healing_events = 0
+    }
     self.message = "Drag a die to a rim, socket, or hatch. C confirms."
     self.fonts = {
         title = new_ui_font(24),
@@ -702,6 +773,7 @@ function V2Combat:register_events()
         Events.CREST_EXPENDED,
         Events.SLOT_FED,
         Events.SLOT_RESOLVED,
+        Events.SLOT_COST_CHANGED,
         Events.SPELLMARK_OPENED,
         Events.SPELLMARK_RESOLVED,
         Events.LATCH_EJECTED,
@@ -726,8 +798,22 @@ function V2Combat:register_events()
     end
 
     self.engine:on(Events.SLOT_RESOLVED, function(data)
+        local slot_name = data.slot and (data.slot.name or data.slot.id) or "Slot"
+        self.playtest_stats.slot_activation_count = self.playtest_stats.slot_activation_count + 1
+        self.playtest_stats.slot_activations[slot_name] =
+            (self.playtest_stats.slot_activations[slot_name] or 0) + 1
         if self:should_log_event(Events.SLOT_RESOLVED, data) then
             self:show_slot_activation(data)
+        end
+    end)
+
+    self.engine:on(Events.DAMAGE_DEALT, function()
+        self.playtest_stats.damage_events = self.playtest_stats.damage_events + 1
+    end)
+
+    self.engine:on(Events.HEAL_APPLIED, function(data)
+        if not data.no_effect then
+            self.playtest_stats.healing_events = self.playtest_stats.healing_events + 1
         end
     end)
 end
@@ -1394,6 +1480,22 @@ function V2Combat:begin_combat_end()
         title = "You Lose"
     end
 
+    if self.context.designer_mode then
+        self.combat_end = {
+            result = result,
+            title = title,
+            elapsed = 0,
+            designer = true
+        }
+        self.playtest_summary = self:build_playtest_summary()
+        self.player_can_allocate = false
+        self.enemy_response_pending = false
+        self.selected_die = nil
+        self.drag = nil
+        self.message = "Playtest complete. R repeats this seed; Shift+R rolls a new seed."
+        return
+    end
+
     if result == "win" then
         self:begin_claim_ceremony(title)
         return
@@ -1414,6 +1516,9 @@ end
 
 function V2Combat:update_combat_end(dt)
     self.combat_end.elapsed = (self.combat_end.elapsed or 0) + (dt or 0)
+    if self.combat_end.designer then
+        return
+    end
     if self.combat_end.elapsed >= (self.combat_end.delay or COMBAT_END_RETURN_DELAY) then
         self:return_to_overworld()
     end
@@ -1438,6 +1543,86 @@ local function snapshot_parts(combatant)
         table.insert(parts, snapshot_part(part))
     end
     return parts
+end
+
+local function status_names(combatant, status)
+    local names = {}
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == status then
+            table.insert(names, part.name or part.id)
+        end
+    end
+    return names
+end
+
+function V2Combat:build_playtest_summary()
+    local stats = self.playtest_stats or {}
+    local slot_activations = {}
+    for name, count in pairs(stats.slot_activations or {}) do
+        table.insert(slot_activations, {
+            name = name,
+            count = count
+        })
+    end
+    table.sort(slot_activations, function(left, right)
+        return left.name < right.name
+    end)
+
+    local preserved = {}
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        if part.status ~= "maimed" then
+            table.insert(preserved, part.name or part.id)
+        end
+    end
+
+    return {
+        encounter_id = self.encounter_id,
+        scenario_id = self.context.designer_scenario_id,
+        seed = self.seed,
+        outcome = self:outcome(),
+        rounds = self.engine and self.engine.current_round or 0,
+        player_hearts = self.player and self.player.heart_points or 0,
+        enemy_hearts = self.enemy and self.enemy.heart_points or 0,
+        damage_events = stats.damage_events or 0,
+        healing_events = stats.healing_events or 0,
+        slot_activation_count = stats.slot_activation_count or 0,
+        slot_activations = slot_activations,
+        player_wounded = status_names(self.player, "wounded"),
+        player_maimed = status_names(self.player, "maimed"),
+        enemy_wounded = status_names(self.enemy, "wounded"),
+        enemy_maimed = status_names(self.enemy, "maimed"),
+        preserved_enemy_parts = preserved
+    }
+end
+
+function V2Combat:playtest_summary_text()
+    local summary = self.playtest_summary or self:build_playtest_summary()
+    local lines = {
+        string.format("%s | seed %s | %s", summary.encounter_id, summary.seed, summary.outcome),
+        string.format("Rounds %d | Hearts player %d / enemy %d",
+            summary.rounds,
+            summary.player_hearts,
+            summary.enemy_hearts),
+        string.format("Damage %d | Healing %d | Slot activations %d",
+            summary.damage_events,
+            summary.healing_events,
+            summary.slot_activation_count),
+        "Player maimed: " .. (#summary.player_maimed > 0 and table.concat(summary.player_maimed, ", ") or "none"),
+        "Enemy maimed: " .. (#summary.enemy_maimed > 0 and table.concat(summary.enemy_maimed, ", ") or "none"),
+        "Preserved prizes: " .. (#summary.preserved_enemy_parts > 0
+            and table.concat(summary.preserved_enemy_parts, ", ")
+            or "none")
+    }
+
+    if #summary.slot_activations > 0 then
+        local activations = {}
+        for _, entry in ipairs(summary.slot_activations) do
+            table.insert(activations, entry.name .. " x" .. tostring(entry.count))
+        end
+        table.insert(lines, "Slots: " .. table.concat(activations, ", "))
+    end
+
+    return table.concat(lines, "\n")
 end
 
 function V2Combat:outcome()
@@ -1486,6 +1671,8 @@ function V2Combat:build_combat_result(forced_outcome)
         type = "combat_result",
         outcome = outcome,
         encounter_id = self.encounter_id,
+        seed = self.seed,
+        playtest_summary = self.playtest_summary,
         player_parts = snapshot_parts(self.player),
         enemy_parts = snapshot_parts(self.enemy),
         claimable_parts = claimable_parts,
@@ -1504,6 +1691,8 @@ function V2Combat:return_to_overworld(forced_outcome)
     local result = self:build_combat_result(forced_outcome)
     if GameState.size and GameState.size() > 1 then
         GameState.pop(result)
+    elseif self.context.designer_mode then
+        GameState.switch(require("states.designer_lab"))
     else
         GameState.switch(require("states.overworld"))
     end
@@ -1649,7 +1838,11 @@ function V2Combat:active_die_preview_lines()
 
     local hover = self.hover
     local preview_destination = hover and is_destination_kind(hover.kind) and hover.kind or nil
-    local effective = self.engine:get_effective_symbols(self.player, die, preview_destination)
+    local effective = self.engine:get_effective_symbols(
+        self.player,
+        die,
+        preview_destination,
+        hover and hover.part)
     table.insert(lines, (self.drag and "Held: " or "Selected: ") .. Symbols.format_face(effective))
     table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
 
@@ -2247,6 +2440,16 @@ function V2Combat:keypressed(key)
         elseif key == "space" or key == "return" then
             self:claim_actionpressed("confirm")
         end
+    elseif self.combat_end and self.combat_end.designer and key == "r" then
+        if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then
+            self.context.seed = generated_seed()
+        end
+        self:enter(self.context)
+    elseif self.combat_end and self.combat_end.designer and key == "p" then
+        if love.system and love.system.setClipboardText then
+            love.system.setClipboardText(self:playtest_summary_text())
+            self.message = "Copied playtest summary."
+        end
     elseif self.combat_end and (key == "space" or key == "c" or key == "return" or key == "escape") then
         self:return_to_overworld()
     elseif key == "escape" then
@@ -2256,6 +2459,9 @@ function V2Combat:keypressed(key)
     elseif key == "c" or key == "return" then
         self:confirm_round()
     elseif key == "r" then
+        if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then
+            self.context.seed = generated_seed()
+        end
         self:enter(self.context)
     end
 end
@@ -2290,7 +2496,7 @@ function V2Combat:destination_preview(kind, part)
     end
 
     local valid = self:is_valid_destination(kind, part)
-    local effective = self.engine:get_effective_symbols(self.player, die, kind)
+    local effective = self.engine:get_effective_symbols(self.player, die, kind, part)
 
     if kind == "socket" then
         local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", part, effective)
@@ -2886,7 +3092,11 @@ function V2Combat:draw_auto_allocation_ghost()
     if sequence.visibility == "hidden" then
         draw_die_back(r, COLORS.enemy)
     else
-        local effective = self.engine:get_effective_symbols(sequence.combatant, current.die, current.kind)
+        local effective = self.engine:get_effective_symbols(
+            sequence.combatant,
+            current.die,
+            current.kind,
+            current.part)
         draw_die_face(effective, r, true)
     end
 end
@@ -3316,8 +3526,9 @@ function V2Combat:draw_combat_end_overlay()
 
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
-    local panel_w = 236
-    local panel_h = 94
+    local designer = self.combat_end.designer
+    local panel_w = designer and 470 or 236
+    local panel_h = designer and 252 or 94
     local panel = rect((width - panel_w) / 2, (height - panel_h) / 2, panel_w, panel_h)
     local color = COLORS.muted
 
@@ -3334,12 +3545,66 @@ function V2Combat:draw_combat_end_overlay()
     love.graphics.setFont(self.fonts.title)
     draw_text(self.combat_end.title, panel.x + 14, panel.y + 18, panel.w - 28, "center", color)
 
+    if designer then
+        love.graphics.setFont(self.fonts.small)
+        local summary = self.playtest_summary or self:build_playtest_summary()
+        local y = panel.y + 58
+        local lines = {
+            string.format("Seed %s  |  %d rounds  |  Hearts %d / %d",
+                tostring(summary.seed),
+                summary.rounds,
+                summary.player_hearts,
+                summary.enemy_hearts),
+            string.format("Damage %d  |  Healing %d  |  Slots %d",
+                summary.damage_events,
+                summary.healing_events,
+                summary.slot_activation_count),
+            "Player maimed: " .. (#summary.player_maimed > 0
+                and table.concat(summary.player_maimed, ", ")
+                or "none"),
+            "Enemy maimed: " .. (#summary.enemy_maimed > 0
+                and table.concat(summary.enemy_maimed, ", ")
+                or "none"),
+            "Preserved: " .. (#summary.preserved_enemy_parts > 0
+                and table.concat(summary.preserved_enemy_parts, ", ")
+                or "none")
+        }
+        for _, line in ipairs(lines) do
+            draw_text(line, panel.x + 22, y, panel.w - 44, "left", COLORS.ink)
+            y = y + 27
+        end
+        love.graphics.setFont(self.fonts.tiny)
+        draw_text("R same seed   Shift+R new seed   P copy summary   Esc return",
+            panel.x + 16, panel.y + panel.h - 30, panel.w - 32, "center", COLORS.muted)
+        return
+    end
+
     local remaining = math.max(0, (self.combat_end.delay or COMBAT_END_RETURN_DELAY) - (self.combat_end.elapsed or 0))
     local dots = string.rep(".", math.floor((self.combat_end.elapsed or 0) * 3) % 4)
     love.graphics.setFont(self.fonts.small)
     draw_text("Returning" .. dots, panel.x + 14, panel.y + 58, panel.w - 28, "center", COLORS.ink)
     love.graphics.setFont(self.fonts.tiny)
     draw_text(string.format("%.1fs", remaining), panel.x + 14, panel.y + 76, panel.w - 28, "center", COLORS.muted)
+end
+
+function V2Combat:draw_designer_hud()
+    if not self.context.designer_mode then
+        return
+    end
+
+    local width = love.graphics.getWidth()
+    local panel = rect(width - RAIL_WIDTH + 8, 8, RAIL_WIDTH - 16, 44)
+    draw_box(panel, { 0.02, 0.025, 0.04, 0.94 }, COLORS.selected, 4)
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text(
+        string.format("%s\nseed %s | R replay",
+            self.context.designer_scenario_name or self.encounter_id,
+            tostring(self.seed)),
+        panel.x + 6,
+        panel.y + 6,
+        panel.w - 12,
+        "center",
+        COLORS.ink)
 end
 
 function V2Combat:draw()
@@ -3383,6 +3648,7 @@ function V2Combat:draw()
 
     self:draw_global_spine()
     self:draw_inspector()
+    self:draw_designer_hud()
     self:draw_combat_end_overlay()
 end
 

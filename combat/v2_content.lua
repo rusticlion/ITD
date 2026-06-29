@@ -1,5 +1,7 @@
 local BodyPart = require("combat.bodypart")
 local Combatant = require("combat.combatant")
+local Crests = require("combat.crests")
+local Effects = require("combat.v2_effects")
 local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 
@@ -10,6 +12,10 @@ local VALID_TIMINGS = {
     on_hit = true,
     on_wound_maim = true,
     upkeep = true
+}
+
+local VALID_DYNAMIC_COSTS = {
+    opponent_damaged_parts = true
 }
 
 local PART_KEYWORDS = {
@@ -70,6 +76,7 @@ local function normalize_slot(slot)
     for _, symbol in ipairs(slot.cost or {}) do
         table.insert(normalized.cost, Symbols.normalize(symbol))
     end
+    normalized.base_cost = copy_table(normalized.cost)
 
     if Keywords.collection_has(normalized.keywords, "Hungry") or normalized.keyword == "Hungry" then
         normalized.hungry = true
@@ -77,6 +84,34 @@ local function normalize_slot(slot)
 
     normalized.timing = (normalized.timing or "spend"):lower()
     return normalized
+end
+
+local function validate_dynamic_cost(errors, slot_id, slot)
+    local rule = slot.dynamic_cost
+    if rule == nil then
+        return
+    end
+
+    if type(rule) ~= "table" then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost must be a table")
+        return
+    end
+
+    if not VALID_DYNAMIC_COSTS[rule.type] then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost has invalid type " .. tostring(rule.type))
+    end
+
+    local minimum = tonumber(rule.minimum or 1)
+    if not minimum or minimum < 1 or math.floor(minimum) ~= minimum then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.minimum must be a positive integer")
+    elseif type(slot.cost) == "table" and minimum > #slot.cost then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.minimum cannot exceed base cost")
+    end
+
+    local per_part = tonumber(rule.per_part or 1)
+    if not per_part or per_part < 1 or math.floor(per_part) ~= per_part then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.per_part must be a positive integer")
+    end
 end
 
 local function validate_keywords(errors, owner_id, source, allowed)
@@ -157,6 +192,8 @@ local function validate_slot(errors, slot_id, slot)
 
     validate_keywords(errors, "slot " .. tostring(slot_id), slot.keyword, SLOT_KEYWORDS)
     validate_keywords(errors, "slot " .. tostring(slot_id), slot.keywords, SLOT_KEYWORDS)
+    validate_dynamic_cost(errors, slot_id, slot)
+    Effects.validate(slot.effect or { type = "none" }, "slot " .. tostring(slot_id) .. ".effect", errors)
 end
 
 function Content.validate(definitions)
@@ -205,6 +242,10 @@ function Content.validate(definitions)
                     add_error(errors, "loadout " .. tostring(loadout_id) .. " references unknown part " .. tostring(part_id))
                 end
             end
+        end
+
+        for crest in pairs(loadout.crest_pool or {}) do
+            Crests.validate_name(errors, "loadout " .. tostring(loadout_id) .. ".crest_pool", crest)
         end
     end
 

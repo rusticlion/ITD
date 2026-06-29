@@ -139,17 +139,23 @@ function Player:hasItem(item)
     return self.inventory[item] == true
 end
 
-function Player:draw(tile_size)
+function Player:draw(tile_size, camera)
     local size = tile_size or 32
     local sprite_id = "player_idle_" .. tostring(self.facing or "down")
     local image = Assets.images[sprite_id] or Assets.images.player_idle_down
+    local draw_x = (self.render_x - 1) * size
+    local draw_y = (self.render_y - 1) * size
+    if camera and camera.snap_world then
+        draw_x = camera:snap_world(draw_x)
+        draw_y = camera:snap_world(draw_y)
+    end
 
     if image then
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.draw(
             image,
-            (self.render_x - 1) * size,
-            (self.render_y - 1) * size,
+            draw_x,
+            draw_y,
             0,
             size / image:getWidth(),
             size / image:getHeight()
@@ -160,8 +166,8 @@ function Player:draw(tile_size)
     love.graphics.setColor(0.7, 0.7, 1)
     love.graphics.rectangle(
         "fill",
-        (self.render_x - 1) * size + 8,
-        (self.render_y - 1) * size + 8,
+        draw_x + 8,
+        draw_y + 8,
         16,
         16
     )

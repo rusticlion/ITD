@@ -16,6 +16,7 @@ local Events = {
     SLOT_TRIGGERED = "slot_triggered",
     SLOT_RESOLVED = "slot_resolved",
     SLOT_CHARGE_VENTED = "slot_charge_vented",
+    SLOT_COST_CHANGED = "slot_cost_changed",
     SPELLMARK_OPENED = "spellmark_opened",
     SPELLMARK_RESOLVED = "spellmark_resolved",
     KEYWORD_TRIGGERED = "keyword_triggered",

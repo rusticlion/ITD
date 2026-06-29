@@ -95,19 +95,22 @@ Current runtime state: Tiled-style Lua tile layers render from embedded tilesets
 | `basement_floor_tile` | `32x32` | needed soon | May be authored at 16x16 and upscaled into a 32x32 tileset. |
 | `basement_wall_tile` | `32x32` | needed soon | Solid wall tile; collision is authored separately in Tiled. |
 | `basement_ground_detail_*` | `32x32` | optional | Non-colliding floor variation. |
-| `actor_crack` | `32x32` | needed soon | Shovel target / passage reveal marker. |
-| `actor_pipe` | `32x32` | needed soon | Drainage pipe actor. |
+| `actor_crack` | `16x16` source / `32x32` runtime | imported | Shovel target / passage reveal marker. Legacy variants include open and enemy-revealed states. |
+| `actor_pipe` | `16x16` source / `32x32` runtime | imported | Drainage pipe actor. `actor_pipe_shovel` preserves the item-present state. |
 | `actor_hidden_wall_marker` | `32x32` | needed soon | Early inspectable/dialog test marker. |
-| `player_idle_down` | `32x32` | needed soon | Current placeholder body occupies the center 16x16 of a 32x32 tile. |
-| `player_idle_up` | `32x32` | needed soon | Same footprint. |
-| `player_idle_left` | `32x32` | needed soon | Same footprint. |
-| `player_idle_right` | `32x32` | needed soon | Same footprint. |
-| `player_walk_down1`...`player_walk_down4` | `32x32` | later | 4-frame walk set if we go beyond placeholder movement. |
-| `player_walk_up1`...`player_walk_up4` | `32x32` | later | 4-frame walk set. |
-| `player_walk_left1`...`player_walk_left4` | `32x32` | later | 4-frame walk set. |
-| `player_walk_right1`...`player_walk_right4` | `32x32` | later | 4-frame walk set. |
+| `player_idle_down` | `16x16` source / `32x32` runtime | imported | Current player sprite, enlarged with nearest-neighbor rendering. |
+| `player_idle_up` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_idle_left` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_idle_right` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_walk_down1`...`player_walk_down4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_up1`...`player_walk_up4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_left1`...`player_walk_left4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_right1`...`player_walk_right4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
 
-Needed first: basement floor/wall tiles, `actor_crack`, `actor_pipe`, `actor_hidden_wall_marker`, and a four-direction player idle set.
+Imported legacy assets are curated through `tools/legacy_assets.json`; provenance
+and exact source frame IDs live in `assets/legacy/imported_assets.json`.
+
+Needed first: a compact Basement floor/wall tileset and `actor_hidden_wall_marker`.
 
 ---
 

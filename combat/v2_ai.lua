@@ -1,5 +1,6 @@
 local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
+local Effects = require("combat.v2_effects")
 
 local AI = {}
 
@@ -30,6 +31,9 @@ local PROFILES = {
             healthy = 0
         },
         defend_charged_slot_bonus = 6,
+        heal_wounded_slot_bonus = 30,
+        heal_maimed_slot_bonus = 36,
+        heal_healthy_slot_penalty = -60,
         preferred_slots = {}
     },
 
@@ -51,23 +55,29 @@ local PROFILES = {
         }
     },
 
-    doom_caster = {
+    bone_caster = {
         base = "balanced",
         weights = {
-            rim = 24,
-            socket = 16,
-            slot = 40
+            rim = 8,
+            socket = 44,
+            slot = 42
         },
         symbol_values = {
-            strike = 8,
-            ward = 7,
-            slot = 11
+            strike = 5,
+            ward = 10,
+            slot = 12
         },
-        fill_slot_bonus = 36,
-        charged_slot_bonus = 14,
+        fill_slot_bonus = 30,
+        charged_slot_bonus = 12,
         preferred_slots = {
-            speak_doom = 32,
-            ["Speak Doom"] = 32
+            speak_doom = 24,
+            ["Speak Doom"] = 24,
+            bonestorm = 24,
+            Bonestorm = 24
+        },
+        preferred_sockets = {
+            bone_demon_skull = 28,
+            bone_demon_rib_cage = 28
         },
         target_type_bonus = {
             HEAD = 8,
@@ -77,7 +87,42 @@ local PROFILES = {
             wounded = 8,
             healthy = 0
         },
-        defend_charged_slot_bonus = 14
+        defend_charged_slot_bonus = 16
+    },
+
+    mad_butcher = {
+        base = "aggressive",
+        weights = {
+            rim = 46,
+            socket = 4,
+            slot = 38
+        },
+        symbol_values = {
+            strike = 13,
+            ward = 4,
+            slot = 10
+        },
+        fill_slot_bonus = 20,
+        charged_slot_bonus = 8,
+        preferred_slots = {
+            sadism = 10,
+            Sadism = 10,
+            stitch_up = 26,
+            ["Stitch Up"] = 26,
+            regenerate = 4,
+            Regrowth = 4
+        },
+        target_status_bonus = {
+            wounded = 34,
+            healthy = 0
+        },
+        defend_status_bonus = {
+            wounded = 0,
+            healthy = 0
+        },
+        complete_idle_effect_penalty = -120,
+        matching_status_slot_bonus = 18,
+        heal_wounded_slot_bonus = 40
     }
 }
 
@@ -195,6 +240,98 @@ local function preferred_slot_bonus(profile, slot)
     return preferred[slot.id] or preferred[slot.name] or 0
 end
 
+local function preferred_socket_bonus(profile, part)
+    if not part then
+        return 0
+    end
+
+    local preferred = profile.preferred_sockets or {}
+    local slot = part.slot
+    return preferred[part.id]
+        or (slot and (preferred[slot.id] or preferred[slot.name]))
+        or 0
+end
+
+local function most_damaged_part(combatant)
+    local maimed = nil
+    local wounded = nil
+
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "maimed" then
+            maimed = maimed or part
+        elseif part.status == "wounded" then
+            wounded = wounded or part
+        end
+    end
+
+    return wounded or maimed
+end
+
+local function healing_target(combatant, source_part, effect)
+    local target_mode = effect.target or "most_damaged"
+    if target_mode == "source_part" then
+        return source_part
+    elseif target_mode == "part_type" then
+        local wanted = tostring(effect.target_type or ""):upper()
+        for _, part in ipairs(combatant and combatant.body_parts or {}) do
+            if tostring(part.type or ""):upper() == wanted and part.status ~= "maimed" then
+                return part
+            end
+        end
+        return nil
+    end
+    return most_damaged_part(combatant)
+end
+
+local function healing_effect_bonus(profile, combatant, source_part, effect, will_fill)
+    if Effects.normalize_type(effect) ~= "heal_part" then
+        return 0
+    end
+
+    local target_part = healing_target(combatant, source_part, effect)
+    local status = target_part and target_part.status or "healthy"
+
+    if status == "maimed" then
+        return profile.heal_maimed_slot_bonus or 0
+    elseif status == "wounded" then
+        return profile.heal_wounded_slot_bonus or 0
+    end
+
+    if will_fill then
+        return profile.complete_idle_effect_penalty or profile.heal_healthy_slot_penalty or 0
+    end
+    return 0
+end
+
+local function status_effect_bonus(engine, profile, combatant, effect, will_fill)
+    if Effects.normalize_type(effect) ~= "add_symbol_against_status" then
+        return 0
+    end
+
+    local opponent = engine and engine:get_opponent(combatant)
+    local wanted = tostring(effect.target_status or "wounded"):lower()
+    local matches = 0
+    for _, part in ipairs(opponent and opponent.body_parts or {}) do
+        if tostring(part.status or ""):lower() == wanted then
+            matches = matches + 1
+        end
+    end
+
+    if matches == 0 and will_fill then
+        return profile.complete_idle_effect_penalty or 0
+    end
+    return matches * (profile.matching_status_slot_bonus or 0)
+end
+
+local function slot_effect_bonus(engine, profile, combatant, part, will_fill)
+    local total = 0
+    for _, effect in ipairs(Effects.actions(part and part.slot and part.slot.effect or {})) do
+        total = total + healing_effect_bonus(profile, combatant, part, effect, will_fill)
+        total = total + status_effect_bonus(engine, profile, combatant, effect, will_fill)
+    end
+    return total
+end
+
 local function score_rim(profile, symbols, target)
     local strikes = Symbols.count(symbols, Symbols.STRIKE)
     if strikes <= 0 then
@@ -221,9 +358,10 @@ local function score_socket(profile, symbols, part)
         + wards * (values.ward or 0)
         + part_status_bonus(profile.defend_status_bonus, part)
         + slot_charge_count(part) * (profile.defend_charged_slot_bonus or 0)
+        + preferred_socket_bonus(profile, part)
 end
 
-local function score_slot(profile, symbols, part)
+local function score_slot(engine, profile, combatant, symbols, part)
     local lit_count, remaining_before = slot_feed_match_count(part, symbols)
     if lit_count <= 0 then
         return nil
@@ -231,12 +369,14 @@ local function score_slot(profile, symbols, part)
 
     local weights = profile.weights or {}
     local values = profile.symbol_values or {}
+    local will_fill = remaining_before > 0 and lit_count >= remaining_before
     local score = (weights.slot or 0)
         + lit_count * (values.slot or 0)
         + slot_charge_count(part) * (profile.charged_slot_bonus or 0)
         + preferred_slot_bonus(profile, part and part.slot)
+        + slot_effect_bonus(engine, profile, combatant, part, will_fill)
 
-    if remaining_before > 0 and lit_count >= remaining_before then
+    if will_fill then
         score = score + (profile.fill_slot_bonus or 0)
     end
 
@@ -258,8 +398,6 @@ end
 local function score_die_moves(engine, combatant, die, profile)
     local destinations = engine:get_valid_destinations(combatant, die)
     local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
-    local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
-    local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
     local best = nil
 
     for _, part in ipairs(destinations.slots or {}) do
@@ -267,11 +405,12 @@ local function score_die_moves(engine, combatant, die, profile)
             kind = "slot",
             die = die,
             part = part,
-            score = score_slot(profile, slot_symbols, part)
+            score = score_slot(engine, profile, combatant, slot_symbols, part)
         })
     end
 
     for _, part in ipairs(destinations.rims or {}) do
+        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim", part)
         best = consider(best, {
             kind = "rim",
             die = die,
@@ -281,6 +420,7 @@ local function score_die_moves(engine, combatant, die, profile)
     end
 
     for _, part in ipairs(destinations.sockets or {}) do
+        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket", part)
         best = consider(best, {
             kind = "socket",
             die = die,
@@ -320,19 +460,18 @@ function AI.choose_next_allocation(engine, combatant)
     for _, die in ipairs(engine:get_pool(combatant)) do
         local destinations = engine:get_valid_destinations(combatant, die)
         local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
-        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
-        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
 
         for _, part in ipairs(destinations.slots or {}) do
             best = consider(best, {
                 kind = "slot",
                 die = die,
                 part = part,
-                score = score_slot(profile, slot_symbols, part)
+                score = score_slot(engine, profile, combatant, slot_symbols, part)
             })
         end
 
         for _, part in ipairs(destinations.rims or {}) do
+            local rim_symbols = engine:get_effective_symbols(combatant, die, "rim", part)
             best = consider(best, {
                 kind = "rim",
                 die = die,
@@ -342,6 +481,7 @@ function AI.choose_next_allocation(engine, combatant)
         end
 
         for _, part in ipairs(destinations.sockets or {}) do
+            local socket_symbols = engine:get_effective_symbols(combatant, die, "socket", part)
             best = consider(best, {
                 kind = "socket",
                 die = die,

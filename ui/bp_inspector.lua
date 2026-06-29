@@ -1,3 +1,4 @@
+local Effects = require("combat.v2_effects")
 local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
@@ -46,30 +47,6 @@ local function title_case(value)
     return (text:gsub("^%l", string.upper))
 end
 
-local function format_target(value)
-    local text = tostring(value or "target")
-    if text == "self" then
-        return "each allied"
-    elseif text == "opponent" or text == "enemy" then
-        return "each opposing"
-    end
-
-    return text
-end
-
-local function format_destination(value)
-    local text = tostring(value or "destination")
-    if text == "socket" then
-        return "socket"
-    elseif text == "rim" then
-        return "rim"
-    elseif text == "slot" then
-        return "slot"
-    end
-
-    return text
-end
-
 local function slot_cost_text(slot, part)
     local cost = slot and slot.cost or {}
     if Keywords.slot_is_hungry(part, slot) then
@@ -81,41 +58,16 @@ local function slot_cost_text(slot, part)
     return Symbols.format_face(cost)
 end
 
+local function slot_cost_line(slot, part)
+    local current = slot_cost_text(slot, part)
+    if slot and slot.dynamic_cost and slot.base_cost and #slot.base_cost ~= #(slot.cost or {}) then
+        return current .. " (base " .. Symbols.format_face(slot.base_cost) .. ")"
+    end
+    return current
+end
+
 function BPInspector.slot_effect_text(effect)
-    if type(effect) ~= "table" then
-        return "No effect recorded."
-    end
-
-    local amount = tonumber(effect.amount) or 1
-    local symbol = effect.symbol and Symbols.display(effect.symbol)
-
-    if effect.type == "add_next_symbol" then
-        return "Next die gains " .. tostring(symbol or "a symbol") .. "."
-    elseif effect.type == "heal_self" then
-        if amount == 1 then
-            return "Heals this Body Part one step."
-        end
-        return "Heals this Body Part " .. tostring(amount) .. " steps."
-    elseif effect.type == "damage_opponent_part" then
-        local target = effect.target_type and tostring(effect.target_type):upper() or "a Body Part"
-        if amount == 1 then
-            return "Damages the opponent's " .. target .. " one step."
-        end
-        return "Damages the opponent's " .. target .. " " .. tostring(amount) .. " steps."
-    elseif effect.type == "assign_symbol_to_each_part" then
-        return "Assigns "
-            .. tostring(symbol or "a symbol")
-            .. " to "
-            .. format_target(effect.target)
-            .. " Body Part's "
-            .. format_destination(effect.destination)
-            .. "."
-    elseif effect.type == "add_symbol_to_matching_dice" then
-        local match = effect.match and Symbols.display(effect.match) or "matching"
-        return "Dice showing " .. tostring(match) .. " gain " .. tostring(symbol or "a symbol") .. "."
-    end
-
-    return "Effect: " .. tostring(effect.type or "unknown") .. "."
+    return Effects.describe(effect)
 end
 
 function BPInspector.slot_lines(slot, part)
@@ -125,7 +77,7 @@ function BPInspector.slot_lines(slot, part)
 
     local lines = {
         "Slot: " .. tostring(slot.name or slot.id or "Unnamed"),
-        "Cost: " .. slot_cost_text(slot, part),
+        "Cost: " .. slot_cost_line(slot, part),
         "Timing: " .. title_case(slot.timing or "spend"),
         "Effect: " .. BPInspector.slot_effect_text(slot.effect)
     }
@@ -156,7 +108,7 @@ function BPInspector.part_lines(part, options)
 
     if part.slot then
         table.insert(lines, "Slot: " .. tostring(part.slot.name or part.slot.id or "Unnamed"))
-        table.insert(lines, "Cost: " .. slot_cost_text(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
+        table.insert(lines, "Cost: " .. slot_cost_line(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
         table.insert(lines, "Effect: " .. BPInspector.slot_effect_text(part.slot.effect))
     else
         table.insert(lines, "Slot: none")

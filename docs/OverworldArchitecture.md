@@ -7,12 +7,26 @@
 ## 1. Locked Baseline
 
 - The game uses a **960x540 logical canvas** across overworld and combat.
-- Overworld maps use **32x32 logical tiles**.
+- Overworld maps use **32x32 logical tiles** for authoring, collision, movement, and interaction.
 - Most overworld art may be authored at **16x16 source resolution and upscaled 2x**, but direct 32x32 authoring is allowed when it reads better.
 - Player movement is **tile-stepped with smooth interpolation**: collision and interaction reason in tile coordinates; presentation eases between tiles.
 - Level art flow is **Aseprite mockup -> Tiled composition -> Lua runtime import**.
 
-The goal is one stable visual grid and one stable camera/canvas contract. Combat already targets 960x540, so overworld should not invent a second resolution regime.
+The overworld camera has three discrete render scales:
+
+| Mode | Camera scale | Screen pixels per logical tile | Visible world footprint at 960x540 |
+|---|---:|---:|---:|
+| `wide` | 0.5x | 16x16 | 1920x1080, or 60x33.75 tiles |
+| `standard` | 1x | 32x32 | 960x540, or 30x16.875 tiles |
+| `close` | 1.5x | 48x48 | 640x360, or 20x11.25 tiles |
+
+These are presentation modes, not alternate map grids. A player remains one
+logical tile tall in every mode. Menus, dialog, HUD, and combat always render at
+the full 960x540 canvas and are never scaled with the overworld.
+
+Camera scale changes are authored cuts. Do not animate continuously through
+fractional scales; conceal changes with room transitions, blackouts, flickers,
+doors, or other scene punctuation.
 
 ---
 
@@ -50,6 +64,29 @@ Use a small, predictable layer vocabulary:
 - `collision`: explicit collision data when tile solidity is not expressive enough.
 
 Actors and low props that share floor space should draw by `sort_y` so the player can stand naturally in front of or behind them.
+
+---
+
+## 3.1 Camera Authoring
+
+Rooms may set `camera_zoom` to `wide`, `standard`, or `close`. If omitted, the
+room uses `standard`.
+
+Objects on the `regions` layer with `type = camera_zone` may override the room:
+
+- `camera_zoom`: `wide`, `standard`, or `close`.
+- `priority`: numeric; higher-priority overlapping zones win.
+- `camera_bounds`: boolean. When true, the zone rectangle also becomes the
+  camera's movement bounds. If the bounds are smaller than the active viewport,
+  they are centered in the frame.
+
+Camera positions and moving actor positions are snapped so the final screen
+translation lands on integer pixels at all three scales.
+
+Debug authoring controls:
+
+- `F2`: cycle authored framing -> wide -> standard -> close.
+- `F3`: toggle the actual clamped world-space frames for all three viewport modes.
 
 ---
 
@@ -170,7 +207,7 @@ run = {
     parts = {
         part_inst_dreamer_head = { def_id = "dreamer_head" },
         part_inst_dreamer_body = { def_id = "dreamer_body" },
-        part_inst_bone_demon_claw = { def_id = "bone_demon_right_claw", claimed_from = "basement.bone_demon" }
+        part_inst_bone_demon_arm = { def_id = "bone_demon_right_bare_bones", claimed_from = "basement.bone_demon" }
     }
 }
 ```
@@ -184,9 +221,9 @@ Combat entry should receive an `encounter_id` plus the current `dreamform`. Comb
     player_parts = { ... }, -- current combat-exit statuses before recovery
     claimable_parts = {
         { def_id = "bone_demon_skull", status = "wounded" },
-        { def_id = "bone_demon_right_claw", status = "healthy" }
+        { def_id = "bone_demon_right_bare_bones", status = "healthy" }
     },
-    claimed_part = { def_id = "bone_demon_right_claw" }, -- nil if skipped
+    claimed_part = { def_id = "bone_demon_right_bare_bones" }, -- nil if skipped
     claimed_slot = "arm_r",
     replaced_part = { def_id = "dreamer_right_arm" }
 }

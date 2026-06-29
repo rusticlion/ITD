@@ -1,6 +1,8 @@
 local Player = require("systems.player")
 local Room = require("systems.room")
+local Catalog = require("systems.bodypart_catalog")
 local Save = require("core.save")
+local OverworldCamera = require("systems.overworld_camera")
 
 local World = {}
 World.__index = World
@@ -32,10 +34,6 @@ local DREAMFORM_SLOT_TYPES = {
     leg_r = "LEG"
 }
 local DREAMFORM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
-
-local function clamp(value, min_value, max_value)
-    return math.max(min_value, math.min(max_value, value))
-end
 
 local function copy_table(source)
     if type(source) ~= "table" then
@@ -131,7 +129,10 @@ function World.new(options)
     options = options or {}
     local save_data = copy_table(options.save or {})
     local saved_run = copy_table(save_data.run or {})
-    local saved_player = saved_run.player or {}
+    local saved_player = copy_table(options.player
+        or (options.run and options.run.player)
+        or saved_run.player
+        or {})
     local world = {
         room_module = options.room or saved_run.current_room or DEFAULT_ROOM,
         player = Player.new(options.player_x or saved_player.x or 5, options.player_y or saved_player.y or 5),
@@ -149,7 +150,7 @@ function World.new(options)
         last_save_error = nil,
         message = nil,
         message_timer = 0,
-        camera = { x = 0, y = 0 }
+        camera = OverworldCamera.new()
     }
 
     setmetatable(world, World)
@@ -169,6 +170,28 @@ function World:load_room(room_module)
     self.room_module = room_module
     self.run.current_room = room_module
     self.room = Room.new(room_module, self)
+    self:update_camera()
+end
+
+function World:reload_room()
+    local room_module = self.room_module
+    local player_state = self:player_save_data()
+    if type(room_module) == "string" then
+        package.loaded[room_module] = nil
+    end
+
+    self:load_room(room_module)
+    self.player.x = player_state.x
+    self.player.y = player_state.y
+    self.player.render_x = player_state.x
+    self.player.render_y = player_state.y
+    self.player.move_from_x = player_state.x
+    self.player.move_from_y = player_state.y
+    self.player.move_to_x = player_state.x
+    self.player.move_to_y = player_state.y
+    self.player.moving = false
+    self:apply_player_state(player_state)
+    self:update_camera()
 end
 
 function World:player_save_data()
@@ -241,23 +264,26 @@ function World:update_camera()
         return
     end
 
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
-    local map_width = self.room.width * self.room.tile_size
-    local map_height = self.room.height * self.room.tile_size
     local px, py = self.player:pixel_position(self.room.tile_size)
-
-    self.camera.x = clamp(px - width / 2, 0, math.max(0, map_width - width))
-    self.camera.y = clamp(py - height / 2, 0, math.max(0, map_height - height))
+    self.camera:update(
+        self.room,
+        px,
+        py,
+        love.graphics.getWidth(),
+        love.graphics.getHeight())
 end
 
 function World:draw()
-    love.graphics.push()
-    love.graphics.translate(-math.floor(self.camera.x), -math.floor(self.camera.y))
+    self.camera:attach()
     if self.room then
         self.room:draw(self)
     end
-    love.graphics.pop()
+    local px, py = self.player:pixel_position(self.room and self.room.tile_size or 32)
+    self.camera:draw_world_guides(self.room, px, py)
+    if self.debug_overlay and self.room and self.room.draw_debug_overlay then
+        self.room:draw_debug_overlay(self)
+    end
+    self.camera:detach()
 
     self:draw_hud()
 end
@@ -278,6 +304,14 @@ function World:draw_hud()
         love.graphics.rectangle("line", 16, height - box_height - 16, width - 32, box_height, 4, 4)
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.printf(self.message, 28, height - box_height, width - 56, "left")
+    end
+
+    if self.camera and self.camera.show_guides then
+        local label = self.camera:debug_label()
+        love.graphics.setColor(0.04, 0.04, 0.07, 0.9)
+        love.graphics.rectangle("fill", love.graphics.getWidth() - 238, 10, 228, 24, 3, 3)
+        love.graphics.setColor(0.9, 0.89, 0.98, 1)
+        love.graphics.printf(label, love.graphics.getWidth() - 232, 16, 216, "center")
     end
 end
 
@@ -308,14 +342,9 @@ function World:has_equipped_bp_tag(tag)
         return false
     end
 
-    local ok, definitions = pcall(require, "data.combat.v2_demo_parts")
-    if not ok or not definitions.parts then
-        return false
-    end
-
     for _, instance_id in pairs(self.run.dreamform or {}) do
         local instance = self.run.parts and self.run.parts[instance_id]
-        local part_def = instance and definitions.parts[instance.def_id]
+        local part_def = instance and Catalog.part_definition(instance.def_id)
         for _, existing in ipairs((part_def and part_def.tags) or instance and instance.tags or {}) do
             if existing == tag then
                 return true
@@ -639,6 +668,16 @@ function World:actionpressed(action)
 end
 
 function World:keypressed(key)
+    if key == "f2" and self.camera then
+        local override = self.camera:cycle_debug_override()
+        self:update_camera()
+        self:set_message(override and ("Camera override: " .. override) or "Camera override cleared.")
+        return
+    elseif key == "f3" and self.camera then
+        self.camera:toggle_guides()
+        return
+    end
+
     if key == "space" or key == "return" then
         self:interact()
         return

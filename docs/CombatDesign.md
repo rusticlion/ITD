@@ -95,9 +95,18 @@ Authoring rules:
 - A part's `slot` may be a key into `slots` or an inline slot table.
 - Hungry slots still author a `cost` list to define track length, but display and resolve those pips as wildcards. Author as `hungry = true` or `keywords = { "Hungry" }`.
 - A loadout's `parts` order is also its first-pass panel order in the current UI prototype. The UI reserves six fixed card slots per combatant.
-- Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, and loadouts pointing at unknown parts.
+- Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, unknown effect payloads, unknown crest names, and loadouts pointing at unknown parts.
 
-The first live example is `data/combat/v2_demo_parts.lua`. Keep it intentionally tiny: it exists to validate the pattern, not to balance real content.
+The current live alpha content starts in `data/combat/alpha_basement.lua`, with `data/combat/content_index.lua` listing modules that should be treated as authored game content. `data/combat/v2_demo_parts.lua` remains a useful fixture/sandbox bucket; don't treat it as the canonical alpha loop.
+
+Combat entry points resolve through `data/combat/encounters.lua`: each encounter names a content module plus player/enemy loadouts. Existing debug IDs can remain as aliases while room content moves toward namespaced IDs like `basement.bone_demon`.
+
+Launch a catalog encounter directly while iterating with:
+
+```sh
+love . --encounter=basement.zombie
+love . --encounter=basement.mad_butcher
+```
 
 ---
 
@@ -111,6 +120,8 @@ The first live example is `data/combat/v2_demo_parts.lua`. Keep it intentionally
 
 ### 4.1 Damage
 A part is **hit** when assigned 🗡️ > assigned 🛡️ on that part. A hit advances status one step. Margin of overkill has no additional effect (open question — see §10).
+
+Resolution counts 🗡️/🛡️ from an assignment's full effective face (`assignment.symbols`). `used_symbols` and `burned_symbols` classify destination relevance for affordances, animation, and spellmarks; they are not a second combat tally. Thus an Essence-only die accepted by a rim spellmark is visibly used by the mark but contributes zero 🗡️ pressure.
 
 ---
 
@@ -144,14 +155,17 @@ A slot is: **a name + a cost track of symbol pips + an effect + a timing window.
 - **Venting:** wounding a part shatters all charge on its slot (slot remains operational).
 - **Offline:** maiming a part disables its slot entirely. Wound *robs*; maim *disables*.
 - All charge resets between combats.
+- A slot may declare a structured `dynamic_cost`. The first prototype rule, `opponent_damaged_parts`, shortens the active track at Upkeep for each Wounded or Maimed opposing part, down to its authored minimum. Banked charge persists. If contraction completes the active track, mandatory trigger fires immediately.
 
 Banked charge is self-balancing: it paints a target (the battery demands a socket every round) while the attacker allocates with that knowledge. Turtling taxes itself.
 
 ### 6.3 Timing Windows
 Every slot declares exactly one: **Spend** (fires immediately during Allocation), **On Hit**, **On Wound/Maim**, **Upkeep**. The engine exposes exactly these four hooks. Allocation is a sequence of committed moves, not a draft to be rewound; immediate Spend effects are allowed to modify the remaining allocation state (rerolls, symbol changes, next-die bonuses, sealed destinations, etc.).
 
+Reactive timing is local to the Slot's Body Part. A filled On-Hit Slot arms during Allocation and resolves only after that part suffers a contested hit. Its On-Wound/Maim entries then resolve against the same completed damage event. Other parts' armed entries remain queued. Trigger context includes the attack, defense, symbol counts, attacker/target, and resulting status change.
+
 ### 6.4 Queue
-Filled slots enqueue in fill order and resolve FIFO within their window. Deliberately untutorialized — discoverable through the queue ticker.
+Filled slots enqueue in fill order and resolve FIFO within their window. Part-scoped reactive windows preserve FIFO among entries armed on that part without draining matching entries elsewhere. Deliberately untutorialized — discoverable through the queue ticker.
 
 ### 6.5 Example Slots
 - **Bloodlust** — 🗡️🗡️🗡️ · Spend · This round's attacks from this combatant gain Brutal.
@@ -185,7 +199,9 @@ Current structured effect types:
 - `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`.
 - `assign_symbol_to_each_part` — create virtual assignments on every open matching destination, e.g. a Force Field that assigns one 🛡️ to each unwarded friendly socket.
 - `open_spellmark` — temporarily alters existing rims or sockets to accept Essence; the first matching Essence assignment marks that part and resolves an `on_mark` payload.
-- `heal_self`, `damage_opponent_part`, `gain_crest` — early prototype utility effects.
+- `heal_part` — heal the Slot's `source_part`, the combatant's `most_damaged` part, or an allied `part_type`.
+- `add_symbol_against_status` — dice showing `match` gain `symbol` when assigned to a destination on a Healthy or Wounded target. The target is part of symbol evaluation, so previews, validity, AI scoring, and resolution all see the same effective face.
+- `damage_opponent_part`, `gain_crest` — early prototype utility effects.
 
 This vocabulary intentionally models magical conversion as visible added symbols rather than hidden “counts as” state. Essence remains Essence; a Slot can temporarily make Essence dice carry extra tactical weight.
 
@@ -240,6 +256,29 @@ The system must support two coherent archetypes, each demanding different dice, 
 - **Wide** — chip wounds across many parts; gunk the opponent's entire pool with 🩸; win the symbol economy. Counterplay: Brace, healing, fast aggression.
 
 Head-punching is kept honest not by toughness stats but by: the one-die-per-destination cap, asymmetric part value across enemies (the scary die on a 1-Heart arm forces the disarm-vs-race fork), venting (wounding *any* charged part steals tempo), and wide play's pool-degradation payoff.
+
+The Basement Zombie is the first explicit route-versus-reward example. Its 3-Heart Brain Pan offers a two-hit victory, but maiming it destroys the most desirable claim. Every other part carries **Regrowth** (🩸 · Spend · heal this part one step), while the preserved head spends 🩸🩸 on **Bite** to add 🗡️🗡️ to its next assigned die. The hard kill therefore preserves the prize while giving the Zombie more time and Blood with which to threaten the player.
+
+The Basement Bone Demon establishes an early **caster** identity: dice are ingredients before they are direct actions. Its **Demon Skull** feeds ⚡ into **Speak Doom**, while its 2-Heart **Hollow Ribcage** feeds 🗡️ into **Bonestorm**, which assigns one 🗡️ to every open opposing rim. Ward faces take priority over either ritual and defend these two batteries; only surplus fuel becomes direct offense. This creates two visible charge threats and asks the player which one to vent, while the Demon spends much of its pool building and protecting future turns.
+
+AI contract for this encounter:
+
+1. Assign 🛡️ to sockets, prioritizing the Demon Skull and Hollow Ribcage.
+2. Feed ⚡ to Speak Doom.
+3. Feed 🗡️ to Bonestorm.
+4. Use remaining legal dice for direct attacks or broader defense.
+
+The Basement Mad Butcher is a boss-shaped route puzzle built around persistent Head pressure. His 3-Heart **Welding Mask** is both the immediate victory target and the prize the player gives up by taking that route. His 1-Heart **Broad Shoulders** spend 🩸🩸 on **Stitch Up**, healing the allied Head rather than the Body carrying the Slot. The two 1-Heart arms carry concentrated multi-🗡️ faces, while his legs literally reuse the Zombie's Regrowth parts.
+
+**Sadism** begins as a four-🗡️ track. At each Upkeep it costs one fewer pip per damaged opposing Body Part, minimum one. When it fires, dice already showing 🗡️ gain another 🗡️ against Wounded opposing parts for that round. This makes the player's accumulating wounds both the timer and the payoff: spreading damage accelerates the threat, while focused arm attacks convert existing wounds into maims.
+
+The intended routes are:
+
+1. Maim Broad Shoulders, then the Welding Mask for the fast kill; the Head prize is destroyed.
+2. Maim Broad Shoulders and two 1-Heart limbs for the slower hard kill; the Welding Mask remains claimable.
+3. Pressure the Head without disabling Broad Shoulders and risk watching that progress repaired.
+
+Mad Butcher AI should repair a Wounded Head first, bank but not waste Sadism when no target is Wounded, attack Wounded parts with concentrated Arm dice, and use Regrowth only after Head survival is handled. He has little interest in Ward.
 
 ---
 

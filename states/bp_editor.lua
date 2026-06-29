@@ -1,4 +1,7 @@
 local GameState = require("core.gamestate")
+local Crests = require("combat.crests")
+local Content = require("combat.v2_content")
+local Effects = require("combat.v2_effects")
 local Symbols = require("core.symbols")
 
 local BPEditor = {}
@@ -6,38 +9,14 @@ BPEditor.__index = BPEditor
 
 local TYPES = { "HEAD", "BODY", "ARM", "LEG" }
 local TIMINGS = { "spend", "on_hit", "on_wound_maim", "upkeep" }
-local EFFECT_TYPES = {
-    "none",
-    "add_next_symbol",
-    "channel_symbol",
-    "assign_symbol_to_each_part",
-    "heal_self",
-    "damage_opponent_part",
-    "gain_crest"
-}
-local EFFECT_LABELS = {
-    none = "none",
-    add_next_symbol = "next",
-    channel_symbol = "channel",
-    assign_symbol_to_each_part = "auto assign",
-    heal_self = "heal",
-    damage_opponent_part = "damage BP",
-    gain_crest = "crest"
-}
-local SUPPORTED_EFFECT_TYPES = {
-    none = true,
-    add_next_symbol = true,
-    add_symbol_to_matching_dice = true,
-    channel_symbol = true,
-    assign_symbol_to_each_part = true,
-    auto_assign_symbol = true,
-    heal_self = true,
-    damage_opponent_part = true,
-    gain_crest = true
-}
+local EFFECT_TYPES = Effects.EDITOR_ORDER
+local EFFECT_LABELS = Effects.EDITOR_LABELS
 local DESTINATIONS = { "any", "socket", "rim", "slot" }
 local ASSIGN_DESTINATIONS = { "socket", "rim" }
 local TARGET_SIDES = { "self", "opponent" }
+local HEAL_TARGETS = { "most_damaged", "source_part", "part_type" }
+local TARGET_STATUSES = { "healthy", "wounded" }
+local SPELLMARK_TARGET_TYPES = { "ANY", "HEAD", "BODY", "ARM", "LEG" }
 local SYMBOLS = {
     { id = Symbols.STRIKE, label = "ATK" },
     { id = Symbols.WARD, label = "DEF" },
@@ -47,6 +26,8 @@ local SYMBOLS = {
 }
 local BODY_PART_NAME_LIMIT = 15
 local SLOT_NAME_LIMIT = 9
+local LIST_VISIBLE_ROWS = 15
+local LIST_ROW_HEIGHT = 25
 
 local COLORS = {
     bg = { 0.93, 0.92, 0.88, 1 },
@@ -65,6 +46,10 @@ end
 
 local function point_in_rect(x, y, r)
     return r and x >= r.x and x <= r.x + r.w and y >= r.y and y <= r.y + r.h
+end
+
+local function clamp(value, min_value, max_value)
+    return math.max(min_value, math.min(max_value, value))
 end
 
 local function set_color(color)
@@ -219,6 +204,8 @@ function BPEditor:enter()
     self.part_order = {}
     self.source_slots = {}
     self.search = ""
+    self.list_scroll = 0
+    self.list_rect = nil
     self.active_field = nil
     self.selected_face = 1
     self.message = "Select a Body Part, edit fields, then copy Lua or note text."
@@ -336,15 +323,19 @@ function BPEditor:part_to_form(part, slots)
     end
 
     local effect = slot and slot.effect or {}
-    local effect_type = effect.type or "none"
+    local effect_type = Effects.editor_type(effect)
     if is_sequence_effect(effect) then
         effect_type = "custom_sequence"
-    elseif effect_type == "add_symbol_to_matching_dice" then
-        effect_type = "channel_symbol"
-    elseif effect_type == "auto_assign_symbol" then
-        effect_type = "assign_symbol_to_each_part"
-    elseif not SUPPORTED_EFFECT_TYPES[effect_type] then
+    elseif not Effects.is_known(effect) then
         effect_type = "custom_effect"
+    end
+
+    local payload = effect.on_mark or effect.payload or effect.effect or {}
+    local default_symbol = effect_type == "open_spellmark" and Symbols.ESSENCE or Symbols.STRIKE
+    local effect_destination = effect.destination or (effect_type == "open_spellmark" and "rim" or "any")
+    local target_side = effect.target or effect.target_side
+    if not target_side and effect_type == "open_spellmark" then
+        target_side = effect_destination == "rim" and "opponent" or "self"
     end
 
     return {
@@ -366,17 +357,21 @@ function BPEditor:part_to_form(part, slots)
         slot_id = slot and (slot.id or "") or "",
         slot_name = slot and (slot.name or "") or "",
         slot_cost = clone(slot and slot.cost or {}),
+        slot_dynamic_cost = clone(slot and slot.dynamic_cost),
         slot_timing = slot and (slot.timing or "spend") or "spend",
         effect_type = effect_type,
         raw_effect = clone(effect),
-        effect_symbol = effect.symbol or Symbols.STRIKE,
+        effect_symbol = effect.symbol or effect.accept_symbol or default_symbol,
         effect_match_symbol = effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE,
-        effect_destination = effect.destination or "any",
-        effect_assign_destination = effect.destination or "socket",
-        effect_target_side = effect.target or effect.target_side or "self",
+        effect_destination = effect_destination,
+        effect_assign_destination = effect.destination or (effect_type == "open_spellmark" and "rim" or "socket"),
+        effect_target_side = target_side or "self",
+        effect_heal_target = effect.target or "most_damaged",
+        effect_target_status = effect.target_status or "wounded",
         effect_crest = effect.crest or "Valor",
-        effect_target_type = effect.target_type or "HEAD",
-        effect_amount = tostring(effect.amount or 1)
+        effect_target_type = effect_type == "open_spellmark" and (effect.target_type or effect.part_type or "ANY")
+            or (effect.target_type or "HEAD"),
+        effect_amount = tostring(effect.amount or payload.amount or 1)
     }
 end
 
@@ -386,18 +381,30 @@ function BPEditor:filtered_parts()
     for _, key in ipairs(self.part_order) do
         local entry = self.parts[key]
         local part = entry and entry.part or {}
+        local slot = type(part.slot) == "string" and entry and entry.slots and entry.slots[part.slot] or part.slot
         local haystack = table.concat({
             part.id or "",
             part.name or "",
             part.type or "",
             part.flavor or "",
-            entry and entry.source or ""
+            table.concat(part.tags or {}, " "),
+            table.concat(part.keywords or {}, " "),
+            slot and slot.id or "",
+            slot and slot.name or "",
+            slot and Effects.describe(slot.effect) or "",
+            entry and entry.source or "",
+            entry and (tostring(entry.source or ""):match("([^%.]+)$") or "") or ""
         }, " "):lower()
         if query == "" or haystack:find(query, 1, true) then
             table.insert(filtered, key)
         end
     end
     return filtered
+end
+
+function BPEditor:clamp_list_scroll(filtered_count)
+    local max_scroll = math.max(0, (filtered_count or 0) - LIST_VISIBLE_ROWS)
+    self.list_scroll = clamp(self.list_scroll or 0, 0, max_scroll)
 end
 
 function BPEditor:register_button(id, label, r, on_click, selected)
@@ -478,23 +485,42 @@ function BPEditor:draw_database_panel()
 
     local y = 98
     local filtered = self:filtered_parts()
+    self:clamp_list_scroll(#filtered)
+    self.list_rect = rect(22, 98, 214, LIST_VISIBLE_ROWS * LIST_ROW_HEIGHT - 3)
+
     love.graphics.setFont(self.fonts.small)
-    for index, key in ipairs(filtered) do
-        if index > 17 then
+    set_color(COLORS.muted)
+    love.graphics.printf(tostring(#filtered) .. " / " .. tostring(#self.part_order), 162, 86, 74, "right")
+
+    for row = 1, LIST_VISIBLE_ROWS do
+        local key = filtered[(self.list_scroll or 0) + row]
+        if not key then
             break
         end
         local entry = self.parts[key]
         local part = entry.part
-        local item = rect(22, y, 214, 22)
+        local item = rect(22, y, 204, 22)
         local selected = key == self.current_key
+        local source_label = tostring(entry.source or ""):match("([^%.]+)$") or ""
         draw_box(item, selected and { 0.88, 0.93, 1, 1 } or { 1, 1, 1, 0.55 }, selected and COLORS.selected or COLORS.line, 3)
         set_color(selected and COLORS.selected or COLORS.ink)
         love.graphics.printf((part.name or part.id or "?") .. " [" .. tostring(part.type or "?") .. "]",
-            item.x + 5, item.y + 5, item.w - 10, "left")
+            item.x + 5, item.y + 4, item.w - 68, "left")
+        set_color(selected and COLORS.selected or COLORS.muted)
+        love.graphics.printf(source_label, item.x + item.w - 64, item.y + 4, 58, "right")
         self:register_button("part_" .. key, "", item, function()
             self:load_part(key)
         end, selected)
-        y = y + 25
+        y = y + LIST_ROW_HEIGHT
+    end
+
+    if #filtered > LIST_VISIBLE_ROWS then
+        local track = rect(230, self.list_rect.y, 6, self.list_rect.h)
+        local max_scroll = math.max(1, #filtered - LIST_VISIBLE_ROWS)
+        local thumb_h = math.max(24, track.h * (LIST_VISIBLE_ROWS / #filtered))
+        local thumb_y = track.y + (track.h - thumb_h) * ((self.list_scroll or 0) / max_scroll)
+        draw_box(track, { 1, 1, 1, 0.42 }, COLORS.line, 3)
+        draw_box(rect(track.x, thumb_y, track.w, thumb_h), { 0.88, 0.93, 1, 1 }, COLORS.selected, 3)
     end
 
     self:register_button("new_part", "New", rect(22, 493, 66, 26), function()
@@ -653,6 +679,28 @@ function BPEditor:draw_slot_panel()
     end)
     self:draw_button("cost_clear")
 
+    self:register_button("cost_fixed", "fixed", rect(704, 294, 50, 24), function()
+        self.current.slot_dynamic_cost = nil
+    end, self.current.slot_dynamic_cost == nil)
+    self:register_button("cost_damaged", "foe dmg", rect(760, 294, 64, 24), function()
+        self.current.slot_dynamic_cost = self.current.slot_dynamic_cost or {
+            type = "opponent_damaged_parts",
+            minimum = 1,
+            per_part = 1
+        }
+    end, self.current.slot_dynamic_cost ~= nil)
+    self:draw_button("cost_fixed")
+    self:draw_button("cost_damaged")
+
+    if self.current.slot_dynamic_cost then
+        local dynamic = self.current.slot_dynamic_cost
+        set_color(COLORS.muted)
+        love.graphics.print(string.format(
+            "Cost -%d per damaged opposing BP (min %d).",
+            tonumber(dynamic.per_part) or 1,
+            tonumber(dynamic.minimum) or 1), 640, 322)
+    end
+
     set_color(COLORS.muted)
     love.graphics.print("Effect Template", 640, 340)
     x = 640
@@ -660,21 +708,39 @@ function BPEditor:draw_slot_panel()
     for index, effect_type in ipairs(EFFECT_TYPES) do
         local button_id = "effect_" .. effect_type
         local label = EFFECT_LABELS[effect_type] or effect_type
-        local w = effect_type == "assign_symbol_to_each_part" and 92
-            or effect_type == "damage_opponent_part" and 82
-            or 58
+        local w = effect_type == "none" and 42
+            or effect_type == "add_next_symbol" and 42
+            or effect_type == "channel_symbol" and 54
+            or effect_type == "assign_symbol_to_each_part" and 70
+            or effect_type == "open_spellmark" and 58
+            or effect_type == "heal_part" and 42
+            or effect_type == "add_symbol_against_status" and 50
+            or effect_type == "damage_opponent_part" and 64
+            or 42
         if x + w > 930 then
             x = 640
             y = y + 30
         end
         self:register_button(button_id, label, rect(x, y, w, 24), function()
             self.current.effect_type = effect_type
+            if effect_type == "open_spellmark" then
+                self.current.effect_assign_destination = "rim"
+                self.current.effect_target_side = "opponent"
+                self.current.effect_symbol = Symbols.ESSENCE
+                self.current.effect_target_type = "ANY"
+            elseif effect_type == "assign_symbol_to_each_part" then
+                self.current.effect_assign_destination = "socket"
+                self.current.effect_target_side = "self"
+                self.current.effect_symbol = Symbols.WARD
+            elseif effect_type == "gain_crest" then
+                self.current.effect_crest = Crests.ORDER[1] or "Valor"
+            end
         end, self.current.effect_type == effect_type)
         self:draw_button(button_id)
         x = x + w + 6
     end
 
-    self:draw_effect_details(640, 426)
+    self:draw_effect_details(640, 416)
 end
 
 function BPEditor:draw_effect_details(x, y)
@@ -683,7 +749,9 @@ function BPEditor:draw_effect_details(x, y)
     local effect_type = self.current.effect_type
     local text = "No effect."
     if effect_type == "add_next_symbol" then
-        text = "Adds one " .. symbol_label(self.current.effect_symbol) .. " to the next die assigned."
+        local amount = tonumber(self.current.effect_amount) or 1
+        text = "Adds " .. tostring(amount) .. " " .. symbol_label(self.current.effect_symbol)
+            .. (amount == 1 and "" or " symbols") .. " to the next die assigned."
         local bx = x
         for _, symbol in ipairs(SYMBOLS) do
             if symbol.id ~= Symbols.BLANK then
@@ -695,6 +763,7 @@ function BPEditor:draw_effect_details(x, y)
                 bx = bx + 58
             end
         end
+        self:draw_field("Amount", "effect_amount", rect(x, y + 56, 66, 24))
     elseif effect_type == "channel_symbol" then
         text = "For this allocation, dice showing " .. symbol_label(self.current.effect_match_symbol)
             .. " gain " .. symbol_label(self.current.effect_symbol) .. "."
@@ -773,14 +842,105 @@ function BPEditor:draw_effect_details(x, y)
             end
         end
         self:draw_field("Amt", "effect_amount", rect(x, y + 82, 54, 22))
+    elseif effect_type == "open_spellmark" then
+        text = "Essence can mark an existing destination; the mark payload resolves on assignment."
+        local bx = x
+        for _, destination in ipairs(ASSIGN_DESTINATIONS) do
+            local button_id = "effect_spellmark_destination_" .. destination
+            self:register_button(button_id, destination, rect(bx, y + 28, 56, 22), function()
+                self.current.effect_assign_destination = destination
+                self.current.effect_target_side = destination == "rim" and "opponent" or "self"
+                self.current.effect_symbol = Symbols.ESSENCE
+            end, (self.current.effect_assign_destination or "rim") == destination)
+            self:draw_button(button_id)
+            bx = bx + 62
+        end
+
+        draw_box(rect(x + 138, y + 28, 76, 22), { 1, 1, 1, 0.72 }, COLORS.line, 3)
+        set_color(COLORS.muted)
+        love.graphics.printf("accept ESS", x + 142, y + 33, 68, "center")
+
+        bx = x
+        for _, part_type in ipairs(SPELLMARK_TARGET_TYPES) do
+            local button_id = "effect_spellmark_target_type_" .. part_type
+            self:register_button(button_id, part_type, rect(bx, y + 56, 50, 22), function()
+                self.current.effect_target_type = part_type
+            end, self.current.effect_target_type == part_type)
+            self:draw_button(button_id)
+            bx = bx + 56
+        end
+        self:draw_field("Dmg", "effect_amount", rect(x, y + 84, 54, 22))
     elseif effect_type == "custom_sequence" then
         local actions = (self.current.raw_effect and (self.current.raw_effect.actions or self.current.raw_effect.sequence)) or {}
         text = "Sequence effect preserved from source (" .. tostring(#actions) .. " actions). Edit in Lua for now."
     elseif effect_type == "custom_effect" then
         text = "Custom effect preserved from source. Edit in Lua for now."
-    elseif effect_type == "heal_self" then
-        text = "Heals this combatant's most damaged part one step."
-        self:draw_field("Amount", "effect_amount", rect(x, y + 28, 66, 24))
+    elseif effect_type == "heal_part" then
+        text = self.current.effect_heal_target == "source_part"
+                and "Heals the Body Part carrying this Slot."
+            or self.current.effect_heal_target == "part_type"
+                and ("Heals the allied " .. tostring(self.current.effect_target_type or "HEAD") .. ".")
+            or "Heals this combatant's most damaged Body Part."
+        local bx = x
+        for _, target in ipairs(HEAL_TARGETS) do
+            local button_id = "effect_heal_target_" .. target
+            local label = target == "source_part" and "this BP"
+                or target == "part_type" and "BP type"
+                or "most hurt"
+            self:register_button(button_id, label, rect(bx, y + 28, 70, 24), function()
+                self.current.effect_heal_target = target
+            end, (self.current.effect_heal_target or "most_damaged") == target)
+            self:draw_button(button_id)
+            bx = bx + 76
+        end
+        if self.current.effect_heal_target == "part_type" then
+            bx = x
+            for _, part_type in ipairs(TYPES) do
+                local button_id = "effect_heal_type_" .. part_type
+                self:register_button(button_id, part_type, rect(bx, y + 58, 50, 22), function()
+                    self.current.effect_target_type = part_type
+                end, self.current.effect_target_type == part_type)
+                self:draw_button(button_id)
+                bx = bx + 56
+            end
+        end
+        self:draw_field("Amt", "effect_amount", rect(x + 232, y + 28, 54, 24))
+    elseif effect_type == "add_symbol_against_status" then
+        text = "Matching dice gain a symbol against Body Parts in the chosen state."
+        local bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_status_match_" .. symbol.id
+                self:register_button(button_id, symbol.label, rect(bx, y + 28, 52, 22), function()
+                    self.current.effect_match_symbol = symbol.id
+                end, self.current.effect_match_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_status_add_" .. symbol.id
+                self:register_button(button_id, "+" .. symbol.label, rect(bx, y + 54, 52, 22), function()
+                    self.current.effect_symbol = symbol.id
+                end, self.current.effect_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, status in ipairs(TARGET_STATUSES) do
+            local button_id = "effect_target_status_" .. status
+            self:register_button(button_id, status, rect(bx, y + 80, 64, 22), function()
+                self.current.effect_target_status = status
+            end, self.current.effect_target_status == status)
+            self:draw_button(button_id)
+            bx = bx + 70
+        end
+        self:draw_field("Amt", "effect_amount", rect(x + 224, y + 80, 54, 22))
     elseif effect_type == "damage_opponent_part" then
         text = "Damages opponent " .. tostring(self.current.effect_target_type or "HEAD") .. " one step."
         local bx = x
@@ -795,8 +955,16 @@ function BPEditor:draw_effect_details(x, y)
         self:draw_field("Amount", "effect_amount", rect(x, y + 62, 66, 24))
     elseif effect_type == "gain_crest" then
         text = "Gains 1 " .. tostring(self.current.effect_crest or "Valor") .. " crest."
-        self:draw_field("Crest", "effect_crest", rect(x, y + 28, 96, 24))
-        self:draw_field("Amount", "effect_amount", rect(x + 108, y + 28, 66, 24))
+        local bx = x
+        for _, crest in ipairs(Crests.ORDER) do
+            local button_id = "effect_crest_" .. crest
+            self:register_button(button_id, crest, rect(bx, y + 28, 72, 24), function()
+                self.current.effect_crest = crest
+            end, (self.current.effect_crest or "Valor") == crest)
+            self:draw_button(button_id)
+            bx = bx + 78
+        end
+        self:draw_field("Amount", "effect_amount", rect(x + 170, y + 28, 66, 24))
     end
     for _, line in ipairs(wrap_text(text, 40)) do
         love.graphics.print(line, x, y)
@@ -885,10 +1053,39 @@ function BPEditor:build_slot()
             symbol = self.current.effect_symbol or (destination == "rim" and Symbols.STRIKE or Symbols.WARD),
             amount = tonumber(self.current.effect_amount) or 1
         }
+    elseif effect_type == "open_spellmark" then
+        local destination = self.current.effect_assign_destination or "rim"
+        effect = {
+            type = "open_spellmark",
+            destination = destination,
+            target = destination == "rim" and "opponent" or "self",
+            symbol = Symbols.ESSENCE,
+            on_mark = {
+                type = "damage_marked_part",
+                amount = tonumber(self.current.effect_amount) or 1
+            }
+        }
+        if self.current.effect_target_type and self.current.effect_target_type ~= "ANY" then
+            effect.target_type = self.current.effect_target_type
+        end
     elseif effect_type == "custom_sequence" or effect_type == "custom_effect" then
         effect = clone(self.current.raw_effect or { type = "none" })
-    elseif effect_type == "heal_self" then
+    elseif effect_type == "heal_part" then
+        effect.target = self.current.effect_heal_target or "most_damaged"
+        if effect.target == "part_type" then
+            effect.target_type = self.current.effect_target_type or "HEAD"
+        end
         effect.amount = tonumber(self.current.effect_amount) or 1
+    elseif effect_type == "add_symbol_against_status" then
+        effect = {
+            type = "add_symbol_against_status",
+            match = self.current.effect_match_symbol or Symbols.STRIKE,
+            symbol = self.current.effect_symbol or Symbols.STRIKE,
+            amount = tonumber(self.current.effect_amount) or 1,
+            destination = "rim",
+            target_status = self.current.effect_target_status or "wounded",
+            duration = "round"
+        }
     elseif effect_type == "damage_opponent_part" then
         effect.target_type = self.current.effect_target_type or "HEAD"
         effect.amount = tonumber(self.current.effect_amount) or 1
@@ -899,13 +1096,17 @@ function BPEditor:build_slot()
         effect = { type = "none" }
     end
 
-    return {
+    local slot = {
         id = trim(self.current.slot_id),
         name = trim(self.current.slot_name),
         cost = clone(self.current.slot_cost or {}),
         timing = self.current.slot_timing or "spend",
         effect = effect
     }
+    if self.current.slot_dynamic_cost then
+        slot.dynamic_cost = clone(self.current.slot_dynamic_cost)
+    end
+    return slot
 end
 
 function BPEditor:form_to_part()
@@ -923,6 +1124,40 @@ function BPEditor:form_to_part()
         tags = split_csv(self.current.tags),
         slot = self:build_slot()
     }
+end
+
+function BPEditor:validate_current_part()
+    local part = self:form_to_part()
+    local errors = {}
+
+    if part.id == "" then
+        table.insert(errors, "Body Part ID is required")
+    end
+    if part.name == "" then
+        table.insert(errors, "Body Part name is required")
+    end
+    if part.slot and part.slot.name == "" then
+        table.insert(errors, "Slot name is required")
+    end
+
+    if part.id ~= "" then
+        local definitions = {
+            parts = {
+                [part.id] = part
+            },
+            loadouts = {
+                preview = {
+                    parts = { part.id }
+                }
+            }
+        }
+
+        for _, message in ipairs(Content.validate(definitions)) do
+            table.insert(errors, message)
+        end
+    end
+
+    return errors
 end
 
 function BPEditor:lua_effect(effect)
@@ -978,8 +1213,24 @@ function BPEditor:lua_effect(effect)
         return "{ " .. table.concat(pieces, ", ") .. " }"
     elseif effect.type == "damage_marked_part" or effect.type == "damage_target_part" or effect.type == "damage_assigned_part" then
         return "{ type = \"damage_marked_part\", amount = " .. tostring(effect.amount or 1) .. " }"
-    elseif effect.type == "heal_self" then
-        return "{ type = \"heal_self\", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "heal_part" then
+        local pieces = {
+            "type = \"heal_part\"",
+            "target = " .. lua_string(effect.target or "most_damaged")
+        }
+        if effect.target == "part_type" then
+            table.insert(pieces, "target_type = " .. lua_string(effect.target_type or "HEAD"))
+        end
+        table.insert(pieces, "amount = " .. tostring(effect.amount or 1))
+        return "{ " .. table.concat(pieces, ", ") .. " }"
+    elseif effect.type == "add_symbol_against_status" then
+        return "{ type = \"add_symbol_against_status\", match = "
+            .. lua_symbol(effect.match or effect.match_symbol or Symbols.STRIKE)
+            .. ", symbol = " .. lua_symbol(effect.symbol or Symbols.STRIKE)
+            .. ", amount = " .. tostring(effect.amount or 1)
+            .. ", destination = " .. lua_string(effect.destination or "rim")
+            .. ", target_status = " .. lua_string(effect.target_status or "wounded")
+            .. ", duration = " .. lua_string(effect.duration or "round") .. " }"
     elseif effect.type == "damage_opponent_part" then
         return "{ type = \"damage_opponent_part\", target_type = " .. lua_string(effect.target_type or "HEAD") .. ", amount = " .. tostring(effect.amount or 1) .. " }"
     elseif effect.type == "gain_crest" then
@@ -998,11 +1249,17 @@ function BPEditor:lua_slot(slot, indent)
         "{",
         i .. "    id = " .. lua_string(slot.id) .. ",",
         i .. "    name = " .. lua_string(slot.name) .. ",",
-        i .. "    cost = " .. lua_symbol_list(slot.cost) .. ",",
-        i .. "    timing = " .. lua_string(slot.timing or "spend") .. ",",
-        i .. "    effect = " .. self:lua_effect(slot.effect),
-        i .. "}"
+        i .. "    cost = " .. lua_symbol_list(slot.cost) .. ","
     }
+    if slot.dynamic_cost then
+        table.insert(lines, i .. "    dynamic_cost = { type = "
+            .. lua_string(slot.dynamic_cost.type or "opponent_damaged_parts")
+            .. ", minimum = " .. tostring(slot.dynamic_cost.minimum or 1)
+            .. ", per_part = " .. tostring(slot.dynamic_cost.per_part or 1) .. " },")
+    end
+    table.insert(lines, i .. "    timing = " .. lua_string(slot.timing or "spend") .. ",")
+    table.insert(lines, i .. "    effect = " .. self:lua_effect(slot.effect))
+    table.insert(lines, i .. "}")
     return table.concat(lines, "\n")
 end
 
@@ -1047,32 +1304,7 @@ function BPEditor:part_lua()
 end
 
 function BPEditor:effect_note(effect)
-    if not effect or effect.type == "none" then
-        return "none"
-    elseif is_sequence_effect(effect) then
-        local actions = effect.actions or effect.sequence or {}
-        return "sequence (" .. tostring(#actions) .. " actions)"
-    elseif effect.type == "add_next_symbol" then
-        return "next die gains +" .. symbol_label(effect.symbol)
-    elseif effect.type == "add_symbol_to_matching_dice" or effect.type == "channel_symbol" then
-        local destination = effect.destination and (" on " .. tostring(effect.destination)) or ""
-        return symbol_label(effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE)
-            .. " dice gain +" .. symbol_label(effect.symbol or effect.add_symbol or Symbols.STRIKE) .. destination
-    elseif effect.type == "assign_symbol_to_each_part" or effect.type == "auto_assign_symbol" then
-        return "auto-assign " .. symbol_label(effect.symbol or Symbols.WARD)
-            .. " to each open " .. tostring(effect.destination or "socket")
-    elseif effect.type == "open_spellmark" or effect.type == "spellmark" then
-        return "open " .. tostring(effect.destination or "rim") .. " spellmark"
-    elseif effect.type == "damage_marked_part" or effect.type == "damage_target_part" or effect.type == "damage_assigned_part" then
-        return "damage marked part"
-    elseif effect.type == "heal_self" then
-        return "heal most damaged part " .. tostring(effect.amount or 1) .. " step"
-    elseif effect.type == "damage_opponent_part" then
-        return "damage opponent " .. tostring(effect.target_type or "HEAD")
-    elseif effect.type == "gain_crest" then
-        return "gain " .. tostring(effect.amount or 1) .. " " .. tostring(effect.crest or "Valor") .. " crest"
-    end
-    return tostring(effect.type)
+    return Effects.describe(effect)
 end
 
 local function note_face(face)
@@ -1106,6 +1338,12 @@ function BPEditor:part_note()
             table.insert(cost_parts, note_face({ symbol }))
         end
         table.insert(lines, "Cost: " .. table.concat(cost_parts, " "))
+        if slot.dynamic_cost then
+            table.insert(lines, string.format(
+                "Dynamic Cost: -%d pip(s) per damaged opposing BP, minimum %d",
+                tonumber(slot.dynamic_cost.per_part) or 1,
+                tonumber(slot.dynamic_cost.minimum) or 1))
+        end
         table.insert(lines, "Timing: " .. tostring(slot.timing or "spend"))
         table.insert(lines, "Effect: " .. self:effect_note(slot.effect))
     else
@@ -1116,6 +1354,12 @@ function BPEditor:part_note()
 end
 
 function BPEditor:copy_lua()
+    local errors = self:validate_current_part()
+    if #errors > 0 then
+        self.message = "Fix before copying Lua: " .. tostring(errors[1])
+        return
+    end
+
     local text = self:part_lua()
     if love.system and love.system.setClipboardText then
         love.system.setClipboardText(text)
@@ -1174,6 +1418,7 @@ function BPEditor:textinput(text)
 
     if self.active_field == "search" then
         self.search = self.search .. text
+        self.list_scroll = 0
         return
     end
 
@@ -1190,15 +1435,42 @@ function BPEditor:keypressed(key)
     elseif key == "backspace" and self.active_field then
         if self.active_field == "search" then
             self.search = self.search:sub(1, -2)
+            self.list_scroll = 0
         else
             local value = tostring(self.current[self.active_field] or "")
             self.current[self.active_field] = value:sub(1, -2)
         end
     elseif key == "delete" and self.active_field == "search" then
         self.search = ""
+        self.list_scroll = 0
+    elseif key == "/" and not self.active_field then
+        self.active_field = "search"
+        return
+    elseif key == "down" then
+        self.list_scroll = (self.list_scroll or 0) + 1
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "up" then
+        self.list_scroll = (self.list_scroll or 0) - 1
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "pagedown" then
+        self.list_scroll = (self.list_scroll or 0) + LIST_VISIBLE_ROWS
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "pageup" then
+        self.list_scroll = (self.list_scroll or 0) - LIST_VISIBLE_ROWS
+        self:clamp_list_scroll(#self:filtered_parts())
     elseif key == "return" and (love.keyboard.isDown("lgui") or love.keyboard.isDown("lctrl")) then
         self:copy_lua()
     end
+end
+
+function BPEditor:wheelmoved(_, y)
+    local mouse_x, mouse_y = love.mouse.getPosition()
+    if not point_in_rect(mouse_x, mouse_y, self.list_rect) then
+        return
+    end
+
+    self.list_scroll = (self.list_scroll or 0) - (y * 3)
+    self:clamp_list_scroll(#self:filtered_parts())
 end
 
 return BPEditor

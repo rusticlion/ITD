@@ -13,6 +13,16 @@
 - Target game canvas: **960x540**.
 - Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
 - Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
+- Optional map property `camera_zoom`: `wide`, `standard`, or `close`. Basement uses `close`.
+
+Camera viewport guides in Tiled world pixels:
+
+- `wide`: `1920x1080` (`60x33.75` logical tiles).
+- `standard`: `960x540` (`30x16.875` logical tiles).
+- `close`: `640x360` (`20x11.25` logical tiles).
+
+The fractional vertical tile counts are intentional: the camera uses the full
+16:9 canvas rather than letterboxing to a whole-tile height.
 
 ---
 
@@ -122,6 +132,15 @@ Common region types:
 - `cutscene`: one-shot story trigger.
 
 Supported custom properties overlap with actor objects: `target_room`, `target_spawn`, `encounter_id`, `flag`, and `message`. Hidden POIs should use generic reveal/discovery properties such as `hidden_poi`, `reveal_tool`, `reveal_flag`, and `reveals_actor` rather than tool-specific region names.
+
+Camera-zone properties:
+
+- `camera_zoom`: `wide`, `standard`, or `close`.
+- `priority`: numeric; resolves overlapping camera zones.
+- `camera_bounds`: boolean; use the region rectangle as camera bounds.
+
+Runtime debug controls: `F2` cycles a temporary camera-mode override and `F3`
+shows all three viewport footprints centered on the player.
 
 ---
 

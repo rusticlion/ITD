@@ -2,7 +2,7 @@ local Content = require("combat.v2_content")
 
 local Catalog = {}
 
-Catalog.MODULE_NAME = "data.combat.v2_demo_parts"
+Catalog.MODULE_NAME = "data.combat.alpha_basement"
 
 Catalog.SLOT_ORDER = {
     { id = "head", label = "Head" },
@@ -13,14 +13,27 @@ Catalog.SLOT_ORDER = {
     { id = "leg_r", label = "Right Leg" }
 }
 
-local definitions_cache = nil
+local definitions_cache = {}
 
-local function definitions()
-    if not definitions_cache then
-        definitions_cache = Content.load_module(Catalog.MODULE_NAME)
+local function module_names()
+    local ok, index = pcall(require, "data.combat.content_index")
+    if ok and type(index) == "table" and type(index.modules) == "table" and #index.modules > 0 then
+        return index.modules
     end
 
-    return definitions_cache
+    return { Catalog.MODULE_NAME }
+end
+
+local function definitions_for_module(module_name)
+    if not definitions_cache[module_name] then
+        definitions_cache[module_name] = Content.load_module(module_name)
+    end
+
+    return definitions_cache[module_name]
+end
+
+local function definitions()
+    return definitions_for_module(module_names()[1] or Catalog.MODULE_NAME)
 end
 
 local function first_owned_instance(world, def_id)
@@ -52,12 +65,32 @@ function Catalog.definitions()
     return definitions()
 end
 
+function Catalog.module_names()
+    return module_names()
+end
+
+function Catalog.part_definition(def_id)
+    for _, module_name in ipairs(module_names()) do
+        local defs = definitions_for_module(module_name)
+        if defs.parts and defs.parts[def_id] then
+            return defs.parts[def_id], defs, module_name
+        end
+    end
+
+    return nil, nil, nil
+end
+
 function Catalog.build_part(def_id, instance_id, instance, slot)
     if not def_id then
         return nil
     end
 
-    return decorate_part(Content.build_part(definitions(), def_id), instance_id, instance, slot)
+    local _, defs = Catalog.part_definition(def_id)
+    if not defs then
+        error("Unknown body part: " .. tostring(def_id))
+    end
+
+    return decorate_part(Content.build_part(defs, def_id), instance_id, instance, slot)
 end
 
 function Catalog.part_from_instance(instance_id, instance, slot)
@@ -119,9 +152,10 @@ function Catalog.discovered_part_ids(world)
     end
 
     table.sort(ids, function(left, right)
-        local defs = definitions()
-        local left_name = defs.parts[left] and defs.parts[left].name or left
-        local right_name = defs.parts[right] and defs.parts[right].name or right
+        local left_def = Catalog.part_definition(left)
+        local right_def = Catalog.part_definition(right)
+        local left_name = left_def and left_def.name or left
+        local right_name = right_def and right_def.name or right
         if left_name == right_name then
             return left < right
         end

@@ -53,6 +53,7 @@ local Assets = require("core.assets")
 Assets.images = {
     basement_tiles = fake_image(64, 32),
     actor_pipe = fake_image(32, 32),
+    actor_pipe_shovel = fake_image(32, 32),
     player_idle_down = fake_image(32, 32)
 }
 
@@ -113,7 +114,26 @@ local room = Room.new({
                     width = 32,
                     height = 32,
                     properties = {
-                        { name = "asset_id", value = "actor_pipe" }
+                        { name = "item", value = "shovel" }
+                    }
+                }
+            }
+        },
+        {
+            name = "regions",
+            type = "objectgroup",
+            objects = {
+                {
+                    id = 8,
+                    name = "close_room",
+                    type = "camera_zone",
+                    x = 0,
+                    y = 0,
+                    width = 64,
+                    height = 32,
+                    properties = {
+                        { name = "camera_zoom", value = "close" },
+                        { name = "camera_bounds", value = true }
                     }
                 }
             }
@@ -129,6 +149,12 @@ assert(room:is_tile_solid(2, 1) == true, "expected collision layer to drive soli
 local actor = room.actor_by_id.pipe_spawn
 assert(actor, "expected named Tiled actor")
 assert(actor.x == 2 and actor.y == 2, "expected Tiled pixel coordinates to convert to tile coordinates")
+assert(actor:tile_rect(32) == 32, "expected actor world x")
+
+local camera_zone = room:camera_zone_at(16, 16)
+assert(camera_zone and camera_zone.id == "close_room", "expected camera zone lookup")
+assert(camera_zone:property("camera_zoom") == "close", "expected camera zone mode")
+assert(camera_zone:property("camera_bounds") == true, "expected camera zone bounds flag")
 
 room:draw_tile_layer(room:layer("ground"))
 assert(#draw_calls == 3, "expected three tile draw calls")
@@ -139,7 +165,14 @@ assert(draw_calls[2].x == 64 and draw_calls[2].scale_x == -1, "expected horizont
 draw_calls = {}
 actor:draw({})
 assert(#draw_calls == 1, "expected actor sprite draw")
-assert(draw_calls[1].image == Assets.images.actor_pipe, "expected actor sprite asset")
+assert(draw_calls[1].image == Assets.images.actor_pipe_shovel, "expected actor sprite asset")
+
+draw_calls = {}
+actor.state.removed = true
+actor:draw({})
+assert(#draw_calls == 1, "expected removed actor sprite draw")
+assert(draw_calls[1].image == Assets.images.actor_pipe,
+    "expected removed pipe item to use empty pipe sprite")
 
 draw_calls = {}
 local player = Player.new(1, 1)

@@ -1,19 +1,37 @@
 {
-    "activeFile": "Basement_1.tsx",
+    "activeFile": "untitled.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "BasementBackground.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 0.5
+        },
         "Basement_1.tsx": {
             "scaleInDock": 1,
-            "scaleInEditor": 7.1692
+            "scaleInEditor": 1.54
+        },
+        "untitled.tmx": {
+            "scale": 1.0603,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 228.2372913326417,
+                "y": 141.94096010563044
+            }
         }
     },
-    "last.imagePath": "/Users/russellbates/JunkDrawer/ITD/assets/sprites/overworld",
+    "last.imagePath": "/Users/russellbates/JunkDrawer/ITD/assets/tiled_raw",
+    "map.height": 17,
+    "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "Basement_1.tsx"
+        "BasementBackground.tsx",
+        "untitled.tmx"
     ],
     "project": "ITD.tiled-project",
     "recentFiles": [
+        "BasementBackground.tsx",
+        "untitled.tmx",
         "Basement_1.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"

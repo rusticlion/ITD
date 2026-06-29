@@ -27,6 +27,11 @@ local KNOWN_LAYERS = {
     regions = true,
     collision = true
 }
+local VALID_CAMERA_MODES = {
+    wide = true,
+    standard = true,
+    close = true
+}
 
 local TILE_COLORS = {
     ground = { 0.18, 0.17, 0.18, 1 },
@@ -60,6 +65,66 @@ local function property_value(properties, key)
     end
 
     return nil
+end
+
+local function bool_value(value, default)
+    if value == nil then
+        return default
+    end
+    return value == true or value == "true" or value == 1
+end
+
+local function object_world_rect(object, tile_size)
+    local size = tile_size or DEFAULT_TILE_SIZE
+    if object.tile_x or object.tile_y then
+        local x = ((tonumber(object.tile_x) or 1) - 1) * size
+        local y = ((tonumber(object.tile_y) or 1) - 1) * size
+        local width = (tonumber(object.tile_width) or 1) * size
+        local height = (tonumber(object.tile_height) or 1) * size
+        return x, y, width, height
+    end
+
+    return tonumber(object.x) or 0,
+        tonumber(object.y) or 0,
+        tonumber(object.width) or size,
+        tonumber(object.height) or size
+end
+
+local function build_region(object, tile_size)
+    local x, y, width, height = object_world_rect(object, tile_size)
+    local region = {
+        id = tostring(object.name or object.id or "region"),
+        name = object.name,
+        type = property_value(object.properties, "region_type")
+            or object.type
+            or object.class
+            or "region",
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        properties = object.properties or {}
+    }
+
+    function region:property(key, default)
+        local value = property_value(self.properties, key)
+        if value == nil then
+            return default
+        end
+        if key == "camera_bounds" then
+            return bool_value(value, default)
+        end
+        return value
+    end
+
+    function region:contains(world_x, world_y)
+        return world_x >= self.x
+            and world_y >= self.y
+            and world_x < self.x + self.width
+            and world_y < self.y + self.height
+    end
+
+    return region
 end
 
 local function basename_without_extension(path)
@@ -193,6 +258,7 @@ function Room.new(room_source, world)
         tilesets = {},
         actors = {},
         actor_by_id = {},
+        regions = {},
         world = world,
         state = world and world.room_states and world.room_states[data.id or data.name or "room"] or {}
     }
@@ -203,9 +269,18 @@ function Room.new(room_source, world)
     end
     room:load_tilesets(data.tilesets or {})
     room:load_actors()
+    room:load_regions()
     room.validation = room:validate()
     room:print_validation()
     return room
+end
+
+function Room:property(key, default)
+    local value = property_value(self.properties, key)
+    if value == nil then
+        return default
+    end
+    return value
 end
 
 function Room:layer(name)
@@ -339,6 +414,35 @@ function Room:load_actors()
             end
         end
     end
+end
+
+function Room:load_regions()
+    self.regions = {}
+
+    for _, layer in ipairs(self.layers or {}) do
+        if layer.type == "objectgroup" and layer.name == "regions" then
+            for _, object in ipairs(layer.objects or {}) do
+                table.insert(self.regions, build_region(object, self.tile_size))
+            end
+        end
+    end
+end
+
+function Room:camera_zone_at(world_x, world_y)
+    local match
+    local match_priority = -math.huge
+
+    for index, region in ipairs(self.regions or {}) do
+        if region.type == "camera_zone" and region:contains(world_x, world_y) then
+            local priority = tonumber(region:property("priority", 0)) or 0
+            if not match or priority >= match_priority then
+                match = region
+                match_priority = priority
+            end
+        end
+    end
+
+    return match
 end
 
 function Room:validate_tilesets(result)
@@ -475,6 +579,32 @@ function Room:validate()
             "Room tile size is %s; current overworld runtime expects %s.",
             tostring(self.tile_size),
             tostring(DEFAULT_TILE_SIZE)))
+    end
+
+    local camera_mode = self:property("camera_zoom") or self:property("camera_mode")
+    if camera_mode and not VALID_CAMERA_MODES[camera_mode] then
+        add_message(result.errors, string.format(
+            "Room camera mode '%s' is invalid; expected wide, standard, or close.",
+            tostring(camera_mode)))
+    end
+
+    for _, region in ipairs(self.regions or {}) do
+        if region.type == "camera_zone" then
+            local zone_mode = region:property("camera_zoom")
+                or region:property("camera_mode")
+                or region:property("zoom")
+            if zone_mode and not VALID_CAMERA_MODES[zone_mode] then
+                add_message(result.errors, string.format(
+                    "Camera zone '%s' uses invalid mode '%s'.",
+                    region.id,
+                    tostring(zone_mode)))
+            end
+            if region.width <= 0 or region.height <= 0 then
+                add_message(result.errors, string.format(
+                    "Camera zone '%s' must have positive width and height.",
+                    region.id))
+            end
+        end
     end
 
     self:validate_tilesets(result)
@@ -620,7 +750,7 @@ function Room:draw_actor_band(world, include_player)
         table.insert(drawables, {
             sort_y = world.player:sort_y(self.tile_size),
             draw = function()
-                world.player:draw(self.tile_size)
+                world.player:draw(self.tile_size, world.camera)
             end
         })
     end
@@ -642,6 +772,56 @@ function Room:draw(world)
     self:draw_actor_band(world, true)
     self:draw_tile_layer(self:layer("objects_high"))
     self:draw_tile_layer(self:layer("effects"))
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function Room:draw_debug_overlay(world)
+    local size = self.tile_size
+    local scale = world and world.camera and world.camera:scale() or 1
+    love.graphics.setLineWidth(1 / scale)
+
+    love.graphics.setColor(0.78, 0.8, 0.9, 0.16)
+    for x = 0, self.width do
+        love.graphics.line(x * size, 0, x * size, self.height * size)
+    end
+    for y = 0, self.height do
+        love.graphics.line(0, y * size, self.width * size, y * size)
+    end
+
+    love.graphics.setColor(1, 0.2, 0.24, 0.26)
+    for y = 1, self.height do
+        for x = 1, self.width do
+            if self:is_tile_solid(x, y) then
+                love.graphics.rectangle("fill", (x - 1) * size, (y - 1) * size, size, size)
+            end
+        end
+    end
+
+    for _, region in ipairs(self.regions or {}) do
+        love.graphics.setColor(0.26, 0.8, 1, 0.22)
+        love.graphics.rectangle("fill", region.x, region.y, region.width, region.height)
+        love.graphics.setColor(0.26, 0.8, 1, 0.9)
+        love.graphics.rectangle("line", region.x, region.y, region.width, region.height)
+        love.graphics.print("R" .. tostring(index), region.x + 3, region.y + 3)
+    end
+
+    for index, actor in ipairs(self.actors or {}) do
+        local x, y, width, height = actor:tile_rect(size)
+        love.graphics.setColor(1, 0.78, 0.2, 0.18)
+        love.graphics.rectangle("fill", x, y, width, height)
+        love.graphics.setColor(1, 0.78, 0.2, 0.95)
+        love.graphics.rectangle("line", x, y, width, height)
+        love.graphics.print("#" .. tostring(index), x + 3, y + 3)
+    end
+
+    if world and world.player then
+        local x = (world.player.x - 1) * size
+        local y = (world.player.y - 1) * size
+        love.graphics.setColor(0.28, 1, 0.66, 0.95)
+        love.graphics.rectangle("line", x + 2 / scale, y + 2 / scale, size - 4 / scale, size - 4 / scale)
+    end
+
+    love.graphics.setLineWidth(1)
     love.graphics.setColor(1, 1, 1, 1)
 end
 

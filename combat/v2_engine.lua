@@ -1,4 +1,6 @@
 local Events = require("combat.events")
+local Crests = require("combat.crests")
+local Effects = require("combat.v2_effects")
 local Keywords = require("combat.keywords")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
@@ -25,6 +27,14 @@ local function copy_result_fields(target, source)
             target[key] = value
         end
     end
+end
+
+local function copy_fields(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do
+        copy[key] = value
+    end
+    return copy
 end
 
 local function amount_or_default(value, default)
@@ -58,22 +68,6 @@ local function normalize_destination(destination)
     return value
 end
 
-local function normalize_effect_actions(effect)
-    if type(effect) ~= "table" then
-        return {}
-    end
-
-    if type(effect.actions) == "table" then
-        return effect.actions
-    elseif type(effect.sequence) == "table" then
-        return effect.sequence
-    elseif type(effect[1]) == "table" and effect.type == nil then
-        return effect
-    end
-
-    return { effect }
-end
-
 local function modifier_applies_to_destination(modifier, destination)
     local wanted = normalize_destination(modifier and (modifier.destination or modifier.destination_kind))
     if not wanted then
@@ -100,6 +94,15 @@ local function modifier_matches_symbols(modifier, symbols)
     end
 
     return Symbols.has(symbols, match)
+end
+
+local function modifier_matches_target(modifier, target_part)
+    local wanted = modifier and (modifier.target_status or modifier.part_status)
+    if not wanted then
+        return true
+    end
+
+    return target_part ~= nil and tostring(target_part.status or ""):lower() == tostring(wanted):lower()
 end
 
 local function default_spellmark_target(destination)
@@ -160,6 +163,12 @@ local function rim_accepts_symbols(part, symbols)
     end
 
     return true
+end
+
+local function count_contest_symbol(assignment, symbol)
+    -- Resolution counts the full effective face. used/burned symbols describe
+    -- destination relevance for presentation and spellmarks, not a second tally.
+    return assignment and Symbols.count(assignment.symbols or {}, symbol) or 0
 end
 
 local function match_slot_feed(part, slot, symbols)
@@ -268,7 +277,8 @@ local function is_slot_filled(part, slot)
     return true
 end
 
-function Engine:new()
+function Engine:new(options)
+    options = options or {}
     local instance = {
         state = "WAITING",
         combatants = {},
@@ -286,7 +296,8 @@ function Engine:new()
         token_counter = 0,
         queue_counter = 0,
         spellmark_counter = 0,
-        untargetable_parts = setmetatable({}, { __mode = "k" })
+        untargetable_parts = setmetatable({}, { __mode = "k" }),
+        rng = options.rng
     }
 
     return setmetatable(instance, Engine)
@@ -386,7 +397,58 @@ end
 function Engine:perform_upkeep()
     self:clear_round_state()
     self:emit(Events.UPKEEP_PHASE, { round = self.current_round })
+    self:refresh_dynamic_slot_costs()
     self:resolve_slot_window(TIMING_UPKEEP)
+end
+
+function Engine:count_damaged_parts(combatant)
+    local count = 0
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "wounded" or part.status == "maimed" then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function Engine:refresh_dynamic_slot_costs()
+    for _, combatant in ipairs(self.combatants or {}) do
+        local opponent = self:get_opponent(combatant)
+        for _, part in ipairs(combatant.body_parts or {}) do
+            local slot = part.slot
+            local rule = slot and slot.dynamic_cost
+            if rule and rule.type == "opponent_damaged_parts" then
+                local base_cost = slot.base_cost or slot.cost or {}
+                slot.base_cost = slot.base_cost or copy_list(base_cost)
+
+                local minimum = math.max(1, math.floor(tonumber(rule.minimum) or 1))
+                local per_part = math.max(1, math.floor(tonumber(rule.per_part) or 1))
+                local damaged = self:count_damaged_parts(opponent)
+                local next_length = math.max(minimum, #slot.base_cost - damaged * per_part)
+                local previous_length = #(slot.cost or {})
+                local next_cost = {}
+                for index = 1, next_length do
+                    next_cost[index] = slot.base_cost[index]
+                end
+                slot.cost = next_cost
+
+                if previous_length ~= next_length then
+                    self:emit(Events.SLOT_COST_CHANGED, {
+                        combatant = combatant,
+                        part = part,
+                        slot = slot,
+                        previous_length = previous_length,
+                        current_length = next_length,
+                        damaged_parts = damaged
+                    })
+                end
+
+                if part:is_slot_online() and is_slot_filled(part, slot) then
+                    self:trigger_slot(combatant, part, slot)
+                end
+            end
+        end
+    end
 end
 
 function Engine:next_token_id()
@@ -407,7 +469,7 @@ function Engine:roll_all_dice()
         self.dice_pools[combatant] = {}
 
         for _, part in ipairs(combatant.body_parts or {}) do
-            local result = SymbolDie.roll(part)
+            local result = SymbolDie.roll(part, self.rng)
             local token = {
                 id = self:next_token_id(),
                 owner = combatant,
@@ -461,14 +523,16 @@ function Engine:remove_die_from_pool(combatant, die)
     return false
 end
 
-function Engine:get_effective_symbols(combatant, die, destination)
+function Engine:get_effective_symbols(combatant, die, destination, target_part)
     local base = die and die.symbols or {}
     local pending = combatant and combatant.get_pending_next_symbols and combatant:get_pending_next_symbols() or {}
     local added = copy_list(pending)
     local modifiers = combatant and combatant.get_allocation_symbol_modifiers and combatant:get_allocation_symbol_modifiers() or {}
 
     for _, modifier in ipairs(modifiers) do
-        if modifier_applies_to_destination(modifier, destination) and modifier_matches_symbols(modifier, base) then
+        if modifier_applies_to_destination(modifier, destination)
+            and modifier_matches_symbols(modifier, base)
+            and modifier_matches_target(modifier, target_part) then
             local symbol = modifier.symbol or modifier.add_symbol
             local amount = amount_or_default(modifier.amount, 1)
             for _, added_symbol in ipairs(repeated_symbol(symbol, amount)) do
@@ -563,7 +627,7 @@ function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
         return false, "socket_full"
     end
 
-    local effective, added = self:get_effective_symbols(combatant, die, "socket")
+    local effective, added = self:get_effective_symbols(combatant, die, "socket", part)
     local used, burned, spellmark = self:classify_destination_symbols(combatant, "socket", part, effective)
     if not Symbols.has(effective, Symbols.WARD) and not spellmark then
         return false, "no_ward"
@@ -617,7 +681,7 @@ function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
         return false, "rim_full"
     end
 
-    local effective, added = self:get_effective_symbols(attacker, die, "rim")
+    local effective, added = self:get_effective_symbols(attacker, die, "rim", target_part)
     local used, burned, spellmark = self:classify_destination_symbols(attacker, "rim", target_part, effective)
     if not Symbols.has(effective, Symbols.STRIKE) and not spellmark then
         return false, "no_strike"
@@ -809,12 +873,13 @@ function Engine:remove_slot_entry(entry)
     end
 end
 
-function Engine:resolve_slot_window(timing)
+function Engine:resolve_slot_window(timing, trigger_context)
     local normalized = timing and timing:lower()
     local pending = {}
+    local trigger_part = trigger_context and trigger_context.part
 
     for _, entry in ipairs(self.slot_queue or {}) do
-        if entry.timing == normalized then
+        if entry.timing == normalized and (not trigger_part or entry.part == trigger_part) then
             table.insert(pending, entry)
         end
     end
@@ -822,6 +887,7 @@ function Engine:resolve_slot_window(timing)
     table.sort(pending, function(a, b) return (a.order or 0) < (b.order or 0) end)
 
     for _, entry in ipairs(pending) do
+        entry.trigger_context = trigger_context
         self:resolve_slot_entry(entry)
     end
 end
@@ -1036,94 +1102,7 @@ function Engine:resolve_spellmark_assignment(combatant, spellmark, assignment)
 end
 
 function Engine:resolve_effect_action(entry, effect)
-    effect = effect or {}
-
-    local effect_type = effect.type or "none"
-    local result = {
-        type = effect_type
-    }
-
-    if effect_type == "gain_crest" then
-        local amount = amount_or_default(effect.amount, 1)
-        self:grant_crest(entry.combatant, effect.crest, amount, { source = "slot", slot = entry.slot })
-        result.crest = effect.crest
-        result.amount = amount
-    elseif effect_type == "heal_self" then
-        local amount = amount_or_default(effect.amount, 1)
-        local target_part = self:find_most_damaged_part(entry.combatant)
-        result.target_part = target_part
-        result.amount = amount
-        result.healed = self:apply_healing(entry.combatant, entry.combatant, target_part, amount, { source = "slot", slot = entry.slot })
-    elseif effect_type == "add_next_symbol" then
-        local symbol = effect.symbol or Symbols.STRIKE
-        local amount = amount_or_default(effect.amount, 1)
-        if entry.combatant and entry.combatant.add_next_symbol then
-            for _ = 1, amount do
-                entry.combatant:add_next_symbol(symbol)
-            end
-        end
-        result.symbol = symbol
-        result.amount = amount
-    elseif effect_type == "add_symbol_to_matching_dice" or effect_type == "channel_symbol" then
-        local symbol = Symbols.normalize(effect.symbol or effect.add_symbol or Symbols.STRIKE)
-        local match = effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE
-        local amount = amount_or_default(effect.amount, 1)
-
-        if entry.combatant and entry.combatant.add_allocation_symbol_modifier and symbol then
-            entry.combatant:add_allocation_symbol_modifier({
-                match = match,
-                symbol = symbol,
-                amount = amount,
-                destination = effect.destination,
-                duration = effect.duration or "allocation",
-                source = {
-                    type = "slot",
-                    slot = entry.slot,
-                    part = entry.part
-                }
-            })
-        end
-
-        result.type = "add_symbol_to_matching_dice"
-        result.match = match
-        result.symbol = symbol
-        result.amount = amount
-        result.destination = normalize_destination(effect.destination)
-        result.duration = effect.duration or "allocation"
-    elseif effect_type == "assign_symbol_to_each_part" or effect_type == "auto_assign_symbol" then
-        result = self:auto_assign_symbols(entry, effect)
-    elseif effect_type == "open_spellmark" or effect_type == "spellmark" then
-        result = self:open_spellmark(entry, effect)
-    elseif effect_type == "damage_opponent_part" then
-        local opponent = self:get_opponent(entry.combatant)
-        local target_part = nil
-
-        if effect.target_part_id and opponent then
-            target_part = opponent:get_body_part_by_id(effect.target_part_id)
-        elseif effect.target_type then
-            target_part = find_first_part_by_type(opponent, effect.target_type)
-        end
-
-        if not target_part and effect.target == "head" then
-            target_part = find_first_part_by_type(opponent, "HEAD")
-        end
-
-        result.target_part = target_part
-        result.amount = amount_or_default(effect.amount, 1)
-        result.damaged = false
-
-        for _ = 1, result.amount do
-            if target_part and target_part.status ~= "maimed" then
-                result.damaged = self:apply_damage(entry.combatant, opponent, target_part, {
-                    source = "slot",
-                    slot = entry.slot,
-                    effect = effect
-                }) or result.damaged
-            end
-        end
-    end
-
-    return result
+    return Effects.execute(self, entry, effect or { type = "none" })
 end
 
 function Engine:resolve_slot_entry(entry)
@@ -1135,13 +1114,13 @@ function Engine:resolve_slot_entry(entry)
 
     local effect = entry.effect or {}
     local result = {
-        type = effect.type or "none"
+        type = type(effect) == "table" and (effect.type or "none") or "custom"
     }
 
     if type(effect) == "function" then
         result = effect(self, entry) or result
     else
-        local actions = normalize_effect_actions(effect)
+        local actions = Effects.actions(effect)
         result = {
             type = #actions > 1 and "sequence" or ((actions[1] and actions[1].type) or "none"),
             actions = {}
@@ -1161,7 +1140,8 @@ function Engine:resolve_slot_entry(entry)
         combatant = entry.combatant,
         part = entry.part,
         slot = entry.slot,
-        effect = result
+        effect = result,
+        trigger_context = entry.trigger_context
     })
 
     if self.state ~= "COMPLETE" and self:check_combat_end() then
@@ -1175,6 +1155,7 @@ function Engine:grant_crest(combatant, crest, amount, extra)
         return 0
     end
 
+    crest = Crests.normalize(crest)
     local total = combatant:add_crest(crest, amount or 1)
     local data = {
         combatant = combatant,
@@ -1194,38 +1175,15 @@ function Engine:grant_crest(combatant, crest, amount, extra)
 end
 
 function Engine:expend_crest(combatant, crest)
-    if not combatant or not crest then
-        return false, "invalid_crest"
-    end
-
-    if combatant:get_crest_count(crest) <= 0 then
-        return false, "crest_empty"
-    end
-
-    local effect = {
-        type = crest:lower()
-    }
-
-    if crest == "Valor" then
-        effect.symbol = Symbols.STRIKE
-    elseif crest == "Shadow" then
-        -- handled after the implementation check below
-    else
-        return false, "crest_not_implemented"
-    end
-
-    combatant:remove_crest(crest, 1)
-
-    if crest == "Valor" then
-        combatant:add_next_symbol(Symbols.STRIKE)
-    elseif crest == "Shadow" then
-        combatant.shadow_slot_shroud = true
+    local ok, canonical, effect = Crests.expend(self, combatant, crest)
+    if not ok then
+        return false, canonical
     end
 
     self:emit(Events.CREST_EXPENDED, {
         combatant = combatant,
-        crest = crest,
-        remaining = combatant:get_crest_count(crest),
+        crest = canonical,
+        remaining = combatant:get_crest_count(canonical),
         effect = effect
     })
 
@@ -1262,6 +1220,10 @@ function Engine:find_most_damaged_part(combatant)
     end
 
     return wounded or maimed
+end
+
+function Engine:find_part_by_type(combatant, part_type)
+    return find_first_part_by_type(combatant, part_type)
 end
 
 function Engine:apply_healing(healer, target, part, amount, context)
@@ -1348,7 +1310,18 @@ function Engine:apply_damage(attacker, target, part, context)
         context = context
     })
 
-    self:resolve_slot_window(TIMING_ON_WOUND_MAIM)
+    local trigger_context = copy_fields(context)
+    trigger_context.attacker = attacker
+    trigger_context.target = target
+    trigger_context.part = part
+    trigger_context.status_before = before
+    trigger_context.status_after = after
+    trigger_context.heart_point_loss = heart_loss
+
+    if trigger_context.hit then
+        self:resolve_slot_window(TIMING_ON_HIT, trigger_context)
+    end
+    self:resolve_slot_window(TIMING_ON_WOUND_MAIM, trigger_context)
     return true
 end
 
@@ -1360,8 +1333,8 @@ function Engine:resolve_round()
         for _, part in ipairs(defender.body_parts or {}) do
             local attack = self.assignments.rims[part]
             local defense = self.assignments.sockets[part]
-            local strike_count = attack and Symbols.count(attack.symbols, Symbols.STRIKE) or 0
-            local ward_count = defense and Symbols.count(defense.symbols, Symbols.WARD) or 0
+            local strike_count = count_contest_symbol(attack, Symbols.STRIKE)
+            local ward_count = count_contest_symbol(defense, Symbols.WARD)
 
             if attack or defense then
                 self:emit(Events.PART_RESOLVED, {
@@ -1376,8 +1349,8 @@ function Engine:resolve_round()
             end
 
             if attack and strike_count > ward_count then
-                self:resolve_slot_window(TIMING_ON_HIT)
                 self:apply_damage(attack.attacker, defender, part, {
+                    hit = true,
                     attack = attack,
                     defense = defense,
                     strike_count = strike_count,
@@ -1438,12 +1411,11 @@ function Engine:get_valid_destinations(combatant, die_or_id)
         return destinations
     end
 
-    local socket_symbols = self:get_effective_symbols(combatant, die, "socket")
-    local rim_symbols = self:get_effective_symbols(combatant, die, "rim")
     local slot_symbols = self:get_effective_symbols(combatant, die, "slot")
     local opponent = self:get_opponent(combatant)
 
     for _, part in ipairs(combatant.body_parts or {}) do
+        local socket_symbols = self:get_effective_symbols(combatant, die, "socket", part)
         if part.status ~= "maimed" and not self.assignments.sockets[part] then
             local spellmark = self:get_assignment_spellmark(combatant, "socket", part, socket_symbols)
             if Symbols.has(socket_symbols, Symbols.WARD) or spellmark then
@@ -1454,6 +1426,7 @@ function Engine:get_valid_destinations(combatant, die_or_id)
 
     if opponent then
         for _, part in ipairs(opponent.body_parts or {}) do
+            local rim_symbols = self:get_effective_symbols(combatant, die, "rim", part)
             local spellmark = self:get_assignment_spellmark(combatant, "rim", part, rim_symbols)
             if is_part_targetable(self, part)
                 and not self.assignments.rims[part]

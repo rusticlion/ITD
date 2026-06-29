@@ -13,6 +13,51 @@ local function has_launch_arg(name)
     return false
 end
 
+local function launch_arg_value(prefix)
+    local marker = prefix .. "="
+    for _, value in ipairs(arg or {}) do
+        if value:sub(1, #marker) == marker then
+            return value:sub(#marker + 1)
+        end
+    end
+    return nil
+end
+
+local function find_designer_scenario(scenario_id)
+    if not scenario_id then
+        return nil
+    end
+
+    local catalog = require("data.designer_scenarios")
+    for _, group in ipairs({ "combat", "overworld" }) do
+        for _, scenario in ipairs(catalog[group] or {}) do
+            if scenario.id == scenario_id then
+                return scenario, group
+            end
+        end
+    end
+    return nil
+end
+
+local function room_module_name(value)
+    if not value or value:find(".", 1, true) then
+        return value
+    end
+    return "data.rooms." .. value
+end
+
+local function spawn_player(value)
+    local x, y = tostring(value or ""):match("^(%-?%d+),(%-?%d+)$")
+    if x and y then
+        return {
+            x = tonumber(x),
+            y = tonumber(y),
+            facing = "down"
+        }
+    end
+    return nil
+end
+
 local function dispatch_actionpressed(actions, source)
     local handled = false
     for _, action in ipairs(actions or {}) do
@@ -33,10 +78,48 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     Text.install(love.graphics)
     Assets:load()
-    if has_launch_arg("--bp-editor") then
+    local encounter_id = launch_arg_value("--encounter")
+    local seed = tonumber(launch_arg_value("--seed"))
+    local scenario_id = launch_arg_value("--scenario") or launch_arg_value("--checkpoint")
+    local scenario, scenario_group = find_designer_scenario(scenario_id)
+    local room = launch_arg_value("--room")
+    if scenario_id and not scenario then
+        error("Unknown designer scenario: " .. tostring(scenario_id))
+    elseif scenario and scenario_group == "combat" then
+        GameState.switch(require("states.v2_combat"), {
+            encounter_id = scenario.encounter_id,
+            seed = seed or scenario.seed,
+            combat_setup = scenario.combat_setup,
+            designer_mode = true,
+            designer_scenario_id = scenario.id,
+            designer_scenario_name = scenario.name
+        })
+    elseif scenario and scenario_group == "overworld" then
+        GameState.switch(require("states.designer_overworld"), {
+            scenario = scenario
+        })
+    elseif room then
+        GameState.switch(require("states.designer_overworld"), {
+            scenario = {
+                id = "room.direct",
+                name = "Direct Room",
+                room = room_module_name(room),
+                player = spawn_player(launch_arg_value("--spawn")) or {
+                    x = 5,
+                    y = 5,
+                    facing = "down"
+                }
+            }
+        })
+    elseif has_launch_arg("--designer-lab") then
+        GameState.switch(require("states.designer_lab"))
+    elseif has_launch_arg("--bp-editor") then
         GameState.switch(require("states.bp_editor"))
-    elseif has_launch_arg("--v2-combat") then
-        GameState.switch(require("states.v2_combat"))
+    elseif encounter_id or has_launch_arg("--v2-combat") then
+        GameState.switch(require("states.v2_combat"), {
+            encounter_id = encounter_id or "debug.demo",
+            seed = seed
+        })
     else
         GameState.switch(Overworld)
     end

@@ -1,0 +1,559 @@
+{
+  "source": {
+    "repository": "https://github.com/rusticlion/IntoTheDreamlands.git",
+    "commit": "b8e4a35aa143728084ed97c8c1f7ab6d8b012f89"
+  },
+  "palette_applied": true,
+  "assets": [
+    {
+      "asset_id": "player_walk_down1",
+      "destination": "assets/sprites/overworld/player_walk_down1.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_walk_down2",
+      "destination": "assets/sprites/overworld/player_walk_down2.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 2,
+      "source_frame_id": "e8110338-257f-4877-a366-741b1a349df0",
+      "width": 16,
+      "height": 16,
+      "sha256": "e6bfaa0332f02a6c974685ce3fa6a5c66f4316a96479cd53fd7574b8ffec91fa"
+    },
+    {
+      "asset_id": "player_walk_down3",
+      "destination": "assets/sprites/overworld/player_walk_down3.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 3,
+      "source_frame_id": "d1578672-19fd-4828-ad44-c24a13340055",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_walk_down4",
+      "destination": "assets/sprites/overworld/player_walk_down4.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 4,
+      "source_frame_id": "0947033f-8980-4918-b9ed-35fe8fe686ca",
+      "width": 16,
+      "height": 16,
+      "sha256": "0d1119aafa248a40347f5dcf421bac617c40fb3ef2eea6a09ae2959b4cd6e691"
+    },
+    {
+      "asset_id": "player_walk_up1",
+      "destination": "assets/sprites/overworld/player_walk_up1.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 1,
+      "source_frame_id": "eac4b0a1-b386-4de8-bff4-d76be11b4927",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_walk_up2",
+      "destination": "assets/sprites/overworld/player_walk_up2.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 2,
+      "source_frame_id": "cc0db691-45b3-4084-a2b4-ac5ea638c77f",
+      "width": 16,
+      "height": 16,
+      "sha256": "92111c59eae8351315116f11df175bd8aab797e69330dfbd8af2066a0ea200d1"
+    },
+    {
+      "asset_id": "player_walk_up3",
+      "destination": "assets/sprites/overworld/player_walk_up3.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 3,
+      "source_frame_id": "add23c0e-885b-48c0-8b62-04a85cb1badc",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_walk_up4",
+      "destination": "assets/sprites/overworld/player_walk_up4.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 4,
+      "source_frame_id": "b7efd0bd-6af4-4e5a-81fd-93d4e8dcb786",
+      "width": 16,
+      "height": 16,
+      "sha256": "6e1271bb1786cf58062990a7a03a22daeb4340f983e67d1104190bbb5c99b6c2"
+    },
+    {
+      "asset_id": "player_walk_left1",
+      "destination": "assets/sprites/overworld/player_walk_left1.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 1,
+      "source_frame_id": "ac4f3fa1-ea9d-478a-b2cf-1094a5328e75",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_walk_left2",
+      "destination": "assets/sprites/overworld/player_walk_left2.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 2,
+      "source_frame_id": "f9aa19d5-46c3-475a-9c85-e998c592cb2b",
+      "width": 16,
+      "height": 16,
+      "sha256": "68473ef22b8b63849ac3f13f333f1d51e5040c730577bc4c973fe0259c549381"
+    },
+    {
+      "asset_id": "player_walk_left3",
+      "destination": "assets/sprites/overworld/player_walk_left3.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 3,
+      "source_frame_id": "25d73f01-0d9a-4cfe-a365-b6c621e2f016",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_walk_left4",
+      "destination": "assets/sprites/overworld/player_walk_left4.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 4,
+      "source_frame_id": "bfb27aac-3c19-44d6-8558-bf714320c66e",
+      "width": 16,
+      "height": 16,
+      "sha256": "d6baf71b080d087d45108cb7b084ae8e59da561989203915579e2225351d1d6f"
+    },
+    {
+      "asset_id": "player_walk_right1",
+      "destination": "assets/sprites/overworld/player_walk_right1.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 1,
+      "source_frame_id": "fab1e3f2-34de-4fa6-8a4a-7a389c1ce19b",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "player_walk_right2",
+      "destination": "assets/sprites/overworld/player_walk_right2.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 2,
+      "source_frame_id": "ac4f2882-514a-4c69-ad59-bfd058becaf5",
+      "width": 16,
+      "height": 16,
+      "sha256": "402021405d1c6fb6cc1e9924b7138e8372e92580d2e33c45ada74eac20701233"
+    },
+    {
+      "asset_id": "player_walk_right3",
+      "destination": "assets/sprites/overworld/player_walk_right3.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 3,
+      "source_frame_id": "e2b4b821-3f7b-47b9-beda-b1204d30989d",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "player_walk_right4",
+      "destination": "assets/sprites/overworld/player_walk_right4.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 4,
+      "source_frame_id": "0c543b3b-18f2-4aa4-8338-05ef4f5109df",
+      "width": 16,
+      "height": 16,
+      "sha256": "89f0b31b0524ff62cc6a911b849527f781a3ef9e9aceffb8901bfa6872783abd"
+    },
+    {
+      "asset_id": "player_idle_down",
+      "destination": "assets/sprites/overworld/player_idle_down.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_idle_up",
+      "destination": "assets/sprites/overworld/player_idle_up.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 1,
+      "source_frame_id": "eac4b0a1-b386-4de8-bff4-d76be11b4927",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_idle_left",
+      "destination": "assets/sprites/overworld/player_idle_left.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 1,
+      "source_frame_id": "ac4f3fa1-ea9d-478a-b2cf-1094a5328e75",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_idle_right",
+      "destination": "assets/sprites/overworld/player_idle_right.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 1,
+      "source_frame_id": "fab1e3f2-34de-4fa6-8a4a-7a389c1ce19b",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "cat_idle1",
+      "destination": "assets/sprites/overworld/cat_idle1.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 1,
+      "source_frame_id": "bcc90c75-3a30-4cae-a178-7437523a1a6a",
+      "width": 16,
+      "height": 16,
+      "sha256": "38aff71d3ec76593c5bd97ccbd8c5d249132c3b81c391e28d4c28aa722b6ce90"
+    },
+    {
+      "asset_id": "cat_idle2",
+      "destination": "assets/sprites/overworld/cat_idle2.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 2,
+      "source_frame_id": "94fcbefe-e797-4fb0-b2e8-e104814800b9",
+      "width": 16,
+      "height": 16,
+      "sha256": "c567cbfc88fb7e371e2f21e3d9fa05e3eb28b014531e6150ac941c0bf6f5b9cc"
+    },
+    {
+      "asset_id": "cat_idle3",
+      "destination": "assets/sprites/overworld/cat_idle3.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 3,
+      "source_frame_id": "c95b0ff0-5361-4ff5-8e15-507c4f251507",
+      "width": 16,
+      "height": 16,
+      "sha256": "99c1b55d7830dc2393b593e1247e2e884dd0c4d4284ef35e4a7eb5d59aa2c6f5"
+    },
+    {
+      "asset_id": "cat_idle4",
+      "destination": "assets/sprites/overworld/cat_idle4.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 4,
+      "source_frame_id": "78c803d8-2b7a-4004-a7d2-9d597399b028",
+      "width": 16,
+      "height": 16,
+      "sha256": "5cb811c9463e0e633677b7be8f50d8b6529fa712ba8046abdf98340450f05cba"
+    },
+    {
+      "asset_id": "cat_walk_down1",
+      "destination": "assets/sprites/overworld/cat_walk_down1.png",
+      "source_sprite": "spr_cat_walk_down",
+      "source_frame": 1,
+      "source_frame_id": "4b6c0351-312f-4a07-a594-c48846c80a95",
+      "width": 16,
+      "height": 16,
+      "sha256": "7e72d22f607d0dceae03dbb3e11a5079588340d543c497095956f0668042923b"
+    },
+    {
+      "asset_id": "cat_walk_down2",
+      "destination": "assets/sprites/overworld/cat_walk_down2.png",
+      "source_sprite": "spr_cat_walk_down",
+      "source_frame": 2,
+      "source_frame_id": "f6e82952-29af-49e9-8cc7-abdf9f80cc6a",
+      "width": 16,
+      "height": 16,
+      "sha256": "99a5ccb81f4cb6cd39fe96cee639a4121feff881272d8cd61edd3ac7cbab8b1a"
+    },
+    {
+      "asset_id": "cat_walk_up1",
+      "destination": "assets/sprites/overworld/cat_walk_up1.png",
+      "source_sprite": "spr_cat_walk_up",
+      "source_frame": 1,
+      "source_frame_id": "126d2412-0bf8-46d6-a48d-37da8e5759bf",
+      "width": 16,
+      "height": 16,
+      "sha256": "75004bb65016a9d85e7995fe3f4c7520fa9c5d741bdb19fca954f34b3b4ad095"
+    },
+    {
+      "asset_id": "cat_walk_up2",
+      "destination": "assets/sprites/overworld/cat_walk_up2.png",
+      "source_sprite": "spr_cat_walk_up",
+      "source_frame": 2,
+      "source_frame_id": "b53d7d85-c942-4924-b970-022f77b76d23",
+      "width": 16,
+      "height": 16,
+      "sha256": "c7268483b2f5bd3b12808b92754e3a12e5b07a569fc18f3da8ea66fa4844dfba"
+    },
+    {
+      "asset_id": "cat_walk_left1",
+      "destination": "assets/sprites/overworld/cat_walk_left1.png",
+      "source_sprite": "spr_cat_walk_left",
+      "source_frame": 1,
+      "source_frame_id": "5887d3c4-c24f-4637-aadf-ebccbfc46db9",
+      "width": 16,
+      "height": 16,
+      "sha256": "f6436a3b7a04a90be2ca6903b608acc771716999d21ad676f06f27405e26a6a5"
+    },
+    {
+      "asset_id": "cat_walk_left2",
+      "destination": "assets/sprites/overworld/cat_walk_left2.png",
+      "source_sprite": "spr_cat_walk_left",
+      "source_frame": 2,
+      "source_frame_id": "4415ccba-569f-4812-a891-eb4121c128b6",
+      "width": 16,
+      "height": 16,
+      "sha256": "fe6b124252efdffd3d83448aab7c1abc0893010624fb4b9eb6690762743cc88a"
+    },
+    {
+      "asset_id": "cat_walk_right1",
+      "destination": "assets/sprites/overworld/cat_walk_right1.png",
+      "source_sprite": "spr_cat_walk_right",
+      "source_frame": 1,
+      "source_frame_id": "a8ea53ce-150b-49ae-a2a6-3cc648b8a344",
+      "width": 16,
+      "height": 16,
+      "sha256": "31b1494bb4c203e924a33ca3e7c9c28ccf8812250cad6d07010ff0e1bf198c47"
+    },
+    {
+      "asset_id": "cat_walk_right2",
+      "destination": "assets/sprites/overworld/cat_walk_right2.png",
+      "source_sprite": "spr_cat_walk_right",
+      "source_frame": 2,
+      "source_frame_id": "68cd8cb9-deda-471b-a9d3-2c7d0f8aef30",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c4b13eaf94edffaadf1091cd0b6f7647b2fc9b4786a693f677071f32e42b55c"
+    },
+    {
+      "asset_id": "actor_crack",
+      "destination": "assets/sprites/overworld/actor_crack.png",
+      "source_sprite": "spr_wall_crack_opening",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "73809c3dd24b97454eb0cf59ce4d9f73b61b389ad35dfca0c947454d4f87b37c"
+    },
+    {
+      "asset_id": "actor_crack_resolved",
+      "destination": "assets/sprites/overworld/actor_crack_resolved.png",
+      "source_sprite": "spr_wall_crack_opening",
+      "source_frame": 2,
+      "source_frame_id": "657fa8d3-c318-4296-81db-a502272716a1",
+      "width": 16,
+      "height": 16,
+      "sha256": "3372502e4809b664777839ea424b06225b9921050f22656549ada966545298a3"
+    },
+    {
+      "asset_id": "actor_crack_bone_demon_revealed",
+      "destination": "assets/sprites/overworld/actor_crack_bone_demon_revealed.png",
+      "source_sprite": "spr_wall_crack_skeleton",
+      "source_frame": 3,
+      "source_frame_id": "04c4e64c-b553-4fba-87b3-36fd7ca18cdd",
+      "width": 16,
+      "height": 16,
+      "sha256": "226c3c94e7c46f9a2abe8216330193dfd1e5e6a4368ef13ea019df803af963b0"
+    },
+    {
+      "asset_id": "actor_crack_zombie_revealed",
+      "destination": "assets/sprites/overworld/actor_crack_zombie_revealed.png",
+      "source_sprite": "spr_wall_crack_zombie",
+      "source_frame": 3,
+      "source_frame_id": "11a3ecde-75a7-42cb-9578-52ea510ab005",
+      "width": 16,
+      "height": 16,
+      "sha256": "3c32ad41117fbc7f485c96a64ea1d574c56f787c85ab1bbd9c4a936d3c0d7153"
+    },
+    {
+      "asset_id": "actor_pipe",
+      "destination": "assets/sprites/overworld/actor_pipe.png",
+      "source_sprite": "spr_wall_pipe_porthole",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "2672ce43089c8c810b5e0461debef33afda7dd45791d47b95912eaad99dc1c89"
+    },
+    {
+      "asset_id": "actor_pipe_shovel",
+      "destination": "assets/sprites/overworld/actor_pipe_shovel.png",
+      "source_sprite": "spr_wall_pipe_porthole_shovel",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "bb9c762d4426bc1b7b06d2553c3c8794d0bc8aa980390530b9cad57eee5aa2f7"
+    },
+    {
+      "asset_id": "actor_surgery_table",
+      "destination": "assets/sprites/overworld/actor_surgery_table.png",
+      "source_sprite": "spr_surgery_table",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 32,
+      "height": 48,
+      "sha256": "98b2b9c4d21bc111ee451902c9aa971bc179b3683b43e9668e0eea5e7a904a47"
+    },
+    {
+      "asset_id": "actor_bloody_table",
+      "destination": "assets/sprites/overworld/actor_bloody_table.png",
+      "source_sprite": "spr_bloody_table",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 32,
+      "height": 32,
+      "sha256": "b866c0938f57d583925741325851a45283d61539bdff27951dacc6545166d3f2"
+    },
+    {
+      "asset_id": "actor_blood_buckets",
+      "destination": "assets/sprites/overworld/actor_blood_buckets.png",
+      "source_sprite": "spr_blood_buckets",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "c87d394220ab3e0d59859d2ea21014b60d80feecfaddfec4c0791bd075f2b2f9"
+    },
+    {
+      "asset_id": "actor_st_andrews_cross",
+      "destination": "assets/sprites/overworld/actor_st_andrews_cross.png",
+      "source_sprite": "spr_st_andrews_cross",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "f1127c292474e382ab72fcc6bd25221adce8dd262bf86c3fa662d921d95a4c62"
+    },
+    {
+      "asset_id": "actor_basement_door",
+      "destination": "assets/sprites/overworld/actor_basement_door.png",
+      "source_sprite": "spr_basement_door",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "93bf90e450c8562ef6160f1caff3fc01134b6adcee217f4d877b499be6e106db"
+    },
+    {
+      "asset_id": "item_shovel",
+      "destination": "assets/sprites/overworld/item_shovel.png",
+      "source_sprite": "spr_shovel",
+      "source_frame": 1,
+      "source_frame_id": "06051060-6823-4ba6-99a8-df875d903f98",
+      "width": 17,
+      "height": 16,
+      "sha256": "68122c17d92c7b1ec2e22557ab417acf5441c7775c1dbf666cf0442628261bc7"
+    },
+    {
+      "asset_id": "item_rusty_key",
+      "destination": "assets/sprites/overworld/item_rusty_key.png",
+      "source_sprite": "spr_key",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "4c4b7f5e83c064abde7b95e8fb0a5c4ff9f37668d65fc337a6c5f19f37fc2bec"
+    },
+    {
+      "asset_id": "item_wrench",
+      "destination": "assets/sprites/overworld/item_wrench.png",
+      "source_sprite": "spr_wrench",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "9f2d709692c7ce281376aa435a9c5fe1999ee0544f3602a2c1710378b2d152ca"
+    },
+    {
+      "asset_id": "item_bolt_cutters",
+      "destination": "assets/sprites/overworld/item_bolt_cutters.png",
+      "source_sprite": "spr_bolt_cutters",
+      "source_frame": 1,
+      "source_frame_id": "65c17068-4804-4f49-91c0-4a14e4e849f2",
+      "width": 16,
+      "height": 16,
+      "sha256": "14c427f2a41429a4f11646405fb0f18f95aa1be31071111a20c44cce61b38ab7"
+    },
+    {
+      "asset_id": "item_blindfold",
+      "destination": "assets/sprites/overworld/item_blindfold.png",
+      "source_sprite": "spr_blindfold",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "a20ec1123bcc178b26bd41ee943b315f93db98e08935a7a0c034c9a0b6347c04"
+    },
+    {
+      "asset_id": "item_devils_brush",
+      "destination": "assets/sprites/overworld/item_devils_brush.png",
+      "source_sprite": "spr_devils_brush",
+      "source_frame": 1,
+      "source_frame_id": "870cc0da-026f-4f1a-aaea-2ca714f6ee3a",
+      "width": 16,
+      "height": 16,
+      "sha256": "07d02128819aeca2a5204dd78fbdaf8fbefb8d7c26b1caab45b23ff27006ff88"
+    },
+    {
+      "asset_id": "actor_mad_butcher",
+      "destination": "assets/sprites/overworld/actor_mad_butcher.png",
+      "source_sprite": "spr_murderer",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6112ca6157d8763dacb85db3820dfe8ea250e6ae3c43c81966f03d32fa2e5a29"
+    },
+    {
+      "asset_id": "actor_bone_demon",
+      "destination": "assets/sprites/overworld/actor_bone_demon.png",
+      "source_sprite": "spr_demon_skull",
+      "source_frame": 1,
+      "source_frame_id": "f712404d-899c-441d-b88b-43c4b2b32c29",
+      "width": 16,
+      "height": 16,
+      "sha256": "546220f444c94fa6b79b01f45bef8992d796c7b924efc9e807d2cefebf4a934a"
+    },
+    {
+      "asset_id": "actor_blood_demon",
+      "destination": "assets/sprites/overworld/actor_blood_demon.png",
+      "source_sprite": "spr_blood_demon",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "d0068a20d5d24af63df45ab04b075692a7ee0febc2e3c9336453a5ae300982c3"
+    },
+    {
+      "asset_id": "basement_background",
+      "destination": "assets/reference/legacy/basement_background.png",
+      "source_sprite": "spr_demon_basement_bg",
+      "source_frame": 1,
+      "source_frame_id": "b9d8c80e-779a-4400-a783-ba27fba08037",
+      "width": 304,
+      "height": 384,
+      "sha256": "65d85fd2c6bc867ec88778b78ec6fdadbc9b1532d66c9bda952a333eceff33d9"
+    },
+    {
+      "asset_id": "basement_actor_layout",
+      "destination": "assets/reference/legacy/basement_actor_layout.png",
+      "source_sprite": "spr_demon_basement_actors",
+      "source_frame": 1,
+      "source_frame_id": "8d8943e9-87bb-462e-850d-e1d3ebf13de2",
+      "width": 304,
+      "height": 384,
+      "sha256": "0aa198dee14722c00133343d7123ee77cd5b841f359186794595aaeeebce37a0"
+    },
+    {
+      "asset_id": "basement_mockup",
+      "destination": "assets/reference/legacy/basement_mockup.png",
+      "source_sprite": "spr_demon_basement_mockup",
+      "source_frame": 1,
+      "source_frame_id": "5a9021c9-9ef6-45dd-8e48-d91e1b4523f0",
+      "width": 304,
+      "height": 384,
+      "sha256": "461b6ed8534d49c3b8362a0c0b59c4f7255a564d721ba8d6a7203b634afdc88a"
+    }
+  ]
+}

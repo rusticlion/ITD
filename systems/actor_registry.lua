@@ -33,7 +33,7 @@ local function actor_sprite_candidates(actor, default_id)
         end
     end
 
-    if actor.state and actor.state.resolved then
+    if actor.state and (actor.state.resolved or actor.state.removed) then
         add(sprite_property(actor, "resolved_asset_id"))
         add(sprite_property(actor, "resolved_sprite_id"))
         if explicit then
@@ -167,7 +167,10 @@ local function tool_use_result(actor, player, defaults)
 end
 
 local function draw_pipe(actor)
-    if draw_actor_sprite(actor, "actor_pipe") then
+    local default_id = actor.properties.item and not actor.state.removed
+        and "actor_pipe_shovel"
+        or "actor_pipe"
+    if draw_actor_sprite(actor, default_id) then
         return
     end
 

@@ -5,7 +5,8 @@ return {
     tilewidth = 32,
     tileheight = 32,
     properties = {
-        dream = "basement"
+        dream = "basement",
+        camera_zoom = "close"
     },
     layers = {
         {
@@ -61,6 +62,7 @@ return {
                     tile_x = 2,
                     tile_y = 2,
                     properties = {
+                        resolved_asset_id = "actor_crack_zombie_revealed",
                         on_tool_use = {
                             tool = "shovel",
                             type = "encounter",
@@ -75,6 +77,7 @@ return {
                     tile_x = 9,
                     tile_y = 4,
                     properties = {
+                        resolved_asset_id = "actor_crack_bone_demon_revealed",
                         on_tool_use = {
                             tool = "shovel",
                             type = "encounter",
@@ -89,6 +92,7 @@ return {
                     tile_x = 5,
                     tile_y = 7,
                     properties = {
+                        resolved_asset_id = "actor_crack_resolved",
                         on_tool_use = {
                             tool = "shovel",
                             type = "passage",

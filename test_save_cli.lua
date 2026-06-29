@@ -93,18 +93,18 @@ local summary = combat_world:apply_combat_result({
     player_parts = {},
     enemy_parts = {},
     claimable_parts = {
-        { def_id = "bone_demon_right_claw", type = "ARM", status = "wounded" }
+        { def_id = "bone_demon_right_bare_bones", type = "ARM", status = "wounded" }
     },
-    claimed_part = { def_id = "bone_demon_right_claw", id = "bone_demon_right_claw", name = "Right Bone Claw", type = "ARM", status = "wounded" },
+    claimed_part = { def_id = "bone_demon_right_bare_bones", id = "bone_demon_right_bare_bones", name = "Bare Bones", type = "ARM", status = "wounded" },
     claimed_slot = "arm_r"
 })
 
 local claimed_arm_id = combat_world.run.dreamform.arm_r
 assert(claimed_arm_id ~= replaced_arm_id, "claimed arm should replace the old right arm instance")
 assert_equal(combat_world.run.parts[replaced_arm_id], nil, "replaced arm should be deleted from current parts")
-assert_equal(combat_world.run.parts[claimed_arm_id].def_id, "bone_demon_right_claw", "claimed arm def")
+assert_equal(combat_world.run.parts[claimed_arm_id].def_id, "bone_demon_right_bare_bones", "claimed arm def")
 assert_equal(combat_world.run.parts[claimed_arm_id].status, "healthy", "claimed wounded part gets post-combat recovery")
-assert_equal(combat_world.run.discovered_parts.bone_demon_right_claw, true, "claimed arm discovered")
+assert_equal(combat_world.run.discovered_parts.bone_demon_right_bare_bones, true, "claimed arm discovered")
 assert_equal(summary.claim_summary.slot_id, "arm_r", "claim summary slot")
 assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_right_arm", "claim summary replaced part")
 

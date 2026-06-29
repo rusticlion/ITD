@@ -111,12 +111,15 @@ end
 
 function Actor:tile_rect(tile_size)
     local size = tile_size or DEFAULT_TILE_SIZE
-    return (self.x - 1) * size, (self.y - 1) * size, size, size
+    return (self.x - 1) * size,
+        (self.y - 1) * size,
+        tonumber(self.width) or size,
+        tonumber(self.height) or size
 end
 
 function Actor:sort_y(tile_size)
-    local size = tile_size or DEFAULT_TILE_SIZE
-    return (self.y - 1) * size + size
+    local _, y, _, height = self:tile_rect(tile_size)
+    return y + height
 end
 
 function Actor:update(world, dt)

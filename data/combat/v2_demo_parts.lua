@@ -39,7 +39,8 @@ return {
             cost = { B, B, B },
             timing = "spend",
             effect = {
-                type = "heal_self",
+                type = "heal_part",
+                target = "most_damaged",
                 amount = 1
             }
         },
@@ -269,7 +270,7 @@ return {
         enemy_demo = {
             id = "enemy",
             name = "Bone Demon",
-            ai_personality = "doom_caster",
+            ai_personality = "bone_caster",
             parts = {
                 "bone_demon_skull",
                 "bone_demon_rib_cage",

@@ -1,13 +1,188 @@
 # Codebase Dump: ITD
 
-_Generated on 2025-11-11 16:23 UTC_
+_Generated on 2026-06-25 18:21 UTC_
 
 ## AGENTS.md
 
 ```markdown
-Start by reviewing the documentation in /docs for context on your task - you will be directed to the most relevant documentation. You may be directed to find details for your task in /docs/tickets, otherwise proceed based on the contents of the request.
+Always review any relevant code before implementation. We do our best to keep the project documented well in-codebase, so explore the /docs directory when you need more information. Feel free to ask me questions to your satisfaction before implementing changes, especially if a task seems ambiguous as posed.
 
-Review any relevant code before implementation, then proceed to implement the requested features in Lua/LOVE2D.
+We are developing a LOVE2D RPG called "Into the Dreamlands", with complex, tabletop-inspired D6-based combat, a Gameboy Advance/early 2000s low-res RPG aesthetic, and a genre-bending story about an adventure that takes place in the main character's dreams. You can find history and much more description of the project in @InitialPlanning.md. 
+
+This is a solo art-game project, not a legacy product. For game rules, combat presentation, content schemas, and authored data, prefer simple, elegant, intention-revealing code over backward-compatible accommodation. When you find stale assets, obsolete data shapes, duplicate IDs, or awkward legacy paths, call them out and recommend deletion/renaming/rewrite rather than automatically preserving them.
+
+Ask before destructive cleanup, but do not treat existing structure as sacred. It is acceptable, and often preferred, to simplify systems by changing data/code together.
+
+For tooling-adjacent infrastructure such as asset loading, editors, input handling, save/load, and object pools, defensive handling is useful, but invalid states should still be reported clearly and should not silently hide authoring mistakes.
+
+Have fun and feel free to stop to chat through something. It's a game.
+```
+
+## assets/aseprite_raw/blood_symbol_outline.png
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/blood_symbol.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/blood_symbol.png
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/bp_card.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/bp_card.png
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/combat_queue_stack.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/combat_spine.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/combat_tabletop.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/die_rim.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/die_socket.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/die-hatch.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/empty_die.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/lightning_symbol.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/shield_symbol.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/Sprite-0001.aseprite
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/sword_symbol.aseprite
+
+Binary file; contents omitted.
+
+## assets/fonts/dotgothic16/DotGothic16-Regular.ttf
+
+Binary file; contents omitted.
+
+## assets/fonts/dotgothic16/OFL.txt
+
+```
+Copyright 2020 The DotGothic16 Project Authors (https://github.com/fontworks-fonts/DotGothic16)
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+http://scripts.sil.org/OFL
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
 ```
 
 ## assets/README.md
@@ -25,10 +200,19 @@ mocked UI layout used throughout the S4 UI Foundation sprint.
   - State-specific placeholders such as `placeholder_healthy.png`, `placeholder_wounded.png`, and `placeholder_maimed.png`.
 - `assets/sprites/icons/`
   - Generic UI glyphs, including the `placeholder_default.png` fallback used by the asset manager.
+- `assets/sprites/overworld/`
+  - Tiled tileset sheets, overworld actor sprites, and player sprites. See `docs/OverworldAssetManifest.md` and `docs/TiledCheatsheet.md`.
+- `assets/sprites/ui/`
+  - Dialog and menu presentation assets. See `docs/OverworldAssetManifest.md` for canvas sizes and IDs.
+- `assets/fonts/dotgothic16/`
+  - DotGothic16 Regular and its bundled SIL Open Font License text. Used by the v2 combat UI.
 
 Each file is addressed by its filename (without the `.png` extension) through `core/assets.lua`. Avoid embedding
 state or directory information in code outside of the asset manager—always request sprites by ID via
 `Assets:get("asset_id")`.
+
+See `docs/CombatAssetManifest.md` for the v2 combat layout measurements and the next facade-pass sprite ID list.
+
 ```
 
 ## assets/sprites/bodyparts/placeholder_healthy.png
@@ -43,303 +227,505 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
+## assets/sprites/combat/blood_symbol_outline.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/blood_symbol.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_hover1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_hover2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_invalid.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_maimed.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_selected.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_valid.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card_wounded.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_card.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_absorbent.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_absorbent.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_armored.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_armored.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_brittle.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_brittle.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_hungry.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_keyword_hungry.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_title.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/bp_title.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_conduit_field.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_conduit_field.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit_hover.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit_hover.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_enemy_tableau.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_enemy_tableau.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_initiative_badge.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_initiative_badge.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_inspector_rail.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_inspector_rail.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_player_tableau.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_player_tableau.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_queue_stack.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_round_badge.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_round_badge.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_spine.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_tabletop.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/crest_shadow_chip.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/crest_shadow_chip.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/crest_valor_chip.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/crest_valor_chip.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_locked1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_locked2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_occupied.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_spellmarked1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_spellmarked2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_spellmarked3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_spellmarked4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_valid1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim_valid2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_row_guideline_enemy.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_row_guideline_player.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_row_guideline.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_locked1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_locked2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_occupied.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_spellmarked1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_spellmarked2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_spellmarked3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_spellmarked4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_valid1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket_valid2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_socket.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/empty_die.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/heart_point_depleted.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/heart_point.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/heart_point.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/lightning_symbol_outline.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/lightning_symbol.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/shield_symbol_outline.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/shield_symbol.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/slot_cell_wild.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/slot_cell_wild.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/sword_symbol_outline.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/sword_symbol.png
+
+Binary file; contents omitted.
+
 ## assets/sprites/icons/placeholder_default.png
 
 Binary file; contents omitted.
 
-## combat/ai.lua
+## assets/sprites/icons/sword_symbol.png
 
-```lua
-local AI = {}
+Binary file; contents omitted.
 
-local BENEFICIAL_CRESTS = {
-    Shadow = true,
-    Valor = true,
-    Knowledge = true,
-    Cunning = true
+## assets/sprites/overworld/basement_mock_1-Sheet.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_mock_1-Sheet.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_mock_1.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/README.md
+
+```markdown
+# Overworld Sprites
+
+This folder is scanned by `core/assets.lua` for `.png` files.
+
+Expected first-pass IDs are tracked in `docs/OverworldAssetManifest.md`; Tiled authoring invariants live in `docs/TiledCheatsheet.md`.
+
+Selected sprites from the original GameMaker prototype are imported through
+`tools/import_legacy_assets.py`. Edit `tools/legacy_assets.json` to curate the
+selection or stable asset IDs; do not copy GameMaker's UUID-named PNGs manually.
+Import provenance and hashes live in `assets/legacy/`.
+
+```
+
+## assets/sprites/ui/dialog_box_frame.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_box_frame.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_choice_cursor.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_choice_cursor.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_continue.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_continue1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_continue2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_nameplate.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/dialog_nameplate.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/menu_cursor.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/menu_full_frame.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/menu_full_frame.png
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/menu_sidebar_frame.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/ui/menu_sidebar_frame.png
+
+Binary file; contents omitted.
+
+## assets/tiled_raw/Basement_1.tsx
+
+```tsx
+<?xml version="1.0" encoding="UTF-8"?>
+<tileset version="1.10" tiledversion="1.12.1" name="Basement_1" tilewidth="32" tileheight="32" tilecount="18" columns="18">
+ <image source="../sprites/overworld/basement_mock_1-Sheet.png" width="576" height="32"/>
+</tileset>
+
+```
+
+## assets/tiled_raw/ITD.tiled-project
+
+```
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "compatibilityVersion": 1100,
+    "extensionsPath": "extensions",
+    "folders": [
+        "."
+    ],
+    "properties": [
+    ],
+    "propertyTypes": [
+    ]
 }
 
-local DETRIMENTAL_CRESTS = {
-    Madness = true,
-    Greed = true,
-    Corruption = true
+```
+
+## assets/tiled_raw/ITD.tiled-session
+
+```
+{
+    "activeFile": "untitled.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "BasementBackground.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 0.5
+        },
+        "Basement_1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1.54
+        },
+        "untitled.tmx": {
+            "scale": 1.0603,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 228.2372913326417,
+                "y": 141.94096010563044
+            }
+        }
+    },
+    "last.imagePath": "/Users/russellbates/JunkDrawer/ITD/assets/tiled_raw",
+    "map.height": 17,
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "BasementBackground.tsx",
+        "untitled.tmx"
+    ],
+    "project": "ITD.tiled-project",
+    "recentFiles": [
+        "BasementBackground.tsx",
+        "untitled.tmx",
+        "Basement_1.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
 }
-
-local STATUS_PRIORITY = {
-    wounded = 3,
-    healthy = 2,
-    maimed = 0
-}
-
-local function average_for_die(dice_type)
-    if type(dice_type) ~= "string" then
-        return 0
-    end
-
-    local sides = dice_type:lower():match("d(%d+)")
-    sides = sides and tonumber(sides)
-
-    if not sides or sides <= 0 then
-        return 0
-    end
-
-    return (sides + 1) / 2
-end
-
-local function count_wounded_parts(combatant)
-    if not combatant or not combatant.body_parts then
-        return 0
-    end
-
-    local total = 0
-    for _, part in ipairs(combatant.body_parts) do
-        if part.status == "wounded" then
-            total = total + 1
-        end
-    end
-
-    return total
-end
-
-local function estimate_attack_value(action)
-    local dice_count = action.dice_count or 0
-    local average = average_for_die(action.dice_type or "d6")
-    local bonus = action.flat_bonus or 0
-
-    return dice_count * average + bonus
-end
-
-local function estimate_defense_value(action)
-    local dice_count = action.dice_count or 0
-    local average = average_for_die(action.dice_type or "d6")
-
-    return dice_count * average
-end
-
-local function crest_value(crest, amount)
-    local multiplier = amount or 1
-
-    if BENEFICIAL_CRESTS[crest] then
-        return 2 * multiplier
-    end
-
-    if DETRIMENTAL_CRESTS[crest] then
-        return -2 * multiplier
-    end
-
-    return multiplier
-end
-
-local function score_tech(ai_combatant, opponent, tech)
-    if not tech then
-        return -math.huge
-    end
-
-    local offense = 0
-    local defense = 0
-    local support = 0
-
-    local opponent_wounds = count_wounded_parts(opponent)
-
-    for _, action in ipairs(tech.actions or {}) do
-        if action.type == "attack_roll" then
-            local value = estimate_attack_value(action)
-
-            if opponent_wounds > 0 then
-                value = value * (1 + opponent_wounds * 0.15)
-            end
-
-            offense = offense + value
-        elseif action.type == "damage_body_part" then
-            local steps = action.amount or 1
-            offense = offense + (steps * 6)
-        elseif action.type == "defense_roll" then
-            defense = defense + estimate_defense_value(action)
-        elseif action.type == "heal_body_part" then
-            support = support + 6
-        elseif action.type == "gain_crest" then
-            support = support + crest_value(action.crest, action.amount)
-        elseif action.type == "consume_crest" then
-            support = support - crest_value(action.crest, action.amount)
-        end
-    end
-
-    local heart_points = ai_combatant and ai_combatant.heart_points or 3
-    if heart_points <= 1 then
-        defense = defense * 1.75
-        support = support + 2
-    elseif heart_points == 2 then
-        defense = defense * 1.25
-    end
-
-    local ai_wounds = count_wounded_parts(ai_combatant)
-    if ai_wounds > 0 then
-        support = support + ai_wounds * 2.5
-    end
-
-    local total_actions = #(tech.actions or {})
-
-    return offense * 1.1 + defense + support + total_actions * 0.1
-end
-
-local function get_tech_list(ai_combatant, provided)
-    local source = provided
-
-    if not source or #source == 0 then
-        if ai_combatant and ai_combatant.get_available_techs then
-            source = ai_combatant:get_available_techs()
-        else
-            source = {}
-        end
-    end
-
-    local techs = {}
-
-    for _, entry in ipairs(source) do
-        if entry then
-            if entry.tech then
-                table.insert(techs, entry.tech)
-            else
-                table.insert(techs, entry)
-            end
-        end
-    end
-
-    return techs
-end
-
-function AI.choose_tech(ai_combatant, opponent, available_techs)
-    local techs = get_tech_list(ai_combatant, available_techs)
-    local best_tech = nil
-    local best_score = -math.huge
-
-    for _, tech in ipairs(techs) do
-        local score = score_tech(ai_combatant, opponent, tech)
-        if score > best_score then
-            best_score = score
-            best_tech = tech
-        end
-    end
-
-    return best_tech
-end
-
-local function gather_targetable_parts(opponent, context)
-    if not opponent then
-        return {}
-    end
-
-    local parts = nil
-
-    if context and context.engine and context.engine.get_targetable_parts then
-        parts = context.engine:get_targetable_parts(opponent)
-    end
-
-    if parts and #parts > 0 then
-        return parts
-    end
-
-    parts = {}
-    for _, part in ipairs(opponent.body_parts or {}) do
-        if part.status ~= "maimed" then
-            table.insert(parts, part)
-        end
-    end
-
-    return parts
-end
-
-local function sort_target_priority(parts)
-    table.sort(parts, function(a, b)
-        local a_priority = STATUS_PRIORITY[a.status or "healthy"] or 1
-        local b_priority = STATUS_PRIORITY[b.status or "healthy"] or 1
-
-        if a_priority == b_priority then
-            local a_toughness = a.toughness or math.huge
-            local b_toughness = b.toughness or math.huge
-
-            if a_toughness == b_toughness then
-                local a_hp = a.hp_value or 0
-                local b_hp = b.hp_value or 0
-                if a_hp == b_hp then
-                    return (a.id or "") < (b.id or "")
-                end
-                return a_hp > b_hp
-            end
-
-            return a_toughness < b_toughness
-        end
-
-        return a_priority > b_priority
-    end)
-end
-
-function AI.assign_targets(ai_combatant, opponent, tech, context)
-    local assignments = {}
-
-    if not tech or not tech.actions or not opponent then
-        return assignments
-    end
-
-    local engine = context and context.engine or nil
-    local targetable_parts = gather_targetable_parts(opponent, context)
-
-    if #targetable_parts == 0 then
-        return assignments
-    end
-
-    sort_target_priority(targetable_parts)
-
-    local function get_preferred_part(index)
-        if #targetable_parts == 0 then
-            return nil
-        end
-
-        local adjusted = ((index - 1) % #targetable_parts) + 1
-        return targetable_parts[adjusted]
-    end
-
-    local attack_index = 0
-
-    for index, action in ipairs(tech.actions) do
-        if action.type == "attack_roll" then
-            attack_index = attack_index + 1
-
-            local target_part = nil
-
-            if action.target_body_part_id and opponent.get_body_part_by_id then
-                target_part = opponent:get_body_part_by_id(action.target_body_part_id)
-            end
-
-            if not target_part then
-                target_part = get_preferred_part(attack_index)
-            end
-
-            if target_part then
-                if target_part.status == "maimed" then
-                    target_part = nil
-                end
-            end
-
-            if target_part then
-                if not engine or not engine.is_part_untargetable or not engine:is_part_untargetable(target_part) then
-                    assignments[index] = target_part
-                end
-            end
-        end
-    end
-
-    return assignments
-end
-
-return AI
-
 
 ```
 
 ## combat/bodypart.lua
 
 ```lua
+local Keywords = require("combat.keywords")
+
 local BodyPart = {}
 BodyPart.__index = BodyPart
 
@@ -352,13 +738,18 @@ local VALID_STATUSES = {
 function BodyPart:new(data)
     local instance = {
         id = data.id,
+        instance_id = data.instance_id,
         name = data.name,
+        flavor = data.flavor,
         type = data.type,
         status = data.status or "healthy",
-        toughness = data.toughness or 2,
         hp_value = data.hp_value or 1,
-        techs = data.techs or {},
-        tags = data.tags or {}
+        tags = data.tags or {},
+        die = data.die,
+        slot = data.slot,
+        keyword = Keywords.normalize(data.keyword),
+        keywords = Keywords.normalize_collection(data.keywords or {}),
+        slot_charge = {}
     }
 
     return setmetatable(instance, BodyPart)
@@ -393,6 +784,53 @@ function BodyPart:advance_damage_state()
     return self.status
 end
 
+function BodyPart:is_slot_online()
+    return self.slot ~= nil and self.status ~= "maimed"
+end
+
+function BodyPart:reset_slot_charge()
+    self.slot_charge = {}
+end
+
+function BodyPart:vent_slot_charge()
+    local had_charge = false
+
+    for _, charged in pairs(self.slot_charge or {}) do
+        if charged then
+            had_charge = true
+            break
+        end
+    end
+
+    self.slot_charge = {}
+    return had_charge
+end
+
+function BodyPart:has_keyword(keyword)
+    local wanted = Keywords.normalize(keyword)
+    if not wanted then
+        return false
+    end
+
+    if Keywords.normalize(self.keyword) == wanted then
+        return true
+    end
+
+    if type(self.keywords) == "table" then
+        if self.keywords[wanted] then
+            return true
+        end
+
+        for _, existing in ipairs(self.keywords) do
+            if Keywords.normalize(existing) == wanted then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function BodyPart:regress_damage_state()
     if self.status == "maimed" then
         self.status = "wounded"
@@ -424,11 +862,12 @@ function Combatant:new(data)
         body_parts = {},
         heart_points = data.heart_points or 3,
         crest_pool = data.crest_pool or {},
-        modifiers = {},
-        selected_tech = nil,
         is_player = data.is_player or false,
-        pending_forced_rerolls = 0,
-        attack_bonus_tokens = {}
+        pending_next_symbols = {},
+        allocation_symbol_modifiers = {},
+        pending_spellmarks = {},
+        shadow_slot_shroud = false,
+        ai_personality = data.ai_personality or data.ai_profile or data.ai or "balanced"
     }
 
     local combatant = setmetatable(instance, Combatant)
@@ -457,25 +896,6 @@ function Combatant:get_body_part_by_id(id)
         end
     end
     return nil
-end
-
-function Combatant:get_available_techs()
-    local techs = {}
-
-    for _, part in ipairs(self.body_parts) do
-        for _, tech in ipairs(part.techs or {}) do
-            if type(tech) == "table" then
-                table.insert(techs, { tech = tech, source_part = part })
-            elseif type(tech) == "string" then
-                table.insert(techs, {
-                    tech = { id = tech, name = tech, actions = {} },
-                    source_part = part
-                })
-            end
-        end
-    end
-
-    return techs
 end
 
 function Combatant:get_first_healthy_part()
@@ -524,203 +944,1234 @@ function Combatant:get_crest_count(crest)
     return self.crest_pool[crest] or 0
 end
 
-function Combatant:clear_modifiers()
-    self.modifiers = {}
-end
-
-function Combatant:add_modifier(key, value)
-    if not key then
+function Combatant:add_next_symbol(symbol)
+    if not symbol then
         return
     end
 
-    self.modifiers[key] = (self.modifiers[key] or 0) + (value or 0)
+    self.pending_next_symbols = self.pending_next_symbols or {}
+    table.insert(self.pending_next_symbols, symbol)
 end
 
-function Combatant:get_modifier(key)
-    if not key then
-        return 0
+function Combatant:get_pending_next_symbols()
+    return self.pending_next_symbols or {}
+end
+
+function Combatant:consume_pending_next_symbols()
+    local symbols = self.pending_next_symbols or {}
+    self.pending_next_symbols = {}
+    return symbols
+end
+
+function Combatant:add_allocation_symbol_modifier(modifier)
+    if type(modifier) ~= "table" or not modifier.symbol then
+        return
     end
 
-    return self.modifiers[key] or 0
+    self.allocation_symbol_modifiers = self.allocation_symbol_modifiers or {}
+    table.insert(self.allocation_symbol_modifiers, modifier)
+end
+
+function Combatant:get_allocation_symbol_modifiers()
+    return self.allocation_symbol_modifiers or {}
+end
+
+function Combatant:add_spellmark(spellmark)
+    if type(spellmark) ~= "table" then
+        return
+    end
+
+    self.pending_spellmarks = self.pending_spellmarks or {}
+    table.insert(self.pending_spellmarks, spellmark)
+end
+
+function Combatant:get_spellmarks()
+    return self.pending_spellmarks or {}
+end
+
+function Combatant:remove_spellmark(spellmark)
+    for index = #(self.pending_spellmarks or {}), 1, -1 do
+        if self.pending_spellmarks[index] == spellmark then
+            table.remove(self.pending_spellmarks, index)
+            return true
+        end
+    end
+
+    return false
+end
+
+function Combatant:clear_v2_round_effects()
+    self.pending_next_symbols = {}
+    self.allocation_symbol_modifiers = {}
+    self.pending_spellmarks = {}
+    self.shadow_slot_shroud = false
 end
 
 return Combatant
 
 ```
 
-## combat/crests.lua
+## combat/events.lua
 
 ```lua
-local CrestEffects = {}
+local Events = {
+    -- State transitions
+    COMBAT_START = "combat_start",
+    ROUND_START = "round_start",
+    UPKEEP_PHASE = "upkeep_phase",
+    ROLL_PHASE = "roll_phase",
+    ALLOCATION_PHASE = "allocation_phase",
+    RESOLUTION_PHASE = "resolution_phase",
+    ROUND_END = "round_end",
+    COMBAT_END = "combat_end",
 
-local PASSIVE_REGISTRY = {
-    Valor = function(engine, combatant, count)
-        if count >= 2 and combatant and combatant.add_modifier then
-            combatant:add_modifier("attack_bonus", 1)
-        end
+    -- Actions
+    DICE_ROLLED = "dice_rolled",
+    DIE_ASSIGNED = "die_assigned",
+    SLOT_FED = "slot_fed",
+    SLOT_TRIGGERED = "slot_triggered",
+    SLOT_RESOLVED = "slot_resolved",
+    SLOT_CHARGE_VENTED = "slot_charge_vented",
+    SPELLMARK_OPENED = "spellmark_opened",
+    SPELLMARK_RESOLVED = "spellmark_resolved",
+    KEYWORD_TRIGGERED = "keyword_triggered",
+    LATCH_EJECTED = "latch_ejected",
+    PART_RESOLVED = "part_resolved",
+    DAMAGE_DEALT = "damage_dealt",
+    BP_STATUS_CHANGED = "bp_status_changed",
+    HEAL_APPLIED = "heal_applied",
+    CREST_GAINED = "crest_gained",
+    CREST_EXPENDED = "crest_expended"
+}
+
+return Events
+
+```
+
+## combat/keywords.lua
+
+```lua
+local Keywords = {}
+
+Keywords.ORDER = {
+    "Armored",
+    "Brittle",
+    "Absorbent",
+    "Hungry"
+}
+
+Keywords.DEFINITIONS = {
+    Armored = {
+        name = "Armored",
+        short = "AR",
+        asset = "bp_keyword_armored",
+        layer = "rim",
+        description = "Only dice showing 2+ ATK may be assigned to this rim."
+    },
+    Brittle = {
+        name = "Brittle",
+        short = "BR",
+        asset = "bp_keyword_brittle",
+        layer = "body",
+        description = "Any damage to this Body Part maims it."
+    },
+    Absorbent = {
+        name = "Absorbent",
+        short = "AB",
+        asset = "bp_keyword_absorbent",
+        layer = "socket",
+        description = "If attacked and undamaged while its socket holds a die, feed that die to its Slot."
+    },
+    Hungry = {
+        name = "Hungry",
+        short = "HU",
+        asset = "bp_keyword_hungry",
+        layer = "slot",
+        description = "This Slot uses wildcard pips; any nonblank symbol can light one."
+    }
+}
+
+local CANONICAL = {}
+for _, name in ipairs(Keywords.ORDER) do
+    CANONICAL[name:lower()] = name
+end
+
+local function add_unique(list, seen, value)
+    local normalized = Keywords.normalize(value)
+    if normalized and not seen[normalized] then
+        table.insert(list, normalized)
+        seen[normalized] = true
     end
-}
+end
 
-local ALL_CRESTS = {
-    "Shadow",
-    "Valor",
-    "Knowledge",
-    "Cunning",
-    "Madness",
-    "Greed",
-    "Corruption"
-}
-
-local EXPEND_REGISTRY = {}
-
-local function random_crest_name()
-    if #ALL_CRESTS == 0 then
+function Keywords.normalize(keyword)
+    if keyword == nil then
         return nil
     end
 
-    local index = math.random(1, #ALL_CRESTS)
-    return ALL_CRESTS[index]
+    local text = tostring(keyword)
+    return CANONICAL[text:lower()] or text
 end
 
-function CrestEffects.apply(engine, combatant)
-    if not combatant then
-        return
-    end
+function Keywords.is_known(keyword)
+    local normalized = Keywords.normalize(keyword)
+    return normalized ~= nil and Keywords.DEFINITIONS[normalized] ~= nil
+end
 
-    for crest, handler in pairs(PASSIVE_REGISTRY) do
-        if handler then
-            local count = combatant.get_crest_count and combatant:get_crest_count(crest) or 0
-            handler(engine, combatant, count)
+function Keywords.normalize_collection(source)
+    local list = {}
+    local seen = {}
+
+    if type(source) == "string" then
+        add_unique(list, seen, source)
+    elseif type(source) == "table" then
+        for _, value in ipairs(source) do
+            add_unique(list, seen, value)
+        end
+
+        for key, value in pairs(source) do
+            if type(key) ~= "number" and value then
+                add_unique(list, seen, key)
+            end
         end
     end
+
+    return list
 end
 
-function CrestEffects.can_expend(crest)
-    return crest ~= nil and EXPEND_REGISTRY[crest] ~= nil
-end
-
-function CrestEffects.get_expend_handler(crest)
-    return crest and EXPEND_REGISTRY[crest] or nil
-end
-
-function CrestEffects.random_crest()
-    return random_crest_name()
-end
-
-EXPEND_REGISTRY.Shadow = function(engine, combatant, on_complete)
-    if not engine or not combatant then
-        if on_complete then
-            on_complete({ type = "shadow", skipped = true })
-        end
-        return
+function Keywords.collection_has(source, keyword)
+    local wanted = Keywords.normalize(keyword)
+    if not wanted then
+        return false
     end
 
-    local opponent = engine:get_opponent(combatant)
-    if not opponent then
-        if on_complete then
-            on_complete({ type = "shadow", skipped = true })
+    for _, existing in ipairs(Keywords.normalize_collection(source)) do
+        if existing == wanted then
+            return true
         end
-        return
     end
 
-    local options = engine:get_targetable_parts(opponent)
-    if not options or #options == 0 then
-        if on_complete then
-            on_complete({ type = "shadow", skipped = true })
-        end
-        return
+    return false
+end
+
+function Keywords.has(part, keyword)
+    if not part then
+        return false
     end
 
-    local metadata = {
-        type = "crest_target_select",
-        crest = "Shadow",
-        combatant = combatant,
-        opponent = opponent,
-        options = {}
-    }
+    local wanted = Keywords.normalize(keyword)
+    if not wanted then
+        return false
+    end
 
-    for index, part in ipairs(options) do
-        metadata.options[index] = {
-            index = index,
-            part = part,
-            id = part.id,
-            name = part.name,
-            status = part.status,
-            toughness = part.toughness or 0
+    if Keywords.normalize(part.keyword) == wanted then
+        return true
+    end
+
+    return Keywords.collection_has(part.keywords, wanted)
+end
+
+function Keywords.slot_is_hungry(part, slot)
+    slot = slot or (part and part.slot)
+    if Keywords.has(part, "Hungry") then
+        return true
+    end
+
+    if not slot then
+        return false
+    end
+
+    return slot.hungry == true
+        or Keywords.normalize(slot.keyword) == "Hungry"
+        or Keywords.collection_has(slot.keywords, "Hungry")
+end
+
+function Keywords.badges_for_part(part)
+    local badges = {}
+    if not part then
+        return badges
+    end
+
+    for _, name in ipairs(Keywords.ORDER) do
+        local present = Keywords.has(part, name)
+        if name == "Hungry" then
+            present = present or Keywords.slot_is_hungry(part, part.slot)
+        end
+
+        if present then
+            table.insert(badges, Keywords.DEFINITIONS[name])
+        end
+    end
+
+    return badges
+end
+
+function Keywords.validate_collection(source, allowed)
+    local errors = {}
+    for _, keyword in ipairs(Keywords.normalize_collection(source)) do
+        if not Keywords.is_known(keyword) then
+            table.insert(errors, "unknown keyword " .. tostring(keyword))
+        elseif allowed and not allowed[keyword] then
+            table.insert(errors, "keyword " .. tostring(keyword) .. " is not valid here")
+        end
+    end
+    return errors
+end
+
+return Keywords
+
+```
+
+## combat/v2_ai.lua
+
+```lua
+local Keywords = require("combat.keywords")
+local Symbols = require("core.symbols")
+local Effects = require("combat.v2_effects")
+
+local AI = {}
+
+local PROFILES = {
+    balanced = {
+        weights = {
+            rim = 30,
+            socket = 22,
+            slot = 14
+        },
+        symbol_values = {
+            strike = 9,
+            ward = 8,
+            slot = 8
+        },
+        fill_slot_bonus = 18,
+        charged_slot_bonus = 5,
+        target_status_bonus = {
+            wounded = 10,
+            healthy = 0
+        },
+        target_type_bonus = {
+            HEAD = 4,
+            BODY = 2
+        },
+        defend_status_bonus = {
+            wounded = 12,
+            healthy = 0
+        },
+        defend_charged_slot_bonus = 6,
+        heal_wounded_slot_bonus = 30,
+        heal_maimed_slot_bonus = 36,
+        heal_healthy_slot_penalty = -60,
+        preferred_slots = {}
+    },
+
+    aggressive = {
+        base = "balanced",
+        weights = {
+            rim = 38,
+            socket = 14,
+            slot = 12
+        },
+        symbol_values = {
+            strike = 11,
+            ward = 6,
+            slot = 7
+        },
+        target_status_bonus = {
+            wounded = 16,
+            healthy = 0
         }
+    },
+
+    bone_caster = {
+        base = "balanced",
+        weights = {
+            rim = 8,
+            socket = 44,
+            slot = 42
+        },
+        symbol_values = {
+            strike = 5,
+            ward = 10,
+            slot = 12
+        },
+        fill_slot_bonus = 30,
+        charged_slot_bonus = 12,
+        preferred_slots = {
+            speak_doom = 24,
+            ["Speak Doom"] = 24,
+            bonestorm = 24,
+            Bonestorm = 24
+        },
+        preferred_sockets = {
+            bone_demon_skull = 28,
+            bone_demon_rib_cage = 28
+        },
+        target_type_bonus = {
+            HEAD = 8,
+            BODY = 3
+        },
+        target_status_bonus = {
+            wounded = 8,
+            healthy = 0
+        },
+        defend_charged_slot_bonus = 16
+    }
+}
+
+local function copy_list(source)
+    local copy = {}
+    for index, value in ipairs(source or {}) do
+        copy[index] = value
+    end
+    return copy
+end
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
     end
 
-    local function handle_input(engine_instance, raw_input)
-        local choice = tonumber(raw_input)
-        local selection = choice and metadata.options[choice] or nil
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
 
-        if not selection then
-            engine_instance:request_input("Select a body part to shroud", handle_input, metadata)
-            return
+local function merge_table(base, override)
+    local merged = copy_table(base or {})
+
+    for key, value in pairs(override or {}) do
+        if key ~= "base" and type(value) == "table" and type(merged[key]) == "table" then
+            merged[key] = merge_table(merged[key], value)
+        elseif key ~= "base" then
+            merged[key] = copy_table(value)
+        end
+    end
+
+    return merged
+end
+
+local function resolve_profile(combatant)
+    local profile = combatant and combatant.ai_personality or nil
+
+    if type(profile) == "table" then
+        local base_name = profile.base or profile.profile or profile.id or "balanced"
+        local base = PROFILES[base_name] or PROFILES.balanced
+        return merge_table(base, profile)
+    end
+
+    local named = PROFILES[profile or "balanced"] or PROFILES.balanced
+    if named.base and PROFILES[named.base] then
+        return merge_table(PROFILES[named.base], named)
+    end
+
+    return copy_table(named)
+end
+
+local function slot_charge_count(part)
+    local total = 0
+    for _, charged in pairs(part and part.slot_charge or {}) do
+        if charged then
+            total = total + 1
+        end
+    end
+    return total
+end
+
+local function slot_feed_match_count(part, symbols)
+    local slot = part and part.slot
+    local cost = slot and slot.cost or {}
+    local to_light = {}
+    local hungry = part and Keywords.slot_is_hungry(part, slot)
+    local remaining_before = 0
+
+    for index = 1, #cost do
+        if not (part.slot_charge and part.slot_charge[index]) then
+            remaining_before = remaining_before + 1
+        end
+    end
+
+    for _, symbol in ipairs(symbols or {}) do
+        if symbol ~= Symbols.BLANK then
+            for index, required in ipairs(cost) do
+                if not (part.slot_charge and part.slot_charge[index]) and not to_light[index] then
+                    if hungry or required == symbol then
+                        to_light[index] = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    local lit_count = 0
+    for _ in pairs(to_light) do
+        lit_count = lit_count + 1
+    end
+
+    return lit_count, remaining_before
+end
+
+local function part_type_bonus(profile, part)
+    local part_type = part and part.type and tostring(part.type):upper()
+    return (profile.target_type_bonus and profile.target_type_bonus[part_type]) or 0
+end
+
+local function part_status_bonus(table_by_status, part)
+    local status = part and part.status or "healthy"
+    return (table_by_status and table_by_status[status]) or 0
+end
+
+local function preferred_slot_bonus(profile, slot)
+    if not slot then
+        return 0
+    end
+
+    local preferred = profile.preferred_slots or {}
+    return preferred[slot.id] or preferred[slot.name] or 0
+end
+
+local function preferred_socket_bonus(profile, part)
+    if not part then
+        return 0
+    end
+
+    local preferred = profile.preferred_sockets or {}
+    local slot = part.slot
+    return preferred[part.id]
+        or (slot and (preferred[slot.id] or preferred[slot.name]))
+        or 0
+end
+
+local function most_damaged_part(combatant)
+    local maimed = nil
+    local wounded = nil
+
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "maimed" then
+            maimed = maimed or part
+        elseif part.status == "wounded" then
+            wounded = wounded or part
+        end
+    end
+
+    return wounded or maimed
+end
+
+local function healing_effect_bonus(profile, combatant, source_part, effect)
+    if Effects.normalize_type(effect) ~= "heal_part" then
+        return 0
+    end
+
+    local target_mode = effect.target or "most_damaged"
+    local target_part = target_mode == "source_part" and source_part or most_damaged_part(combatant)
+    local status = target_part and target_part.status or "healthy"
+
+    if status == "maimed" then
+        return profile.heal_maimed_slot_bonus or 0
+    elseif status == "wounded" then
+        return profile.heal_wounded_slot_bonus or 0
+    end
+
+    return profile.heal_healthy_slot_penalty or 0
+end
+
+local function slot_effect_bonus(profile, combatant, part)
+    local total = 0
+    for _, effect in ipairs(Effects.actions(part and part.slot and part.slot.effect or {})) do
+        total = total + healing_effect_bonus(profile, combatant, part, effect)
+    end
+    return total
+end
+
+local function score_rim(profile, symbols, target)
+    local strikes = Symbols.count(symbols, Symbols.STRIKE)
+    if strikes <= 0 then
+        return nil
+    end
+
+    local weights = profile.weights or {}
+    local values = profile.symbol_values or {}
+    return (weights.rim or 0)
+        + strikes * (values.strike or 0)
+        + part_type_bonus(profile, target)
+        + part_status_bonus(profile.target_status_bonus, target)
+end
+
+local function score_socket(profile, symbols, part)
+    local wards = Symbols.count(symbols, Symbols.WARD)
+    if wards <= 0 then
+        return nil
+    end
+
+    local weights = profile.weights or {}
+    local values = profile.symbol_values or {}
+    return (weights.socket or 0)
+        + wards * (values.ward or 0)
+        + part_status_bonus(profile.defend_status_bonus, part)
+        + slot_charge_count(part) * (profile.defend_charged_slot_bonus or 0)
+        + preferred_socket_bonus(profile, part)
+end
+
+local function score_slot(profile, combatant, symbols, part)
+    local lit_count, remaining_before = slot_feed_match_count(part, symbols)
+    if lit_count <= 0 then
+        return nil
+    end
+
+    local weights = profile.weights or {}
+    local values = profile.symbol_values or {}
+    local score = (weights.slot or 0)
+        + lit_count * (values.slot or 0)
+        + slot_charge_count(part) * (profile.charged_slot_bonus or 0)
+        + preferred_slot_bonus(profile, part and part.slot)
+        + slot_effect_bonus(profile, combatant, part)
+
+    if remaining_before > 0 and lit_count >= remaining_before then
+        score = score + (profile.fill_slot_bonus or 0)
+    end
+
+    return score
+end
+
+local function consider(best, candidate)
+    if not candidate or not candidate.score then
+        return best
+    end
+
+    if not best or candidate.score > best.score then
+        return candidate
+    end
+
+    return best
+end
+
+local function score_die_moves(engine, combatant, die, profile)
+    local destinations = engine:get_valid_destinations(combatant, die)
+    local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
+    local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
+    local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
+    local best = nil
+
+    for _, part in ipairs(destinations.slots or {}) do
+        best = consider(best, {
+            kind = "slot",
+            die = die,
+            part = part,
+            score = score_slot(profile, combatant, slot_symbols, part)
+        })
+    end
+
+    for _, part in ipairs(destinations.rims or {}) do
+        best = consider(best, {
+            kind = "rim",
+            die = die,
+            part = part,
+            score = score_rim(profile, rim_symbols, part)
+        })
+    end
+
+    for _, part in ipairs(destinations.sockets or {}) do
+        best = consider(best, {
+            kind = "socket",
+            die = die,
+            part = part,
+            score = score_socket(profile, socket_symbols, part)
+        })
+    end
+
+    if best then
+        best.score = nil
+    end
+
+    return best
+end
+
+function AI.choose_allocation(engine, combatant, die_or_id)
+    if not (engine and combatant) then
+        return nil
+    end
+
+    local die = engine:find_die(combatant, die_or_id)
+    if not die then
+        return nil
+    end
+
+    return score_die_moves(engine, combatant, die, resolve_profile(combatant))
+end
+
+function AI.choose_next_allocation(engine, combatant)
+    if not (engine and combatant) then
+        return nil
+    end
+
+    local profile = resolve_profile(combatant)
+    local best = nil
+
+    for _, die in ipairs(engine:get_pool(combatant)) do
+        local destinations = engine:get_valid_destinations(combatant, die)
+        local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
+        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
+        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
+
+        for _, part in ipairs(destinations.slots or {}) do
+            best = consider(best, {
+                kind = "slot",
+                die = die,
+                part = part,
+                score = score_slot(profile, combatant, slot_symbols, part)
+            })
         end
 
-        engine_instance:clear_input()
-        engine_instance:mark_part_untargetable(selection.part)
+        for _, part in ipairs(destinations.rims or {}) do
+            best = consider(best, {
+                kind = "rim",
+                die = die,
+                part = part,
+                score = score_rim(profile, rim_symbols, part)
+            })
+        end
 
-        if on_complete then
-            on_complete({
-                type = "shadow",
-                target = selection.part
+        for _, part in ipairs(destinations.sockets or {}) do
+            best = consider(best, {
+                kind = "socket",
+                die = die,
+                part = part,
+                score = score_socket(profile, socket_symbols, part)
             })
         end
     end
 
-    engine:request_input("Select a body part to shroud", handle_input, metadata)
+    if best then
+        best.score = nil
+    end
+
+    return best
 end
 
-EXPEND_REGISTRY.Valor = function(_, combatant, on_complete)
-    if combatant and combatant.attack_bonus_tokens then
-        table.insert(combatant.attack_bonus_tokens, 2)
+function AI.auto_allocate(engine, combatant)
+    if not (engine and combatant) then
+        return
     end
 
-    if on_complete then
-        on_complete({
-            type = "valor",
-            bonus = 2
-        })
-    end
-end
+    local guard = 0
+    while guard < 24 do
+        guard = guard + 1
+        local move = AI.choose_next_allocation(engine, combatant)
+        if not move then
+            return
+        end
 
-EXPEND_REGISTRY.Madness = function(engine, combatant, on_complete)
-    if combatant then
-        combatant.pending_forced_rerolls = (combatant.pending_forced_rerolls or 0) + 1
-    end
-
-    local gained_crest = CrestEffects.random_crest()
-    if engine and engine.grant_crest and gained_crest and combatant then
-        engine:grant_crest(combatant, gained_crest, 1, { source = "madness_expend" })
-    end
-
-    if on_complete then
-        on_complete({
-            type = "madness",
-            gained_crest = gained_crest
-        })
+        local ok = engine:commit_allocation_move(combatant, move)
+        if not ok then
+            return
+        end
     end
 end
 
-return CrestEffects
+function AI.get_profile(name)
+    return copy_table(PROFILES[name or "balanced"])
+end
+
+return AI
 
 ```
 
-## combat/engine.lua
+## combat/v2_content.lua
+
+```lua
+local BodyPart = require("combat.bodypart")
+local Combatant = require("combat.combatant")
+local Crests = require("combat.crests")
+local Effects = require("combat.v2_effects")
+local Keywords = require("combat.keywords")
+local Symbols = require("core.symbols")
+
+local Content = {}
+
+local VALID_TIMINGS = {
+    spend = true,
+    on_hit = true,
+    on_wound_maim = true,
+    upkeep = true
+}
+
+local PART_KEYWORDS = {
+    Armored = true,
+    Brittle = true,
+    Absorbent = true,
+    Hungry = true
+}
+
+local SLOT_KEYWORDS = {
+    Hungry = true
+}
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
+
+local function add_error(errors, message)
+    table.insert(errors, message)
+end
+
+local function normalize_faces(faces)
+    local normalized = {}
+    for index = 1, 6 do
+        normalized[index] = Symbols.normalize_face(faces and faces[index] or Symbols.BLANK)
+    end
+    return normalized
+end
+
+local function normalize_die(die)
+    die = die or {}
+
+    return {
+        faces = normalize_faces(die.faces),
+        wound_faces = copy_table(die.wound_faces or { 1, 2 }),
+        maim_faces = copy_table(die.maim_faces or { 3, 4 })
+    }
+end
+
+local function normalize_slot(slot)
+    if not slot then
+        return nil
+    end
+
+    local normalized = copy_table(slot)
+    normalized.cost = {}
+    normalized.keyword = Keywords.normalize(slot.keyword)
+    normalized.keywords = Keywords.normalize_collection(slot.keywords or {})
+
+    for _, symbol in ipairs(slot.cost or {}) do
+        table.insert(normalized.cost, Symbols.normalize(symbol))
+    end
+
+    if Keywords.collection_has(normalized.keywords, "Hungry") or normalized.keyword == "Hungry" then
+        normalized.hungry = true
+    end
+
+    normalized.timing = (normalized.timing or "spend"):lower()
+    return normalized
+end
+
+local function validate_keywords(errors, owner_id, source, allowed)
+    for _, message in ipairs(Keywords.validate_collection(source, allowed)) do
+        add_error(errors, tostring(owner_id) .. " has " .. message)
+    end
+end
+
+local function validate_die(errors, part_id, die)
+    if type(die) ~= "table" then
+        add_error(errors, part_id .. " is missing die data")
+        return
+    end
+
+    if type(die.faces) ~= "table" then
+        add_error(errors, part_id .. " die.faces must be a table")
+    end
+
+    for index = 1, 6 do
+        if die.faces and die.faces[index] == nil then
+            add_error(errors, part_id .. " die.faces[" .. tostring(index) .. "] is missing")
+        end
+    end
+
+    local face_sets = {}
+    local function validate_face_indexes(field)
+        local indexes = die[field]
+        if type(indexes) ~= "table" then
+            add_error(errors, part_id .. " " .. field .. " must define exactly two face indexes")
+            return
+        end
+
+        if #indexes ~= 2 then
+            add_error(errors, part_id .. " " .. field .. " must define exactly two face indexes")
+        end
+
+        face_sets[field] = {}
+        for _, face_index in ipairs(die[field] or {}) do
+            local numeric = tonumber(face_index)
+            if not numeric or numeric < 1 or numeric > 6 then
+                add_error(errors, part_id .. " " .. field .. " contains invalid face index " .. tostring(face_index))
+            elseif face_sets[field][numeric] then
+                add_error(errors, part_id .. " " .. field .. " contains duplicate face index " .. tostring(face_index))
+            else
+                face_sets[field][numeric] = true
+            end
+        end
+    end
+
+    validate_face_indexes("wound_faces")
+    validate_face_indexes("maim_faces")
+
+    for index in pairs(face_sets.wound_faces or {}) do
+        if face_sets.maim_faces and face_sets.maim_faces[index] then
+            add_error(errors, part_id .. " wound_faces and maim_faces both include face index " .. tostring(index))
+        end
+    end
+end
+
+local function validate_slot(errors, slot_id, slot)
+    if type(slot) ~= "table" then
+        add_error(errors, "slot " .. tostring(slot_id) .. " must be a table")
+        return
+    end
+
+    if not slot.name then
+        add_error(errors, "slot " .. tostring(slot_id) .. " is missing name")
+    end
+
+    if type(slot.cost) ~= "table" or #slot.cost == 0 then
+        add_error(errors, "slot " .. tostring(slot_id) .. " must define a non-empty cost")
+    end
+
+    local timing = (slot.timing or "spend"):lower()
+    if not VALID_TIMINGS[timing] then
+        add_error(errors, "slot " .. tostring(slot_id) .. " has invalid timing " .. tostring(slot.timing))
+    end
+
+    validate_keywords(errors, "slot " .. tostring(slot_id), slot.keyword, SLOT_KEYWORDS)
+    validate_keywords(errors, "slot " .. tostring(slot_id), slot.keywords, SLOT_KEYWORDS)
+    Effects.validate(slot.effect or { type = "none" }, "slot " .. tostring(slot_id) .. ".effect", errors)
+end
+
+function Content.validate(definitions)
+    local errors = {}
+
+    if type(definitions) ~= "table" then
+        return { "content module must return a table" }
+    end
+
+    for slot_id, slot in pairs(definitions.slots or {}) do
+        validate_slot(errors, slot_id, slot)
+    end
+
+    for part_id, part in pairs(definitions.parts or {}) do
+        if not part.id then
+            add_error(errors, "part " .. tostring(part_id) .. " is missing id")
+        elseif part.id ~= part_id then
+            add_error(errors, "part key " .. tostring(part_id) .. " does not match id " .. tostring(part.id))
+        end
+
+        if not part.name then
+            add_error(errors, part_id .. " is missing name")
+        end
+
+        if not part.type then
+            add_error(errors, part_id .. " is missing type")
+        end
+
+        validate_die(errors, part_id, part.die)
+        validate_keywords(errors, part_id, part.keyword, PART_KEYWORDS)
+        validate_keywords(errors, part_id, part.keywords, PART_KEYWORDS)
+
+        if type(part.slot) == "string" and not (definitions.slots and definitions.slots[part.slot]) then
+            add_error(errors, part_id .. " references unknown slot " .. tostring(part.slot))
+        elseif type(part.slot) == "table" then
+            validate_slot(errors, part_id .. ".slot", part.slot)
+        end
+    end
+
+    for loadout_id, loadout in pairs(definitions.loadouts or {}) do
+        if type(loadout.parts) ~= "table" or #loadout.parts == 0 then
+            add_error(errors, "loadout " .. tostring(loadout_id) .. " must define parts")
+        else
+            for _, part_id in ipairs(loadout.parts) do
+                if not (definitions.parts and definitions.parts[part_id]) then
+                    add_error(errors, "loadout " .. tostring(loadout_id) .. " references unknown part " .. tostring(part_id))
+                end
+            end
+        end
+
+        for crest in pairs(loadout.crest_pool or {}) do
+            Crests.validate_name(errors, "loadout " .. tostring(loadout_id) .. ".crest_pool", crest)
+        end
+    end
+
+    return errors
+end
+
+function Content.load_module(module_name)
+    local definitions = require(module_name)
+    local errors = Content.validate(definitions)
+    if #errors > 0 then
+        error("Invalid v2 combat content in " .. tostring(module_name) .. ":\n - " .. table.concat(errors, "\n - "))
+    end
+    return definitions
+end
+
+function Content.build_part(definitions, part_id)
+    local part_def = definitions.parts and definitions.parts[part_id]
+    if not part_def then
+        error("Unknown body part: " .. tostring(part_id))
+    end
+
+    local data = copy_table(part_def)
+    data.die = normalize_die(part_def.die)
+    data.keyword = Keywords.normalize(part_def.keyword)
+    data.keywords = Keywords.normalize_collection(part_def.keywords or {})
+
+    if type(part_def.slot) == "string" then
+        data.slot = normalize_slot(definitions.slots[part_def.slot])
+    else
+        data.slot = normalize_slot(part_def.slot)
+    end
+
+    return BodyPart:new(data)
+end
+
+function Content.build_combatant(definitions, loadout_id)
+    local loadout = definitions.loadouts and definitions.loadouts[loadout_id]
+    if not loadout then
+        error("Unknown combatant loadout: " .. tostring(loadout_id))
+    end
+
+    local combatant = Combatant:new({
+        id = loadout.id or loadout_id,
+        name = loadout.name or loadout_id,
+        is_player = loadout.is_player or false,
+        ai_personality = copy_table(loadout.ai_personality or loadout.ai_profile or loadout.ai),
+        crest_pool = copy_table(loadout.crest_pool or {}),
+        heart_points = loadout.heart_points or 3
+    })
+
+    for _, part_id in ipairs(loadout.parts or {}) do
+        combatant:add_body_part(Content.build_part(definitions, part_id))
+    end
+
+    return combatant
+end
+
+return Content
+
+```
+
+## combat/v2_demo.lua
+
+```lua
+local Content = require("combat.v2_content")
+local Encounters = require("combat.v2_encounters")
+
+local Demo = {}
+
+local MODULE_NAME = "data.combat.v2_demo_parts"
+
+function Demo.create_combatants(context)
+    return Encounters.create_combatants(context)
+end
+
+function Demo.validate()
+    local errors = Content.validate(require(MODULE_NAME))
+    for _, message in ipairs(Encounters.validate()) do
+        table.insert(errors, message)
+    end
+    return errors
+end
+
+return Demo
+
+```
+
+## combat/v2_engine.lua
 
 ```lua
 local Events = require("combat.events")
-local States = require("combat.states")
-local Dice = require("core.dice")
-local CrestPassives = require("combat.crests")
-local AI = require("combat.ai")
+local Crests = require("combat.crests")
+local Effects = require("combat.v2_effects")
+local Keywords = require("combat.keywords")
+local Symbols = require("core.symbols")
+local SymbolDie = require("core.symbol_die")
 
 local Engine = {}
 Engine.__index = Engine
 
-local MAX_STATE_ADVANCES_PER_UPDATE = 8
+local TIMING_SPEND = "spend"
+local TIMING_ON_HIT = "on_hit"
+local TIMING_ON_WOUND_MAIM = "on_wound_maim"
+local TIMING_UPKEEP = "upkeep"
+
+local function copy_list(source)
+    local copy = {}
+    for index, value in ipairs(source or {}) do
+        copy[index] = value
+    end
+    return copy
+end
+
+local function copy_result_fields(target, source)
+    for key, value in pairs(source or {}) do
+        if key ~= "actions" and target[key] == nil then
+            target[key] = value
+        end
+    end
+end
+
+local function amount_or_default(value, default)
+    local numeric = tonumber(value)
+    if not numeric or numeric < 1 then
+        return default or 1
+    end
+    return math.floor(numeric)
+end
+
+local function repeated_symbol(symbol, amount)
+    local symbols = {}
+    local normalized = Symbols.normalize(symbol)
+    for _ = 1, amount_or_default(amount, 1) do
+        if normalized and normalized ~= Symbols.BLANK then
+            table.insert(symbols, normalized)
+        end
+    end
+    return symbols
+end
+
+local function normalize_destination(destination)
+    local value = destination and tostring(destination):lower()
+    if value == "sockets" then
+        return "socket"
+    elseif value == "rims" then
+        return "rim"
+    elseif value == "slots" then
+        return "slot"
+    end
+    return value
+end
+
+local function modifier_applies_to_destination(modifier, destination)
+    local wanted = normalize_destination(modifier and (modifier.destination or modifier.destination_kind))
+    if not wanted then
+        return true
+    end
+
+    local actual = normalize_destination(destination)
+    return actual == nil or actual == wanted
+end
+
+local function modifier_matches_symbols(modifier, symbols)
+    local match = modifier and (modifier.match or modifier.match_symbol or modifier.source_symbol)
+    if not match or match == "any" then
+        return true
+    end
+
+    if type(match) == "table" then
+        for _, symbol in ipairs(match) do
+            if Symbols.has(symbols, symbol) then
+                return true
+            end
+        end
+        return false
+    end
+
+    return Symbols.has(symbols, match)
+end
+
+local function default_spellmark_target(destination)
+    return normalize_destination(destination) == "rim" and "opponent" or "self"
+end
+
+local function spellmark_accepts_symbol(spellmark, symbols)
+    local accepted = spellmark and (spellmark.symbol or spellmark.accept_symbol or Symbols.ESSENCE)
+    return accepted and Symbols.has(symbols, accepted)
+end
+
+local function spellmark_part_matches(spellmark, part)
+    if not spellmark or not part then
+        return false
+    end
+
+    if spellmark.target_part_id and spellmark.target_part_id ~= part.id then
+        return false
+    end
+
+    local wanted_type = spellmark.target_type or spellmark.part_type
+    if wanted_type and tostring(wanted_type):upper() ~= tostring(part.type or ""):upper() then
+        return false
+    end
+
+    return true
+end
+
+local function classify_symbols_for_relevance(symbols, relevant_symbols)
+    local used = {}
+    local burned = {}
+
+    for _, symbol in ipairs(symbols or {}) do
+        if relevant_symbols[symbol] then
+            table.insert(used, symbol)
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    return used, burned
+end
+
+local function slot_cost(slot)
+    local cost = slot and slot.cost or {}
+    local normalized = {}
+
+    for _, symbol in ipairs(cost) do
+        table.insert(normalized, Symbols.normalize(symbol))
+    end
+
+    return normalized
+end
+
+local function rim_accepts_symbols(part, symbols)
+    if Keywords.has(part, "Armored") and Symbols.count(symbols, Symbols.STRIKE) < 2 then
+        return false, "armored_requires_two_strikes"
+    end
+
+    return true
+end
+
+local function match_slot_feed(part, slot, symbols)
+    local cost = slot_cost(slot)
+    local to_light = {}
+    local burned = {}
+    local hungry = Keywords.slot_is_hungry(part, slot)
+
+    for _, symbol in ipairs(symbols or {}) do
+        local matched_index = nil
+
+        if symbol ~= Symbols.BLANK then
+            for index, required in ipairs(cost) do
+                if not (part.slot_charge and part.slot_charge[index]) and not to_light[index] then
+                    if hungry or required == symbol then
+                        matched_index = index
+                        break
+                    end
+                end
+            end
+        end
+
+        if matched_index then
+            to_light[matched_index] = symbol
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    return cost, to_light, burned
+end
+
+local function lit_count(to_light)
+    local total = 0
+    for _ in pairs(to_light or {}) do
+        total = total + 1
+    end
+    return total
+end
 
 local function is_part_targetable(engine, part)
     if not part or part.status == "maimed" then
@@ -734,195 +2185,61 @@ local function is_part_targetable(engine, part)
     return true
 end
 
-local function collect_targetable_parts_from(engine, combatant)
-    local parts = {}
-
-    if not combatant or not combatant.body_parts then
-        return parts
+local function part_belongs_to(combatant, part)
+    if not combatant or not part then
+        return false
     end
 
-    for _, part in ipairs(combatant.body_parts) do
-        if is_part_targetable(engine, part) then
-            table.insert(parts, part)
+    for _, existing in ipairs(combatant.body_parts or {}) do
+        if existing == part then
+            return true
         end
     end
 
-    return parts
+    return false
 end
 
-local function merge_keyword_sources(destination, source)
-    if not source or not source.keywords then
-        return
+local function find_part(combatant, part_or_id)
+    if type(part_or_id) == "table" then
+        return part_or_id
     end
 
-    for key, value in pairs(source.keywords) do
-        if type(value) == "number" then
-            destination[key] = (destination[key] or 0) + value
-        elseif type(value) == "boolean" then
-            destination[key] = value and 1 or 0
-        elseif type(value) == "string" then
-            local numeric = tonumber(value)
-            destination[key] = numeric or value
-        else
-            destination[key] = value
-        end
+    if combatant and combatant.get_body_part_by_id then
+        return combatant:get_body_part_by_id(part_or_id)
     end
+
+    return nil
 end
 
-local function collect_keywords(tech, action)
-    local combined = {}
-    merge_keyword_sources(combined, tech)
-    merge_keyword_sources(combined, action)
-    return combined
-end
-
-local function get_keyword_value(keywords, key)
-    if not keywords then
+local function find_first_part_by_type(combatant, part_type)
+    local wanted = part_type and tostring(part_type):upper()
+    if not wanted then
         return nil
     end
 
-    local value = keywords[key]
-    if type(value) == "number" then
-        return value
-    elseif type(value) == "boolean" then
-        return value and 1 or 0
-    elseif type(value) == "string" then
-        return tonumber(value) or value
-    end
-
-    return value
-end
-
-local function apply_consistent_keyword(result, keywords)
-    if not result or not keywords then
-        return nil
-    end
-
-    local consistent_value = get_keyword_value(keywords, "Consistent")
-    if not consistent_value then
-        return nil
-    end
-
-    consistent_value = tonumber(consistent_value)
-    if not consistent_value then
-        return nil
-    end
-
-    local count = result.count or #result.rolls or 0
-    if count <= 0 then
-        return nil
-    end
-
-    result.rolls = result.rolls or {}
-    for index = 1, count do
-        result.rolls[index] = consistent_value
-    end
-
-    result.total = consistent_value * count
-    result.consistent_value = consistent_value
-
-    return consistent_value
-end
-
-local function get_pre_roll_bucket_key(action_type)
-    if action_type == "defense_roll" then
-        return "defense"
-    end
-
-    return "attack"
-end
-
-local function clone_roll_result(result)
-    if not result then
-        return nil
-    end
-
-    local copy = {}
-
-    for key, value in pairs(result) do
-        if key == "rolls" and type(value) == "table" then
-            copy.rolls = {}
-            for index, roll in ipairs(value) do
-                copy.rolls[index] = roll
-            end
-        else
-            copy[key] = value
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.type and tostring(part.type):upper() == wanted and part.status ~= "maimed" then
+            return part
         end
     end
 
-    return copy
+    return nil
 end
 
-local AttackPipeline = {}
+local function is_slot_filled(part, slot)
+    local cost = slot_cost(slot)
+    if #cost == 0 then
+        return false
+    end
 
-function AttackPipeline.apply_base_totals(_, context)
-    context.attack_total = (context.attack_total or 0)
-    context.effective_defense = math.max(0, context.effective_defense or 0)
-    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
-    context.defense_total = context.effective_defense
+    for index = 1, #cost do
+        if not (part.slot_charge and part.slot_charge[index]) then
+            return false
+        end
+    end
+
+    return true
 end
-
-function AttackPipeline.apply_piercing(_, context)
-    local pierce = get_keyword_value(context.keywords, "Piercing")
-    if not pierce then
-        return
-    end
-
-    pierce = tonumber(pierce) or 0
-    if pierce <= 0 then
-        return
-    end
-
-    local total_reduction = 0
-    local defense_before = context.effective_defense or 0
-    local defense_reduction = math.min(defense_before, pierce)
-    context.effective_defense = defense_before - defense_reduction
-    total_reduction = total_reduction + defense_reduction
-
-    local remaining = pierce - defense_reduction
-    local toughness_reduction = 0
-    if remaining > 0 then
-        local base_before = context.base_toughness or 0
-        toughness_reduction = math.min(base_before, remaining)
-        context.base_toughness = base_before - toughness_reduction
-        total_reduction = total_reduction + toughness_reduction
-    end
-
-    context.effective_defense = math.max(0, context.effective_defense)
-    context.base_toughness = math.max(0, context.base_toughness or 0)
-    context.effective_toughness = (context.base_toughness or 0) + context.effective_defense
-    context.defense_total = context.effective_defense
-
-    context.notes = context.notes or {}
-    context.notes.piercing = total_reduction
-    context.notes.piercing_defense = defense_reduction
-    context.notes.piercing_toughness = toughness_reduction
-end
-
-function AttackPipeline.check_hit(_, context)
-    context.hit = (context.attack_total or 0) > (context.effective_toughness or 0)
-end
-
-function AttackPipeline.apply_brutal(_, context)
-    if not context.hit then
-        return
-    end
-
-    local brutal = get_keyword_value(context.keywords, "Brutal")
-    if not brutal then
-        return
-    end
-
-    brutal = tonumber(brutal) or 0
-    if brutal == 0 then
-        return
-    end
-
-    context.damage = (context.damage or context.base_damage or 1) + brutal
-    context.notes = context.notes or {}
-    context.notes.brutal = brutal
-end
-
 
 function Engine:new()
     local instance = {
@@ -931,159 +2248,21 @@ function Engine:new()
         current_round = 0,
         event_queue = {},
         listeners = {},
-        pending_input = nil,
-        selection_queue = nil,
-        attack_assignments = {},
-        defense_assignments = {},
-        attack_assignment_queue = nil,
-        defense_assignment_queue = nil,
-        attack_assignment_ready = false,
-        defense_assignment_ready = false,
         winner = nil,
-        pre_rolled_dice = {},
-        states = States,
+        initiative = "player",
+        dice_pools = {},
+        assignments = {
+            sockets = {},
+            rims = {}
+        },
+        slot_queue = {},
+        token_counter = 0,
+        queue_counter = 0,
+        spellmark_counter = 0,
         untargetable_parts = setmetatable({}, { __mode = "k" })
     }
 
     return setmetatable(instance, Engine)
-end
-
-function Engine:clear_pre_rolled_dice()
-    self.pre_rolled_dice = {}
-end
-
-function Engine:reset_pre_roll_store(combatant)
-    if not combatant then
-        return
-    end
-
-    self.pre_rolled_dice = self.pre_rolled_dice or {}
-    self.pre_rolled_dice[combatant] = {
-        attack = {},
-        defense = {}
-    }
-end
-
-function Engine:get_pre_roll_bucket(combatant, action_type)
-    if not combatant then
-        return nil
-    end
-
-    if not self.pre_rolled_dice then
-        return nil
-    end
-
-    local store = self.pre_rolled_dice[combatant]
-    if not store then
-        return nil
-    end
-
-    local key = get_pre_roll_bucket_key(action_type)
-    return store and store[key] or nil
-end
-
-function Engine:set_pre_rolled_result(combatant, action_index, action_type, result)
-    if not combatant or not action_index or not result then
-        return
-    end
-
-    self.pre_rolled_dice = self.pre_rolled_dice or {}
-    local store = self.pre_rolled_dice[combatant]
-    if not store then
-        store = {
-            attack = {},
-            defense = {}
-        }
-        self.pre_rolled_dice[combatant] = store
-    end
-
-    local key = get_pre_roll_bucket_key(action_type)
-    store[key] = store[key] or {}
-    store[key][action_index] = clone_roll_result(result)
-end
-
-function Engine:get_pre_rolled_result(combatant, action_index, action_type)
-    if not combatant or not action_index then
-        return nil
-    end
-
-    local bucket = self:get_pre_roll_bucket(combatant, action_type)
-    if not bucket then
-        return nil
-    end
-
-    return bucket[action_index]
-end
-
-function Engine:get_pre_rolled_total(combatant, action_index, action_type)
-    local result = self:get_pre_rolled_result(combatant, action_index, action_type)
-    return result and result.total or nil
-end
-
-function Engine:get_pre_rolled_totals(combatant, action_type)
-    local totals = {}
-    local bucket = self:get_pre_roll_bucket(combatant, action_type)
-
-    if not bucket then
-        return totals
-    end
-
-    for index, result in pairs(bucket) do
-        if result and result.total ~= nil then
-            totals[index] = result.total
-        end
-    end
-
-    return totals
-end
-
-function Engine:pre_roll_player_dice()
-    if not self.combatants then
-        return
-    end
-
-    self.pre_rolled_dice = self.pre_rolled_dice or {}
-
-    for _, combatant in ipairs(self.combatants) do
-        if combatant.is_player then
-            self:reset_pre_roll_store(combatant)
-
-            local tech = combatant.selected_tech
-            if tech and tech.actions then
-                for index, action in ipairs(tech.actions) do
-                    if action.type == "attack_roll" or action.type == "defense_roll" then
-                        local result = Dice.roll(action.dice_count or 1, action.dice_type or "d6")
-                        local keywords = collect_keywords(tech, action)
-                        apply_consistent_keyword(result, keywords)
-                        self:set_pre_rolled_result(combatant, index, action.type, result)
-                    end
-                end
-            else
-                self:reset_pre_roll_store(combatant)
-            end
-        end
-    end
-end
-
-function Engine:get_attack_pipeline()
-    return {
-        AttackPipeline.apply_base_totals,
-        AttackPipeline.apply_piercing,
-        AttackPipeline.check_hit,
-        AttackPipeline.apply_brutal
-    }
-end
-
-function Engine:run_attack_pipeline(context)
-    if not context then
-        return nil
-    end
-
-    for _, step in ipairs(self:get_attack_pipeline()) do
-        step(self, context)
-    end
-
-    return context
 end
 
 function Engine:emit(event_type, data)
@@ -1111,411 +2290,789 @@ function Engine:add_combatant(combatant)
     table.insert(self.combatants, combatant)
 end
 
-function Engine:start_combat()
-    self.current_round = 0
-    self.event_queue = {}
-    self.pending_input = nil
-    self.selection_queue = nil
-    self.attack_assignments = {}
-    self.defense_assignments = {}
-    self.attack_assignment_queue = nil
-    self.defense_assignment_queue = nil
-    self.attack_assignment_ready = false
-    self.defense_assignment_ready = false
-    self.winner = nil
-    self:clear_pre_rolled_dice()
-    self.untargetable_parts = setmetatable({}, { __mode = "k" })
-    self:clear_combatant_modifiers()
-
-    self:emit(Events.COMBAT_START, { combatants = self.combatants })
-    self:transition_to("ROUND_START")
-end
-
-function Engine:clear_combatant_modifiers()
-    for _, combatant in ipairs(self.combatants) do
-        if combatant.clear_modifiers then
-            combatant:clear_modifiers()
+function Engine:get_opponent(combatant)
+    for _, candidate in ipairs(self.combatants or {}) do
+        if candidate ~= combatant then
+            return candidate
         end
     end
+
+    return nil
 end
 
-function Engine:clear_untargetable_parts()
-    self.untargetable_parts = setmetatable({}, { __mode = "k" })
+function Engine:set_initiative(initiative)
+    self.initiative = initiative or "player"
 end
 
 function Engine:is_part_untargetable(part)
-    if not part then
-        return false
-    end
-
     return self.untargetable_parts and self.untargetable_parts[part] == true
 end
 
-function Engine:mark_part_untargetable(part)
+function Engine:mark_part_untargetable(part, source)
     if not part then
         return
     end
 
-    self.untargetable_parts = self.untargetable_parts or setmetatable({}, { __mode = "k" })
     self.untargetable_parts[part] = true
+    self:eject_latch(part, source)
 end
 
-function Engine:get_targetable_parts(combatant)
-    return collect_targetable_parts_from(self, combatant)
-end
-
-function Engine:apply_crest_passives()
-    for _, combatant in ipairs(self.combatants) do
-        CrestPassives.apply(self, combatant)
-    end
-end
-
-function Engine:perform_upkeep()
-    self:clear_untargetable_parts()
-    self:clear_combatant_modifiers()
-    self:apply_crest_passives()
-end
-
-function Engine:transition_to(state_name)
-    if self.state == state_name then
-        return
-    end
-
-    self.state = state_name
-    local state_data = self.states[state_name]
-    if state_data and state_data.enter then
-        state_data.enter(self)
-    end
-end
-
-function Engine:process_state()
-    local iterations = 0
-
-    while iterations < MAX_STATE_ADVANCES_PER_UPDATE do
-        if self:needs_input() then
-            break
-        end
-
-        local state_data = self.states[self.state]
-        if not state_data or not state_data.process then
-            break
-        end
-
-        local next_state = state_data.process(self)
-        if not next_state or next_state == self.state then
-            break
-        end
-
-        self:transition_to(next_state)
-        iterations = iterations + 1
-    end
-end
-
-function Engine:needs_input()
-    return self.pending_input ~= nil
-end
-
-function Engine:get_input_prompt()
-    return self.pending_input and self.pending_input.prompt or ""
-end
-
-function Engine:get_pending_input_metadata()
-    return self.pending_input and self.pending_input.metadata
-end
-
-function Engine:provide_input(input)
-    if not self.pending_input then
-        return
-    end
-
-    local handler = self.pending_input.handler
-    self.pending_input = nil
-
-    if handler then
-        handler(self, input)
-    end
-end
-
-function Engine:request_input(prompt, handler, metadata)
-    self.pending_input = {
-        prompt = prompt,
-        handler = handler,
-        metadata = metadata
+function Engine:clear_round_state()
+    self.dice_pools = {}
+    self.assignments = {
+        sockets = {},
+        rims = {}
     }
+    self.untargetable_parts = setmetatable({}, { __mode = "k" })
 
-    self:emit(Events.AWAIT_PLAYER_INPUT, {
-        prompt = prompt,
-        state = self.state,
-        metadata = metadata
+    for _, combatant in ipairs(self.combatants or {}) do
+        if combatant.clear_v2_round_effects then
+            combatant:clear_v2_round_effects()
+        end
+    end
+end
+
+function Engine:start_combat()
+    self.current_round = 0
+    self.event_queue = {}
+    self.winner = nil
+    self.slot_queue = {}
+    self.state = "WAITING"
+    self:emit(Events.COMBAT_START, { combatants = self.combatants })
+    self:start_round()
+end
+
+function Engine:start_round()
+    self.current_round = self.current_round + 1
+    self.state = "ROUND_START"
+    self:emit(Events.ROUND_START, { round = self.current_round })
+    self:perform_upkeep()
+    self:roll_all_dice()
+    self.state = "ALLOCATION"
+    self:emit(Events.ALLOCATION_PHASE, {
+        round = self.current_round,
+        initiative = self.initiative,
+        dice_pools = self.dice_pools
     })
 end
 
-function Engine:clear_input()
-    self.pending_input = nil
+function Engine:perform_upkeep()
+    self:clear_round_state()
+    self:emit(Events.UPKEEP_PHASE, { round = self.current_round })
+    self:resolve_slot_window(TIMING_UPKEEP)
 end
 
-function Engine:begin_tech_selection()
-    self.attack_assignment_ready = false
-    self.defense_assignment_ready = false
-    self.selection_queue = {}
-    for index, combatant in ipairs(self.combatants) do
-        self.selection_queue[index] = combatant
-        combatant.selected_tech = nil
-    end
-
-    self:advance_tech_selection()
+function Engine:next_token_id()
+    self.token_counter = self.token_counter + 1
+    return "die_" .. tostring(self.token_counter)
 end
 
-function Engine:advance_tech_selection()
-    if not self.selection_queue then
-        return
-    end
+function Engine:next_spellmark_id()
+    self.spellmark_counter = (self.spellmark_counter or 0) + 1
+    return "spellmark_" .. tostring(self.spellmark_counter)
+end
 
-    if #self.selection_queue == 0 then
-        self.selection_queue = nil
-        return
-    end
+function Engine:roll_all_dice()
+    self.state = "ROLL"
+    self:emit(Events.ROLL_PHASE, { round = self.current_round })
 
-    local combatant = self.selection_queue[1]
-    local available_entries = combatant:get_available_techs()
-    local available_techs = {}
+    for _, combatant in ipairs(self.combatants or {}) do
+        self.dice_pools[combatant] = {}
 
-    for index, entry in ipairs(available_entries) do
-        available_techs[index] = entry.tech
-    end
-
-    local function advance_queue()
-        table.remove(self.selection_queue, 1)
-        self:advance_tech_selection()
-    end
-
-    local function handle_player_selection()
-        if #available_techs > 0 then
-            local metadata = {
-                type = "tech_select_phase",
-                combatant = combatant,
-                options = {}
+        for _, part in ipairs(combatant.body_parts or {}) do
+            local result = SymbolDie.roll(part)
+            local token = {
+                id = self:next_token_id(),
+                owner = combatant,
+                source_part = part,
+                face_index = result.face_index,
+                symbols = result.symbols,
+                assigned = false
             }
 
-            for index, entry in ipairs(available_entries) do
-                local tech = entry.tech
-                local source_part = entry.source_part
-                metadata.options[index] = {
-                    index = index,
-                    tech = tech,
-                    tech_id = tech and tech.id,
-                    tech_name = tech and tech.name,
-                    body_part = source_part,
-                    body_part_id = source_part and source_part.id,
-                    body_part_name = source_part and source_part.name
-                }
-            end
-
-            self:emit(Events.TECH_SELECT_PHASE, {
+            table.insert(self.dice_pools[combatant], token)
+            self:emit(Events.DICE_ROLLED, {
                 combatant = combatant,
-                available_techs = available_techs,
-                options = metadata.options
+                die = token,
+                source_part = part,
+                face_index = token.face_index,
+                symbols = token.symbols,
+                formatted = Symbols.format_face(token.symbols)
             })
+        end
+    end
+end
 
-            local function handle_input(engine, raw_input)
-                local choice = tonumber(raw_input)
-                local selected_entry = choice and available_entries[choice] or nil
-                local selected_tech = selected_entry and selected_entry.tech or nil
-                local selected_option = choice and metadata.options[choice] or nil
+function Engine:get_pool(combatant)
+    self.dice_pools[combatant] = self.dice_pools[combatant] or {}
+    return self.dice_pools[combatant]
+end
 
-                if not selected_tech then
-                    engine:request_input("Invalid selection. Choose a tech by number", handle_input, metadata)
-                    return
-                end
+function Engine:find_die(combatant, die_or_id)
+    if type(die_or_id) == "table" then
+        return die_or_id
+    end
 
-                combatant.selected_tech = selected_tech
-                engine:emit(Events.TECH_SELECTED, {
-                    combatant = combatant,
-                    tech = combatant.selected_tech,
-                    body_part = selected_option and selected_option.body_part,
-                    option = selected_option
-                })
+    for _, die in ipairs(self:get_pool(combatant)) do
+        if die.id == die_or_id then
+            return die
+        end
+    end
 
-                engine:clear_input()
-                advance_queue()
+    return nil
+end
+
+function Engine:remove_die_from_pool(combatant, die)
+    local pool = self:get_pool(combatant)
+    for index = #pool, 1, -1 do
+        if pool[index] == die then
+            table.remove(pool, index)
+            return true
+        end
+    end
+
+    return false
+end
+
+function Engine:get_effective_symbols(combatant, die, destination)
+    local base = die and die.symbols or {}
+    local pending = combatant and combatant.get_pending_next_symbols and combatant:get_pending_next_symbols() or {}
+    local added = copy_list(pending)
+    local modifiers = combatant and combatant.get_allocation_symbol_modifiers and combatant:get_allocation_symbol_modifiers() or {}
+
+    for _, modifier in ipairs(modifiers) do
+        if modifier_applies_to_destination(modifier, destination) and modifier_matches_symbols(modifier, base) then
+            local symbol = modifier.symbol or modifier.add_symbol
+            local amount = amount_or_default(modifier.amount, 1)
+            for _, added_symbol in ipairs(repeated_symbol(symbol, amount)) do
+                table.insert(added, added_symbol)
             end
-
-            self:request_input("Select tech for " .. combatant.name, handle_input, metadata)
-        else
-            combatant.selected_tech = nil
-            advance_queue()
         end
     end
 
-    if combatant.is_player then
-        if self:prompt_crest_expenditure(combatant, handle_player_selection) then
-            return
-        end
-
-        handle_player_selection()
-        return
-    end
-
-    if #available_techs > 0 then
-        local opponent = self:get_opponent(combatant)
-        combatant.selected_tech = AI.choose_tech(combatant, opponent, available_techs) or available_techs[1]
-        self:emit(Events.TECH_SELECTED, {
-            combatant = combatant,
-            tech = combatant.selected_tech,
-            automatic = true
-        })
-    else
-        combatant.selected_tech = nil
-    end
-
-    advance_queue()
+    return Symbols.with_added_symbols(base, added), copy_list(added)
 end
 
-function Engine:tech_selection_complete()
-    return self.selection_queue == nil and not self:needs_input()
+function Engine:consume_pending_symbols(combatant)
+    if combatant and combatant.consume_pending_next_symbols then
+        return combatant:consume_pending_next_symbols()
+    end
+
+    return {}
 end
 
-function Engine:get_expendable_crests(combatant)
-    local options = {}
-
-    if not combatant or not combatant.crest_pool then
-        return options
-    end
-
-    for crest, count in pairs(combatant.crest_pool) do
-        if (count or 0) > 0 and CrestPassives.can_expend(crest) then
-            table.insert(options, {
-                name = crest,
-                count = count
-            })
-        end
-    end
-
-    table.sort(options, function(a, b)
-        if a.name == b.name then
-            return false
-        end
-        return a.name < b.name
-    end)
-
-    for index, entry in ipairs(options) do
-        entry.index = index
-    end
-
-    return options
+function Engine:commit_die(combatant, die, effective_symbols, added_symbols)
+    self:remove_die_from_pool(combatant, die)
+    self:consume_pending_symbols(combatant)
+    die.assigned = true
+    die.effective_symbols = effective_symbols
+    die.added_symbols = added_symbols
 end
 
-function Engine:prompt_select_crest(combatant, options, continue_callback)
-    local crest_options = options or self:get_expendable_crests(combatant)
-    if not crest_options or #crest_options == 0 then
-        if continue_callback then
-            continue_callback()
+function Engine:classify_assignment_symbols(symbols, relevant_symbol)
+    local used = {}
+    local burned = {}
+    local relevant = Symbols.normalize(relevant_symbol)
+
+    for _, symbol in ipairs(symbols or {}) do
+        if symbol == relevant then
+            table.insert(used, symbol)
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
         end
-        return
     end
 
-    local metadata = {
-        type = "crest_select",
-        combatant = combatant,
-        options = crest_options
+    return used, burned
+end
+
+function Engine:get_assignment_spellmark(combatant, destination, part, symbols)
+    local normalized_destination = normalize_destination(destination)
+    local spellmarks = combatant and combatant.get_spellmarks and combatant:get_spellmarks() or {}
+
+    for _, spellmark in ipairs(spellmarks) do
+        local mark_destination = normalize_destination(spellmark.destination) or "rim"
+        local target_side = spellmark.target or spellmark.target_side or default_spellmark_target(mark_destination)
+
+        if mark_destination == normalized_destination
+            and target_side == default_spellmark_target(normalized_destination)
+            and spellmark_part_matches(spellmark, part)
+            and spellmark_accepts_symbol(spellmark, symbols) then
+            return spellmark
+        end
+    end
+
+    return nil
+end
+
+function Engine:classify_destination_symbols(combatant, destination, part, symbols)
+    local normalized_destination = normalize_destination(destination)
+    local primary_symbol = normalized_destination == "rim" and Symbols.STRIKE or Symbols.WARD
+    local relevant = {
+        [primary_symbol] = true
     }
+    local spellmark = self:get_assignment_spellmark(combatant, normalized_destination, part, symbols)
 
-    local function handle_selection(engine, raw_input)
-        local choice = tonumber(raw_input)
-        local selection = choice and crest_options[choice] or nil
-
-        if not selection then
-            engine:request_input("Select a crest to expend", handle_selection, metadata)
-            return
-        end
-
-        engine:clear_input()
-        engine:expend_crest(combatant, selection.name, function()
-            if continue_callback then
-                continue_callback()
-            end
-        end)
+    if spellmark then
+        relevant[Symbols.normalize(spellmark.symbol or spellmark.accept_symbol or Symbols.ESSENCE)] = true
     end
 
-    self:request_input("Select a crest to expend", handle_selection, metadata)
+    local used, burned = classify_symbols_for_relevance(symbols, relevant)
+    return used, burned, spellmark
 end
 
-function Engine:prompt_crest_expenditure(combatant, on_complete)
-    if not combatant then
-        return false
+function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
+    local die = self:find_die(combatant, die_or_id)
+    local part = find_part(combatant, part_or_id)
+
+    if not die or not part or die.owner ~= combatant or not part_belongs_to(combatant, part) then
+        return false, "invalid_die_or_part"
     end
 
-    combatant._crest_prompted_round = combatant._crest_prompted_round or 0
-    if combatant._crest_prompt_in_progress then
-        return true
+    if part.status == "maimed" then
+        return false, "part_maimed"
     end
 
-    if combatant._crest_prompted_round == self.current_round then
-        return false
+    if self.assignments.sockets[part] then
+        return false, "socket_full"
     end
 
-    local function finish()
-        combatant._crest_prompt_in_progress = false
-        combatant._crest_prompted_round = self.current_round
-        if on_complete then
-            on_complete()
-        end
+    local effective, added = self:get_effective_symbols(combatant, die, "socket")
+    local used, burned, spellmark = self:classify_destination_symbols(combatant, "socket", part, effective)
+    if not Symbols.has(effective, Symbols.WARD) and not spellmark then
+        return false, "no_ward"
     end
 
-    local function ask_again()
-        local crest_options = self:get_expendable_crests(combatant)
-        if #crest_options == 0 then
-            finish()
-            return
-        end
+    self:commit_die(combatant, die, effective, added)
+    local assignment = {
+        die = die,
+        combatant = combatant,
+        part = part,
+        symbols = effective,
+        used_symbols = used,
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
+    }
+    self.assignments.sockets[part] = assignment
 
-        local metadata = {
-            type = "crest_prompt",
-            combatant = combatant,
-            options = crest_options
-        }
+    self:emit(Events.DIE_ASSIGNED, {
+        combatant = combatant,
+        die = die,
+        destination = "socket",
+        part = part,
+        used_symbols = used,
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
+    })
 
-        local function handle_yes_no(engine, raw_input)
-            local response = tostring(raw_input or ""):lower()
-            if response == "y" or response == "yes" then
-                engine:clear_input()
-                engine:prompt_select_crest(combatant, crest_options, ask_again)
-            elseif response == "n" or response == "no" then
-                engine:clear_input()
-                finish()
-            else
-                engine:request_input("Expend a crest?", handle_yes_no, metadata)
-            end
-        end
-
-        self:request_input("Expend a crest?", handle_yes_no, metadata)
+    if spellmark then
+        self:resolve_spellmark_assignment(combatant, spellmark, assignment)
     end
-
-    combatant._crest_prompt_in_progress = true
-    ask_again()
 
     return true
 end
 
+function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
+    local die = self:find_die(attacker, die_or_id)
+    local defender = self:get_opponent(attacker)
+    local target_part = find_part(defender, target_part_or_id)
+
+    if not die or not defender or not target_part or die.owner ~= attacker then
+        return false, "invalid_die_or_target"
+    end
+
+    if not is_part_targetable(self, target_part) then
+        return false, "target_not_targetable"
+    end
+
+    if self.assignments.rims[target_part] then
+        return false, "rim_full"
+    end
+
+    local effective, added = self:get_effective_symbols(attacker, die, "rim")
+    local used, burned, spellmark = self:classify_destination_symbols(attacker, "rim", target_part, effective)
+    if not Symbols.has(effective, Symbols.STRIKE) and not spellmark then
+        return false, "no_strike"
+    end
+
+    local accepted, reason = rim_accepts_symbols(target_part, effective)
+    if not accepted then
+        return false, reason
+    end
+
+    self:commit_die(attacker, die, effective, added)
+    local assignment = {
+        die = die,
+        attacker = attacker,
+        defender = defender,
+        part = target_part,
+        symbols = effective,
+        used_symbols = used,
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
+    }
+    self.assignments.rims[target_part] = assignment
+
+    self:emit(Events.DIE_ASSIGNED, {
+        combatant = attacker,
+        die = die,
+        destination = "rim",
+        target_combatant = defender,
+        part = target_part,
+        used_symbols = used,
+        burned_symbols = burned,
+        added_symbols = added,
+        spellmark = spellmark
+    })
+
+    if spellmark then
+        self:resolve_spellmark_assignment(attacker, spellmark, assignment)
+    end
+
+    return true
+end
+
+function Engine:feed_die_to_slot(combatant, die_or_id, part_or_id)
+    local die = self:find_die(combatant, die_or_id)
+    local part = find_part(combatant, part_or_id)
+
+    if not die or not part or die.owner ~= combatant or not part_belongs_to(combatant, part) then
+        return false, "invalid_die_or_part"
+    end
+
+    if not part:is_slot_online() then
+        return false, "slot_offline"
+    end
+
+    local slot = part.slot
+    local cost = slot_cost(slot)
+    if #cost == 0 then
+        return false, "slot_has_no_cost"
+    end
+
+    local effective, added = self:get_effective_symbols(combatant, die, "slot")
+    local _, to_light, burned = match_slot_feed(part, slot, effective)
+
+    if lit_count(to_light) == 0 then
+        return false, "no_matching_pips"
+    end
+
+    self:commit_die(combatant, die, effective, added)
+    return self:light_slot_from_symbols(combatant, die, part, slot, effective, added, to_light, burned)
+end
+
+function Engine:light_slot_from_symbols(combatant, die, part, slot, symbols, added, to_light, burned, extra)
+    if not part or not slot or lit_count(to_light) == 0 then
+        return false, "no_matching_pips"
+    end
+
+    local cost = slot_cost(slot)
+    part.slot_charge = part.slot_charge or {}
+
+    local lit = {}
+    for index, symbol in pairs(to_light) do
+        part.slot_charge[index] = true
+        table.insert(lit, {
+            index = index,
+            symbol = symbol,
+            required = cost[index]
+        })
+    end
+
+    table.sort(lit, function(a, b) return a.index < b.index end)
+
+    local event = {
+        combatant = combatant,
+        die = die,
+        part = part,
+        slot = slot,
+        lit = lit,
+        burned_symbols = burned or {},
+        added_symbols = added or {},
+        filled = is_slot_filled(part, slot)
+    }
+
+    for key, value in pairs(extra or {}) do
+        if event[key] == nil then
+            event[key] = value
+        end
+    end
+
+    self:emit(Events.SLOT_FED, event)
+
+    if is_slot_filled(part, slot) then
+        self:trigger_slot(combatant, part, slot)
+    end
+
+    return true
+end
+
+function Engine:resolve_absorbent_socket(combatant, part, defense, context)
+    if not (combatant and part and defense and Keywords.has(part, "Absorbent")) then
+        return false
+    end
+
+    if not part:is_slot_online() then
+        return false
+    end
+
+    local slot = part.slot
+    if #slot_cost(slot) == 0 then
+        return false
+    end
+
+    local _, to_light, burned = match_slot_feed(part, slot, defense.symbols or {})
+    if lit_count(to_light) == 0 then
+        return false
+    end
+
+    self.assignments.sockets[part] = nil
+    self:emit(Events.KEYWORD_TRIGGERED, {
+        combatant = combatant,
+        part = part,
+        keyword = "Absorbent",
+        assignment = defense,
+        context = context
+    })
+
+    return self:light_slot_from_symbols(combatant, defense.die, part, slot,
+        defense.symbols or {}, defense.added_symbols or {}, to_light, burned, {
+            source = "keyword",
+            keyword = "Absorbent",
+            assignment = defense,
+            context = context
+        })
+end
+
+function Engine:trigger_slot(combatant, part, slot)
+    part:reset_slot_charge()
+
+    self.queue_counter = self.queue_counter + 1
+    local entry = {
+        id = "slot_event_" .. tostring(self.queue_counter),
+        order = self.queue_counter,
+        combatant = combatant,
+        part = part,
+        slot = slot,
+        timing = (slot.timing or TIMING_SPEND):lower(),
+        effect = slot.effect or {}
+    }
+
+    table.insert(self.slot_queue, entry)
+
+    if combatant.shadow_slot_shroud then
+        self:mark_part_untargetable(part, { type = "shadow", slot = slot })
+    end
+
+    self:emit(Events.SLOT_TRIGGERED, entry)
+
+    if entry.timing == TIMING_SPEND then
+        self:resolve_slot_entry(entry)
+    end
+end
+
+function Engine:remove_slot_entry(entry)
+    for index = #self.slot_queue, 1, -1 do
+        if self.slot_queue[index] == entry then
+            table.remove(self.slot_queue, index)
+            return
+        end
+    end
+end
+
+function Engine:resolve_slot_window(timing)
+    local normalized = timing and timing:lower()
+    local pending = {}
+
+    for _, entry in ipairs(self.slot_queue or {}) do
+        if entry.timing == normalized then
+            table.insert(pending, entry)
+        end
+    end
+
+    table.sort(pending, function(a, b) return (a.order or 0) < (b.order or 0) end)
+
+    for _, entry in ipairs(pending) do
+        self:resolve_slot_entry(entry)
+    end
+end
+
+function Engine:create_virtual_assignment_die(owner, source_part, symbols, source)
+    local effective = Symbols.with_added_symbols(symbols or {}, {})
+    return {
+        id = self:next_token_id(),
+        owner = owner,
+        source_part = source_part,
+        symbols = copy_list(effective),
+        effective_symbols = copy_list(effective),
+        added_symbols = {},
+        assigned = true,
+        virtual = true,
+        source = source
+    }
+end
+
+function Engine:auto_assign_symbols(entry, effect)
+    local destination = normalize_destination(effect.destination) or "socket"
+    local actor = entry.combatant
+    local target_side = effect.target or effect.target_side
+    if not target_side then
+        target_side = destination == "rim" and "opponent" or "self"
+    end
+
+    local target = target_side == "opponent" and self:get_opponent(actor) or actor
+    local relevant = destination == "rim" and Symbols.STRIKE or Symbols.WARD
+    local symbols = repeated_symbol(effect.symbol or relevant, effect.amount or 1)
+    local assigned = {}
+    local wanted_type = effect.part_type and tostring(effect.part_type):upper()
+
+    if not actor or not target or #symbols == 0 or not Symbols.has(symbols, relevant) then
+        return {
+            type = effect.type,
+            destination = destination,
+            assigned = assigned
+        }
+    end
+
+    for _, part in ipairs(target.body_parts or {}) do
+        local type_ok = not wanted_type or (part.type and tostring(part.type):upper() == wanted_type)
+        local destination_free = destination == "rim" and not self.assignments.rims[part]
+            or destination == "socket" and not self.assignments.sockets[part]
+        local targetable = destination ~= "rim" or is_part_targetable(self, part)
+        local rim_accepted = destination ~= "rim" or rim_accepts_symbols(part, symbols)
+
+        if type_ok and destination_free and targetable and rim_accepted and part.status ~= "maimed" then
+            local token_owner = destination == "rim" and actor or target
+            local token = self:create_virtual_assignment_die(token_owner, entry.part, symbols, {
+                type = "slot",
+                slot = entry.slot,
+                effect = effect
+            })
+            local used, burned = self:classify_assignment_symbols(token.effective_symbols, relevant)
+
+            if destination == "rim" then
+                self.assignments.rims[part] = {
+                    die = token,
+                    attacker = actor,
+                    defender = target,
+                    part = part,
+                    symbols = token.effective_symbols,
+                    used_symbols = used,
+                    burned_symbols = burned,
+                    added_symbols = {},
+                    virtual = true,
+                    source_slot = entry.slot
+                }
+            else
+                self.assignments.sockets[part] = {
+                    die = token,
+                    combatant = target,
+                    part = part,
+                    symbols = token.effective_symbols,
+                    used_symbols = used,
+                    burned_symbols = burned,
+                    added_symbols = {},
+                    virtual = true,
+                    source_slot = entry.slot
+                }
+            end
+
+            table.insert(assigned, {
+                part = part,
+                die = token,
+                symbols = token.effective_symbols
+            })
+
+            self:emit(Events.DIE_ASSIGNED, {
+                combatant = actor,
+                die = token,
+                destination = destination,
+                target_combatant = destination == "rim" and target or nil,
+                part = part,
+                used_symbols = used,
+                burned_symbols = burned,
+                added_symbols = {},
+                virtual = true,
+                source = token.source
+            })
+        end
+    end
+
+    return {
+        type = effect.type,
+        destination = destination,
+        symbol = effect.symbol or relevant,
+        amount = amount_or_default(effect.amount, 1),
+        target = target,
+        assigned = assigned
+    }
+end
+
+function Engine:open_spellmark(entry, effect)
+    local destination = normalize_destination(effect.destination) or "rim"
+    local spellmark = {
+        id = self:next_spellmark_id(),
+        name = effect.name or effect.mark_name or (entry.slot and entry.slot.name) or "Spellmark",
+        destination = destination,
+        target = effect.target or effect.target_side or default_spellmark_target(destination),
+        symbol = Symbols.normalize(effect.symbol or effect.accept_symbol or Symbols.ESSENCE),
+        target_type = effect.target_type or effect.part_type,
+        target_part_id = effect.target_part_id,
+        single_use = effect.single_use ~= false,
+        payload = effect.on_mark or effect.payload or effect.effect or { type = "none" },
+        source = {
+            type = "slot",
+            slot = entry.slot,
+            part = entry.part
+        }
+    }
+
+    if entry.combatant and entry.combatant.add_spellmark then
+        entry.combatant:add_spellmark(spellmark)
+    end
+
+    self:emit(Events.SPELLMARK_OPENED, {
+        combatant = entry.combatant,
+        part = entry.part,
+        slot = entry.slot,
+        spellmark = spellmark
+    })
+
+    return {
+        type = effect.type,
+        spellmark = spellmark,
+        destination = destination,
+        symbol = spellmark.symbol,
+        target = spellmark.target
+    }
+end
+
+function Engine:resolve_spellmark_assignment(combatant, spellmark, assignment)
+    if not (combatant and spellmark and assignment) then
+        return nil
+    end
+
+    if spellmark.single_use ~= false and combatant.remove_spellmark then
+        combatant:remove_spellmark(spellmark)
+    end
+
+    local payload = spellmark.payload or { type = "none" }
+    local payload_type = payload.type or "none"
+    local result = {
+        type = "spellmark",
+        payload_type = payload_type,
+        spellmark = spellmark,
+        assignment = assignment,
+        target_part = assignment.part
+    }
+
+    if payload_type == "damage_marked_part" or payload_type == "damage_target_part" or payload_type == "damage_assigned_part" then
+        local amount = amount_or_default(payload.amount, 1)
+        local target = assignment.defender or assignment.combatant or self:get_opponent(combatant)
+        result.amount = amount
+        result.damaged = false
+
+        for _ = 1, amount do
+            if target and assignment.part and assignment.part.status ~= "maimed" then
+                result.damaged = self:apply_damage(combatant, target, assignment.part, {
+                    source = "spellmark",
+                    spellmark = spellmark,
+                    payload = payload,
+                    assignment = assignment
+                }) or result.damaged
+            end
+        end
+    elseif payload_type ~= "none" then
+        result.payload = self:resolve_effect_action({
+            combatant = combatant,
+            part = spellmark.source and spellmark.source.part,
+            slot = spellmark.source and spellmark.source.slot
+        }, payload)
+    end
+
+    self:emit(Events.SPELLMARK_RESOLVED, {
+        combatant = combatant,
+        spellmark = spellmark,
+        assignment = assignment,
+        part = assignment.part,
+        effect = result
+    })
+
+    if self.state ~= "COMPLETE" and self:check_combat_end() then
+        self.state = "COMPLETE"
+        self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+    end
+
+    return result
+end
+
+function Engine:resolve_effect_action(entry, effect)
+    return Effects.execute(self, entry, effect or { type = "none" })
+end
+
+function Engine:resolve_slot_entry(entry)
+    if not entry then
+        return
+    end
+
+    self:remove_slot_entry(entry)
+
+    local effect = entry.effect or {}
+    local result = {
+        type = effect.type or "none"
+    }
+
+    if type(effect) == "function" then
+        result = effect(self, entry) or result
+    else
+        local actions = Effects.actions(effect)
+        result = {
+            type = #actions > 1 and "sequence" or ((actions[1] and actions[1].type) or "none"),
+            actions = {}
+        }
+
+        for _, action in ipairs(actions) do
+            local action_result = self:resolve_effect_action(entry, action)
+            table.insert(result.actions, action_result)
+            if #actions == 1 then
+                copy_result_fields(result, action_result)
+            end
+        end
+    end
+
+    self:emit(Events.SLOT_RESOLVED, {
+        entry = entry,
+        combatant = entry.combatant,
+        part = entry.part,
+        slot = entry.slot,
+        effect = result
+    })
+
+    if self.state ~= "COMPLETE" and self:check_combat_end() then
+        self.state = "COMPLETE"
+        self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
+    end
+end
+
 function Engine:grant_crest(combatant, crest, amount, extra)
-    if not combatant or not combatant.add_crest or not crest then
+    if not combatant or not crest then
         return 0
     end
 
-    local delta = amount or 1
-    local total = combatant:add_crest(crest, delta)
+    crest = Crests.normalize(crest)
+    local total = combatant:add_crest(crest, amount or 1)
     local data = {
         combatant = combatant,
         crest = crest,
-        amount = delta,
+        amount = amount or 1,
         total = total
     }
 
-    if extra then
-        for key, value in pairs(extra) do
-            if data[key] == nil then
-                data[key] = value
-            end
+    for key, value in pairs(extra or {}) do
+        if data[key] == nil then
+            data[key] = value
         end
     end
 
@@ -1523,996 +3080,293 @@ function Engine:grant_crest(combatant, crest, amount, extra)
     return total
 end
 
-function Engine:expend_crest(combatant, crest, on_complete)
-    if not combatant or not crest then
-        if on_complete then
-            on_complete(nil)
-        end
-        return
+function Engine:expend_crest(combatant, crest)
+    local ok, canonical, effect = Crests.expend(self, combatant, crest)
+    if not ok then
+        return false, canonical
     end
 
-    local current = combatant.get_crest_count and combatant:get_crest_count(crest) or 0
-    if current <= 0 then
-        if on_complete then
-            on_complete(nil)
-        end
-        return
-    end
-
-    local remaining = combatant.remove_crest and combatant:remove_crest(crest, 1) or (current - 1)
-    if remaining < 0 then
-        remaining = 0
-    end
-
-    local handler = CrestPassives.get_expend_handler(crest)
-
-    local function finalize(effect_data)
-        self:emit(Events.CREST_EXPENDED, {
-            combatant = combatant,
-            crest = crest,
-            remaining = remaining,
-            effect = effect_data
-        })
-
-        if on_complete then
-            on_complete(effect_data)
-        end
-    end
-
-    if handler then
-        handler(self, combatant, finalize)
-    else
-        finalize(nil)
-    end
-end
-
-function Engine:consume_attack_bonus_token(combatant)
-    if not combatant or not combatant.attack_bonus_tokens then
-        return 0
-    end
-
-    if #combatant.attack_bonus_tokens == 0 then
-        return 0
-    end
-
-    return table.remove(combatant.attack_bonus_tokens, 1)
-end
-
-function Engine:apply_forced_reroll(combatant, result, context)
-    if not combatant or not result then
-        return result
-    end
-
-    local pending = combatant.pending_forced_rerolls or 0
-    if pending <= 0 then
-        return result
-    end
-
-    local rolls = result.rolls or {}
-    if #rolls == 0 then
-        combatant.pending_forced_rerolls = math.max(0, pending - 1)
-        return result
-    end
-
-    combatant.pending_forced_rerolls = pending - 1
-
-    local highest_index = 1
-    local highest_value = rolls[1]
-
-    for index, value in ipairs(rolls) do
-        if value > highest_value then
-            highest_value = value
-            highest_index = index
-        end
-    end
-
-    local sides = result.sides or (result.type and tonumber(result.type:match("d(%d+)"))) or 6
-    local new_roll = math.random(1, sides)
-
-    result.total = (result.total or 0) - highest_value + new_roll
-    rolls[highest_index] = new_roll
-
-    self:emit(Events.DIE_REROLLED, {
+    self:emit(Events.CREST_EXPENDED, {
         combatant = combatant,
-        crest = "Madness",
-        previous_value = highest_value,
-        new_value = new_roll,
+        crest = canonical,
+        remaining = combatant:get_crest_count(canonical),
+        effect = effect
+    })
+
+    return true
+end
+
+function Engine:eject_latch(part, source)
+    local assignment = self.assignments.rims[part]
+    if not assignment then
+        return nil
+    end
+
+    self.assignments.rims[part] = nil
+    self:emit(Events.LATCH_EJECTED, {
+        part = part,
+        assignment = assignment,
+        die = assignment.die,
+        source = source
+    })
+
+    return assignment
+end
+
+function Engine:find_most_damaged_part(combatant)
+    local maimed = nil
+    local wounded = nil
+
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "maimed" then
+            maimed = maimed or part
+        elseif part.status == "wounded" then
+            wounded = wounded or part
+        end
+    end
+
+    return wounded or maimed
+end
+
+function Engine:apply_healing(healer, target, part, amount, context)
+    if not target or not part or not part.regress_damage_state then
+        return false
+    end
+
+    local steps = amount or 1
+    local before = part.status
+
+    for _ = 1, steps do
+        part:regress_damage_state()
+    end
+
+    local after = part.status
+    local healed = before ~= after
+
+    self:emit(Events.HEAL_APPLIED, {
+        healer = healer,
+        target = target,
+        body_part = part,
+        amount = steps,
+        status_before = before,
+        status_after = after,
+        no_effect = not healed,
         context = context
     })
 
-    return result
+    return healed
 end
 
-function Engine:prepare_attack_assignments()
-    self.attack_assignment_ready = false
-    self.attack_assignments = {}
-    self.attack_assignment_queue = {}
-
-    self:clear_pre_rolled_dice()
-    self:pre_roll_player_dice()
-
-    for _, combatant in ipairs(self.combatants) do
-        self.attack_assignments[combatant] = {}
-
-        local tech = combatant.selected_tech
-        local actions = {}
-
-        if tech and tech.actions then
-            for index, action in ipairs(tech.actions) do
-                if action.type == "attack_roll" then
-                    table.insert(actions, {
-                        action = action,
-                        action_index = index
-                    })
-                end
-            end
-        end
-
-        if #actions > 0 then
-            if combatant.is_player then
-                table.insert(self.attack_assignment_queue, {
-                    combatant = combatant,
-                    actions = actions,
-                    next_index = 1
-                })
-            else
-                local opponent = self:get_opponent(combatant)
-                local assigned_targets = AI.assign_targets(combatant, opponent, tech, {
-                    engine = self,
-                    actions = actions
-                })
-
-                for _, data in ipairs(actions) do
-                    local target_part = assigned_targets and assigned_targets[data.action_index] or nil
-
-                    if target_part and not is_part_targetable(self, target_part) then
-                        target_part = nil
-                    end
-
-                    if not target_part then
-                        local _, fallback_part = self:select_target_body_part(combatant, data.action)
-                        target_part = fallback_part
-                    end
-
-                    if opponent and target_part then
-                        table.insert(self.attack_assignments[combatant], {
-                            tech = tech,
-                            action = data.action,
-                            action_index = data.action_index,
-                            target_combatant = opponent,
-                            target_part = target_part
-                        })
-
-                        self:emit(Events.ATTACK_ASSIGNED, {
-                            combatant = combatant,
-                            action = data.action,
-                            action_index = data.action_index,
-                            target = target_part,
-                            automatic = true
-                        })
-                    end
-                end
-            end
-        end
+function Engine:apply_damage(attacker, target, part, context)
+    if not target or not part or part.status == "maimed" then
+        return false
     end
 
-    if self.attack_assignment_queue and #self.attack_assignment_queue == 0 then
-        self.attack_assignment_queue = nil
-        self.attack_assignment_ready = true
-        return
-    end
+    local before = part.status
+    local brittle = Keywords.has(part, "Brittle")
+    local after = nil
+    local heart_loss = 0
 
-    self:advance_attack_assignment()
-end
-
-function Engine:attack_assignment_complete()
-    return self.attack_assignment_ready and not self:needs_input()
-end
-
-function Engine:add_attack_assignment(combatant, assignment_data, opponent, body_part)
-    if not combatant or not assignment_data or not opponent or not body_part then
-        return
-    end
-
-    local assignments = self.attack_assignments[combatant]
-    if not assignments then
-        assignments = {}
-        self.attack_assignments[combatant] = assignments
-    end
-
-    for index = #assignments, 1, -1 do
-        local existing = assignments[index]
-        if existing.action_index == assignment_data.action_index then
-            table.remove(assignments, index)
-        end
-    end
-
-    table.insert(assignments, {
-        tech = combatant.selected_tech,
-        action = assignment_data.action,
-        action_index = assignment_data.action_index,
-        target_combatant = opponent,
-        target_part = body_part
-    })
-
-    self:emit(Events.ATTACK_ASSIGNED, {
-        combatant = combatant,
-        action = assignment_data.action,
-        action_index = assignment_data.action_index,
-        target = body_part,
-        automatic = not combatant.is_player
-    })
-end
-
-function Engine:advance_attack_assignment()
-    if not self.attack_assignment_queue then
-        return
-    end
-
-    while true do
-        if #self.attack_assignment_queue == 0 then
-            self.attack_assignment_queue = nil
-            self.attack_assignment_ready = true
-            return
-        end
-
-        local entry = self.attack_assignment_queue[1]
-        entry.next_index = entry.next_index or 1
-
-        if entry.next_index > #entry.actions then
-            table.remove(self.attack_assignment_queue, 1)
-        else
-            local action_data = entry.actions[entry.next_index]
-            local opponent = self:get_opponent(entry.combatant)
-            local targetable_parts = self:get_targetable_parts(opponent)
-
-            if not opponent or #targetable_parts == 0 then
-                entry.next_index = entry.next_index + 1
-            else
-                local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "attack"
-                local base_prompt = string.format("Assign attack %d for %s", entry.next_index, entry.combatant.name)
-                local prompt_text = string.format("%s: %s", base_prompt, action_label)
-
-                local options = {}
-                for index, part in ipairs(targetable_parts) do
-                    options[index] = {
-                        index = index,
-                        part = part,
-                        id = part.id,
-                        name = part.name,
-                        status = part.status,
-                        toughness = part.toughness or 0
-                    }
-                end
-
-                local metadata = {
-                    type = "attack_assignment",
-                    combatant = entry.combatant,
-                    opponent = opponent,
-                    action = action_data.action,
-                    action_index = action_data.action_index,
-                    action_label = action_label,
-                    options = options,
-                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
-                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
-                }
-
-                local function handle_input(engine, raw_input)
-                    local choice = tonumber(raw_input)
-                    local selection = choice and metadata.options[choice] or nil
-
-                    if not selection then
-                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
-                        return
-                    end
-
-                    engine:add_attack_assignment(entry.combatant, action_data, opponent, selection.part)
-                    entry.next_index = entry.next_index + 1
-
-                    if entry.next_index > #entry.actions then
-                        table.remove(engine.attack_assignment_queue, 1)
-                    end
-
-                    engine:clear_input()
-                    engine:advance_attack_assignment()
-                end
-
-                self:request_input(prompt_text, handle_input, metadata)
-                return
-            end
-        end
-    end
-end
-
-function Engine:prepare_defense_assignments()
-    self.defense_assignment_ready = false
-    self.defense_assignments = {}
-    self.defense_assignment_queue = {}
-
-    local function select_best_defense_part(combatant)
-        local best_part = nil
-        for _, part in ipairs(combatant.body_parts) do
-            if part.status ~= "maimed" then
-                if not best_part or (part.toughness or 0) > (best_part.toughness or 0) then
-                    best_part = part
-                end
-            end
-        end
-        return best_part
-    end
-
-    for _, combatant in ipairs(self.combatants) do
-        self.defense_assignments[combatant] = {}
-
-        local tech = combatant.selected_tech
-        local actions = {}
-
-        if tech and tech.actions then
-            for index, action in ipairs(tech.actions) do
-                if action.type == "defense_roll" then
-                    table.insert(actions, {
-                        action = action,
-                        action_index = index
-                    })
-                end
-            end
-        end
-
-        if #actions > 0 then
-            if combatant.is_player then
-                table.insert(self.defense_assignment_queue, {
-                    combatant = combatant,
-                    actions = actions,
-                    next_index = 1
-                })
-            else
-                local preferred_part = select_best_defense_part(combatant)
-                for _, data in ipairs(actions) do
-                    if preferred_part then
-                        table.insert(self.defense_assignments[combatant], {
-                            tech = tech,
-                            action = data.action,
-                            action_index = data.action_index,
-                            target_part = preferred_part
-                        })
-
-                        self:emit(Events.DEFENSE_ASSIGNED, {
-                            combatant = combatant,
-                            action = data.action,
-                            action_index = data.action_index,
-                            target = preferred_part,
-                            automatic = true
-                        })
-                    end
-                end
-            end
-        end
-    end
-
-    if self.defense_assignment_queue and #self.defense_assignment_queue == 0 then
-        self.defense_assignment_queue = nil
-        self.defense_assignment_ready = true
-        return
-    end
-
-    self:advance_defense_assignment()
-end
-
-function Engine:defense_assignment_complete()
-    return self.defense_assignment_ready and not self:needs_input()
-end
-
-function Engine:add_defense_assignment(combatant, assignment_data, body_part)
-    if not combatant or not assignment_data or not body_part then
-        return
-    end
-
-    local assignments = self.defense_assignments[combatant]
-    if not assignments then
-        assignments = {}
-        self.defense_assignments[combatant] = assignments
-    end
-
-    for index = #assignments, 1, -1 do
-        local existing = assignments[index]
-        if existing.action_index == assignment_data.action_index then
-            table.remove(assignments, index)
-        end
-    end
-
-    table.insert(assignments, {
-        tech = combatant.selected_tech,
-        action = assignment_data.action,
-        action_index = assignment_data.action_index,
-        target_part = body_part
-    })
-
-    self:emit(Events.DEFENSE_ASSIGNED, {
-        combatant = combatant,
-        action = assignment_data.action,
-        action_index = assignment_data.action_index,
-        target = body_part,
-        automatic = not combatant.is_player
-    })
-end
-
-function Engine:advance_defense_assignment()
-    if not self.defense_assignment_queue then
-        return
-    end
-
-    while true do
-        if #self.defense_assignment_queue == 0 then
-            self.defense_assignment_queue = nil
-            self.defense_assignment_ready = true
-            return
-        end
-
-        local entry = self.defense_assignment_queue[1]
-        entry.next_index = entry.next_index or 1
-
-        if entry.next_index > #entry.actions then
-            table.remove(self.defense_assignment_queue, 1)
-        else
-            local action_data = entry.actions[entry.next_index]
-                    local available_parts = self:get_targetable_parts(entry.combatant)
-
-            if #available_parts == 0 then
-                entry.next_index = entry.next_index + 1
-            else
-                local action_label = action_data.action.name or action_data.action.id or action_data.action.type or "defense"
-                local base_prompt = string.format("Assign defense %d for %s", entry.next_index, entry.combatant.name)
-                local prompt_text = string.format("%s: %s", base_prompt, action_label)
-
-                local options = {}
-                for index, part in ipairs(available_parts) do
-                    options[index] = {
-                        index = index,
-                        part = part,
-                        id = part.id,
-                        name = part.name,
-                        status = part.status,
-                        toughness = part.toughness or 0
-                    }
-                end
-
-                local metadata = {
-                    type = "defense_assignment",
-                    combatant = entry.combatant,
-                    action = action_data.action,
-                    action_index = action_data.action_index,
-                    action_label = action_label,
-                    options = options,
-                    rolled_result = self:get_pre_rolled_result(entry.combatant, action_data.action_index, action_data.action and action_data.action.type),
-                    rolled_value = self:get_pre_rolled_total(entry.combatant, action_data.action_index, action_data.action and action_data.action.type)
-                }
-
-                local function handle_input(engine, raw_input)
-                    local choice = tonumber(raw_input)
-                    local selection = choice and metadata.options[choice] or nil
-
-                    if not selection then
-                        engine:request_input(prompt_text .. " - select a valid target", handle_input, metadata)
-                        return
-                    end
-
-                    engine:add_defense_assignment(entry.combatant, action_data, selection.part)
-                    entry.next_index = entry.next_index + 1
-
-                    if entry.next_index > #entry.actions then
-                        table.remove(engine.defense_assignment_queue, 1)
-                    end
-
-                    engine:clear_input()
-                    engine:advance_defense_assignment()
-                end
-
-                self:request_input(prompt_text, handle_input, metadata)
-                return
-            end
-        end
-    end
-end
-
-function Engine:get_opponent(combatant)
-    for _, other in ipairs(self.combatants) do
-        if other ~= combatant then
-            return other
-        end
-    end
-
-    return nil
-end
-
-function Engine:select_target_body_part(attacker, action)
-    local opponent = self:get_opponent(attacker)
-    if not opponent then
-        return nil
-    end
-
-    if action and action.target_body_part_id then
-        local explicit = opponent:get_body_part_by_id(action.target_body_part_id)
-        if is_part_targetable(self, explicit) then
-            return opponent, explicit
-        end
-    end
-
-    local targetable = self:get_targetable_parts(opponent)
-    if #targetable > 0 then
-        return opponent, targetable[1]
-    end
-
-    local fallback = opponent:get_first_healthy_part()
-    return opponent, fallback
-end
-
-function Engine:select_friendly_body_part(combatant, action)
-    if not combatant then
-        return nil
-    end
-
-    if action and action.target_body_part_id then
-        local explicit = combatant:get_body_part_by_id(action.target_body_part_id)
-        if explicit then
-            return combatant, explicit
-        end
-    end
-
-    for _, part in ipairs(combatant.body_parts or {}) do
-        if part.status == "maimed" or part.status == "wounded" then
-            return combatant, part
-        end
-    end
-
-    return combatant, combatant:get_first_healthy_part()
-end
-
-function Engine:apply_damage(attacker, target, body_part, amount, context)
-    if not target or not body_part or body_part.status == "maimed" then
-        return
-    end
-
-    local status_before = body_part.status
-    local steps = amount or 1
-
-    for _ = 1, steps do
-        local new_status = body_part:advance_damage_state()
-        self:emit(Events.DAMAGE_DEALT, {
-            attacker = attacker,
-            target = target,
-            body_part = body_part,
-            status_before = status_before,
-            status_after = new_status,
+    if brittle then
+        part:set_status("maimed")
+        after = part.status
+        self:emit(Events.KEYWORD_TRIGGERED, {
+            combatant = target,
+            part = part,
+            keyword = "Brittle",
             context = context
         })
+    else
+        after = part:advance_damage_state()
+    end
 
-        if new_status ~= status_before then
-            self:emit(Events.BP_STATUS_CHANGED, {
+    if after == "wounded" then
+        if part:vent_slot_charge() then
+            self:emit(Events.SLOT_CHARGE_VENTED, {
                 combatant = target,
-                body_part = body_part,
-                previous_status = status_before,
-                new_status = new_status,
-                context = context
+                part = part,
+                reason = "wounded"
             })
         end
-
-        if new_status == "maimed" and status_before ~= "maimed" then
-            local lost_hp = body_part.hp_value or 1
-            target.heart_points = math.max(0, target.heart_points - lost_hp)
-            self:emit(Events.DAMAGE_DEALT, {
-                attacker = attacker,
-                target = target,
-                body_part = body_part,
-                status_before = "maimed",
-                status_after = "maimed",
-                heart_point_loss = lost_hp,
-                context = context
-            })
-        end
-
-        status_before = body_part.status
-
-        if body_part.status == "maimed" then
-            break
-        end
+    elseif after == "maimed" then
+        part:vent_slot_charge()
+        heart_loss = part.hp_value or 1
+        target.heart_points = math.max(0, (target.heart_points or 0) - heart_loss)
     end
+
+    self:emit(Events.BP_STATUS_CHANGED, {
+        combatant = target,
+        body_part = part,
+        status_before = before,
+        status_after = after,
+        heart_points = target.heart_points
+    })
+
+    self:emit(Events.DAMAGE_DEALT, {
+        attacker = attacker,
+        target = target,
+        body_part = part,
+        status_before = before,
+        status_after = after,
+        heart_point_loss = heart_loss,
+        context = context
+    })
+
+    self:resolve_slot_window(TIMING_ON_WOUND_MAIM)
+    return true
 end
 
-function Engine:apply_healing(actor, target, body_part, amount, context)
-    if not target or not body_part then
-        return
-    end
+function Engine:resolve_round()
+    self.state = "RESOLUTION"
+    self:emit(Events.RESOLUTION_PHASE, { round = self.current_round })
 
-    local steps = amount or 1
-    for _ = 1, steps do
-        local status_before = body_part.status
-        local new_status = body_part:regress_damage_state()
+    for _, defender in ipairs(self.combatants or {}) do
+        for _, part in ipairs(defender.body_parts or {}) do
+            local attack = self.assignments.rims[part]
+            local defense = self.assignments.sockets[part]
+            local strike_count = attack and Symbols.count(attack.symbols, Symbols.STRIKE) or 0
+            local ward_count = defense and Symbols.count(defense.symbols, Symbols.WARD) or 0
 
-        self:emit(Events.HEAL_APPLIED, {
-            healer = actor,
-            target = target,
-            body_part = body_part,
-            status_before = status_before,
-            status_after = new_status,
-            context = context,
-            no_effect = status_before == new_status
-        })
-
-        if new_status ~= status_before then
-            self:emit(Events.BP_STATUS_CHANGED, {
-                combatant = target,
-                body_part = body_part,
-                previous_status = status_before,
-                new_status = new_status,
-                healed = true,
-                context = context
-            })
-        else
-            break
-        end
-    end
-end
-
-function Engine:get_attack_assignment(attacker, action_index)
-    local assignments = self.attack_assignments[attacker]
-    if not assignments then
-        return nil
-    end
-
-    for _, assignment in ipairs(assignments) do
-        if assignment.action_index == action_index then
-            return assignment
-        end
-    end
-
-    return nil
-end
-
-function Engine:roll_defense_assignments()
-    local totals = {}
-
-    for _, combatant in ipairs(self.combatants) do
-        totals[combatant] = {}
-    end
-
-    for combatant, assignments in pairs(self.defense_assignments or {}) do
-        for _, assignment in ipairs(assignments) do
-            local action = assignment.action
-            local target_part = assignment.target_part
-
-            if action and target_part then
-                local stored_result = nil
-                if combatant.is_player then
-                    stored_result = self:get_pre_rolled_result(combatant, assignment.action_index, action.type)
-                end
-
-                local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
-                result = self:apply_forced_reroll(combatant, result, {
-                    type = "defense",
-                    action = action,
-                    body_part = target_part
+            if attack or defense then
+                self:emit(Events.PART_RESOLVED, {
+                    defender = defender,
+                    part = part,
+                    attack = attack,
+                    defense = defense,
+                    strike_count = strike_count,
+                    ward_count = ward_count,
+                    hit = strike_count > ward_count
                 })
+            end
 
-                self:emit(Events.DICE_ROLLED, {
-                    attacker = combatant,
-                    action = action,
-                    result = result,
-                    defense = true,
-                    body_part = target_part
+            if attack and strike_count > ward_count then
+                self:resolve_slot_window(TIMING_ON_HIT)
+                self:apply_damage(attack.attacker, defender, part, {
+                    attack = attack,
+                    defense = defense,
+                    strike_count = strike_count,
+                    ward_count = ward_count
                 })
-
-                local part_id = target_part.id
-                if part_id then
-                    local combatant_totals = totals[combatant]
-                    combatant_totals[part_id] = (combatant_totals[part_id] or 0) + (result.total or 0)
-                end
+            elseif attack and defense and strike_count <= ward_count then
+                self:resolve_absorbent_socket(defender, part, defense, {
+                    attack = attack,
+                    defense = defense,
+                    strike_count = strike_count,
+                    ward_count = ward_count
+                })
             end
         end
     end
 
-    return totals
-end
-
-function Engine:resolve_action(attacker, action, action_index, defense_totals)
-    if not action or action.type == nil then
-        return
-    end
-
-    if action.type == "direct_damage" then
-        local opponent, body_part = self:select_target_body_part(attacker, action)
-        if opponent and body_part then
-            local amount = action.amount or 1
-            local context = {
-                attacker = attacker,
-                defender = opponent,
-                target_part = body_part,
-                action = action,
-                action_index = action_index,
-                base_damage = amount,
-                damage = amount,
-                keywords = collect_keywords(attacker and attacker.selected_tech, action)
-            }
-            self:apply_damage(attacker, opponent, body_part, amount, context)
+    if self:check_combat_end() then
+        local was_complete = self.state == "COMPLETE"
+        self.state = "COMPLETE"
+        if not was_complete then
+            self:emit(Events.COMBAT_END, { round = self.current_round, winner = self.winner })
         end
-    elseif action.type == "attack_roll" then
-        local stored_result = nil
-        if attacker and attacker.is_player then
-            stored_result = self:get_pre_rolled_result(attacker, action_index, action.type)
-        end
-
-        local result = stored_result and clone_roll_result(stored_result) or Dice.roll(action.dice_count or 1, action.dice_type or "d6")
-        result = self:apply_forced_reroll(attacker, result, {
-            type = "attack",
-            action = action,
-            action_index = action_index
-        })
-
-        local tech = attacker and attacker.selected_tech
-        local keywords = collect_keywords(tech, action)
-        local consistent_value = apply_consistent_keyword(result, keywords)
-
-        local passive_bonus = attacker and attacker.get_modifier and attacker:get_modifier("attack_bonus") or 0
-        local token_bonus = self:consume_attack_bonus_token(attacker)
-        local attack_bonus = passive_bonus + token_bonus
-
-        local assignment = self:get_attack_assignment(attacker, action_index)
-        local opponent = assignment and assignment.target_combatant
-        local body_part = assignment and assignment.target_part
-
-        if not opponent or not body_part then
-            opponent, body_part = self:select_target_body_part(attacker, action)
-        end
-
-        local defense_total = 0
-        if defense_totals and opponent and body_part and body_part.id then
-            local opponent_totals = defense_totals[opponent]
-            defense_total = opponent_totals and opponent_totals[body_part.id] or 0
-        end
-
-        local context = {
-            attacker = attacker,
-            defender = opponent,
-            target_part = body_part,
-            action = action,
-            action_index = action_index,
-            keywords = keywords,
-            dice_result = result,
-            consistent_value = consistent_value,
-            passive_attack_bonus = passive_bonus,
-            temporary_attack_bonus = token_bonus,
-            attack_bonus = attack_bonus,
-            base_roll_total = result.total or 0,
-            attack_total = (result.total or 0) + attack_bonus,
-            defense_total = defense_total,
-            effective_defense = defense_total,
-            base_toughness = body_part and body_part.toughness or 0,
-            original_base_toughness = body_part and body_part.toughness or 0,
-            effective_toughness = (body_part and body_part.toughness or 0) + defense_total,
-            base_damage = action.damage or 1,
-            damage = action.damage or 1,
-            notes = {}
-        }
-
-        self:run_attack_pipeline(context)
-
-        self:emit(Events.DICE_ROLLED, {
-            attacker = attacker,
-            action = action,
-            result = result,
-            modified_total = context.attack_total,
-            attack_bonus = attack_bonus,
-            passive_attack_bonus = passive_bonus,
-            temporary_attack_bonus = token_bonus,
-            context = context
-        })
-
-        if context.hit and opponent and body_part then
-            self:apply_damage(attacker, opponent, body_part, context.damage, context)
-        end
-    elseif action.type == "defense_roll" then
-        return
-    elseif action.type == "gain_crest" then
-        local crest = action.crest
-        if crest and attacker then
-            local amount = action.amount or 1
-            self:grant_crest(attacker, crest, amount, { source = "action" })
-        end
-    elseif action.type == "heal_body_part" then
-        local recipient = attacker
-        if action.target == "opponent" then
-            recipient = self:get_opponent(attacker)
-        elseif type(action.target) == "table" and action.target.combatant then
-            recipient = action.target.combatant
-        end
-
-        local target_combatant, body_part = self:select_friendly_body_part(recipient, action)
-        if target_combatant and body_part then
-            local amount = action.amount or 1
-            local context = {
-                healer = attacker,
-                target = target_combatant,
-                target_part = body_part,
-                action = action,
-                action_index = action_index
-            }
-            self:apply_healing(attacker, target_combatant, body_part, amount, context)
-        end
-    end
-end
-
-function Engine:resolve_actions()
-    local defense_totals = self:roll_defense_assignments()
-
-    for _, combatant in ipairs(self.combatants) do
-        local tech = combatant.selected_tech
-        if tech and tech.actions then
-            for index, action in ipairs(tech.actions) do
-                self:resolve_action(combatant, action, index, defense_totals)
-            end
-        end
+    else
+        self.state = "ROUND_END"
+        self:emit(Events.ROUND_END, { round = self.current_round })
     end
 end
 
 function Engine:check_combat_end()
-    local surviving = {}
-    local defeated = {}
+    local living = {}
 
-    for _, combatant in ipairs(self.combatants) do
-        if combatant:is_defeated() then
-            table.insert(defeated, combatant)
-        else
-            table.insert(surviving, combatant)
+    for _, combatant in ipairs(self.combatants or {}) do
+        if combatant.is_defeated and not combatant:is_defeated() then
+            table.insert(living, combatant)
         end
     end
 
-    if #defeated > 0 then
-        if #surviving == 1 then
-            self.winner = surviving[1]
-        end
+    if #living == 1 then
+        self.winner = living[1]
+        return true
+    elseif #living == 0 and #self.combatants > 0 then
+        self.winner = nil
         return true
     end
 
     return false
 end
 
+function Engine:get_valid_destinations(combatant, die_or_id)
+    local die = self:find_die(combatant, die_or_id)
+    local destinations = {
+        sockets = {},
+        rims = {},
+        slots = {}
+    }
+
+    if not die then
+        return destinations
+    end
+
+    local socket_symbols = self:get_effective_symbols(combatant, die, "socket")
+    local rim_symbols = self:get_effective_symbols(combatant, die, "rim")
+    local slot_symbols = self:get_effective_symbols(combatant, die, "slot")
+    local opponent = self:get_opponent(combatant)
+
+    for _, part in ipairs(combatant.body_parts or {}) do
+        if part.status ~= "maimed" and not self.assignments.sockets[part] then
+            local spellmark = self:get_assignment_spellmark(combatant, "socket", part, socket_symbols)
+            if Symbols.has(socket_symbols, Symbols.WARD) or spellmark then
+                table.insert(destinations.sockets, part)
+            end
+        end
+    end
+
+    if opponent then
+        for _, part in ipairs(opponent.body_parts or {}) do
+            local spellmark = self:get_assignment_spellmark(combatant, "rim", part, rim_symbols)
+            if is_part_targetable(self, part)
+                and not self.assignments.rims[part]
+                and (Symbols.has(rim_symbols, Symbols.STRIKE) or spellmark)
+                and rim_accepts_symbols(part, rim_symbols) then
+                table.insert(destinations.rims, part)
+            end
+        end
+    end
+
+    for _, part in ipairs(combatant.body_parts or {}) do
+        if part:is_slot_online() then
+            local matched = false
+            local cost = slot_cost(part.slot)
+            for _, symbol in ipairs(slot_symbols) do
+                for index, required in ipairs(cost) do
+                    if not (part.slot_charge and part.slot_charge[index]) and (Keywords.slot_is_hungry(part, part.slot) or required == symbol) then
+                        table.insert(destinations.slots, part)
+                        matched = true
+                        break
+                    end
+                end
+                if matched then
+                    break
+                end
+            end
+        end
+    end
+
+    return destinations
+end
+
+function Engine:commit_allocation_move(combatant, move)
+    if not move or not move.kind or not move.die or not move.part then
+        return false, "invalid_move"
+    end
+
+    if move.kind == "rim" then
+        return self:assign_die_to_rim(combatant, move.die.id, move.part)
+    elseif move.kind == "socket" then
+        return self:assign_die_to_socket(combatant, move.die.id, move.part)
+    elseif move.kind == "slot" then
+        return self:feed_die_to_slot(combatant, move.die.id, move.part)
+    end
+
+    return false, "unknown_destination"
+end
+
 return Engine
-
-```
-
-## combat/events.lua
-
-```lua
-local Events = {
-    -- State transitions
-    COMBAT_START = "combat_start",
-    ROUND_START = "round_start",
-    UPKEEP_PHASE = "upkeep_phase",
-    TECH_SELECT_PHASE = "tech_select_phase",
-    ATTACK_ASSIGN_PHASE = "attack_assign_phase",
-    DEFENSE_ASSIGN_PHASE = "defense_assign_phase",
-    RESOLUTION_PHASE = "resolution_phase",
-    ROUND_END = "round_end",
-    COMBAT_END = "combat_end",
-
-    -- Actions
-    TECH_SELECTED = "tech_selected",
-    ATTACK_ASSIGNED = "attack_assigned",
-    DEFENSE_ASSIGNED = "defense_assigned",
-    DICE_ROLLED = "dice_rolled",
-    DIE_REROLLED = "die_rerolled",
-    DAMAGE_DEALT = "damage_dealt",
-    BP_STATUS_CHANGED = "bp_status_changed",
-    HEAL_APPLIED = "heal_applied",
-    CREST_GAINED = "crest_gained",
-    CREST_EXPENDED = "crest_expended",
-
-    -- UI hints
-    AWAIT_PLAYER_INPUT = "await_player_input",
-    SHOW_RESULT = "show_result"
-}
-
-return Events
-
-```
-
-## combat/states.lua
-
-```lua
-local Events = require("combat.events")
-
-local States = {}
-
-States.WAITING = {
-    enter = function(_) end,
-    process = function(_) return nil end
-}
-
-States.ROUND_START = {
-    enter = function(engine)
-        engine.current_round = engine.current_round + 1
-        engine:emit(Events.ROUND_START, { round = engine.current_round })
-    end,
-    process = function(_) return "UPKEEP" end
-}
-
-States.UPKEEP = {
-    enter = function(engine)
-        engine:perform_upkeep()
-        engine:emit(Events.UPKEEP_PHASE, { round = engine.current_round })
-    end,
-    process = function(_) return "TECH_SELECT" end
-}
-
-States.TECH_SELECT = {
-    enter = function(engine)
-        engine:emit(Events.TECH_SELECT_PHASE, {
-            round = engine.current_round,
-            combatants = engine.combatants
-        })
-        engine:begin_tech_selection()
-    end,
-    process = function(engine)
-        if engine:tech_selection_complete() then
-            return "ATTACK_ASSIGN"
-        end
-        return nil
-    end
-}
-
-States.ATTACK_ASSIGN = {
-    enter = function(engine)
-        engine:emit(Events.ATTACK_ASSIGN_PHASE, { round = engine.current_round })
-        engine:prepare_attack_assignments()
-    end,
-    process = function(engine)
-        if engine:attack_assignment_complete() then
-            return "DEFENSE_ASSIGN"
-        end
-        return nil
-    end
-}
-
-States.DEFENSE_ASSIGN = {
-    enter = function(engine)
-        engine:emit(Events.DEFENSE_ASSIGN_PHASE, { round = engine.current_round })
-        engine:prepare_defense_assignments()
-    end,
-    process = function(engine)
-        if engine:defense_assignment_complete() then
-            return "RESOLUTION"
-        end
-        return nil
-    end
-}
-
-States.RESOLUTION = {
-    enter = function(engine)
-        engine:emit(Events.RESOLUTION_PHASE, { round = engine.current_round })
-        engine:resolve_actions()
-    end,
-    process = function(engine)
-        if engine:check_combat_end() then
-            return "COMPLETE"
-        end
-        return "ROUND_END"
-    end
-}
-
-States.ROUND_END = {
-    enter = function(engine)
-        engine:emit(Events.ROUND_END, { round = engine.current_round })
-    end,
-    process = function(_) return "ROUND_START" end
-}
-
-States.COMPLETE = {
-    enter = function(engine)
-        engine:emit(Events.COMBAT_END, { round = engine.current_round })
-    end,
-    process = function(_) return nil end
-}
-
-return States
 
 ```
 
@@ -2521,8 +3375,8 @@ return States
 ```lua
 function love.conf(t)
     t.window.title = "Into the Dreamlands"
-    t.window.width = 1056
-    t.window.height = 768
+    t.window.width = 960
+    t.window.height = 540
     t.console = true
 end
 
@@ -2533,9 +3387,13 @@ end
 ```lua
 local Assets = {
     images = {},
+    sources = {},
     directories = {
         "assets/sprites/bodyparts",
+        "assets/sprites/combat",
         "assets/sprites/icons",
+        "assets/sprites/overworld",
+        "assets/sprites/ui",
     }
 }
 
@@ -2550,6 +3408,7 @@ end
 
 function Assets:load()
     self.images = {}
+    self.sources = {}
 
     for _, directory in ipairs(self.directories) do
         local info = love.filesystem.getInfo(directory)
@@ -2557,9 +3416,19 @@ function Assets:load()
             for _, file in ipairs(love.filesystem.getDirectoryItems(directory)) do
                 if file:sub(-4):lower() == ".png" then
                     local id = file:sub(1, -5)
-                    local image = loadImage(directory .. "/" .. file)
+                    local path = directory .. "/" .. file
+                    local image = loadImage(path)
                     if image then
-                        self.images[id] = image
+                        if self.images[id] then
+                            print(string.format(
+                                "[Assets] Duplicate asset id '%s' at %s; keeping first loaded image from %s.",
+                                id,
+                                path,
+                                self.sources[id] or "unknown"))
+                        else
+                            self.images[id] = image
+                            self.sources[id] = path
+                        end
                     end
                 end
             end
@@ -2605,61 +3474,6 @@ function Assets:get(id)
 end
 
 return Assets
-```
-
-## core/dice.lua
-
-```lua
-local Dice = {}
-
-local function parse_die_type(dice_type)
-    if type(dice_type) ~= "string" then
-        return nil
-    end
-
-    local sides = dice_type:lower():match("d(%d+)")
-    if not sides then
-        return nil
-    end
-
-    sides = tonumber(sides)
-    if sides and sides > 0 then
-        return sides
-    end
-
-    return nil
-end
-
-function Dice.roll(dice_count, dice_type)
-    local count = tonumber(dice_count) or 1
-    if count < 1 then
-        count = 1
-    end
-
-    local sides = parse_die_type(dice_type or "d6")
-    if not sides then
-        error("Invalid dice type: " .. tostring(dice_type))
-    end
-
-    local rolls = {}
-    local total = 0
-
-    for _ = 1, count do
-        local result = math.random(1, sides)
-        table.insert(rolls, result)
-        total = total + result
-    end
-
-    return {
-        total = total,
-        rolls = rolls,
-        count = count,
-        sides = sides,
-        type = dice_type or ("d" .. tostring(sides))
-    }
-end
-
-return Dice
 
 ```
 
@@ -2667,23 +3481,94 @@ return Dice
 
 ```lua
 local GameState = {
-    current = nil
+    current = nil,
+    stack = {}
 }
 
 local function call(state, method, ...)
     if state and state[method] then
-        state[method](state, ...)
+        return state[method](state, ...)
     end
 end
 
+local function refresh_current()
+    GameState.current = GameState.stack[#GameState.stack]
+    return GameState.current
+end
+
+local function exit_stack()
+    for index = #GameState.stack, 1, -1 do
+        call(GameState.stack[index], "exit")
+        GameState.stack[index] = nil
+    end
+    refresh_current()
+end
+
 function GameState.switch(state, ...)
-    if state == GameState.current then
+    if state == GameState.current and #GameState.stack == 1 then
         return
     end
 
-    call(GameState.current, "exit")
-    GameState.current = state
+    exit_stack()
+
+    if state then
+        table.insert(GameState.stack, state)
+        refresh_current()
+        call(GameState.current, "enter", ...)
+    end
+end
+
+function GameState.push(state, ...)
+    if not state then
+        return
+    end
+
+    local previous = GameState.current
+    call(previous, "pause", state)
+    table.insert(GameState.stack, state)
+    refresh_current()
+    call(state, "enter", ...)
+end
+
+function GameState.pop(...)
+    local previous = GameState.current
+    if not previous then
+        return nil
+    end
+
+    call(previous, "exit", ...)
+    table.remove(GameState.stack)
+    local current = refresh_current()
+    call(current, "resume", previous, ...)
+    return previous
+end
+
+function GameState.replace(state, ...)
+    local previous = GameState.current
+    if previous then
+        call(previous, "exit")
+        table.remove(GameState.stack)
+    end
+
+    if state then
+        table.insert(GameState.stack, state)
+    end
+
+    refresh_current()
     call(GameState.current, "enter", ...)
+end
+
+function GameState.peek(depth)
+    local offset = depth or 0
+    return GameState.stack[#GameState.stack - offset]
+end
+
+function GameState.size()
+    return #GameState.stack
+end
+
+function GameState.clear()
+    exit_stack()
 end
 
 function GameState.update(dt)
@@ -2691,7 +3576,17 @@ function GameState.update(dt)
 end
 
 function GameState.draw()
-    call(GameState.current, "draw")
+    local start_index = 1
+    for index = #GameState.stack, 1, -1 do
+        if GameState.stack[index] and GameState.stack[index].opaque then
+            start_index = index
+            break
+        end
+    end
+
+    for index = start_index, #GameState.stack do
+        call(GameState.stack[index], "draw")
+    end
 end
 
 function GameState.keypressed(key)
@@ -2700,6 +3595,18 @@ end
 
 function GameState.keyreleased(key)
     call(GameState.current, "keyreleased", key)
+end
+
+function GameState.actionpressed(action, source)
+    return call(GameState.current, "actionpressed", action, source)
+end
+
+function GameState.actionreleased(action, source)
+    return call(GameState.current, "actionreleased", action, source)
+end
+
+function GameState.textinput(text)
+    call(GameState.current, "textinput", text)
 end
 
 function GameState.mousepressed(x, y, button, istouch, presses)
@@ -2714,347 +3621,1856 @@ return GameState
 
 ```
 
-## data/rooms/basement_1.lua
+## core/input.lua
 
 ```lua
+local Input = {}
+
+local KEY_BINDINGS = {
+    move_up = { "up", "w" },
+    move_down = { "down", "s" },
+    move_left = { "left", "a" },
+    move_right = { "right", "d" },
+    confirm = { "space", "return" },
+    cancel = { "escape" },
+    menu = { "tab" },
+    debug_combat = { "c" }
+}
+
+local GAMEPAD_BINDINGS = {
+    move_up = { "dpup" },
+    move_down = { "dpdown" },
+    move_left = { "dpleft" },
+    move_right = { "dpright" },
+    confirm = { "a" },
+    cancel = { "b" },
+    menu = { "start" }
+}
+
+local key_lookup = {}
+local button_lookup = {}
+local down_actions = {}
+local pressed_actions = {}
+
+local function add_binding(lookup, input_id, action)
+    lookup[input_id] = lookup[input_id] or {}
+    table.insert(lookup[input_id], action)
+end
+
+local function build_lookup(bindings, lookup)
+    for action, inputs in pairs(bindings) do
+        for _, input_id in ipairs(inputs) do
+            add_binding(lookup, input_id, action)
+        end
+    end
+end
+
+local function copy_actions(actions)
+    local copy = {}
+    for _, action in ipairs(actions or {}) do
+        table.insert(copy, action)
+    end
+    return copy
+end
+
+local function press_actions(actions)
+    for _, action in ipairs(actions or {}) do
+        down_actions[action] = true
+        pressed_actions[action] = true
+    end
+    return copy_actions(actions)
+end
+
+local function release_actions(actions)
+    for _, action in ipairs(actions or {}) do
+        down_actions[action] = false
+    end
+    return copy_actions(actions)
+end
+
+build_lookup(KEY_BINDINGS, key_lookup)
+build_lookup(GAMEPAD_BINDINGS, button_lookup)
+
+function Input.actions_for_key(key)
+    return copy_actions(key_lookup[key])
+end
+
+function Input.actions_for_button(button)
+    return copy_actions(button_lookup[button])
+end
+
+function Input.action_for_key(key)
+    local actions = key_lookup[key]
+    return actions and actions[1] or nil
+end
+
+function Input.is_action(key, action)
+    for _, existing in ipairs(key_lookup[key] or {}) do
+        if existing == action then
+            return true
+        end
+    end
+    return false
+end
+
+function Input.keypressed(key)
+    return press_actions(key_lookup[key])
+end
+
+function Input.keyreleased(key)
+    return release_actions(key_lookup[key])
+end
+
+function Input.gamepadpressed(button)
+    return press_actions(button_lookup[button])
+end
+
+function Input.gamepadreleased(button)
+    return release_actions(button_lookup[button])
+end
+
+function Input.is_down(action)
+    return down_actions[action] == true
+end
+
+function Input.was_pressed(action)
+    return pressed_actions[action] == true
+end
+
+function Input.update()
+    pressed_actions = {}
+end
+
+return Input
+
+```
+
+## core/save.lua
+
+```lua
+local Save = {}
+
+Save.VERSION = 1
+Save.DEFAULT_PATH = "saves/slot1.lua"
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
+
+local function sorted_keys(tbl)
+    local keys = {}
+    for key in pairs(tbl) do
+        table.insert(keys, key)
+    end
+
+    table.sort(keys, function(a, b)
+        local type_a = type(a)
+        local type_b = type(b)
+        if type_a ~= type_b then
+            return type_a < type_b
+        end
+        return tostring(a) < tostring(b)
+    end)
+
+    return keys
+end
+
+local function quoted(value)
+    return string.format("%q", value)
+end
+
+local function encode_value(value, indent, seen)
+    local value_type = type(value)
+    indent = indent or ""
+
+    if value_type == "nil" then
+        return "nil"
+    elseif value_type == "string" then
+        return quoted(value)
+    elseif value_type == "number" then
+        if value ~= value or value == math.huge or value == -math.huge then
+            error("Cannot serialize non-finite number")
+        end
+        return tostring(value)
+    elseif value_type == "boolean" then
+        return tostring(value)
+    elseif value_type ~= "table" then
+        error("Cannot serialize " .. value_type)
+    end
+
+    if seen[value] then
+        error("Cannot serialize cyclic table")
+    end
+    seen[value] = true
+
+    local next_indent = indent .. "    "
+    local lines = { "{" }
+    for _, key in ipairs(sorted_keys(value)) do
+        local encoded_key = "[" .. encode_value(key, "", seen) .. "]"
+        local encoded_value = encode_value(value[key], next_indent, seen)
+        table.insert(lines, next_indent .. encoded_key .. " = " .. encoded_value .. ",")
+    end
+    table.insert(lines, indent .. "}")
+
+    seen[value] = nil
+    return table.concat(lines, "\n")
+end
+
+local function compile_chunk(source, chunk_name)
+    if loadstring then
+        local fn, err = loadstring(source, chunk_name)
+        if fn and setfenv then
+            setfenv(fn, {})
+        end
+        return fn, err
+    end
+
+    return load(source, chunk_name, "t", {})
+end
+
+local function filesystem(backend)
+    if backend then
+        return backend
+    end
+
+    return love and love.filesystem or nil
+end
+
+local function dirname(path)
+    return path and path:match("^(.*)/[^/]+$") or nil
+end
+
+function Save.new_game()
+    return {
+        save_version = Save.VERSION,
+        profile = {},
+        run = {},
+        rooms = {}
+    }
+end
+
+function Save.serialize(data)
+    local root = copy_table(data or Save.new_game())
+    root.save_version = root.save_version or Save.VERSION
+    return "return " .. encode_value(root, "", {})
+end
+
+function Save.deserialize(source)
+    if type(source) ~= "string" then
+        return nil, "save source must be a string"
+    end
+
+    local fn, err = compile_chunk(source, "save")
+    if not fn then
+        return nil, err
+    end
+
+    local ok, data = pcall(fn)
+    if not ok then
+        return nil, data
+    end
+
+    if type(data) ~= "table" then
+        return nil, "save file did not return a table"
+    end
+
+    data.save_version = data.save_version or 0
+    if data.save_version > Save.VERSION then
+        return nil, "save version " .. tostring(data.save_version) .. " is newer than runtime version " .. tostring(Save.VERSION)
+    end
+
+    data.profile = data.profile or {}
+    data.run = data.run or {}
+    data.rooms = data.rooms or {}
+    return data
+end
+
+function Save.load(path, backend)
+    path = path or Save.DEFAULT_PATH
+    local fs = filesystem(backend)
+    if not fs then
+        return nil, nil
+    end
+
+    if fs.getInfo and not fs.getInfo(path) then
+        return nil, nil
+    end
+
+    local source, read_err = fs.read(path)
+    if not source then
+        return nil, read_err or "could not read save file"
+    end
+
+    return Save.deserialize(source)
+end
+
+function Save.available(backend)
+    return filesystem(backend) ~= nil
+end
+
+function Save.write(data, path, backend)
+    path = path or Save.DEFAULT_PATH
+    local fs = filesystem(backend)
+    if not fs then
+        return false, "love.filesystem is not available"
+    end
+
+    local directory = dirname(path)
+    if directory and fs.createDirectory then
+        local ok, err = fs.createDirectory(directory)
+        if ok == false then
+            return false, err or ("could not create " .. directory)
+        end
+    end
+
+    local source = Save.serialize(data)
+    local ok, err = fs.write(path, source)
+    if ok == false then
+        return false, err or "could not write save file"
+    end
+
+    return true
+end
+
+return Save
+
+```
+
+## core/symbol_die.lua
+
+```lua
+local Symbols = require("core.symbols")
+
+local SymbolDie = {}
+
+local function copy_set(list)
+    local set = {}
+    for _, index in ipairs(list or {}) do
+        local numeric = tonumber(index)
+        if numeric then
+            set[numeric] = true
+        end
+    end
+    return set
+end
+
+local function normalize_faces(faces)
+    local normalized = {}
+
+    for index = 1, 6 do
+        normalized[index] = Symbols.normalize_face(faces and faces[index] or Symbols.BLANK)
+    end
+
+    return normalized
+end
+
+function SymbolDie.new(data)
+    data = data or {}
+
+    return {
+        faces = normalize_faces(data.faces),
+        wound_faces = copy_set(data.wound_faces),
+        maim_faces = copy_set(data.maim_faces)
+    }
+end
+
+function SymbolDie.face_for_status(die_data, face_index, status)
+    local die = SymbolDie.new(die_data)
+    local index = tonumber(face_index) or 1
+    local current_status = status or "healthy"
+
+    if current_status == "wounded" and die.wound_faces[index] then
+        return { Symbols.BLOOD }
+    end
+
+    if current_status == "maimed" and (die.wound_faces[index] or die.maim_faces[index]) then
+        return { Symbols.BLOOD }
+    end
+
+    return Symbols.copy_face(die.faces[index] or { Symbols.BLANK })
+end
+
+function SymbolDie.roll(part, rng)
+    local roller = rng or math.random
+    local face_index = roller(1, 6)
+
+    return {
+        face_index = face_index,
+        symbols = SymbolDie.face_for_status(part and part.die, face_index, part and part.status),
+        source_part = part
+    }
+end
+
+function SymbolDie.format_face_for_status(die_data, face_index, status)
+    return Symbols.format_face(SymbolDie.face_for_status(die_data, face_index, status))
+end
+
+return SymbolDie
+
+```
+
+## core/symbols.lua
+
+```lua
+local Symbols = {
+    STRIKE = "strike",
+    WARD = "ward",
+    ESSENCE = "essence",
+    BLOOD = "blood",
+    BLANK = "blank"
+}
+
+local ALIASES = {
+    s = Symbols.STRIKE,
+    strike = Symbols.STRIKE,
+    sword = Symbols.STRIKE,
+    attack = Symbols.STRIKE,
+    atk = Symbols.STRIKE,
+
+    w = Symbols.WARD,
+    ward = Symbols.WARD,
+    shield = Symbols.WARD,
+    defense = Symbols.WARD,
+    def = Symbols.WARD,
+
+    e = Symbols.ESSENCE,
+    essence = Symbols.ESSENCE,
+    magic = Symbols.ESSENCE,
+    spark = Symbols.ESSENCE,
+
+    blood = Symbols.BLOOD,
+    b = Symbols.BLOOD,
+
+    blank = Symbols.BLANK,
+    none = Symbols.BLANK,
+    empty = Symbols.BLANK,
+    ["-"] = Symbols.BLANK
+}
+
+local DISPLAY = {
+    [Symbols.STRIKE] = "ATK",
+    [Symbols.WARD] = "DEF",
+    [Symbols.ESSENCE] = "ESS",
+    [Symbols.BLOOD] = "BLD",
+    [Symbols.BLANK] = "---"
+}
+
+local function copy_list(source)
+    local copy = {}
+    for index, value in ipairs(source or {}) do
+        copy[index] = value
+    end
+    return copy
+end
+
+function Symbols.normalize(symbol)
+    if symbol == nil then
+        return nil
+    end
+
+    local lowered = tostring(symbol):lower()
+    return ALIASES[lowered] or lowered
+end
+
+function Symbols.normalize_face(face)
+    local normalized = {}
+
+    if type(face) == "table" then
+        for _, symbol in ipairs(face) do
+            local value = Symbols.normalize(symbol)
+            if value and value ~= Symbols.BLANK then
+                table.insert(normalized, value)
+            end
+        end
+    elseif type(face) == "string" then
+        local direct = Symbols.normalize(face)
+        if direct and direct ~= Symbols.BLANK and ALIASES[face:lower()] then
+            table.insert(normalized, direct)
+        else
+            for token in face:gmatch("[^%s,%+]+") do
+                local value = Symbols.normalize(token)
+                if value and value ~= Symbols.BLANK then
+                    table.insert(normalized, value)
+                end
+            end
+        end
+    end
+
+    if #normalized == 0 then
+        normalized[1] = Symbols.BLANK
+    end
+
+    return normalized
+end
+
+function Symbols.copy_face(face)
+    return copy_list(face)
+end
+
+function Symbols.with_added_symbols(face, added)
+    local combined = copy_list(face)
+    for _, symbol in ipairs(added or {}) do
+        local value = Symbols.normalize(symbol)
+        if value and value ~= Symbols.BLANK then
+            table.insert(combined, value)
+        end
+    end
+
+    if #combined == 0 then
+        combined[1] = Symbols.BLANK
+    end
+
+    return combined
+end
+
+function Symbols.count(face, symbol)
+    local wanted = Symbols.normalize(symbol)
+    local total = 0
+
+    for _, value in ipairs(face or {}) do
+        if value == wanted then
+            total = total + 1
+        end
+    end
+
+    return total
+end
+
+function Symbols.has(face, symbol)
+    return Symbols.count(face, symbol) > 0
+end
+
+function Symbols.display(symbol)
+    return DISPLAY[Symbols.normalize(symbol)] or tostring(symbol)
+end
+
+function Symbols.format_face(face)
+    local labels = {}
+    for _, symbol in ipairs(face or {}) do
+        table.insert(labels, Symbols.display(symbol))
+    end
+
+    if #labels == 0 then
+        return Symbols.display(Symbols.BLANK)
+    end
+
+    return table.concat(labels, "+")
+end
+
+return Symbols
+
+```
+
+## data/combat/v2_demo_parts.lua
+
+```lua
+local Symbols = require("core.symbols")
+
+local S = Symbols.STRIKE
+local W = Symbols.WARD
+local E = Symbols.ESSENCE
+local B = Symbols.BLOOD
+local O = Symbols.BLANK
+
+local function die(wound_a, wound_b, maim_a, maim_b, durable_a, durable_b)
+    return {
+        faces = {
+            wound_a,
+            wound_b,
+            maim_a,
+            maim_b,
+            durable_a,
+            durable_b
+        },
+        wound_faces = { 1, 2 },
+        maim_faces = { 3, 4 }
+    }
+end
+
 return {
-    width = 10,
-    height = 8,
-    tiles = {
-        {1,1,1,1,1,1,1,1,1,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,0,0,0,0,0,0,0,0,1},
-        {1,1,1,1,1,1,1,1,1,1}
+    slots = {
+        clarity = {
+            id = "clarity",
+            name = "Clarity",
+            cost = { E },
+            timing = "spend",
+            effect = {
+                type = "add_next_symbol",
+                symbol = S
+            }
+        },
+        recuperation = {
+            id = "recuperation",
+            name = "Recuperation",
+            cost = { B, B, B },
+            timing = "spend",
+            effect = {
+                type = "heal_part",
+                target = "most_damaged",
+                amount = 1
+            }
+        },
+        speak_doom = {
+            id = "speak_doom",
+            name = "Speak Doom",
+            cost = { E, E, E, E },
+            timing = "spend",
+            effect = {
+                type = "damage_opponent_part",
+                target_type = "HEAD",
+                amount = 1
+            }
+        }
     },
-    entities = {
-        {type = "crack", x = 2, y = 2},
-        {type = "crack", x = 9, y = 4},
-        {type = "crack", x = 5, y = 7},
-        {type = "pipe", x = 3, y = 2, has_shovel = true}
+
+    parts = {
+        dreamer_head = {
+            id = "dreamer_head",
+            name = "Dreamer's Head",
+            flavor = "The part of you that knows this is a dream, however dimly.",
+            type = "HEAD",
+            hp_value = 3,
+            die = die(O, W, S, E, E, { E, E }),
+            slot = "clarity",
+            tags = { "LUCID" }
+        },
+        dreamer_body = {
+            id = "dreamer_body",
+            name = "Dreamer's Body",
+            flavor = "A sleeping shape that still remembers how to keep breathing.",
+            type = "BODY",
+            hp_value = 2,
+            die = die(W, S, W, { W, S }, { W, W }, { S, S }),
+            slot = "recuperation"
+        },
+        dreamer_right_arm = {
+            id = "dreamer_right_arm",
+            name = "Dreamer's Right Arm",
+            flavor = "A plain hand for grabbing, guarding, and striking in the dark.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, W, S, S, S, { S, E })
+        },
+        dreamer_left_arm = {
+            id = "dreamer_left_arm",
+            name = "Dreamer's Left Arm",
+            flavor = "A plain hand with a little more hesitation than force.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, W, W, S, { W, E }, S)
+        },
+        dreamer_right_leg = {
+            id = "dreamer_right_leg",
+            name = "Dreamer's Right Leg",
+            flavor = "A foot that has not yet learned where it is running.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, W, O, S, W, S)
+        },
+        dreamer_left_leg = {
+            id = "dreamer_left_leg",
+            name = "Dreamer's Left Leg",
+            flavor = "A foot that has not yet learned what follows behind.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, W, O, S, W, S)
+        },
+
+        bone_demon_skull = {
+            id = "bone_demon_skull",
+            name = "Bone Skull",
+            flavor = "It speaks with no tongue, and the words still arrive.",
+            type = "HEAD",
+            hp_value = 1,
+            die = die(E, S, E, { S, E }, { E, E }, S),
+            slot = "speak_doom"
+        },
+        bone_demon_rib_cage = {
+            id = "bone_demon_rib_cage",
+            name = "Rib Cage",
+            flavor = "A dry cage around nothing at all.",
+            type = "BODY",
+            hp_value = 1,
+            die = die(O, S, E, S, { S, E }, S)
+        },
+        bone_demon_right_claw = {
+            id = "bone_demon_right_claw",
+            name = "Right Bone Claw",
+            flavor = "The fingers click like counting sticks.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, S, S, E, S, { S, S })
+        },
+        bone_demon_left_claw = {
+            id = "bone_demon_left_claw",
+            name = "Left Bone Claw",
+            flavor = "It points before it cuts.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, E, S, E, S, { S, E })
+        },
+        scholars_head = {
+            id = "scholars_head",
+            name = "Scholar's Head",
+            flavor = "\"The library will endure; it is the universe.\" - Jorge Luis Borges",
+            type = "HEAD",
+            hp_value = 3,
+            die = {
+                faces = {
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE,
+                    { Symbols.WARD, Symbols.WARD },
+                    Symbols.WARD
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "scholars_head_slot",
+                name = "Anticipate",
+                cost = { Symbols.ESSENCE },
+                timing = "spend",
+                effect = { type = "add_next_symbol", symbol = Symbols.WARD }
+            }
+        },
+        ["robot_head"] = {
+            id = "robot_head",
+            name = "Robot Head",
+            flavor = "",
+            type = "HEAD",
+            hp_value = 2,
+            keywords = { "Armored" },
+            die = {
+                faces = {
+                    { Symbols.STRIKE, Symbols.WARD },
+                    Symbols.STRIKE,
+                    { Symbols.STRIKE, Symbols.WARD },
+                    Symbols.WARD,
+                    Symbols.ESSENCE,
+                    { Symbols.WARD, Symbols.WARD }
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "robot_head_slot",
+                name = "Drone",
+                cost = { Symbols.STRIKE, Symbols.WARD },
+                timing = "spend",
+                effect = { type = "assign_symbol_to_each_part", destination = "socket", target = "self", symbol = Symbols.WARD, amount = 1 }
+            }
+        },
+        ["withered_arm"] = {
+            id = "withered_arm",
+            name = "Withered Arm",
+            flavor = "",
+            type = "ARM",
+            hp_value = 1,
+            keywords = { "Brittle" },
+            die = {
+                faces = {
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE,
+                    Symbols.STRIKE,
+                    Symbols.WARD,
+                    Symbols.ESSENCE,
+                    Symbols.ESSENCE
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "withered_arm_slot",
+                name = "Vengeance",
+                cost = { Symbols.BLOOD },
+                timing = "spend",
+                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1, duration = "allocation" }
+            }
+        },
+        ["gaunt_cloak"] = {
+            id = "gaunt_cloak",
+            name = "Gaunt Cloak",
+            flavor = "",
+            type = "BODY",
+            hp_value = 2,
+            keywords = { "Absorbent" },
+            die = {
+                faces = {
+                    { Symbols.ESSENCE, Symbols.ESSENCE },
+                    { Symbols.WARD, Symbols.WARD },
+                    Symbols.ESSENCE,
+                    Symbols.WARD,
+                    Symbols.BLANK,
+                    Symbols.BLANK
+                },
+                wound_faces = { 1, 2 },
+                maim_faces = { 3, 4 }
+            },
+            slot = {
+                id = "gaunt_cloak_slot",
+                name = "Enshroud",
+                cost = { Symbols.WARD, Symbols.ESSENCE, Symbols.ESSENCE, Symbols.ESSENCE },
+                hungry = true,
+                timing = "spend",
+                effect = { type = "assign_symbol_to_each_part", destination = "socket", target = "self", symbol = Symbols.WARD, amount = 1 }
+            }
+        }
+    },
+
+    loadouts = {
+        player_demo = {
+            id = "player",
+            name = "Dreamer",
+            is_player = true,
+            parts = {
+                "dreamer_head",
+                "dreamer_body",
+                "dreamer_right_arm",
+                "dreamer_left_arm",
+                "dreamer_right_leg",
+                "dreamer_left_leg"
+            }
+        },
+        enemy_demo = {
+            id = "enemy",
+            name = "Bone Demon",
+            ai_personality = "bone_caster",
+            parts = {
+                "bone_demon_skull",
+                "bone_demon_rib_cage",
+                "bone_demon_right_claw",
+                "bone_demon_left_claw"
+            }
+        }
     }
 }
 
 ```
 
-## docs/CombatDesign.md
+## data/dialog/basement.lua
+
+```lua
+return {
+    whispering_wall = {
+        start = "entry",
+        nodes = {
+            entry = {
+                branches = {
+                    {
+                        condition = { flag = "basement.whispering_wall_heard" },
+                        next = "repeat_visit"
+                    },
+                    {
+                        next = "first_visit"
+                    }
+                }
+            },
+            first_visit = {
+                speaker = "Wall",
+                text = "Something inside the wall whispers through the plaster.",
+                next = "listen_choice"
+            },
+            listen_choice = {
+                speaker = "Wall",
+                text = "Put your ear to it?",
+                responses = {
+                    {
+                        label = "Yes",
+                        next = "listen"
+                    },
+                    {
+                        label = "No",
+                        finish = {
+                            effects = {
+                                { type = "set_flag", flag = "basement.whispering_wall_refused", value = true }
+                            }
+                        }
+                    }
+                }
+            },
+            listen = {
+                speaker = "Wall",
+                text = "The whisper says your name, then starts climbing out.",
+                finish = {
+                    effects = {
+                        { type = "set_flag", flag = "basement.whispering_wall_heard", value = true }
+                    },
+                    result = {
+                        type = "encounter",
+                        encounter_id = "zombie",
+                        text = "The whisper pulls itself loose."
+                    }
+                }
+            },
+            repeat_visit = {
+                speaker = "Wall",
+                text = "The wall is quiet now, but it remembers the shape of your ear.",
+                finish = {
+                    effects = {
+                        { type = "set_flag", flag = "basement.whispering_wall_revisited", value = true }
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+## data/rooms/basement_1.lua
+
+```lua
+return {
+    id = "basement_1",
+    width = 10,
+    height = 8,
+    tilewidth = 32,
+    tileheight = 32,
+    properties = {
+        dream = "basement",
+        camera_zoom = "close"
+    },
+    layers = {
+        {
+            name = "ground",
+            type = "tilelayer",
+            data = {
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,1,1,1,1,1,1,1,1,1}
+            }
+        },
+        {
+            name = "walls",
+            type = "tilelayer",
+            data = {
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,1,1,1,1,1,1,1,1,1}
+            }
+        },
+        {
+            name = "collision",
+            type = "tilelayer",
+            visible = false,
+            data = {
+                {1,1,1,1,1,1,1,1,1,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,0,0,0,0,0,0,0,0,1},
+                {1,1,1,1,1,1,1,1,1,1}
+            }
+        },
+        {
+            name = "actors",
+            type = "objectgroup",
+            objects = {
+                {
+                    name = "crack_zombie",
+                    type = "crack",
+                    tile_x = 2,
+                    tile_y = 2,
+                    properties = {
+                        resolved_asset_id = "actor_crack_zombie_revealed",
+                        on_tool_use = {
+                            tool = "shovel",
+                            type = "encounter",
+                            encounter_id = "zombie",
+                            message = "You dig through the wall. Something stirs in the dark."
+                        }
+                    }
+                },
+                {
+                    name = "crack_bone_demon",
+                    type = "crack",
+                    tile_x = 9,
+                    tile_y = 4,
+                    properties = {
+                        resolved_asset_id = "actor_crack_bone_demon_revealed",
+                        on_tool_use = {
+                            tool = "shovel",
+                            type = "encounter",
+                            encounter_id = "bone_demon",
+                            message = "You dig into a hollow behind the wall. Bones click awake."
+                        }
+                    }
+                },
+                {
+                    name = "crack_passage",
+                    type = "crack",
+                    tile_x = 5,
+                    tile_y = 7,
+                    properties = {
+                        resolved_asset_id = "actor_crack_resolved",
+                        on_tool_use = {
+                            tool = "shovel",
+                            type = "passage",
+                            target_room = "basement_ritual_room",
+                            message = "You dig through the wall. Cold air pours through the opening."
+                        }
+                    }
+                },
+                {
+                    name = "pipe_shovel",
+                    type = "pipe",
+                    tile_x = 3,
+                    tile_y = 2,
+                    properties = {
+                        item = "shovel",
+                        message = "Found: shovel!",
+                        empty_message = "An empty drainage pipe."
+                    }
+                },
+                {
+                    name = "whispering_wall",
+                    type = "message",
+                    tile_x = 7,
+                    tile_y = 2,
+                    properties = {
+                        dialog = "data.dialog.basement",
+                        dialog_id = "whispering_wall"
+                    }
+                }
+            }
+        }
+    }
+}
+
+```
+
+## docs/BPEditor.md
+
+````markdown
+# Body Part Editor
+
+Launch with:
+
+```sh
+love . --bp-editor
+```
+
+This is a lightweight development tool for shaping v2 Body Part content. It is intentionally closer to a worksheet than a full database editor.
+
+Current flow:
+
+- Browse and search Body Parts from `data/combat/*.lua`.
+- Fill in ID, name, type, Heart value, tags, and flavor text.
+- Click a die face, then click symbol buttons to build that face.
+- Configure an optional Slot with cost pips, timing, and a common effect template.
+- Copy either a Lua definition or a notes-format description to the clipboard.
+
+Slot effect guidance:
+
+- The editor supports common templates: no effect, add next symbol, channel symbol, auto assign, spellmark, heal part, damage opponent part, and gain crest.
+- Channel symbol exports `add_symbol_to_matching_dice`: dice showing one symbol gain another for the current Allocation, optionally limited to sockets, rims, or slots.
+- Auto assign exports `assign_symbol_to_each_part`: create virtual Ward/Strike assignments on open sockets or rims, useful for effects like Force Field.
+- Heal part can target either the Slot's own Body Part or the combatant's most damaged Body Part.
+- Spellmark opens an existing rim or socket to Essence and authors a damage payload for the marked Body Part.
+- Composed `actions` sequences are preserved when loaded and exported, but editing the sequence itself is still a Lua-side task.
+- Bespoke effects should stay code-authored for now. The content schema can still hold them, but the editor should not become a general-purpose scripting language.
+- If a bespoke effect becomes common enough to reuse across multiple Body Parts, promote it to a named engine effect and then add it as a template here.
+
+The editor does not write directly to project files yet. Pasting exported Lua keeps review explicit and avoids accidental content churn while the schema is still moving.
+
+````
+
+## docs/CombatAssetManifest.md
 
 ```markdown
-Combat Design Document
-Into the Dreamlands
-Core Philosophy
-Combat is a strategic puzzle about resource management and calculated risk. Every decision should feel meaningful, with no optimal strategy that works in all situations. Players succeed through understanding system interactions, not grinding or RNG luck.
+# V2 Combat Asset Manifest
 
-1. COMBAT STRUCTURE
-1.1 Participants
+Native target: 960x540.
 
-Two combatants: Player vs Enemy (1v1 only)
-Each combatant consists of 6 Body Parts maximum
-Each combatant has 3 Heart Points
-Combat ends when one combatant reaches 0 Heart Points
+All sprite filenames below are addressed by ID through `core/assets.lua`: save PNGs in `assets/sprites/combat/` using the listed ID plus `.png`.
 
-1.2 Round Structure
-Each round proceeds through these phases in strict order:
+## Revised Visual Target
 
-Upkeep Phase
+Combat is moving away from a paper-doll stage and sliding dice drawers. The screen should read as a dark tabletop with two Body Part tableaus facing each other.
 
-Trigger start-of-round effects
-Expire end-of-round effects from previous round
-Process passive crest effects
+Core presentation rules:
 
+- Predominant background: `#222034`.
+- Body Parts are cards/tabletop objects, not illustrations of anatomy.
+- Dice settle into owner-side rows directly in front of each BP tableau. Do not draw a visible tray unless a specific state needs one.
+- Crests render in a one-token-tall strip between each BP tableau and that combatant's settled dice row. The strip collapses completely when empty.
+- The space between dice rows is a transit/conduit field for dice movement, spellmark pulses, slot-to-target lines, and brief activation blooms. It is not a paper-doll stage.
+- Text belongs primarily in the right inspector/log. The main playfield should use names, symbols, pips, and very short transient labels only.
+
+## Current Transitional Layout Measurements
+
+These measurements match the current 960x540 renderer while the asset pass catches up. Names use the revised tabletop vocabulary even where old code still has `drawer`-named helpers.
+
+Global constants:
+
+- Main playfield x: 48
+- Main playfield width: 744
+- Left global spine: 8,8,32x524
+- Right inspector rail: 800,8,152x524
+- Enemy BP tableau band: 48,8,744x130
+- Enemy dice row band: 48,144,744x54
+- Conduit / no-man's-land: 48,204,744x132
+- Player dice row band: 48,342,744x54
+- Player BP tableau band: 48,402,744x130
+
+Shared interaction footprints:
+
+- BP card: 116x88
+- Die/socket/rim/hatch: 36x36
+- Symbol pip: 12x12
+- Crest chip: 24x24
+- Confirm chit: 84x48
+
+BP card slots:
+
+- Slot x positions: 52, 176, 300, 424, 548, 672
+- Enemy card y: 34
+- Player card y: 430
+- Enemy title edge: far side from opponent, above/on top of the card.
+- Player title edge: far side from opponent, below/on bottom of the card.
+- BP card left sector: card x+4 to x+44; holds rim, socket, HP value, and keyword badges between socket and HP.
+- BP card right sector: card x+44 to x+112; holds slot title at y+7, hatch at y+24, and centered pip grid at y+62.
+
+Settled dice and crest strips:
+
+- Enemy dice row: 144,153,548x36
+- Player dice row: 144,351,548x36
+- Enemy crest strip starts: 58,171
+- Player crest strip starts: 58,345
+- Crest gap: 7 px between 24x24 chips
+- Player confirm: 700,345,84x48
+
+Global spine internals:
+
+- Enemy heart stack: 12,18,24x80
+- Enemy initiative badge: 12,108,24x24
+- Centered queue stack: 12,175,24x190
+- Contested initiative badge: 12,258,24x24
+- Player initiative badge: 12,408,24x24
+- Player heart stack: 12,442,24x80
+
+## Mirrored Card Grammar
+
+Use semantic edges instead of absolute top/bottom when drawing BP card assets.
+
+Opponent-facing edge:
+
+- Holds the attackable rim latch.
+- Holds the defense socket just inside the card from that rim.
+- Faces the conduit/no-man's-land.
+- Enemy cards: bottom edge.
+- Player cards: top edge.
+
+Owner-facing edge:
+
+- Holds the BP title/name treatment and ownership identity.
+- Faces away from the opponent.
+- Enemy cards: top edge.
+- Player cards: bottom edge.
+
+Slot/hatch placement can be mirrored by side if it improves readability, but its footprint and states should remain invariant.
+
+## Existing Wired Assets
+
+These are already used by `states/v2_combat.lua`:
+
+- `combat_tabletop` - optional 960x540 full-screen tabletop backing
+- `combat_spine` - optional 32x524 global spine backing
+- `combat_queue_stack` - optional 24x190 queue pipeline/well; renderer overlays only actual queued symbols, not empty placeholder cells
+- `combat_initiative_badge` - optional 24x24 initiative badge frame
+- `heart_point` - 24x24 intact Heart Point icon
+- `heart_point_depleted` - 24x24 depleted Heart Point icon
+- `combat_enemy_tableau` - optional 744x130 enemy BP row backing
+- `combat_player_tableau` - optional 744x130 player BP row backing
+- `combat_conduit_field` - optional 744x132 no-man's-land backing
+- `bp_card` - 116x88 base BP card
+- `bp_card_empty` - optional 116x88 empty card placeholder
+- `bp_card_hover1`, `bp_card_hover2` - optional 116x88 animated hover overlay frames
+- `bp_card_selected` - optional 116x88 source-selected overlay
+- `bp_card_valid` - optional 116x88 valid target overlay
+- `bp_card_invalid` - optional 116x88 invalid/offline overlay
+- `bp_card_wounded` - optional 116x88 wounded damage overlay
+- `bp_card_maimed` - optional 116x88 maimed damage overlay
+- `bp_title` - optional 116x16 BP title strip; drawn normally for enemies and flipped vertically for players
+- `bp_keyword_armored`, `bp_keyword_brittle`, `bp_keyword_absorbent`, `bp_keyword_hungry` - optional 13x9 keyword badge sprites; renderer falls back to text-backed badges
+- `die_socket` - 36x36 defense socket
+- `die_socket_valid1`...`die_socket_valid4` - optional animated valid socket frames
+- `die_socket_occupied1`...`die_socket_occupied4` - optional animated occupied socket frames
+- `die_socket_locked1`...`die_socket_locked4` - optional animated locked/offline socket frames
+- `die_socket_spellmarked1`...`die_socket_spellmarked4` - optional animated spellmarked socket frames
+- `die_rim` - 36x36 rim latch
+- `die_rim_valid1`...`die_rim_valid4` - optional animated valid rim frames
+- `die_rim_occupied1`...`die_rim_occupied4` - optional animated occupied rim frames
+- `die_rim_locked1`...`die_rim_locked4` - optional animated locked/offline rim frames
+- `die_rim_spellmarked1`...`die_rim_spellmarked4` - optional animated spellmarked rim frames
+- `die-hatch1` - 36x36 completely closed/rest hatch
+- `die-hatch2` - 36x36 halfway-open hatch for valid eligible destinations
+- `die-hatch3` - 36x36 almost-open hatch for the hovered eligible destination
+- `die-hatch4` - 36x36 open pit/no-door swallow frame
+- `empty_die` - 36x36 die/token base
+- `die_row_guideline_enemy` - optional 548x4 enemy dice row guide
+- `die_row_guideline_player` - optional 548x4 player dice row guide
+- `sword_symbol`, `shield_symbol`, `lightning_symbol`, `blood_symbol` - 12x12 filled symbols
+- `sword_symbol_outline`, `shield_symbol_outline`, `lightning_symbol_outline`, `blood_symbol_outline` - 12x12 unfilled symbols
+- `crest_strip_enemy` - optional one-token-tall enemy crest strip guide
+- `crest_strip_player` - optional one-token-tall player crest strip guide
+
+## Next Facade Pass Targets
+
+Prioritize assets that make the tabletop tableau feel complete without requiring character illustration.
+
+### Table And Chrome
+
+- `combat_tabletop` - 960x540 dark tabletop background, primarily `#222034`
+- `combat_spine` - 32x524 global spine backing
+- `combat_queue_stack` - 24x190 queue pipeline/well
+- `combat_initiative_badge` - 24x24 initiative badge frame
+- `heart_point` - 24x24 intact Heart Point icon
+- `heart_point_depleted` - 24x24 depleted Heart Point icon
+- `combat_inspector_rail` - 152x524 right inspector/log backing
+- `combat_enemy_tableau` - 744x130 enemy BP row backing
+- `combat_player_tableau` - 744x130 player BP row backing
+- `combat_conduit_field` - 744x132 subtle central transit field
+- `combat_confirm_chit` - 84x48 confirm control
+- `combat_confirm_chit_hover` - 84x48 confirm hover/focus state
+
+### Body Part Cards
+
+- `bp_card` - 116x88 base BP card, dark-table compatible
+- `bp_card_empty` - 116x88 empty placeholder
+- `bp_card_hover` - 116x88 hover outline/overlay
+- `bp_card_selected` - 116x88 source-selected outline/overlay
+- `bp_card_valid` - 116x88 valid target outline/overlay
+- `bp_card_invalid` - 116x88 invalid/offline outline/overlay
+- `bp_card_wounded` - 116x88 damage surface overlay
+- `bp_card_maimed` - 116x88 ruined/offline surface overlay
+- `bp_title` - 116x16 title strip treatment; enemy orientation is canonical, player render flips vertically
+- `bp_hp_badge` - compact HP badge frame
+- `bp_keyword_armored` - 13x9 Armored badge
+- `bp_keyword_brittle` - 13x9 Brittle badge
+- `bp_keyword_absorbent` - 13x9 Absorbent badge
+- `bp_keyword_hungry` - 13x9 Hungry badge
+
+### Sockets, Rims, And Slots
+
+- `die_socket` - 36x36 empty defense socket
+- `die_socket_valid` - 36x36 valid-hover socket
+- `die_socket_occupied` - 36x36 occupied socket treatment
+- `die_socket_locked` - 36x36 sealed/offline socket
+- `die_rim` - 36x36 empty attack rim latch
+- `die_rim_valid` - 36x36 valid-hover rim latch
+- `die_rim_occupied` - 36x36 occupied rim latch
+- `die_rim_locked` - 36x36 sealed/offline rim latch
+- `die_rim_spellmarked` - 36x36 rim temporarily accepting Essence
+- `die_socket_spellmarked` - 36x36 socket temporarily accepting Essence
+- `die-hatch1` - 36x36 completely closed/rest hatch
+- `die-hatch2` - 36x36 halfway-open hatch for valid eligible destinations
+- `die-hatch3` - 36x36 almost-open hatch for the hovered eligible destination
+- `die-hatch4` - 36x36 open pit/no-door swallow frame
+- `slot_cell_preview` - optional 12x12 backing behind an existing symbol sprite during charge preview
+- `slot_cell_lit` - optional 12x12 backing behind an existing symbol sprite for charged pips
+- `slot_cell_vent` - optional 12x12 backing/shatter frame for a vented pip
+- `slot_cell_wild` - optional 12x12 Hungry/wildcard pip; renderer falls back to procedural circles
+
+### Dice And Symbols
+
+- `empty_die` - 36x36 die/token base
+- `die_back_enemy` - 36x36 face-down enemy die
+- `die_back_player` - 36x36 face-down player die if needed
+- `die_shadow` - 36x36 table shadow under settled dice
+- `die_row_guideline_enemy` - 548x4 subtle enemy magnet line
+- `die_row_guideline_player` - 548x4 subtle player magnet line
+- `sword_symbol`, `shield_symbol`, `lightning_symbol`, `blood_symbol` - 12x12 filled symbols
+- `sword_symbol_outline`, `shield_symbol_outline`, `lightning_symbol_outline`, `blood_symbol_outline` - 12x12 outline symbols
+- `blank_symbol` - 12x12 blank face mark if blanks need visible texture
+- `burn_spark_strike`, `burn_spark_ward`, `burn_spark_essence`, `burn_spark_blood` - small burn-off particles or ghosts
+
+### Crests
+
+- `crest_valor_chip` - 24x24 Valor crest chip
+- `crest_shadow_chip` - 24x24 Shadow crest chip
+- `crest_count_badge` - small count badge backing
+- `crest_strip_enemy` - optional one-token-tall enemy strip guide
+- `crest_strip_player` - optional one-token-tall player strip guide
+
+Do not draw empty crest slots. The crest strip appears only when at least one visible crest is present.
+
+### Effect Overlays
+
+- `effect_slot_pulse` - generic slot activation bloom
+- `effect_spellmark_thread` - slot-to-rim/socket conduit line segment or particle
+- `effect_wound_flash` - damage flash overlay
+- `effect_vent_shatter` - slot charge vent overlay
+- `effect_latch_eject` - rim ejection burst
+
+These may also be generated procedurally in code. Only draw sprite assets here if repeated hand-authored texture will make them stronger than simple rectangles/lines.
+
+## Authoring Notes
+
+- Keep meaningful art inside the listed footprint; the renderer draws at native dimensions first.
+- State overlays may be authored as one static PNG using the listed base ID, or as 2-4 animation frames using `1`...`4` suffixes, e.g. `die_socket_valid1.png`, `die_socket_valid2.png`.
+- Transparent internal padding is fine, especially for chips and badges, but interaction hitboxes remain rectangular.
+- Avoid light filled panels as the default. Prefer dark fills, pale outlines, and high-contrast symbol accents.
+- Do not create paper-doll, limb, or full-body combat assets for this pass.
+- If a component needs vertical mirroring, prefer a single sprite that can be flipped unless side-specific title or latch art is clearly better.
 
-Tech Selection Phase
-
-Both combatants simultaneously select one Tech
-Techs come from currently equipped Body Parts
-Some Techs have requirements (must be met to select)
-
-
-Attack Assignment Phase
-
-Each combatant assigns any attack rolls from their Tech to enemy Body Parts
-Multiple attacks can target the same Body Part
-Unassigned attacks are lost
-
-
-Defense Assignment Phase
-
-Each combatant assigns any defense rolls from their Tech to their own Body Parts
-Multiple defenses can protect the same Body Part
-Unassigned defenses are lost
-
-
-Resolution Phase
-
-Roll all dice simultaneously
-For each attack: Compare (Attack Roll + Keywords) vs (Target Toughness + Defense Roll)
-If attack exceeds threshold: Body Part takes damage
-Process damage triggers and state changes
-Apply any additional Tech effects
-
-
-End Phase
-
-Check for combat end (either combatant at 0 HP)
-Process end-of-round effects
-Increment round counter
-
-
-
-
-2. BODY PARTS
-2.1 Properties
-Each Body Part has:
-
-Name: Display name
-Type: HEAD, BODY, ARM (×2), LEG (×2)
-Status: Healthy → Wounded → Maimed
-Toughness: Base defense value (typically 1-4)
-HP Value: Heart Points lost when Maimed (typically 1-3)
-Techs: List of available Techs (typically 1-3)
-Tags: Properties for overworld/requirements (STRONG, SCHOLARLY, etc.)
-
-2.2 Damage States
-
-Healthy: Full functionality
-Wounded: Still functional, may trigger effects
-Maimed: No longer usable, owner loses HP Value in Heart Points
-
-2.3 Body Part Configuration
-
-Combatants may have fewer than 6 Body Parts
-Body Parts must be of appropriate types (max 1 HEAD, 1 BODY, 2 ARMS, 2 LEGS)
-Empty slots are valid (combatant with only 3 Body Parts is legal)
-
-
-3. TECHS
-3.1 Structure
-Each Tech consists of:
-
-Name: Display name
-Actions: Ordered list of effects (see 3.2)
-Requirements: Conditions to use (see 3.3)
-Keywords: Modifiers that affect resolution
-
-3.2 Action Types
-
-Attack Roll: Roll Xd6 for attack (assigned in Attack Phase)
-Defense Roll: Roll Xd6 for defense (assigned in Defense Phase)
-Gain Crest: Add specified crest to pool
-Consume Crest: Remove specified crest from pool (requirement)
-Damage Body Part: Direct damage to specific part (no roll)
-Heal Body Part: Restore status one step
-Special Effect: Unique mechanical effect
-
-3.3 Requirements
-Techs may require:
-
-Crests: Minimum count of specific crest type
-Body Part Status: Number of Wounded/Maimed parts
-Tags: Body Part must have specific tag
-Round Count: Only available on certain rounds
-Unique: Cannot be used if opponent uses same Tech
-
-
-4. DICE SYSTEM
-4.1 Die Types
-
-d4: Low variance (1-4), reliable
-d6: Standard die (1-6), baseline
-d8: High variance (1-8), risky
-
-4.2 Rolling
-
-Roll specified number and type of dice
-Sum all results for total
-Keywords may modify results (see 5.0)
-
-4.3 Attack Resolution
-Attack Success if: (Attack Roll + Attack Modifiers) > (Target Toughness + Defense Roll + Defense Modifiers)
-
-5. KEYWORDS
-Keywords modify Tech behavior. Examples:
-
-Consistent X: Force all dice to show X
-Reliable X-Y: Dice cannot roll below X or above Y
-Piercing: Ignore X points of defense
-Brutal: +1 damage
-
-6. CREST SYSTEM
-6.1 Crest Types
-Beneficial (want to accumulate):
-
-Shadow: Defensive utility
-Valor: Offensive bonuses
-Knowledge: Information/tactical advantage
-Cunning: Flexibility/control
-
-Detrimental (want to remove):
-
-Madness: Chaotic effects
-Greed: Resource lock
-Corruption: Spreading damage
-
-6.2 Crest Mechanics
-Each crest has:
-
-Expend Effect: Activated by player choice, removes crest
-Passive Effect: May trigger at threshold counts
-Stack Limit: None (can accumulate infinitely)
-
-6.3 Example Crest Effects
-Shadow
-
-Expend: Target Body Part becomes Untargetable this round
-Passive: None
-
-Madness
-
-Expend: Reroll one die (forced), gain random crest
-Passive: At 3+, all your dice become "chaotic"
-
-Valor
-
-Expend: +2 to one attack roll
-Passive: At 2+, gain +1 die value to all attacks
-
-
-7. COMBAT FLOW EXAMPLE
-Round 1: Upkeep
-
-No effects to process
-
-Round 1: Tech Selection
-
-Player selects "Cleave" from Butcher's Arm
-Enemy selects "Shamble" from Zombie Legs
-
-Round 1: Attack Assignment
-
-Player assigns Cleave's 2d6 attack to Enemy's Head
-Enemy assigns Shamble's 1d6 attack to Player's Arm
-
-Round 1: Defense Assignment
-
-Player has no defense from Cleave
-Enemy assigns Shamble's 1d4 defense to Head
-
-Round 1: Resolution
-
-Player rolls 2d6: [4,3] = 7
-Enemy Head has Toughness 2, Defense 1d4: [2] = 2
-Total defense: 4
-7 > 4, Enemy Head becomes Wounded
-Enemy rolls 1d6: [5] = 5
-Player Arm has Toughness 3, no defense
-5 > 3, Player Arm becomes Wounded
-
-Round 1: End
-
-Check combat end: Both still have HP
-Continue to Round 2
-
-
-8. VICTORY & REWARDS
-8.1 Combat End
-Combat ends when either combatant reaches 0 Heart Points
-8.2 Player Victory
-
-May claim ONE non-Maimed Body Part from enemy
-Gains any combat completion rewards (items, progress)
-Crests do NOT persist to next combat
-
-8.3 Player Defeat
-
-Returns to wake state
-Loses progress in current dream run
-Knowledge/routing information persists
-
-
-9. DESIGN PRINCIPLES
-
-No Dominant Strategy: Rock-paper-scissors dynamics between offensive/defensive/tactical approaches
-Meaningful Damage: Every hit matters with only 3 HP and 6 body parts
-Calculated Risk: Dice provide uncertainty but not chaos
-Build Expression: Body Part collection enables diverse strategies
-Readable Complexity: Systems are deep but parseable
-Failforward: Defeat teaches rather than frustrates
-
-
-10. BALANCE TARGETS
-
-Average combat: 3-5 rounds
-Player win rate (learning): ~40%
-Player win rate (mastered): ~80%
-Decisions per round: 3-4 meaningful choices
-RNG impact: 30% (tactics > luck)
 ```
+
+## docs/CombatDesign.md
+
+````markdown
+# Into the Dreamlands — Combat Design Document v2.2
+**The Symbol Dice System**
+*Drafted June 2026. Supersedes v1 (numeric dice / Tech-Action model). v2.2 clarifies destination capacity, mixed-symbol validity, immediate Spend timing, the initial crest prototype set, and the Lua content definition shape.*
+
+---
+
+## 0. The Index Card
+
+The complete universal ruleset. Everything else in this document is content, exception, or elaboration.
+
+1. Each combatant is up to 6 Body Parts and 3 Hearts. Maiming a part costs its owner that part's Heart value. 0 Hearts = defeat.
+2. Each Body Part carries one symbol die. Every round, all dice are rolled into the owner's pool.
+3. During Allocation, each die goes to exactly one destination:
+   - **Socket** (own part; capacity 1) — accepts a die showing at least one 🛡️; its 🛡️ defend that part.
+   - **Rim** (enemy part; capacity 1) — accepts a die showing at least one 🗡️; its 🗡️ attack that part.
+   - **Slot** (any number of dice) — accepts a die only if at least one shown symbol lights an unfilled cost pip; the die is consumed; surplus symbols are lost.
+4. A die travels whole. Mixed-symbol faces are legal if any shown symbol is relevant to the destination; irrelevant symbols burn off. Unallocated dice are lost.
+5. At Resolution, per part: if assigned 🗡️ exceed assigned 🛡️, the part takes one damage step (Healthy → Wounded → Maimed).
+6. A slot triggers automatically the moment its cost track fills, enqueued FIFO, resolving at its declared timing window. Wounding a part vents its slot's charge. Maiming takes the slot offline.
+7. Initiative governs allocation visibility (see §5). The player has initiative by default.
+
+---
+
+## 1. Core Philosophy
+
+Combat is a strategic puzzle about reading a position and spending a hand of dice. Resolution is counting, not arithmetic. Depth lives in allocation decisions, slot timing, and target selection — never in rules text. **Universal rules stay on the index card; everything expressive lives in content** (dice layouts, slots, crests, rare keywords).
+
+Design north stars carried forward from v1: no dominant strategy, meaningful damage, calculated risk, build expression, readable complexity, failforward.
+
+---
+
+## 2. Symbols & Dice
+
+### 2.1 The Symbol Set
+| Symbol | Name | Role |
+|---|---|---|
+| 🗡️ | Strike | Offense. Assigned via rims. |
+| 🛡️ | Ward | Defense. Assigned via sockets. |
+| ⚡️ | Essence | Slot fuel; primary crest-generation vector. |
+| 🩸 | Blood | Injury byproduct. Generally inert; fuels specific slots. |
+| ⚪ | Blank | Nothing. The variance dial. |
+
+Faces may carry one, two, or (rarely) three symbols. Multi-symbol faces (🗡️🗡️, 🗡️🛡️, ⚡️⚡️) are how force concentrates under the one-die-per-destination cap, making them the premium design currency.
+
+### 2.2 The Die as Character Portrait
+Each Body Part's die is its mechanical fingerprint. Face distribution communicates personality at a glance:
+
+- Reliable defender: `[🛡️][🛡️][🛡️][🛡️][🛡️][🗡️]`
+- Glass cannon: `[🗡️🗡️🗡️][🗡️🗡️][⚪][⚪][⚪][⚪]`
+- Versatile caster: `[⚡️][⚡️][🛡️][🗡️][⚡️🛡️][⚪]`
+
+### 2.3 Degradation (🩸 Gunking)
+Each part's data **predetermines** its wound-faces and maim-faces. This is an ironclad 2/2/2 structure: exactly two faces fall to Wounded, exactly two further faces fall to Maimed, and exactly two faces remain durable.
+
+- **Wounded:** two specified faces are struck and replaced with 🩸.
+- **Maimed:** two further specified faces are struck and replaced with 🩸. The part's die still rolls.
+
+The player never loses dice; their pool gunks up with blood. Degradation paths are part of the fingerprint: a part that loses its blanks first *hardens under pain*; one that loses its 🗡️🗡️ faces first is *fragile brilliance*. Authoring rule: choose struck faces to express character, and remember 🩸 output makes blood-cost slots easier to feed — wounded combatants drift toward desperate techniques.
+
+---
+
+## 3. Body Parts
+
+Each Body Part defines:
+
+| Field | Notes |
+|---|---|
+| Name, type | HEAD / BODY / ARM ×2 / LEG ×2. Fewer than 6 parts is legal. |
+| Flavor | Optional short prose string for planning screens, editors, claiming text, and other non-combat surfaces. |
+| Heart value | Hearts lost by owner when this part is maimed (1–3). |
+| Status | Healthy → Wounded → Maimed. |
+| Die | 6 faces + predetermined wound-faces and maim-faces. |
+| Slot | Usually exactly one (see §6). Zero or two are rare exceptions. |
+| Keyword | Rare. Most parts have none (see §8). |
+| Overworld tags | STRONG, SCHOLARLY, etc. **Never displayed in combat.** Drives exploration interactions and resonance. |
+
+The v1 concepts of **Toughness** (dissolved into die composition and the rare Armored keyword) and **Techs** (collapsed into slots) no longer exist.
+
+### 3.1 Combat Content Definitions
+
+Prototype combat content lives in Lua table modules under `data/combat/`. The engine does not construct ad hoc parts directly; content definitions pass through `combat/v2_content.lua`, which validates references and builds runtime `BodyPart` / `Combatant` objects.
+
+Each content module returns three top-level tables:
+
+| Table | Purpose |
+|---|---|
+| `slots` | Reusable named slot definitions: `id`, `name`, `cost`, `timing`, `effect`, optional `hungry` / `keywords`. |
+| `parts` | Body Part definitions: `id`, `name`, `type`, `hp_value`, `die`, optional `slot`, optional `keywords`, optional overworld `tags`. |
+| `loadouts` | Combatant assembly definitions: `id`, `name`, optional `is_player`, optional `crest_pool`, and ordered `parts`. |
+
+Authoring rules:
+
+- A die must define exactly 6 faces. Each face may be a symbol string (`"strike"`) or a list (`{ "strike", "ward" }`).
+- `wound_faces` and `maim_faces` are face-index lists, 1–6. Each list must contain exactly two unique indexes, and the two lists may not overlap.
+- A part's `slot` may be a key into `slots` or an inline slot table.
+- Hungry slots still author a `cost` list to define track length, but display and resolve those pips as wildcards. Author as `hungry = true` or `keywords = { "Hungry" }`.
+- A loadout's `parts` order is also its first-pass panel order in the current UI prototype. The UI reserves six fixed card slots per combatant.
+- Validation catches missing names/types, missing die faces, invalid degradation indexes, unknown slot references, unknown effect payloads, unknown crest names, and loadouts pointing at unknown parts.
+
+The current live alpha content starts in `data/combat/alpha_basement.lua`, with `data/combat/content_index.lua` listing modules that should be treated as authored game content. `data/combat/v2_demo_parts.lua` remains a useful fixture/sandbox bucket; don't treat it as the canonical alpha loop.
+
+Combat entry points resolve through `data/combat/encounters.lua`: each encounter names a content module plus player/enemy loadouts. Existing debug IDs can remain as aliases while room content moves toward namespaced IDs like `basement.bone_demon`.
+
+Launch a catalog encounter directly while iterating with:
+
+```sh
+love . --encounter=basement.zombie
+```
+
+---
+
+## 4. Round Structure
+
+1. **Upkeep** — trigger/expire effects; resolve Upkeep-window queued slots; process crest passives.
+2. **Roll** — all equipped dice roll into each combatant's pool. Automatic.
+3. **Allocation** — the round's single input phase. Each combatant distributes dice to sockets, rims, and slots, and may expend crests. Visibility per initiative (§5). Ends on Confirm.
+4. **Resolution** — per contested part, compare assigned 🗡️ vs assigned 🛡️; apply damage steps; fire On-Hit and On-Wound/Maim queued slots in FIFO order; process venting and gunking.
+5. **End** — check victory; increment round.
+
+### 4.1 Damage
+A part is **hit** when assigned 🗡️ > assigned 🛡️ on that part. A hit advances status one step. Margin of overkill has no additional effect (open question — see §10).
+
+---
+
+## 5. Initiative
+
+Initiative is a combat state governing allocation information. **The player holds initiative by default** — the tilt is deliberate: against an AI, hidden commitment is a coin flip wearing a trenchcoat; visible enemy allocation makes every round a legible puzzle.
+
+| State | Allocation visibility |
+|---|---|
+| **Player initiative** (default) | Enemy allocates first, fully visible. Player allocates with complete information. |
+| **Contested** | Hidden simultaneous allocation; reveal at Resolution. Elite encounters. |
+| **Enemy initiative** | Player commits first; enemy responds with full information. Boss phases. Oppressive; use rarely. |
+
+Game effects shift initiative: crest expends (Knowledge), enemy abilities that steal it, boss phase transitions. Difficulty escalates through information, not stat inflation. **Balance every standard encounter assuming the player sees enemy allocation**; if ordinary fights need initiative theft to threaten, the dice need sharpening instead.
+
+---
+
+## 6. Slots
+
+A slot is: **a name + a cost track of symbol pips + an effect + a timing window.**
+
+### 6.1 Feeding
+- During Allocation, any number of dice may be fed to a slot.
+- A fed die is consumed. Each of its symbols lights a matching unlit pip; symbols with no matching pip **burn off** (lost).
+- A feed is only legal if at least one pip would light (enforced at the affordance layer — the hatch won't open).
+
+### 6.2 Charge
+- Partially lit tracks **persist between rounds**. No decay.
+- No overcharge: a track cannot hold more than its cost.
+- **Mandatory trigger:** the instant the last pip lights, the slot fires — enqueued FIFO, resolving at its timing window. **Spend-window effects resolve immediately during Allocation**, before the player assigns later dice. Timing control is preserved because feeding is voluntary: hold at cost-minus-one and choose your round.
+- **Venting:** wounding a part shatters all charge on its slot (slot remains operational).
+- **Offline:** maiming a part disables its slot entirely. Wound *robs*; maim *disables*.
+- All charge resets between combats.
+
+Banked charge is self-balancing: it paints a target (the battery demands a socket every round) while the attacker allocates with that knowledge. Turtling taxes itself.
+
+### 6.3 Timing Windows
+Every slot declares exactly one: **Spend** (fires immediately during Allocation), **On Hit**, **On Wound/Maim**, **Upkeep**. The engine exposes exactly these four hooks. Allocation is a sequence of committed moves, not a draft to be rewound; immediate Spend effects are allowed to modify the remaining allocation state (rerolls, symbol changes, next-die bonuses, sealed destinations, etc.).
+
+### 6.4 Queue
+Filled slots enqueue in fill order and resolve FIFO within their window. Deliberately untutorialized — discoverable through the queue ticker.
+
+### 6.5 Example Slots
+- **Bloodlust** — 🗡️🗡️🗡️ · Spend · This round's attacks from this combatant gain Brutal.
+- **Hex** — ⚡️🗡️ · Spend · Target enemy part's socket is sealed this round.
+- **Insight** — ⚡️⚡️ · Spend · Gain a Knowledge crest.
+- **Last Resort** — 🩸🩸🩸 · Spend · Heal one of your parts one step. *(Blood costs come online as you bleed — the built-in comeback vector.)*
+- **Overload** *(enemy ability)* — injects a charge into one of the player's tracks, weaponizing mandatory trigger by detonating the effect on the wrong round.
+
+### 6.6 Prototype Effect Vocabulary
+
+Slot effects may be authored as a single effect table:
+
+```lua
+effect = { type = "add_next_symbol", symbol = Symbols.STRIKE }
+```
+
+or as an ordered sequence:
+
+```lua
+effect = {
+    actions = {
+        { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, destination = "rim" },
+        { type = "add_next_symbol", symbol = Symbols.WARD }
+    }
+}
+```
+
+Current structured effect types:
+
+- `add_next_symbol` — add one or more symbols to the next die assigned this Allocation.
+- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`.
+- `assign_symbol_to_each_part` — create virtual assignments on every open matching destination, e.g. a Force Field that assigns one 🛡️ to each unwarded friendly socket.
+- `open_spellmark` — temporarily alters existing rims or sockets to accept Essence; the first matching Essence assignment marks that part and resolves an `on_mark` payload.
+- `heal_part` — heal either the Slot's `source_part` or the combatant's `most_damaged` part.
+- `damage_opponent_part`, `gain_crest` — early prototype utility effects.
+
+This vocabulary intentionally models magical conversion as visible added symbols rather than hidden “counts as” state. Essence remains Essence; a Slot can temporarily make Essence dice carry extra tactical weight.
+
+Prototype spellmark shape:
+
+```lua
+effect = {
+    type = "open_spellmark",
+    destination = "rim",
+    symbol = Symbols.ESSENCE,
+    on_mark = { type = "damage_marked_part", amount = 1 }
+}
+```
+
+Spellmarks are not a third placement zone. They temporarily make an existing destination accept Essence, so an Essence-only die can mark an enemy rim but applies no Strike pressure, while a Strike+Essence face can both attack and mark.
+
+---
+
+## 7. Crests
+
+Combatant-level resources held in a tray; never attached to parts; reset between combats. The beneficial/detrimental split and the expend paradigm carry forward from v1. Primary generation: ⚡️-fed slots and Resonance (overworld, capped — see v1 Resonance design, unchanged).
+
+For the first v2 prototype, implement only enough crests to validate the pattern. Crests are the manipulation layer over dice, allocation timing, initiative, and targeting state:
+
+| Crest | Expend |
+|---|---|
+| Valor | Add one 🗡️ to the next die you assign this Allocation. This may make a die rim-valid; if the die is assigned elsewhere, the added 🗡️ burns off like any irrelevant symbol. |
+| Shadow | Until the next Upkeep, whenever one of your Body Part slots activates, that Body Part becomes Untargetable. If an attack die is already latched to that part, the latch is ejected and the attack die is lost. |
+| Knowledge, Cunning | Hold for later prototypes; likely initiative/allocation manipulation. |
+| Madness, Greed, Corruption | Detrimental set: expends function as costs paid to purge. TBD. |
+
+Shadow is intentionally near the complexity ceiling for crest expends in the first implementation. If Shadow is readable and implementable, simpler expends should fit the model.
+
+---
+
+## 8. Keywords (Expressive Exceptions)
+
+Rare, badge-displayed rules modifiers. Keep them sparse: usually one part keyword at most, with Hungry appearing as slot behavior. The universal rules never depend on a keyword being present.
+
+- **Armored** *(rim)* — dice cannot be assigned to this BP's rim unless they show at least 🗡️🗡️. This is target legality, not damage reduction.
+- **Brittle** *(body)* — damage to this BP always maims it.
+- **Absorbent** *(socket)* — if this BP is attacked and takes no damage while its socket holds a die, feed that die to its Slot.
+- **Hungry** *(slot)* — this Slot uses wildcard pips. Any nonblank symbol lights one unfilled pip, regardless of identity. Visual tell: hatch always open; cost pips render as wildcard circles.
+
+---
+
+## 9. Strategy Space (Design Intent)
+
+The system must support two coherent archetypes, each demanding different dice, slots, and defensive answers:
+
+- **Tall** — concentrate multi-symbol faces on one part; maim it; race Hearts. Counterplay: Bulwark, Armored, Shadow.
+- **Wide** — chip wounds across many parts; gunk the opponent's entire pool with 🩸; win the symbol economy. Counterplay: Brace, healing, fast aggression.
+
+Head-punching is kept honest not by toughness stats but by: the one-die-per-destination cap, asymmetric part value across enemies (the scary die on a 1-Heart arm forces the disarm-vs-race fork), venting (wounding *any* charged part steals tempo), and wide play's pool-degradation payoff.
+
+The Basement Zombie is the first explicit route-versus-reward example. Its 3-Heart Brain Pan offers a two-hit victory, but maiming it destroys the most desirable claim. Every other part carries **Regrowth** (🩸 · Spend · heal this part one step), while the preserved head spends 🩸🩸 on **Bite** to add 🗡️🗡️ to its next assigned die. The hard kill therefore preserves the prize while giving the Zombie more time and Blood with which to threaten the player.
+
+The Basement Bone Demon establishes an early **caster** identity: dice are ingredients before they are direct actions. Its **Demon Skull** feeds ⚡ into **Speak Doom**, while its 2-Heart **Hollow Ribcage** feeds 🗡️ into **Bonestorm**, which assigns one 🗡️ to every open opposing rim. Ward faces take priority over either ritual and defend these two batteries; only surplus fuel becomes direct offense. This creates two visible charge threats and asks the player which one to vent, while the Demon spends much of its pool building and protecting future turns.
+
+AI contract for this encounter:
+
+1. Assign 🛡️ to sockets, prioritizing the Demon Skull and Hollow Ribcage.
+2. Feed ⚡ to Speak Doom.
+3. Feed 🗡️ to Bonestorm.
+4. Use remaining legal dice for direct attacks or broader defense.
+
+---
+
+## 10. Open Questions — Paper Prototype Checklist
+
+Testable with blank dice + stickers (or d6s + lookup cards), index cards per part, coins for pips. Run before any engine code.
+
+1. **Pacing.** With ~6 attack-capable dice and a 1-net-🗡️ wound threshold, do fights end in 2 rounds of mutual shredding? If too fast, candidate brake: hits on Healthy wound; only hits on Wounded maim (already implied by steps — verify it's enough).
+2. **Overkill margin.** Should beating defense by 3+ matter (e.g., skip Wounded)? Default: no.
+3. **Blanks.** Pure whiffs, or soft currency (two blanks → a reroll)? Default: pure whiffs; revisit if feel-bad.
+4. **Allocation time.** Must stay under ~1 minute at the table with 6 dice + slots + crests. If it drags physically, no UI saves it.
+5. **Mixed faces.** Do the validity and burn-off affordances make whole-die travel read as "flexible hedge" rather than "wasteful trap"? Split's value depends on the answer.
+6. **Hidden-feed leakage.** Under contested initiative, the swallow animation reveals feed *counts* but not pips. Keep (bluffing layer) or fully hide? Current lean: keep.
+7. **Crest expansion.** After Valor and Shadow validate the pattern, which crests earn prototype slots next?
+8. **Multi-slot parts / slotless parts.** How rare? Default: exactly one slot per part for the alpha.
+
+## 11. Balance Targets (carried from v1, revised)
+
+- Average combat: 3–5 rounds. Decisions per round: one allocation puzzle of 6–8 placements.
+- Player win rate: ~40% learning → ~80% mastered.
+- RNG impact: the roll sets the hand; the allocation plays it. Variance is authored per part via blanks and multi-faces, not global.
+- Combat remains strictly 1v1.
+
+---
+
+*Companion document: `docs/CombatPresentation.md` — UI, shape grammar, animation choreography, art pipeline.*
+
+````
 
 ## docs/CombatPresentation.md
 
-```markdown
-Design Document: Combat Presentation
-Core Philosophy: The combat UI must be a clear, unified, and tactile interface that visually reinforces the game's core mechanics. It prioritizes immediate contextual feedback and direct manipulation over abstract menus, ensuring players understand the source and consequence of every action. The flow of a round should feel like a single, seamless sequence of decisions within one consistent space.
-1. The Unified View: "The Anatomical Display"
-Combat takes place on a single, static screen. There is no switching between views to support the phases of combat - elements update in-place instead.
-Layout: The screen is split vertically.
-Left Side: The Player's "Dreamform" (a stylized anatomical layout of their equipped Body Parts).
-Right Side: The Enemy's "Dreamform" (a mirror image).
-Core Components (Always Visible):
-Body Parts (BPs): Each combatant's equipped BPs are displayed in their logical anatomical positions (Head, Body, Arms, Legs). Each BP display clearly shows:
-Its artwork.
-Its current status (e.g., color-coded outline: Green for Healthy, Yellow for Wounded).
-Its Toughness value.
-Heart Points (HP): Three heart icons are displayed directly below each combatant's Dreamform.
-Crest Pools: A dedicated area at the bottom-left of the screen displays the Player's Crests. The bottom-right displays the Enemy's.
-Action Bar: A central space at the bottom of the screen that contains the primary interaction button (e.g., "Commit Tech," "Resolve").
-2. Round Flow & UI Transformation
-The UI will transform in-place to guide the player through the phases of a round.
-Visuals: A brief, subtle animation plays to signify the start of a new round. Any passive Crest effects are visually indicated (e.g., Valor crests begin to glow if the 2+ threshold is met, with a "+1 ATK" icon appearing briefly).
-Goal: Visually link Techs to their source Body Parts and show the immediate consequence of a selection.
-Interaction Flow:
-The Player's functional (Healthy/Wounded) Body Parts gain a subtle interactive glow.
-On Mouse-Over a BP: A "fan" of Tech cards animates out directly from that BP.
-On Click a Tech Card: The card animates to a "Selected Tech" slot near the player's side of the Action Bar.
-Instant Feedback: Simultaneously, a "Dice Preview" area appears next to the selected Tech card. This area shows icons of the dice the Tech provides (e.g., two d6 icons, one d4 icon). These icons are animated (rolling/spinning) to signify they are not yet settled.
-The player can freely test different Tech selections, with the "Selected Tech" and "Dice Preview" updating in real-time.
-When satisfied, the player clicks the central "Commit Tech" button. The enemy's selected Tech card animates into view on their side, and the phase ends.
-Goal: Provide the player with perfect knowledge of their own resources and partial knowledge of the enemy's, creating a puzzle of "calculated risk."
-Interaction Flow:
-Dice Settle:
-The Player's dice in their Dice Preview roll and settle on their final values (e.g., the two d6 icons become a static 6 and 2). These now move to a "Dice Shelf" on the player's side of the Action Bar.
-The Enemy's dice remain animatedly rolling on their Dice Shelf. The player knows the enemy has a 1d8 attack, but not its value.
-Targets Highlighted:
-All enemy BPs gain a red "targetable" outline.
-All player BPs gain a blue "defendable" outline.
-Direct Manipulation:
-The player clicks and drags a die with a known value from their shelf.
-As they drag, valid "Attack Slots" and "Defense Slots" appear next to the corresponding BPs.
-They drop the die into a slot to assign it.
-Simultaneous Enemy Action: As the player assigns their dice, the enemy AI simultaneously assigns its unsettled, rolling dice to its chosen targets. The player sees where the enemy is attacking and defending, but not with what strength.
-Once all dice from both sides are assigned, the central button glows, now reading "Resolve."
-Goal: Provide a clear, dramatic, and easily understandable resolution sequence.
-Visual Flow (Automated Sequence):
-On clicking "Resolve," all of the enemy's dice settle on their final values.
-For each attack in sequence, a visual effect (e.g., a line of energy) connects the attack die to its target BP.
-Key numbers are displayed clearly near the target: Attack Roll vs. (Toughness + Defense Roll).
-The result is shown with a large, clear graphic ("HIT!", "MISS!", "BLOCKED!").
-On a successful hit, the target BP flashes, and its status color/artwork updates.
-HP loss is animated by a heart icon cracking or fading away.
-After all actions resolve, the UI returns to its neutral state for the next Upkeep phase.
-3. Information Display & Keywords
-Tooltips are Key: Complexity is managed via contextual tooltips. Mousing over any game piece (a BP, a Tech card, a Crest, a die on the shelf) will provide a detailed "info box."
-Communicating Keywords:
-When a Tech is selected, its keywords (Piercing, Brutal, etc.) are displayed as icons on the Tech card in the "Selected Tech" slot.
-When the dice are generated from that Tech, they inherit these keyword icons. A die on the shelf will have small Piercing or Brutal icons attached to it.
-This visually confirms that this specific die carries that specific property. The tooltip for the die will explain the keyword's effect.
-Crest Interaction:
-The Crest Pool is always visible. Crests can be clicked to expend them during valid phases (primarily the Tech Selection phase).
-A glowing aura or similar visual effect will indicate when a Crest's passive effect is active. The tooltip will provide the details.
+````markdown
+# Into the Dreamlands — Combat Presentation & UI Specification v1.2
+*Companion to Combat Design Document v2.2. Drafted June 2026.*
+
+---
+
+## 1. Governing Principles
+
+1. **Geometry teaches the rules.** Receptacle shape communicates capacity and consumption; the player learns affordances by hand, not by text.
+2. **Icons in the arena, words in the inspector.** The combat field is near-text-free. All rules text routes to one fixed inspection surface.
+3. **Universal silhouette, expressive skin.** Component shapes and state machines are invariant; theming varies freely per part and per dream without touching legibility.
+4. **The tableau is the fantasy.** Body Part cards, dice, hatches, and text carry the combatant; full paper-doll figures are not part of the current combat target.
+5. **Fixed footprints, layered overlays.** Cards, dice, hatches, and chips have stable pixel dimensions. State, text, effects, and ownership render as overlays; components do not stretch to fit content.
+
+---
+
+## 2. Shape Grammar
+
+| Shape | Meaning |
+|---|---|
+| **Square** | A die, or a die-shaped hole (socket, rim latch, slot intake). Dice go in square holes — the player's one universal motor truth. |
+| **Symbol cell** | A cost/charge pip on a slot track, using the same symbol sprites as die faces. No longer a die; it changed context, not vocabulary. |
+| **Hexagon** | A crest chip in a combatant's conditional crest strip. |
+| **Dashed outline** | Affordance — an empty, legal destination. |
+| **Solid** | Commitment — a placed die, a lit pip, an occupied state. |
+
+During drag, every legal destination's dashed outline brightens. Occupied sockets and offline slots do not react. The one-die rule is never stated; full sockets simply aren't drop targets.
+
+Destination validity is symbol-aware:
+
+- A **socket** lights only for dice showing at least one 🛡️.
+- A **rim latch** lights only for dice showing at least one 🗡️.
+- A **slot hatch** opens only if the die would light at least one unfilled pip on that track.
+- A mixed-symbol die may be placed anywhere at least one shown symbol is relevant. Relevant symbols commit; irrelevant symbols visibly burn off.
+- A die with no relevant symbols for a destination receives no affordance there: no snap, no hatch, no click.
+
+---
+
+## 3. Component Inventory
+
+### 3.1 Per Body Part — the Panel
+Fixed-size BP card sprite · external name label · left combat sector · right slot sector · damage-state surface treatment.
+
+The left sector holds the direct inputs to combat resolution: **defense socket** (internal, shield-rimmed, holds one of the owner's assigned dice), **rim latch** (outer edge, holds one enemy attack die), compact HP value indicator, and rare keyword badges between socket and HP. The right sector holds the Slot apparatus: hatch/intake, short slot title, and pip grid. Costs up to three pips render as one centered row; higher costs render as two centered rows, making six pips the clean practical ceiling. Defense lives *inside* the body; attacks *arrive at* it. The socket and rim are visual neighbors on the card edge facing the conduit space. The card interior is an interaction surface, not a status sheet: exact health text and effect explanations live outside the surface or in the inspector.
+
+There is **no resident die** on a Body Part panel. The originating die does not sit on the part during combat; it appears in the rolled pool and becomes meaningful only when allocated. The panel is the part's destination/control surface, not a storage place for its die.
+
+### 3.2 Per Combatant
+Conditional crest strip (clickable hex chips; expends resolve during Allocation; chips animate from source slot to strip on gain) · settled dice row · Body Part tableau. Combatant Heart Points live in the left rail, not on the tableau.
+
+### 3.3 Global
+Settled dice rows (dice are dragged from here to destinations; spent dice leave the row) · left-rail heart stacks · centered queue ticker (filled-slot chips in FIFO order — the untutorialized advanced read) · initiative marker · **Confirm** (the only phase-control button) · inspector rail (§6) · collapsible combat log · conduit/no-man's-land for dice travel and slot-to-target effects.
+
+Confirm performs soft validation only: "2 dice unallocated — confirm anyway?" Abandoning dice is legal.
+
+Allocation moves are committed as made. There is no Undo button in the first implementation because Spend-window slot effects and crest expends may resolve immediately and change the remaining allocation state.
+
+### 3.4 Rolled Dice — Origin Linking
+Each pool die remains visually tied to its originating Body Part without living on that part:
+
+- On hover, the die's source BP name and card highlight.
+- On the Roll step, dice may scatter through the conduit space and then magnetize into an owner-side row, establishing ownership before allocation begins.
+- The inspector for a pool die shows its source BP, current face, and gunked state.
+
+The rule: a die is **from** a Body Part, but it is never **stored on** that Body Part during combat.
+
+### 3.5 Fixed Footprints
+
+The target native combat canvas is **960×540**. This is the game's current baseline render size: low enough to preserve the chunky, pixel-forward 2000s handheld feel, but large enough for six-part combat plus a fixed inspector.
+
+The first real visual pass should commit to static component dimensions rather than stretching cards to fill the strip. The combat screen reserves **six BP card slots per combatant** even when a prototype loadout contains fewer than six parts. Empty slots render as placeholders; full content will usually occupy all six.
+
+Fixed footprints support sprite replacement:
+
+- BP cards are drawn from a fixed card sprite with text and state overlays.
+- BP card footprint: **116×88**.
+- Dice, socket, rim latch, and hatch intake share a **36×36** interaction footprint. Die art may include transparent internal margin, but the token never changes size between pool and assignment.
+- Symbol sprites are **12×12** and are reused for die faces, slot costs, lit charge, and burn-off ghosts.
+- Symbols are sprites layered inside dice faces and assignment previews.
+- Socket, rim, and hatch locations are authored relative to the card footprint, not recalculated from card width.
+- Body Part names render on or near the owner-facing edge away from the opponent: enemy names above/top, player names below/bottom. Names are authored to fit the fixed title strip; overflow is an authoring warning, not a desired truncation/wrapping behavior. Card size never changes to accommodate text.
+- First-pass 960×540 layout: 12px outer margins, 180px inspector rail, six 116px cards + five 8px gaps = 736px card row inside a 744px main area.
+
+### 3.6 Visual Component Checklist
+
+This is the working asset/component inventory for the real combat screen. Wireframes may fake these with rectangles, but the implementation should reserve a stable conceptual slot for each item.
+
+**BP card stack**
+
+- Base card sprite: player / enemy tint variants.
+- Empty card placeholder sprite.
+- Hover, selected-source, valid-drop, invalid/offline, and targetable-state outline overlays.
+- External name label and optional truncation/focus marquee behavior.
+- Compact HP badge, eventually logographic rather than text.
+- Damage surface treatment: healthy, wounded, maimed (cracks, discoloration, offline/ruined treatment) instead of a colored status pip.
+- Rare keyword badge row, currently text-backed (`AR`, `BR`, `AB`, `HU`) until final icon assets land.
+- Status/effect badges: Untargetable, sealed socket, shrouded slot, etc.
+
+**Socket/rim assignment layer**
+
+- Defense socket sprite: empty, valid-hover, occupied, locked/offline.
+- Attack rim latch sprite: empty, valid-hover, occupied, locked/offline.
+- Assigned die rendering in socket/rim, including owner tint and face symbols.
+- Burn-off overlay for mixed-symbol waste on assignment.
+- Future animation handles: die fly-in path, latch snap, socket dock, ejection.
+
+**Slot/hatch layer**
+
+- Hatch/intake sprite states: rest, hover-open, swallow, charging, full/enqueued, vented, offline.
+- Slot pip grid symbol cells: unlit/outline, preview, lit/charged, armed, vented, disabled.
+- Slot name short label.
+- Pip burn-off ghosts for surplus symbols.
+- Queue-chip spawn point and slot-to-queue animation anchor.
+
+**Dice rows**
+
+- Optional row guide/shadow, not a visible drawer or tray.
+- Die token sprite with source-owner tint.
+- Symbol sprites: Strike, Ward, Essence, Blood, Blank.
+- Multi-symbol face layout rules for one-, two-, and three-symbol faces.
+- Origin-link overlay: source BP/card glow.
+- Drag ghost / cursor-follow token.
+
+**Crests**
+
+- Crest chip base sprite by type.
+- Count badge.
+- Spend-hover, spend-armed, disabled/empty, and passive-active overlays.
+- Crest fly-to-strip animation target.
+
+**Global chrome**
+
+- Combatant heart stacks: three icons per side; lost Heart Points render as broken icons.
+- Initiative marker that occupies enemy, contested, or player rail space.
+- Queue ticker chips and FIFO consume animation, centered in the left rail. The pipeline art owns empty-space presentation; the renderer draws only actual queued entries over it.
+- Confirm button and warning state for unallocated dice.
+- Inspector rail panels: object header, rules text, cost preview, unfolded die layout, log rows.
+- Conduit/no-man's-land field: subtle dark transit surface for dice movement and slot-to-target lines.
+- Spellmark thread / slot-to-target pulse overlays.
+
+---
+
+## 4. The Slot Intake — Hatch State Machine
+
+A die-shaped intake with a pip track extending from one fixed edge. Physical metaphor: the coin slot. States:
+
+1. **Rest** — hatch shut, unlit pips dashed.
+2. **Eligible** — hatch is halfway open *only if at least one pip would light* (rules enforcement at the affordance layer). This appears across valid slot destinations while an eligible die is selected or being dragged.
+3. **Hover** — the hovered eligible hatch is almost fully open. Pips that would light glow as a preview; symbols that would burn are shown as fading ghosts past the track end. The player evaluates mixed-face waste before releasing the button.
+4. **Swallow** — hatch doors fully retract into a pit for the brief post-drop consumption beat, then close by reversing through Hover → Eligible → Rest.
+5. **Count** — pips light *sequentially* (payment counted frame by frame); surplus symbols drift off the track and fade (waste shown, not implied).
+6. **Charging** — lit pips persist across rounds while the hatch returns to rest. Distinct color from —
+7. **Full → enqueued** — track flips to the armed color; a chip joins the queue ticker. A pending event, no longer a resource.
+8. **Vented** — on wound: pips shatter, hatch rattles.
+9. **Offline** — on maim: hatch rests closed under a disabled treatment until a dedicated sealed/offline hatch asset exists.
+
+Exception tell: a **Hungry** slot's hatch is always open and its cost pips render as wildcard circles — the visual exception matches the mechanical one, legible before any text is read.
+
+**Skinning:** hatch art is diegetic per part (furnace door on the Butcher's arm; a textbook cover on the Scholar's hand; something wetly organic in the Jungle). Silhouette, footprint, track edge, and state set never vary.
+
+---
+
+## 5. Stage Layout
+
 ```
+┌──────────────────────────────────────────────┬───────────┐
+│  ENEMY BP TABLEAU                           │           │
+│  enemy crest strip   · enemy settled dice    │           │
+├──────────────────────────────────────────────┤ INSPECTOR │
+│        CONDUIT / NO-MAN'S-LAND               │   RAIL    │
+│    dice travel · spellmark threads · FX      │  (fixed,  │
+├──────────────────────────────────────────────┤  collaps- │
+│  player settled dice · player crest strip    │  ible)    │
+│  PLAYER BP TABLEAU   · CONFIRM               │  + log    │
+├──────────────────────────────────────────────┤           │
+│  GLOBAL SPINE        · hearts · queue · init │           │
+└──────────────────────────────────────────────┴───────────┘
+```
+
+- **Combatants are tableaus, not bodies.** BP cards sit in dense, readable strips. Enemy layouts may become stranger over time, but the card remains the atomic target.
+- **No paper-doll reserve.** The center space is not waiting for character art. It is a conduit for motion and effects.
+- Dice roll into the conduit space, then magnetize into settled rows in front of their owner tableau.
+- The conduit hosts resolution: dice fly to rims, slots flash, spellmark threads cross the gap, and wound/maim effects bloom on the affected cards.
+- Rim latches face the conduit space: enemy latches sit along the lower edge of enemy panels; player latches sit along the upper edge of player panels. Their corresponding defense sockets sit immediately inside the card on the same edge. Attacks visually arrive from the arena, and defense visually meets them at the border.
+- Title/name treatments live on the far side from the opponent: enemy titles top, player titles bottom.
+- Crests occupy a one-token-tall strip between each BP tableau and the settled dice row, and only appear when the combatant has visible crests.
+- **Hidden allocation (contested initiative):** enemy rims show face-down dice; enemy hatches play a swallow with no pip reveal. Feed *counts* leak by design (bluffing layer — flagged as an open decision in the design doc). **Enemy initiative:** the player's committed board renders locked while the enemy responds — the screen itself sells the information loss.
+
+---
+
+## 6. Inspector Rail
+
+One fixed surface (right rail) for all text, all objects, one gesture: hover or select anything — a slot, a die, a crest, a queued chip, an enemy part — and its name + effect text appears in the same place every time. Eye-to-words is one saccade to one known location.
+
+- **Live during drag:** cost preview, burn warning, pip forecast — readable mid-drag, when pop-ins would flicker.
+- **Drag focus:** while a die is held, the rail shows only the resolved face, source Body Part, and current drop-target preview. Full die distribution / unfolded-cube detail is intentionally suppressed during drag; the player is placing a resolved token, not evaluating the part's whole die anatomy.
+- **Idle state:** queue detail, initiative explanation, collapsible combat log (a free renderer over the engine's event stream — debugging tool and player-trust tool in one).
+- **Unfolded die view:** when inspecting a Body Part or idle pool die, show its six faces in a three-column break-order grid: woundable faces on the left, maimable faces in the center, durable faces on the right. No header row. Crack overlays are dynamic proximity tells: heavy cracks mean "breaks on the next damage step," light cracks mean "breaks after one more step," and 🩸 means already broken.
+- **Collapsible with pin toggle** for minimalists, who fall back to cursor-adjacent mini-tooltips.
+- Rejected alternative, for the record: far-side-from-cursor pop-in. It places the same object's text in different screen locations depending on approach direction, preventing reading-reflex formation, and it fights the drag state.
+
+---
+
+## 7. The Planning Screen (Out of Combat)
+
+Each owned part displays as **one unfolded cube with its break order painted on**: woundable faces in the left column, maimable faces in the center column, durable faces in the right column. The same dynamic proximity overlay used by the combat inspector applies here: heavy cracks mark the next faces to become 🩸, light cracks mark the following break tier, and already-broken faces render as 🩸. Overworld tags (STRONG, SCHOLARLY) display here and only here. Slot text via the same inspector pattern.
+
+---
+
+## 8. The Claiming Ceremony
+
+On victory, the enemy tableau remains on the table; the player may select one non-maimed part card or leave their dreamform unchanged. Maimed enemy BPs are unavailable to claim, so focusing down a powerful part can win the fight while destroying the prize.
+
+Claiming is mutation, not collection. The selected enemy card is lifted out of the enemy spread and grafted directly into the matching player dreamform slot. Head and Body have one destination; Arms and Legs ask the player which side is replaced. The discarded player BP leaves the run rather than entering an inventory. Five seconds that make the entire progression system tangible, and the body-horror beat the jam playtesters loved before they understood a single rule. Budget polish here disproportionately.
+
+---
+
+## 9. Art Pipeline Spec
+
+The card pipeline converts part art from anatomy to tabletop object:
+
+- Standard BP card footprint, plus state overlays for healthy / wounded / maimed.
+- Deliverable per part, when bespoke art is warranted: card face treatment, hatch skin, title treatment, and optional damage overlays.
+- **Mismatched part identities are the fantasy, not a defect.** A dreamform with a butcher's cleaver card beside a scholar's head card is the intended exquisite-corpse image; dream logic waives the harmony requirement that usually makes modular sprite systems expensive.
+- Part art is exactly as data-driven as part dice: `parts/<dream>/<part_id>/` can contain die definition, slot definition, flavor, and optional card skin references.
+
+---
+
+## 10. Animation Choreography Notes
+
+- Hatch sequence (§4) is the rules tutorial; never skip frames 2–4 on a player's first feeds.
+- Venting and offline states reuse one component's vocabulary — the whole damage model legible through the slot intake alone.
+- Crest gain: chip flies slot to crest strip (teaches the source).
+- Queue resolution: chips consume left-to-right off the ticker (teaches FIFO by observation).
+- Keep the full allocation→resolution loop snappy; resolution animations must be batch-accelerable or skippable from the first build, or 3–5 round fights will drag by round two of playtesting.
+
+````
 
 ## docs/InitialPlanning.md
 
@@ -4520,6 +6936,428 @@ This foundation gives you a working game loop in week 1-2, then you can iterativ
 Ready to start coding? The first milestone is just getting that player square moving around the Basement!
 ```
 
+## docs/OverworldArchitecture.md
+
+````markdown
+# Into the Dreamlands - Overworld Architecture Notes
+
+*Drafted June 2026. These notes lock the first implementation target for exploration, room authoring, menus, and save plumbing.*
+
+---
+
+## 1. Locked Baseline
+
+- The game uses a **960x540 logical canvas** across overworld and combat.
+- Overworld maps use **32x32 logical tiles** for authoring, collision, movement, and interaction.
+- Most overworld art may be authored at **16x16 source resolution and upscaled 2x**, but direct 32x32 authoring is allowed when it reads better.
+- Player movement is **tile-stepped with smooth interpolation**: collision and interaction reason in tile coordinates; presentation eases between tiles.
+- Level art flow is **Aseprite mockup -> Tiled composition -> Lua runtime import**.
+
+The overworld camera has three discrete render scales:
+
+| Mode | Camera scale | Screen pixels per logical tile | Visible world footprint at 960x540 |
+|---|---:|---:|---:|
+| `wide` | 0.5x | 16x16 | 1920x1080, or 60x33.75 tiles |
+| `standard` | 1x | 32x32 | 960x540, or 30x16.875 tiles |
+| `close` | 1.5x | 48x48 | 640x360, or 20x11.25 tiles |
+
+These are presentation modes, not alternate map grids. A player remains one
+logical tile tall in every mode. Menus, dialog, HUD, and combat always render at
+the full 960x540 canvas and are never scaled with the overworld.
+
+Camera scale changes are authored cuts. Do not animate continuously through
+fractional scales; conceal changes with room transitions, blackouts, flickers,
+doors, or other scene punctuation.
+
+---
+
+## 2. Authoring Pipeline
+
+Initial maps should be mocked up in Aseprite for speed and mood. Final map composition happens in Tiled, where tile layers, object layers, collision regions, exits, and actor instances can be authored explicitly.
+
+Runtime room loading should be designed around Tiled concepts even if early rooms remain hand-authored Lua tables:
+
+- Tile layers for ground, details, walls, and foreground.
+- Object layers for actors, regions, exits, encounter triggers, and tool targets.
+- Stable object IDs or authored names for save-state keys.
+- Custom properties for behavior data such as `actor_type`, `on_tool_use`, `target_room`, `encounter_id`, or `flag`.
+
+Current runtime support accepts finite Lua exports with embedded tileset metadata. Tileset images resolve through `assets/sprites/overworld/` by `asset_id`, `image_id`, or image filename, and room load prints validation warnings for missing assets, unsupported layer shapes, duplicate IDs, unknown actor types, and diagonal tile flips.
+
+Do not couple game logic to Aseprite output details. Aseprite establishes the look; Tiled establishes the playable room.
+
+Keep `docs/TiledCheatsheet.md` current with exact layer names, object properties, and save-state invariants needed while authoring maps in Tiled.
+
+---
+
+## 3. Room Layers
+
+Use a small, predictable layer vocabulary:
+
+- `ground`: base floor tiles.
+- `ground_detail`: stains, cracks, rugs, decals, and other non-colliding floor detail.
+- `walls`: solid structural tiles.
+- `objects_low`: low props that draw before actors.
+- `actors`: player, NPCs, enemies, pickups, interactables, and movable objects.
+- `objects_high`: overhead pipes, wall tops, canopies, and foreground occluders.
+- `effects`: weather, glow, shimmer, ritual pulses, and other transient visuals.
+- `regions`: invisible triggers, exits, camera zones, compass spots, and puzzle volumes.
+- `collision`: explicit collision data when tile solidity is not expressive enough.
+
+Actors and low props that share floor space should draw by `sort_y` so the player can stand naturally in front of or behind them.
+
+---
+
+## 3.1 Camera Authoring
+
+Rooms may set `camera_zoom` to `wide`, `standard`, or `close`. If omitted, the
+room uses `standard`.
+
+Objects on the `regions` layer with `type = camera_zone` may override the room:
+
+- `camera_zoom`: `wide`, `standard`, or `close`.
+- `priority`: numeric; higher-priority overlapping zones win.
+- `camera_bounds`: boolean. When true, the zone rectangle also becomes the
+  camera's movement bounds. If the bounds are smaller than the active viewport,
+  they are centered in the frame.
+
+Camera positions and moving actor positions are snapped so the final screen
+translation lands on integer pixels at all three scales.
+
+Debug authoring controls:
+
+- `F2`: cycle authored framing -> wide -> standard -> close.
+- `F3`: toggle the actual clamped world-space frames for all three viewport modes.
+
+---
+
+## 4. World And Actor Model
+
+Prefer a simple actor system over a full ECS.
+
+Core objects:
+
+- `World`: owns the current dream, current room, actors, camera, flags, inventory, encounter bridge, and save hooks.
+- `Room`: owns tile layers, object layers, regions, spawn definitions, and room-local state.
+- `Actor`: has a stable `id`, `type`, position, facing, layer/depth, optional collider, optional interaction, optional animator, and optional save state.
+- `ActorTypeRegistry`: maps actor type IDs to behavior constructors.
+- `Director`: an invisible actor or room controller for bespoke dream behavior such as rising water, periodic spawns, exams, faction state, or camera reveals.
+
+Actor behavior should be composed from a small vocabulary before introducing custom code:
+
+- `solid`
+- `interactable`
+- `pickup`
+- `tool_target`
+- `door`
+- `room_exit`
+- `encounter_trigger`
+- `dialogue`
+- `switch`
+- `persistent_state`
+- `director`
+
+When a dream needs special behavior, add it as a named actor type or director instead of hardcoding it inside the global overworld state.
+
+---
+
+## 5. Animation
+
+Use one general animation layer for overworld actors and animated props.
+
+- `SpriteDef`: image path, frame size, origin, and named animations.
+- `Animator`: current animation, frame timer, loop mode, and one-shot completion.
+- Common animation names: `idle_down`, `idle_up`, `idle_left`, `idle_right`, `walk_down`, `walk_up`, `walk_left`, `walk_right`, `open`, `closed`, `glow`, `use_tool`.
+
+Tile animations can be loaded from Tiled if they stay decorative. Interactive animated objects should be actors.
+
+---
+
+## 6. Save State
+
+Save by stable IDs and flags, not serialized runtime objects.
+
+Current save path:
+
+- `saves/slot1.lua` through `love.filesystem`.
+
+Current save shape:
+
+- `profile`: player name, cat name, settings, unlocked meta knowledge, and long-term discoveries.
+- `run`: current night state, current dream, current room, player position/inventory/tools, claimed body parts, resonance, defeated encounters, and puzzle flags.
+- `rooms`: room-local actor state keyed by stable room ID and actor ID.
+
+Examples:
+
+```lua
+{
+    save_version = 1,
+    profile = {},
+    run = {
+        current_room = "data.rooms.basement_1",
+        player = {
+            x = 5,
+            y = 5,
+            facing = "down",
+            inventory = { shovel = true },
+            equipped = "shovel"
+        },
+        dreamform = { ... },
+        parts = { ... },
+        encounters = { ... },
+        flags = {}
+    },
+    rooms = {
+        basement_1 = {
+            pipe_shovel = { removed = true },
+            crack_north = { resolved = true },
+            mad_butcher_door = { unlocked = true }
+        }
+    }
+}
+```
+
+Autosave currently fires at safe boundaries: item pickup, passage opening, and combat result application. Later room transitions, wake/death, and explicit menu saves should call the same world autosave hook.
+
+---
+
+## 7. Combat Bridge And Dreamform State
+
+Combat is a progression boundary, not just a win/loss minigame. The overworld/run layer owns persistent player combat state, then hands combat a runtime combatant built from that state.
+
+Run state should track:
+
+- `dreamform`: the currently equipped Body Part instance IDs by slot.
+- `parts`: the currently embodied Body Part instances only. A replaced BP leaves the run; this is not an inventory.
+- `discovered_parts`: Body Part definition IDs that the Esoterica database can reveal.
+- `encounters`: defeated, cleared, or otherwise resolved encounter IDs.
+- `combat_history`: optional debug/playtest records such as round count, winner, claimed part, and defeat reason.
+
+Use stable Body Part definition IDs for content identity, and separate runtime instance IDs when a claimed part may carry per-run state. The likely shape is:
+
+```lua
+run = {
+    dreamform = {
+        head = "part_inst_dreamer_head",
+        body = "part_inst_dreamer_body",
+        arm_l = "part_inst_dreamer_left_arm",
+        arm_r = "part_inst_bone_demon_claw",
+        leg_l = "part_inst_dreamer_left_leg",
+        leg_r = "part_inst_dreamer_right_leg"
+    },
+    parts = {
+        part_inst_dreamer_head = { def_id = "dreamer_head" },
+        part_inst_dreamer_body = { def_id = "dreamer_body" },
+        part_inst_bone_demon_arm = { def_id = "bone_demon_right_bare_bones", claimed_from = "basement.bone_demon" }
+    }
+}
+```
+
+Combat entry should receive an `encounter_id` plus the current `dreamform`. Combat exit should return a structured result:
+
+```lua
+{
+    outcome = "victory", -- victory, defeat, fled, scripted
+    encounter_id = "basement.bone_demon",
+    player_parts = { ... }, -- current combat-exit statuses before recovery
+    claimable_parts = {
+        { def_id = "bone_demon_skull", status = "wounded" },
+        { def_id = "bone_demon_right_bare_bones", status = "healthy" }
+    },
+    claimed_part = { def_id = "bone_demon_right_bare_bones" }, -- nil if skipped
+    claimed_slot = "arm_r",
+    replaced_part = { def_id = "dreamer_right_arm" }
+}
+```
+
+The claim ceremony happens on the combat screen immediately after victory. Combat identifies non-maimed enemy parts as claimable; the player may skip the claim. If the player claims a BP, the result names both the claimed part and the target dreamform slot. The run layer then creates a new current part instance, equips it into that slot, records the definition in `discovered_parts`, and deletes the replaced instance from `run.parts`.
+
+Locked first-pass recovery rule: Body Part damage persists through combat exit, then every equipped surviving Body Part heals one step before the next combat begins. `maimed` becomes `wounded`, `wounded` becomes `healthy`, and `healthy` remains `healthy`. Claimed non-maimed parts receive the same one-step recovery as they take root. This keeps damage pressure without allowing a BP to begin the next fight already offline.
+
+The post-combat stack overlay now summarizes outcome, recovery, and the chosen mutation. It is no longer the claim UI.
+
+---
+
+## 8. Menus And State Stack
+
+`core.gamestate` supports a stack:
+
+- `switch(state, ...)`: hard scene change; exits the whole stack and enters one state.
+- `push(state, ...)`: overlay or modal; pauses the previous state and enters the new one.
+- `pop(...)`: exits the top state and resumes the state beneath it.
+- `replace(state, ...)`: swaps only the current top state.
+
+Only the top state updates and receives input. Drawing walks from bottom to top unless a state sets `opaque = true`, in which case lower states are hidden.
+
+This supports pause menus, dialogue boxes, inventory/tool selection, dreamform planning, claiming, and options screens without turning every game state into a menu manager.
+
+The first input layer is `core.input`, a thin action map rather than a full control-remapping UI. States that are part of the normal overworld/menu flow should prefer actions over raw keys:
+
+- `move_up`, `move_down`, `move_left`, `move_right`
+- `confirm`
+- `cancel`
+- `menu`
+- `debug_combat`
+
+Raw key handlers remain useful for debug-only states, editor text fields, and combat interactions that still need bespoke mouse/keyboard handling.
+
+The main menu follows the 2000s handheld RPG pattern: pressing `menu` opens a narrow sidebar over the world, and `cancel` closes it. The sidebar lists menu screens and has a cursor for navigation. `confirm` opens the selected full-screen menu state on top of the sidebar. Full-screen menu states cover the game world and return to the sidebar on `cancel`.
+
+Current screens: Inventory, Dreamform, Esoterica, Save, Options, and Quit. Inventory/Dreamform/Esoterica are read-only review screens for now; Save calls the current autosave hook; Options and Quit are placeholders.
+
+---
+
+## 9. Dialog
+
+Dialog is a stack overlay. The overworld remains visible underneath, but only ambient visual updates run while dialog is active. Actor movement, player movement, encounters, timers that alter game state, and other world simulation should remain paused until dialog resolves.
+
+Dialog trees are data-first Lua tables for now. Nodes can advance linearly, branch by condition, present up to two short player responses, and return a `dialog_result` when finished. The world applies dialog result effects after the dialog state pops, which keeps combat starts and flag changes out of the middle of the overlay lifecycle.
+
+Supported first-pass condition checks:
+
+- flag set/unset
+- inventory item owned
+- equipped item
+- equipped Body Part tag
+
+Supported first-pass end effects:
+
+- `set_flag`
+- `clear_flag`
+- `give_item`
+- result hooks such as `encounter`
+
+Dialog presentation assets are tracked in `docs/OverworldAssetManifest.md`.
+
+````
+
+## docs/OverworldAssetManifest.md
+
+```markdown
+# Overworld Asset Manifest
+
+*Working list for overworld, dialog, and menu presentation assets. Keep this current as placeholder rectangles become real art.*
+
+---
+
+## Global Canvas Contract
+
+- Target logical canvas: **960x540**.
+- Logical overworld tile size: **32x32**. Art may be authored at **16x16** and upscaled, but exported tilesets and runtime footprints should compose on the 32x32 grid.
+- UI asset folder: `assets/sprites/ui/`. This folder is scanned by `core/assets.lua`; asset IDs are filenames without `.png`.
+- Overworld sprite folder: `assets/sprites/overworld/`. This folder is scanned by `core/assets.lua`; asset IDs are filenames without `.png`.
+
+## Dialog UI
+
+Current runtime state: `states.dialog` draws the assets below when present, then falls back to drawn placeholder rectangles and the existing text rendering path.
+
+Current runtime placement:
+
+- Dialog box: `x=24`, `y=388`, `w=912`, `h=128`.
+- Speaker nameplate: `x=40`, `y=370`, `w<=220`, `h=28`.
+- Response buttons: `112x26`; current slots are roughly `x=668` and `x=790`, `y=474`.
+- Continue indicator: lower-right of the box, currently around `x=902`, `y=488`.
+
+| Asset ID | Canvas | Status | Notes |
+|---|---:|---|---|
+| `dialog_box_frame` | `912x128` | needed | Full-width bottom RPG dialog frame. Keep text-safe area clear from `x+24,y+28` through `864px` width. |
+| `dialog_nameplate` | `220x28` | needed | Speaker plate; should tolerate shorter speaker names by leaving right-side negative space. |
+| `dialog_response_selected` | `112x26` | optional | Use only if we keep pill-style response selection. |
+| `dialog_choice_cursor` | `8x12` | recommended | Preferred lightweight `>`-style selector for two short responses. |
+| `dialog_continue` | `12x12` | recommended | Small animated or static continue prompt. `dialog_continue1`...`dialog_continue4` can be used if animated. |
+| `dialog_portrait_frame` | `72x72` | later | Optional portrait slot: 64x64 portrait well plus frame/padding. |
+| `dialog_open_blip1`...`dialog_open_blip4` | `912x128` | later | Optional open/close snap frames matching the main box footprint. |
+
+Needed first: `dialog_box_frame`, `dialog_nameplate`, `dialog_choice_cursor`, `dialog_continue`.
+
+Style notes:
+
+- Dialog text should feel low-res and readable before ornate.
+- Response labels are intentionally short: usually `Yes` and `No`, with support for alternate short labels.
+- Keep dialog presentation compatible with the full-width bottom box used by early 2000s handheld RPGs.
+
+---
+
+## Menu UI
+
+Current runtime state: `states.menu_sidebar` and `states.menu_screen` use drawn placeholder rectangles.
+
+Current runtime placement:
+
+- Sidebar panel: `x=732`, `y=18`, `w=210`, `h=256` on the 960x540 canvas.
+- Sidebar rows: `186x28` visible row footprint, 32px vertical stride.
+- Full-screen menu frame: `x=24`, `y=24`, `w=912`, `h=492`.
+- Full-screen menu content area: `x=52`, `y=92`, `w=856`, `h=396`.
+
+| Asset ID | Canvas | Status | Notes |
+|---|---:|---|---|
+| `menu_sidebar_frame` | `210x256` | needed | Pokemon-style right sidebar over the world. |
+| `menu_cursor` | `8x12` | recommended | Shared `>` cursor for sidebar, Esoterica list, and compact choices. |
+| `menu_full_frame` | `912x492` | needed | Full-screen menu frame. Header text lives around `x+24,y+22`; divider at `y+62`. |
+| `menu_footer_panel` | `856x48` | optional | Status/help/save-message strip inside full-screen menu content area. |
+| `menu_icon_inventory` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_icon_dreamform` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_icon_esoterica` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_icon_save` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_icon_options` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_icon_quit` | `16x16` | optional | Only needed if sidebar rows become icon+text. |
+| `menu_save_pulse1`...`menu_save_pulse4` | `24x24` | later | Tiny save confirmation flourish. |
+
+Current Dreamform screen component footprints:
+
+| Component | Canvas / Runtime Size | Notes |
+|---|---:|---|
+| BP cards | reuse combat BP cards, `116x88` card / `116x134` total footprint | Do not create a separate Dreamform BP card unless we deliberately fork the look. |
+| Dice pool panel | `435x240` | Current lower-left Dreamform panel at 960x540. |
+| Shared inspector panel | `403x240` | Current lower-right Dreamform panel. |
+
+Current Esoterica screen component footprints:
+
+| Component | Canvas / Runtime Size | Notes |
+|---|---:|---|
+| Esoterica list panel | `238x396` | Left column. Rows are `218x26` visible footprints with 30px stride. |
+| Viewed BP card | `232x268` total footprint | 2x scale of shared combat BP card footprint. |
+| Shared inspector panel | `291x396` | Right column, includes die diagram. |
+
+---
+
+## Overworld Tiles And Sprites
+
+Current runtime state: Tiled-style Lua tile layers render from embedded tilesets when their image asset can be resolved. Missing tilesets/sprites fall back to the simple color rectangle placeholders.
+
+| Asset ID | Canvas | Status | Notes |
+|---|---:|---|---|
+| `basement_tiles` | variable, 32x32 grid | needed soon | First Tiled tileset sheet. Keep `tilewidth=32`, `tileheight=32`, and filename/tileset `asset_id` aligned with this ID. |
+| `basement_floor_tile` | `32x32` | needed soon | May be authored at 16x16 and upscaled into a 32x32 tileset. |
+| `basement_wall_tile` | `32x32` | needed soon | Solid wall tile; collision is authored separately in Tiled. |
+| `basement_ground_detail_*` | `32x32` | optional | Non-colliding floor variation. |
+| `actor_crack` | `16x16` source / `32x32` runtime | imported | Shovel target / passage reveal marker. Legacy variants include open and enemy-revealed states. |
+| `actor_pipe` | `16x16` source / `32x32` runtime | imported | Drainage pipe actor. `actor_pipe_shovel` preserves the item-present state. |
+| `actor_hidden_wall_marker` | `32x32` | needed soon | Early inspectable/dialog test marker. |
+| `player_idle_down` | `16x16` source / `32x32` runtime | imported | Current player sprite, enlarged with nearest-neighbor rendering. |
+| `player_idle_up` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_idle_left` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_idle_right` | `16x16` source / `32x32` runtime | imported | Same footprint. |
+| `player_walk_down1`...`player_walk_down4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_up1`...`player_walk_up4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_left1`...`player_walk_left4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+| `player_walk_right1`...`player_walk_right4` | `16x16` source / `32x32` runtime | imported | 4-frame legacy walk set. |
+
+Imported legacy assets are curated through `tools/legacy_assets.json`; provenance
+and exact source frame IDs live in `assets/legacy/imported_assets.json`.
+
+Needed first: a compact Basement floor/wall tileset and `actor_hidden_wall_marker`.
+
+---
+
+## Later
+
+- Ambient water/grass/fire/sparkle tile animations.
+- Tool-use effects such as shovel scrape, reveal puff, and passage opening.
+- Combat bridge transition flourish from overworld into the tabletop combat scene.
+
+```
+
 ## docs/tickets/S1_CombatCore/T1_1_DiceRollingAndResolution.md
 
 ```markdown
@@ -4870,21 +7708,278 @@ Design Notes/Pitfalls:
 Data-Driven Text: Do not hardcode tooltip text in your UI code. Create a separate data file (e.g., data/ui_text.lua) that maps IDs (tooltips.brutal, tooltips.valor_crest) to strings. This makes editing, proofreading, and future localization much, much easier.
 ```
 
+## docs/TiledCheatsheet.md
+
+````markdown
+# Tiled Cheatsheet
+
+*Working reference for authoring Into the Dreamlands overworld rooms in Tiled. Keep this file current whenever runtime expectations change.*
+
+---
+
+## Map Settings
+
+- Orientation: orthogonal.
+- Map type: finite map. Infinite/chunked maps are not supported yet.
+- Runtime export: Lua map export.
+- Logical tile size: **32x32**.
+- Target game canvas: **960x540**.
+- Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
+- Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
+- Optional map property `camera_zoom`: `wide`, `standard`, or `close`. Basement uses `close`.
+
+Camera viewport guides in Tiled world pixels:
+
+- `wide`: `1920x1080` (`60x33.75` logical tiles).
+- `standard`: `960x540` (`30x16.875` logical tiles).
+- `close`: `640x360` (`20x11.25` logical tiles).
+
+The fractional vertical tile counts are intentional: the camera uses the full
+16:9 canvas rather than letterboxing to a whole-tile height.
+
+---
+
+## Tilesets And Sprite Assets
+
+- Overworld art lives in `assets/sprites/overworld/`. The folder is scanned by `core/assets.lua`.
+- Asset IDs are filenames without `.png`.
+- Embedded Tiled tilesets are supported when they provide `firstgid`, `image`, `imagewidth`, `imageheight`, `tilewidth`, `tileheight`, and `columns`/`tilecount`.
+- Tileset images resolve to runtime assets by `asset_id` custom property first, then `image_id`, then the image filename. For example, `../overworld/basement_tiles.png` resolves to `basement_tiles`.
+- External `.tsx` tilesets are fine for authoring, but exported Lua maps must either embed enough tileset data or set an `asset_id` the runtime can resolve.
+- Horizontal and vertical tile flips render. Avoid diagonal tile flips for now; the validator reports them because diagonal rendering is not implemented.
+- If a tile has a nonzero GID but its tileset/image cannot be resolved, the runtime draws the old colored rectangle fallback and prints a room validation warning.
+
+---
+
+## Required Layer Names
+
+Use these names exactly:
+
+- `ground`: base floor tiles.
+- `ground_detail`: optional non-colliding floor decoration.
+- `walls`: visible wall/solid structure tiles.
+- `objects_low`: optional tile props drawn before actors.
+- `actors`: object layer for interactive/runtime actors.
+- `objects_high`: optional foreground/overhead tile props drawn after actors.
+- `effects`: optional decorative animated/effect layer.
+- `regions`: object layer for invisible triggers, exits, compass spots, and camera zones.
+- `collision`: optional tile layer for explicit collision. If present, nonzero tiles are solid. If absent, nonzero `walls` tiles are solid.
+
+Unknown layers are allowed while experimenting, but they should not drive gameplay until documented here.
+
+---
+
+## Actor Objects
+
+Actors live on the `actors` object layer.
+
+Required:
+
+- `name`: stable actor ID. Required for anything persistent or save-relevant.
+- `type`: actor type, such as `pipe`, `crack`, `door`, or `pickup`.
+
+Supported custom properties:
+
+- `actor_type`: optional override if Tiled's built-in `type` field is inconvenient.
+- `asset_id`: optional sprite asset ID from `assets/sprites/overworld/`.
+- `sprite_id` / `sprite`: accepted aliases for `asset_id`.
+- `resolved_asset_id`: optional sprite shown after an actor's one-shot interaction resolves.
+- `solid`: boolean; blocks movement when true.
+- `interactable`: boolean; can be examined/used when true.
+- `item`: item ID granted by a pickup-like actor.
+- `flag`: flag key set or checked by the actor.
+- `message`: default examine text.
+- `empty_message`: text after an item has been removed.
+- `missing_tool_message`: text shown when the player lacks the needed tool.
+- `resolved_message`: text shown after a one-shot interaction has already resolved.
+- `on_tool_use`: action payload for actors activated by an equipped/owned tool.
+- `dialog`: dialog module path, e.g. `data.dialog.basement`.
+- `dialog_id`: dialog tree ID inside the dialog module.
+
+`type` should describe presentation and default behavior, not the full gameplay outcome. For example, `crack` means "draw and behave like a shovel-target crack"; the encounter or passage it opens belongs in `on_tool_use`.
+
+Hand-authored Lua rooms may use nested payloads:
+
+```lua
+properties = {
+    on_tool_use = {
+        tool = "shovel",
+        type = "encounter",
+        encounter_id = "basement.zombie",
+        message = "You dig through the wall. Something stirs in the dark."
+    }
+}
+```
+
+Tiled exports should use dotted property names if nested custom classes are inconvenient:
+
+- `on_tool_use.tool`: equipped/owned tool ID required to activate the actor.
+- `on_tool_use.type`: `message`, `encounter`, `passage`, or `item`.
+- `on_tool_use.message`: text shown when the action resolves.
+- `on_tool_use.encounter_id`: combat encounter/content ID to launch.
+- `on_tool_use.target_room`: room ID or module path for exits.
+- `on_tool_use.target_spawn`: spawn ID inside the target room.
+- `on_tool_use.item`: item ID granted by an item action.
+- `on_tool_use.once`: boolean; defaults to true for tool targets.
+
+Interim hand-authored Lua rooms may use `tile_x` and `tile_y` directly. Tiled imports should prefer pixel `x`/`y`.
+
+Default actor sprite IDs:
+
+- `pipe`: `actor_pipe`.
+- `crack`: `actor_crack`.
+- `message`: `actor_hidden_wall_marker`.
+
+---
+
+## Region Objects
+
+Regions live on the `regions` object layer and should use stable `name` values when they affect save state or routing.
+
+Common region types:
+
+- `exit`: room transition.
+- `encounter_trigger`: launches combat on touch or confirm.
+- `camera_zone`: alters camera behavior.
+- `hidden_poi`: hidden point of interest for the Compass/Shovel/Puzzle Box chain.
+- `cutscene`: one-shot story trigger.
+
+Supported custom properties overlap with actor objects: `target_room`, `target_spawn`, `encounter_id`, `flag`, and `message`. Hidden POIs should use generic reveal/discovery properties such as `hidden_poi`, `reveal_tool`, `reveal_flag`, and `reveals_actor` rather than tool-specific region names.
+
+Camera-zone properties:
+
+- `camera_zoom`: `wide`, `standard`, or `close`.
+- `priority`: numeric; resolves overlapping camera zones.
+- `camera_bounds`: boolean; use the region rectangle as camera bounds.
+
+Runtime debug controls: `F2` cycles a temporary camera-mode override and `F3`
+shows all three viewport footprints centered on the player.
+
+---
+
+## Dialog Objects
+
+Early dialog actors can use `type = "message"` plus `dialog` and `dialog_id` properties. Dialog trees live in Lua modules for now:
+
+```lua
+properties = {
+    dialog = "data.dialog.basement",
+    dialog_id = "whispering_wall"
+}
+```
+
+Dialog supports:
+
+- Branches based on flags, inventory, equipped item, or equipped Body Part tags.
+- Two short player responses.
+- End-of-tree effects such as `set_flag`, `clear_flag`, `give_item`, and result hooks such as `encounter`.
+- Ambient-only overworld updates while dialog is open; actor movement and state-changing world updates are locked.
+
+---
+
+## Save-State Invariants
+
+- Persistent objects need stable `name` values.
+- Renaming a persistent object is a save migration.
+- Runtime state is saved by `room_id.actor_name`, not by Tiled numeric object ID.
+- The room validator warns when an actor falls back to Tiled's numeric object ID.
+- One-shot actor interactions should save generic `resolved = true` state. Presentation may render that as dug, opened, drained, or exhausted.
+- Prefer explicit flags for cross-room logic, e.g. `basement.shovel_found`, `basement.mad_butcher_defeated`.
+
+---
+
+## Current Runtime Actor Types
+
+- `pipe`: examine/pickup actor. If it has `item`, the first interaction grants that item and marks the actor removed.
+- `crack`: shovel-target presentation actor. Checks `on_tool_use.tool` when present, marks itself `resolved`, and resolves the generic `on_tool_use` action.
+- `message`: simple inspectable text actor.
+
+Add new actor types here when they become runtime-supported.
+
+---
+
+## Current Runtime Validation
+
+Room load prints validation warnings/errors for:
+
+- duplicate layer names.
+- unknown layer names.
+- missing `ground` or `actors` layers.
+- tile layers with missing Lua `data`.
+- layer dimensions that disagree with the map dimensions.
+- missing tileset image assets.
+- nonzero GIDs that no tileset owns.
+- diagonal tile flips.
+- duplicate actor IDs.
+- actor objects that lack stable names and fall back to numeric Tiled IDs.
+- unknown actor types.
+- explicit missing actor sprite assets.
+
+````
+
 ## main.lua
 
 ```lua
 local Assets = require("core.assets")
 local GameState = require("core.gamestate")
+local Input = require("core.input")
 local Overworld = require("states.overworld")
+local Text = require("ui.text")
+
+local function has_launch_arg(name)
+    for _, value in ipairs(arg or {}) do
+        if value == name then
+            return true
+        end
+    end
+    return false
+end
+
+local function launch_arg_value(prefix)
+    local marker = prefix .. "="
+    for _, value in ipairs(arg or {}) do
+        if value:sub(1, #marker) == marker then
+            return value:sub(#marker + 1)
+        end
+    end
+    return nil
+end
+
+local function dispatch_actionpressed(actions, source)
+    local handled = false
+    for _, action in ipairs(actions or {}) do
+        handled = GameState.actionpressed(action, source) or handled
+    end
+    return handled
+end
+
+local function dispatch_actionreleased(actions, source)
+    local handled = false
+    for _, action in ipairs(actions or {}) do
+        handled = GameState.actionreleased(action, source) or handled
+    end
+    return handled
+end
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Text.install(love.graphics)
     Assets:load()
-    GameState.switch(Overworld)
+    local encounter_id = launch_arg_value("--encounter")
+    if has_launch_arg("--bp-editor") then
+        GameState.switch(require("states.bp_editor"))
+    elseif encounter_id or has_launch_arg("--v2-combat") then
+        GameState.switch(require("states.v2_combat"), {
+            encounter_id = encounter_id or "debug.demo"
+        })
+    else
+        GameState.switch(Overworld)
+    end
 end
 
 function love.update(dt)
     GameState.update(dt)
+    Input.update()
 end
 
 function love.draw()
@@ -4892,11 +7987,29 @@ function love.draw()
 end
 
 function love.keypressed(key)
-    GameState.keypressed(key)
+    local handled = dispatch_actionpressed(Input.keypressed(key), { type = "key", key = key })
+    if not handled then
+        GameState.keypressed(key)
+    end
 end
 
 function love.keyreleased(key)
-    GameState.keyreleased(key)
+    local handled = dispatch_actionreleased(Input.keyreleased(key), { type = "key", key = key })
+    if not handled then
+        GameState.keyreleased(key)
+    end
+end
+
+function love.gamepadpressed(_, button)
+    dispatch_actionpressed(Input.gamepadpressed(button), { type = "gamepad", button = button })
+end
+
+function love.gamepadreleased(_, button)
+    dispatch_actionreleased(Input.gamepadreleased(button), { type = "gamepad", button = button })
+end
+
+function love.textinput(text)
+    GameState.textinput(text)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -4906,2120 +8019,2307 @@ end
 function love.mousereleased(x, y, button, istouch, presses)
     GameState.mousereleased(x, y, button, istouch, presses)
 end
+
 ```
 
-## states/combat.lua
+## states/bp_editor.lua
+
+```lua
+local GameState = require("core.gamestate")
+local Crests = require("combat.crests")
+local Content = require("combat.v2_content")
+local Effects = require("combat.v2_effects")
+local Symbols = require("core.symbols")
+
+local BPEditor = {}
+BPEditor.__index = BPEditor
+
+local TYPES = { "HEAD", "BODY", "ARM", "LEG" }
+local TIMINGS = { "spend", "on_hit", "on_wound_maim", "upkeep" }
+local EFFECT_TYPES = Effects.EDITOR_ORDER
+local EFFECT_LABELS = Effects.EDITOR_LABELS
+local DESTINATIONS = { "any", "socket", "rim", "slot" }
+local ASSIGN_DESTINATIONS = { "socket", "rim" }
+local TARGET_SIDES = { "self", "opponent" }
+local HEAL_TARGETS = { "most_damaged", "source_part" }
+local SPELLMARK_TARGET_TYPES = { "ANY", "HEAD", "BODY", "ARM", "LEG" }
+local SYMBOLS = {
+    { id = Symbols.STRIKE, label = "ATK" },
+    { id = Symbols.WARD, label = "DEF" },
+    { id = Symbols.ESSENCE, label = "ESS" },
+    { id = Symbols.BLOOD, label = "BLD" },
+    { id = Symbols.BLANK, label = "BLANK" }
+}
+local BODY_PART_NAME_LIMIT = 15
+local SLOT_NAME_LIMIT = 9
+local LIST_VISIBLE_ROWS = 15
+local LIST_ROW_HEIGHT = 25
+
+local COLORS = {
+    bg = { 0.93, 0.92, 0.88, 1 },
+    panel = { 0.98, 0.98, 0.95, 1 },
+    ink = { 0.12, 0.12, 0.12, 1 },
+    muted = { 0.42, 0.42, 0.38, 1 },
+    line = { 0.68, 0.68, 0.62, 1 },
+    selected = { 0.12, 0.32, 0.82, 1 },
+    accent = { 0.0, 0.47, 0.36, 1 },
+    danger = { 0.68, 0.18, 0.12, 1 }
+}
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function point_in_rect(x, y, r)
+    return r and x >= r.x and x <= r.x + r.w and y >= r.y and y <= r.y + r.h
+end
+
+local function clamp(value, min_value, max_value)
+    return math.max(min_value, math.min(max_value, value))
+end
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function draw_box(r, fill, outline, radius)
+    set_color(fill or COLORS.panel)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, radius or 4, radius or 4)
+    set_color(outline or COLORS.line)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 4, radius or 4)
+end
+
+local function clone(value)
+    if type(value) ~= "table" then
+        return value
+    end
+
+    local copy = {}
+    for key, child in pairs(value) do
+        copy[key] = clone(child)
+    end
+    return copy
+end
+
+local function trim(value)
+    return tostring(value or ""):match("^%s*(.-)%s*$")
+end
+
+local function normalize_face(face)
+    local normalized = Symbols.normalize_face(face)
+    if #normalized == 0 then
+        return { Symbols.BLANK }
+    end
+    return normalized
+end
+
+local function symbol_label(symbol)
+    return Symbols.display(symbol)
+end
+
+local function face_label(face)
+    return Symbols.format_face(face)
+end
+
+local function split_csv(value)
+    local tags = {}
+    for token in tostring(value or ""):gmatch("[^,]+") do
+        local tag = trim(token)
+        if tag ~= "" then
+            table.insert(tags, tag)
+        end
+    end
+    return tags
+end
+
+local function sorted_keys(table_value)
+    local keys = {}
+    for key in pairs(table_value or {}) do
+        table.insert(keys, key)
+    end
+    table.sort(keys)
+    return keys
+end
+
+local function lua_symbol(symbol)
+    local normalized = Symbols.normalize(symbol)
+    if normalized == Symbols.STRIKE then
+        return "Symbols.STRIKE"
+    elseif normalized == Symbols.WARD then
+        return "Symbols.WARD"
+    elseif normalized == Symbols.ESSENCE then
+        return "Symbols.ESSENCE"
+    elseif normalized == Symbols.BLOOD then
+        return "Symbols.BLOOD"
+    end
+    return "Symbols.BLANK"
+end
+
+local function lua_string(value)
+    return string.format("%q", tostring(value or ""))
+end
+
+local function lua_face(face)
+    local normalized = normalize_face(face)
+    if #normalized == 1 then
+        return lua_symbol(normalized[1])
+    end
+
+    local parts = {}
+    for _, symbol in ipairs(normalized) do
+        table.insert(parts, lua_symbol(symbol))
+    end
+    return "{ " .. table.concat(parts, ", ") .. " }"
+end
+
+local function lua_symbol_list(list)
+    local parts = {}
+    for _, symbol in ipairs(list or {}) do
+        table.insert(parts, lua_symbol(symbol))
+    end
+    return "{ " .. table.concat(parts, ", ") .. " }"
+end
+
+local function is_sequence_effect(effect)
+    return type(effect) == "table" and (type(effect.actions) == "table" or type(effect.sequence) == "table")
+end
+
+local function wrap_text(text, limit)
+    local words = {}
+    for word in tostring(text or ""):gmatch("%S+") do
+        table.insert(words, word)
+    end
+
+    local lines = {}
+    local current = ""
+    for _, word in ipairs(words) do
+        local candidate = current == "" and word or (current .. " " .. word)
+        if #candidate > limit and current ~= "" then
+            table.insert(lines, current)
+            current = word
+        else
+            current = candidate
+        end
+    end
+
+    if current ~= "" then
+        table.insert(lines, current)
+    end
+    if #lines == 0 then
+        table.insert(lines, "")
+    end
+    return lines
+end
+
+local function safe_require(module_name)
+    local ok, result = pcall(require, module_name)
+    if ok then
+        return result
+    end
+    return nil, result
+end
+
+function BPEditor:enter()
+    self.fonts = {
+        title = love.graphics.newFont(16),
+        body = love.graphics.newFont(12),
+        small = love.graphics.newFont(10)
+    }
+
+    self.parts = {}
+    self.part_order = {}
+    self.source_slots = {}
+    self.search = ""
+    self.list_scroll = 0
+    self.list_rect = nil
+    self.active_field = nil
+    self.selected_face = 1
+    self.message = "Select a Body Part, edit fields, then copy Lua or note text."
+    self.buttons = {}
+    self.fields = {}
+    self.face_rects = {}
+
+    self:load_database()
+    if #self.part_order > 0 then
+        self:load_part(self.part_order[1])
+    else
+        self:new_part()
+    end
+end
+
+function BPEditor:load_database()
+    local modules = {}
+    local ok, files = pcall(love.filesystem.getDirectoryItems, "data/combat")
+    if ok then
+        for _, file in ipairs(files) do
+            if file:match("%.lua$") then
+                table.insert(modules, "data.combat." .. file:gsub("%.lua$", ""))
+            end
+        end
+    else
+        modules = { "data.combat.v2_demo_parts" }
+    end
+
+    table.sort(modules)
+    for _, module_name in ipairs(modules) do
+        local definitions = safe_require(module_name)
+        if definitions and type(definitions.parts) == "table" then
+            for slot_id, slot in pairs(definitions.slots or {}) do
+                self.source_slots[module_name .. ":" .. slot_id] = clone(slot)
+            end
+
+            for part_id, part in pairs(definitions.parts or {}) do
+                local key = module_name .. ":" .. part_id
+                self.parts[key] = {
+                    source = module_name,
+                    part_id = part_id,
+                    part = clone(part),
+                    slots = definitions.slots or {}
+                }
+                table.insert(self.part_order, key)
+            end
+        end
+    end
+
+    table.sort(self.part_order, function(a, b)
+        local left = self.parts[a]
+        local right = self.parts[b]
+        local left_name = left and left.part and left.part.name or a
+        local right_name = right and right.part and right.part.name or b
+        return left_name < right_name
+    end)
+end
+
+function BPEditor:blank_part()
+    return {
+        id = "new_part",
+        name = "New Body Part",
+        flavor = "",
+        type = "ARM",
+        hp_value = 1,
+        die = {
+            faces = {
+                Symbols.BLANK,
+                Symbols.WARD,
+                Symbols.STRIKE,
+                Symbols.ESSENCE,
+                Symbols.WARD,
+                Symbols.STRIKE
+            },
+            wound_faces = { 1, 2 },
+            maim_faces = { 3, 4 }
+        },
+        tags = {},
+        slot = nil
+    }
+end
+
+function BPEditor:new_part()
+    self.current_key = nil
+    self.current_source = "new"
+    self.current = self:part_to_form(self:blank_part(), {})
+    self.selected_face = 1
+    self.active_field = "id"
+    self.message = "Started a new Body Part."
+end
+
+function BPEditor:load_part(key)
+    local entry = self.parts[key]
+    if not entry then
+        return
+    end
+
+    self.current_key = key
+    self.current_source = entry.source
+    self.current = self:part_to_form(entry.part, entry.slots)
+    self.selected_face = 1
+    self.active_field = nil
+    self.message = "Loaded " .. (self.current.name or self.current.id) .. "."
+end
+
+function BPEditor:part_to_form(part, slots)
+    local slot = nil
+    if type(part.slot) == "string" then
+        slot = clone(slots and slots[part.slot])
+        if slot then
+            slot.id = slot.id or part.slot
+        end
+    elseif type(part.slot) == "table" then
+        slot = clone(part.slot)
+    end
+
+    local effect = slot and slot.effect or {}
+    local effect_type = Effects.editor_type(effect)
+    if is_sequence_effect(effect) then
+        effect_type = "custom_sequence"
+    elseif not Effects.is_known(effect) then
+        effect_type = "custom_effect"
+    end
+
+    local payload = effect.on_mark or effect.payload or effect.effect or {}
+    local default_symbol = effect_type == "open_spellmark" and Symbols.ESSENCE or Symbols.STRIKE
+    local effect_destination = effect.destination or (effect_type == "open_spellmark" and "rim" or "any")
+    local target_side = effect.target or effect.target_side
+    if not target_side and effect_type == "open_spellmark" then
+        target_side = effect_destination == "rim" and "opponent" or "self"
+    end
+
+    return {
+        id = part.id or "",
+        name = part.name or "",
+        flavor = part.flavor or "",
+        type = part.type or "ARM",
+        hp_value = tostring(part.hp_value or 1),
+        tags = table.concat(part.tags or {}, ", "),
+        faces = {
+            normalize_face(part.die and part.die.faces and part.die.faces[1]),
+            normalize_face(part.die and part.die.faces and part.die.faces[2]),
+            normalize_face(part.die and part.die.faces and part.die.faces[3]),
+            normalize_face(part.die and part.die.faces and part.die.faces[4]),
+            normalize_face(part.die and part.die.faces and part.die.faces[5]),
+            normalize_face(part.die and part.die.faces and part.die.faces[6])
+        },
+        has_slot = slot ~= nil,
+        slot_id = slot and (slot.id or "") or "",
+        slot_name = slot and (slot.name or "") or "",
+        slot_cost = clone(slot and slot.cost or {}),
+        slot_timing = slot and (slot.timing or "spend") or "spend",
+        effect_type = effect_type,
+        raw_effect = clone(effect),
+        effect_symbol = effect.symbol or effect.accept_symbol or default_symbol,
+        effect_match_symbol = effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE,
+        effect_destination = effect_destination,
+        effect_assign_destination = effect.destination or (effect_type == "open_spellmark" and "rim" or "socket"),
+        effect_target_side = target_side or "self",
+        effect_heal_target = effect.target or "most_damaged",
+        effect_crest = effect.crest or "Valor",
+        effect_target_type = effect_type == "open_spellmark" and (effect.target_type or effect.part_type or "ANY")
+            or (effect.target_type or "HEAD"),
+        effect_amount = tostring(effect.amount or payload.amount or 1)
+    }
+end
+
+function BPEditor:filtered_parts()
+    local query = self.search:lower()
+    local filtered = {}
+    for _, key in ipairs(self.part_order) do
+        local entry = self.parts[key]
+        local part = entry and entry.part or {}
+        local slot = type(part.slot) == "string" and entry and entry.slots and entry.slots[part.slot] or part.slot
+        local haystack = table.concat({
+            part.id or "",
+            part.name or "",
+            part.type or "",
+            part.flavor or "",
+            table.concat(part.tags or {}, " "),
+            table.concat(part.keywords or {}, " "),
+            slot and slot.id or "",
+            slot and slot.name or "",
+            slot and Effects.describe(slot.effect) or "",
+            entry and entry.source or "",
+            entry and (tostring(entry.source or ""):match("([^%.]+)$") or "") or ""
+        }, " "):lower()
+        if query == "" or haystack:find(query, 1, true) then
+            table.insert(filtered, key)
+        end
+    end
+    return filtered
+end
+
+function BPEditor:clamp_list_scroll(filtered_count)
+    local max_scroll = math.max(0, (filtered_count or 0) - LIST_VISIBLE_ROWS)
+    self.list_scroll = clamp(self.list_scroll or 0, 0, max_scroll)
+end
+
+function BPEditor:register_button(id, label, r, on_click, selected)
+    self.buttons[id] = {
+        label = label,
+        rect = r,
+        on_click = on_click,
+        selected = selected
+    }
+end
+
+function BPEditor:register_field(key, r)
+    self.fields[key] = r
+end
+
+function BPEditor:draw_button(id)
+    local button = self.buttons[id]
+    if not button then
+        return
+    end
+
+    local fill = button.selected and { 0.88, 0.93, 1, 1 } or { 1, 1, 1, 0.9 }
+    local line = button.selected and COLORS.selected or COLORS.line
+    draw_box(button.rect, fill, line, 4)
+    set_color(button.selected and COLORS.selected or COLORS.ink)
+    love.graphics.setFont(self.fonts.small)
+    love.graphics.printf(button.label, button.rect.x + 4, button.rect.y + 5, button.rect.w - 8, "center")
+end
+
+function BPEditor:draw_field(label, key, r)
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print(label, r.x, r.y - 13)
+    draw_box(r, { 1, 1, 1, 0.92 }, self.active_field == key and COLORS.selected or COLORS.line, 3)
+    set_color(COLORS.ink)
+    local value = tostring(self.current[key] or "")
+    love.graphics.printf(value, r.x + 5, r.y + 5, r.w - 10, "left")
+    self:register_field(key, r)
+end
+
+function BPEditor:draw_name_warning(key, label, limit, x, y, width)
+    local value = trim(self.current[key])
+    if #value <= limit then
+        return
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.danger)
+    love.graphics.printf(string.format("%s max %d chars (%d)", label, limit, #value), x, y, width, "left")
+end
+
+function BPEditor:draw_wrapped_field(label, key, r)
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print(label, r.x, r.y - 13)
+    draw_box(r, { 1, 1, 1, 0.92 }, self.active_field == key and COLORS.selected or COLORS.line, 3)
+    set_color(COLORS.ink)
+    local y = r.y + 5
+    for _, line in ipairs(wrap_text(self.current[key] or "", 52)) do
+        love.graphics.print(line, r.x + 5, y)
+        y = y + 12
+        if y > r.y + r.h - 10 then
+            break
+        end
+    end
+    self:register_field(key, r)
+end
+
+function BPEditor:draw_database_panel()
+    local panel = rect(10, 10, 238, 520)
+    draw_box(panel, COLORS.panel, COLORS.line, 5)
+    love.graphics.setFont(self.fonts.title)
+    set_color(COLORS.ink)
+    love.graphics.print("Body Parts", 22, 20)
+
+    self.current.search = self.search
+    self:draw_field("Search", "search", rect(22, 58, 214, 26))
+
+    local y = 98
+    local filtered = self:filtered_parts()
+    self:clamp_list_scroll(#filtered)
+    self.list_rect = rect(22, 98, 214, LIST_VISIBLE_ROWS * LIST_ROW_HEIGHT - 3)
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.printf(tostring(#filtered) .. " / " .. tostring(#self.part_order), 162, 86, 74, "right")
+
+    for row = 1, LIST_VISIBLE_ROWS do
+        local key = filtered[(self.list_scroll or 0) + row]
+        if not key then
+            break
+        end
+        local entry = self.parts[key]
+        local part = entry.part
+        local item = rect(22, y, 204, 22)
+        local selected = key == self.current_key
+        local source_label = tostring(entry.source or ""):match("([^%.]+)$") or ""
+        draw_box(item, selected and { 0.88, 0.93, 1, 1 } or { 1, 1, 1, 0.55 }, selected and COLORS.selected or COLORS.line, 3)
+        set_color(selected and COLORS.selected or COLORS.ink)
+        love.graphics.printf((part.name or part.id or "?") .. " [" .. tostring(part.type or "?") .. "]",
+            item.x + 5, item.y + 4, item.w - 68, "left")
+        set_color(selected and COLORS.selected or COLORS.muted)
+        love.graphics.printf(source_label, item.x + item.w - 64, item.y + 4, 58, "right")
+        self:register_button("part_" .. key, "", item, function()
+            self:load_part(key)
+        end, selected)
+        y = y + LIST_ROW_HEIGHT
+    end
+
+    if #filtered > LIST_VISIBLE_ROWS then
+        local track = rect(230, self.list_rect.y, 6, self.list_rect.h)
+        local max_scroll = math.max(1, #filtered - LIST_VISIBLE_ROWS)
+        local thumb_h = math.max(24, track.h * (LIST_VISIBLE_ROWS / #filtered))
+        local thumb_y = track.y + (track.h - thumb_h) * ((self.list_scroll or 0) / max_scroll)
+        draw_box(track, { 1, 1, 1, 0.42 }, COLORS.line, 3)
+        draw_box(rect(track.x, thumb_y, track.w, thumb_h), { 0.88, 0.93, 1, 1 }, COLORS.selected, 3)
+    end
+
+    self:register_button("new_part", "New", rect(22, 493, 66, 26), function()
+        self:new_part()
+    end)
+    self:register_button("copy_lua", "Copy Lua", rect(96, 493, 66, 26), function()
+        self:copy_lua()
+    end)
+    self:register_button("copy_note", "Copy Note", rect(170, 493, 66, 26), function()
+        self:copy_note()
+    end)
+    self:draw_button("new_part")
+    self:draw_button("copy_lua")
+    self:draw_button("copy_note")
+end
+
+function BPEditor:draw_form_panel()
+    local panel = rect(258, 10, 360, 520)
+    draw_box(panel, COLORS.panel, COLORS.line, 5)
+    love.graphics.setFont(self.fonts.title)
+    set_color(COLORS.ink)
+    love.graphics.print("Editor", 270, 20)
+
+    self:draw_field("ID", "id", rect(270, 58, 158, 26))
+    self:draw_field("Name", "name", rect(440, 58, 166, 26))
+    self:draw_name_warning("name", "BP name", BODY_PART_NAME_LIMIT, 440, 86, 166)
+    self:draw_wrapped_field("Flavor", "flavor", rect(270, 108, 336, 58))
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Type", 270, 186)
+    local x = 270
+    for _, part_type in ipairs(TYPES) do
+        local button_id = "type_" .. part_type
+        self:register_button(button_id, part_type, rect(x, 200, 50, 24), function()
+            self.current.type = part_type
+        end, self.current.type == part_type)
+        self:draw_button(button_id)
+        x = x + 56
+    end
+
+    self:draw_field("Heart", "hp_value", rect(504, 200, 48, 24))
+    self:draw_field("Tags", "tags", rect(270, 252, 336, 26))
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Faces: click a face, then click symbols", 270, 310)
+
+    local labels = {
+        { "Wound", COLORS.danger },
+        { "Maim", { 0.74, 0.52, 0.1, 1 } },
+        { "Durable", COLORS.accent }
+    }
+    local face_index = 1
+    for group = 1, 3 do
+        set_color(labels[group][2])
+        love.graphics.print(labels[group][1], 270 + (group - 1) * 112, 328)
+        for row = 1, 2 do
+            local r = rect(270 + (group - 1) * 112, 344 + (row - 1) * 42, 94, 34)
+            local selected = self.selected_face == face_index
+            draw_box(r, selected and { 0.88, 0.93, 1, 1 } or { 1, 1, 1, 0.78 }, selected and COLORS.selected or COLORS.line, 4)
+            set_color(selected and COLORS.selected or COLORS.ink)
+            love.graphics.printf(face_label(self.current.faces[face_index]), r.x + 5, r.y + 11, r.w - 10, "center")
+            self.face_rects[face_index] = r
+            face_index = face_index + 1
+        end
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Symbol palette", 270, 444)
+    x = 270
+    for _, symbol in ipairs(SYMBOLS) do
+        local button_id = "face_symbol_" .. symbol.id
+        self:register_button(button_id, symbol.label, rect(x, 460, 58, 26), function()
+            self:add_symbol_to_face(symbol.id)
+        end)
+        self:draw_button(button_id)
+        x = x + 66
+    end
+
+    self:register_button("face_pop", "Pop", rect(270, 494, 58, 26), function()
+        self:pop_face_symbol()
+    end)
+    self:draw_button("face_pop")
+end
+
+function BPEditor:draw_slot_panel()
+    local panel = rect(628, 10, 322, 520)
+    draw_box(panel, COLORS.panel, COLORS.line, 5)
+    love.graphics.setFont(self.fonts.title)
+    set_color(COLORS.ink)
+    love.graphics.print("Slot", 640, 20)
+
+    self:register_button("slot_toggle", self.current.has_slot and "Slot On" or "Slot Off", rect(640, 54, 82, 26), function()
+        self.current.has_slot = not self.current.has_slot
+        if self.current.has_slot and self.current.slot_name == "" then
+            self.current.slot_id = self.current.id .. "_slot"
+            self.current.slot_name = "New Slot"
+            self.current.slot_cost = { Symbols.ESSENCE }
+            self.current.effect_type = "add_next_symbol"
+            self.current.effect_symbol = Symbols.STRIKE
+        end
+    end, self.current.has_slot)
+    self:draw_button("slot_toggle")
+
+    if not self.current.has_slot then
+        love.graphics.setFont(self.fonts.body)
+        set_color(COLORS.muted)
+        love.graphics.printf("No slot on this part.", 640, 102, 286, "left")
+        self:draw_output_help(640, 430)
+        return
+    end
+
+    self:draw_field("Slot ID", "slot_id", rect(640, 102, 132, 26))
+    self:draw_field("Slot Name", "slot_name", rect(786, 102, 140, 26))
+    self:draw_name_warning("slot_name", "Slot", SLOT_NAME_LIMIT, 786, 130, 140)
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Timing", 640, 152)
+    local x = 640
+    for index, timing in ipairs(TIMINGS) do
+        local w = index == 3 and 92 or 58
+        local button_id = "timing_" .. timing
+        self:register_button(button_id, timing, rect(x, 166, w, 24), function()
+            self.current.slot_timing = timing
+        end, self.current.slot_timing == timing)
+        self:draw_button(button_id)
+        x = x + w + 6
+    end
+
+    set_color(COLORS.muted)
+    love.graphics.print("Cost", 640, 214)
+    x = 640
+    for _, symbol in ipairs(self.current.slot_cost or {}) do
+        draw_box(rect(x, 230, 38, 24), { 1, 1, 1, 0.85 }, COLORS.line, 3)
+        set_color(COLORS.ink)
+        love.graphics.printf(symbol_label(symbol), x + 2, 236, 34, "center")
+        x = x + 42
+    end
+
+    x = 640
+    for _, symbol in ipairs(SYMBOLS) do
+        if symbol.id ~= Symbols.BLANK then
+            local button_id = "cost_symbol_" .. symbol.id
+            self:register_button(button_id, "+" .. symbol.label, rect(x, 264, 52, 24), function()
+                table.insert(self.current.slot_cost, symbol.id)
+            end)
+            self:draw_button(button_id)
+            x = x + 58
+        end
+    end
+    self:register_button("cost_clear", "Clear", rect(640, 294, 58, 24), function()
+        self.current.slot_cost = {}
+    end)
+    self:draw_button("cost_clear")
+
+    set_color(COLORS.muted)
+    love.graphics.print("Effect Template", 640, 340)
+    x = 640
+    local y = 356
+    for index, effect_type in ipairs(EFFECT_TYPES) do
+        local button_id = "effect_" .. effect_type
+        local label = EFFECT_LABELS[effect_type] or effect_type
+        local w = effect_type == "assign_symbol_to_each_part" and 92
+            or effect_type == "damage_opponent_part" and 82
+            or 58
+        if x + w > 930 then
+            x = 640
+            y = y + 30
+        end
+        self:register_button(button_id, label, rect(x, y, w, 24), function()
+            self.current.effect_type = effect_type
+            if effect_type == "open_spellmark" then
+                self.current.effect_assign_destination = "rim"
+                self.current.effect_target_side = "opponent"
+                self.current.effect_symbol = Symbols.ESSENCE
+                self.current.effect_target_type = "ANY"
+            elseif effect_type == "assign_symbol_to_each_part" then
+                self.current.effect_assign_destination = "socket"
+                self.current.effect_target_side = "self"
+                self.current.effect_symbol = Symbols.WARD
+            elseif effect_type == "gain_crest" then
+                self.current.effect_crest = Crests.ORDER[1] or "Valor"
+            end
+        end, self.current.effect_type == effect_type)
+        self:draw_button(button_id)
+        x = x + w + 6
+    end
+
+    self:draw_effect_details(640, 426)
+end
+
+function BPEditor:draw_effect_details(x, y)
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    local effect_type = self.current.effect_type
+    local text = "No effect."
+    if effect_type == "add_next_symbol" then
+        local amount = tonumber(self.current.effect_amount) or 1
+        text = "Adds " .. tostring(amount) .. " " .. symbol_label(self.current.effect_symbol)
+            .. (amount == 1 and "" or " symbols") .. " to the next die assigned."
+        local bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_symbol_" .. symbol.id
+                self:register_button(button_id, symbol.label, rect(bx, y + 28, 52, 22), function()
+                    self.current.effect_symbol = symbol.id
+                end, self.current.effect_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+        self:draw_field("Amount", "effect_amount", rect(x, y + 56, 66, 24))
+    elseif effect_type == "channel_symbol" then
+        text = "For this allocation, dice showing " .. symbol_label(self.current.effect_match_symbol)
+            .. " gain " .. symbol_label(self.current.effect_symbol) .. "."
+        local bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_match_symbol_" .. symbol.id
+                self:register_button(button_id, symbol.label, rect(bx, y + 28, 52, 22), function()
+                    self.current.effect_match_symbol = symbol.id
+                end, self.current.effect_match_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_channel_symbol_" .. symbol.id
+                self:register_button(button_id, "+" .. symbol.label, rect(bx, y + 54, 52, 22), function()
+                    self.current.effect_symbol = symbol.id
+                end, self.current.effect_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, destination in ipairs(DESTINATIONS) do
+            local button_id = "effect_channel_destination_" .. destination
+            self:register_button(button_id, destination, rect(bx, y + 80, 46, 22), function()
+                self.current.effect_destination = destination
+            end, (self.current.effect_destination or "any") == destination)
+            self:draw_button(button_id)
+            bx = bx + 50
+        end
+        self:draw_field("Amt", "effect_amount", rect(x + 214, y + 80, 54, 22))
+    elseif effect_type == "assign_symbol_to_each_part" then
+        text = "Auto-assigns " .. symbol_label(self.current.effect_symbol) .. " to matching open destinations."
+        local bx = x
+        for _, destination in ipairs(ASSIGN_DESTINATIONS) do
+            local button_id = "effect_assign_destination_" .. destination
+            self:register_button(button_id, destination, rect(bx, y + 28, 56, 22), function()
+                self.current.effect_assign_destination = destination
+                if destination == "socket" then
+                    self.current.effect_symbol = Symbols.WARD
+                    self.current.effect_target_side = "self"
+                elseif destination == "rim" then
+                    self.current.effect_symbol = Symbols.STRIKE
+                    self.current.effect_target_side = "opponent"
+                end
+            end, (self.current.effect_assign_destination or "socket") == destination)
+            self:draw_button(button_id)
+            bx = bx + 62
+        end
+
+        bx = x + 138
+        for _, target_side in ipairs(TARGET_SIDES) do
+            local button_id = "effect_assign_target_" .. target_side
+            self:register_button(button_id, target_side, rect(bx, y + 28, 64, 22), function()
+                self.current.effect_target_side = target_side
+            end, (self.current.effect_target_side or "self") == target_side)
+            self:draw_button(button_id)
+            bx = bx + 70
+        end
+
+        bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_assign_symbol_" .. symbol.id
+                self:register_button(button_id, symbol.label, rect(bx, y + 54, 52, 22), function()
+                    self.current.effect_symbol = symbol.id
+                end, self.current.effect_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+        self:draw_field("Amt", "effect_amount", rect(x, y + 82, 54, 22))
+    elseif effect_type == "open_spellmark" then
+        text = "Essence can mark an existing destination; the mark payload resolves on assignment."
+        local bx = x
+        for _, destination in ipairs(ASSIGN_DESTINATIONS) do
+            local button_id = "effect_spellmark_destination_" .. destination
+            self:register_button(button_id, destination, rect(bx, y + 28, 56, 22), function()
+                self.current.effect_assign_destination = destination
+                self.current.effect_target_side = destination == "rim" and "opponent" or "self"
+                self.current.effect_symbol = Symbols.ESSENCE
+            end, (self.current.effect_assign_destination or "rim") == destination)
+            self:draw_button(button_id)
+            bx = bx + 62
+        end
+
+        draw_box(rect(x + 138, y + 28, 76, 22), { 1, 1, 1, 0.72 }, COLORS.line, 3)
+        set_color(COLORS.muted)
+        love.graphics.printf("accept ESS", x + 142, y + 33, 68, "center")
+
+        bx = x
+        for _, part_type in ipairs(SPELLMARK_TARGET_TYPES) do
+            local button_id = "effect_spellmark_target_type_" .. part_type
+            self:register_button(button_id, part_type, rect(bx, y + 56, 50, 22), function()
+                self.current.effect_target_type = part_type
+            end, self.current.effect_target_type == part_type)
+            self:draw_button(button_id)
+            bx = bx + 56
+        end
+        self:draw_field("Dmg", "effect_amount", rect(x, y + 84, 54, 22))
+    elseif effect_type == "custom_sequence" then
+        local actions = (self.current.raw_effect and (self.current.raw_effect.actions or self.current.raw_effect.sequence)) or {}
+        text = "Sequence effect preserved from source (" .. tostring(#actions) .. " actions). Edit in Lua for now."
+    elseif effect_type == "custom_effect" then
+        text = "Custom effect preserved from source. Edit in Lua for now."
+    elseif effect_type == "heal_part" then
+        text = self.current.effect_heal_target == "source_part"
+            and "Heals the Body Part carrying this Slot."
+            or "Heals this combatant's most damaged Body Part."
+        local bx = x
+        for _, target in ipairs(HEAL_TARGETS) do
+            local button_id = "effect_heal_target_" .. target
+            local label = target == "source_part" and "this BP" or "most hurt"
+            self:register_button(button_id, label, rect(bx, y + 28, 76, 24), function()
+                self.current.effect_heal_target = target
+            end, (self.current.effect_heal_target or "most_damaged") == target)
+            self:draw_button(button_id)
+            bx = bx + 82
+        end
+        self:draw_field("Amount", "effect_amount", rect(x + 170, y + 28, 66, 24))
+    elseif effect_type == "damage_opponent_part" then
+        text = "Damages opponent " .. tostring(self.current.effect_target_type or "HEAD") .. " one step."
+        local bx = x
+        for _, part_type in ipairs(TYPES) do
+            local button_id = "effect_target_" .. part_type
+            self:register_button(button_id, part_type, rect(bx, y + 28, 50, 22), function()
+                self.current.effect_target_type = part_type
+            end, self.current.effect_target_type == part_type)
+            self:draw_button(button_id)
+            bx = bx + 56
+        end
+        self:draw_field("Amount", "effect_amount", rect(x, y + 62, 66, 24))
+    elseif effect_type == "gain_crest" then
+        text = "Gains 1 " .. tostring(self.current.effect_crest or "Valor") .. " crest."
+        local bx = x
+        for _, crest in ipairs(Crests.ORDER) do
+            local button_id = "effect_crest_" .. crest
+            self:register_button(button_id, crest, rect(bx, y + 28, 72, 24), function()
+                self.current.effect_crest = crest
+            end, (self.current.effect_crest or "Valor") == crest)
+            self:draw_button(button_id)
+            bx = bx + 78
+        end
+        self:draw_field("Amount", "effect_amount", rect(x + 170, y + 28, 66, 24))
+    end
+    for _, line in ipairs(wrap_text(text, 40)) do
+        love.graphics.print(line, x, y)
+        y = y + 12
+    end
+end
+
+function BPEditor:draw_output_help(x, y)
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Copy buttons export the current form.", x, y)
+end
+
+function BPEditor:draw()
+    love.graphics.clear(COLORS.bg)
+    self.buttons = {}
+    self.fields = {}
+    self.face_rects = {}
+
+    self:draw_database_panel()
+    self:draw_form_panel()
+    self:draw_slot_panel()
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.printf(self.message or "", 258, 532, 692, "left")
+end
+
+function BPEditor:add_symbol_to_face(symbol)
+    local face = self.current.faces[self.selected_face] or { Symbols.BLANK }
+    if symbol == Symbols.BLANK then
+        self.current.faces[self.selected_face] = { Symbols.BLANK }
+        return
+    end
+
+    if #face == 1 and face[1] == Symbols.BLANK then
+        face = {}
+    end
+
+    if #face < 3 then
+        table.insert(face, symbol)
+    else
+        self.message = "Faces are capped at three symbols in this editor."
+    end
+    self.current.faces[self.selected_face] = face
+end
+
+function BPEditor:pop_face_symbol()
+    local face = self.current.faces[self.selected_face] or { Symbols.BLANK }
+    if #face > 0 then
+        table.remove(face)
+    end
+    if #face == 0 then
+        face = { Symbols.BLANK }
+    end
+    self.current.faces[self.selected_face] = face
+end
+
+function BPEditor:build_slot()
+    if not self.current.has_slot then
+        return nil
+    end
+
+    local effect_type = self.current.effect_type or "none"
+    local effect = { type = effect_type }
+    if effect_type == "add_next_symbol" then
+        effect.symbol = self.current.effect_symbol or Symbols.STRIKE
+        effect.amount = tonumber(self.current.effect_amount) or 1
+    elseif effect_type == "channel_symbol" then
+        effect = {
+            type = "add_symbol_to_matching_dice",
+            match = self.current.effect_match_symbol or Symbols.ESSENCE,
+            symbol = self.current.effect_symbol or Symbols.STRIKE,
+            amount = tonumber(self.current.effect_amount) or 1,
+            duration = "allocation"
+        }
+        if self.current.effect_destination and self.current.effect_destination ~= "any" then
+            effect.destination = self.current.effect_destination
+        end
+    elseif effect_type == "assign_symbol_to_each_part" then
+        local destination = self.current.effect_assign_destination or "socket"
+        effect = {
+            type = "assign_symbol_to_each_part",
+            destination = destination,
+            target = self.current.effect_target_side or (destination == "rim" and "opponent" or "self"),
+            symbol = self.current.effect_symbol or (destination == "rim" and Symbols.STRIKE or Symbols.WARD),
+            amount = tonumber(self.current.effect_amount) or 1
+        }
+    elseif effect_type == "open_spellmark" then
+        local destination = self.current.effect_assign_destination or "rim"
+        effect = {
+            type = "open_spellmark",
+            destination = destination,
+            target = destination == "rim" and "opponent" or "self",
+            symbol = Symbols.ESSENCE,
+            on_mark = {
+                type = "damage_marked_part",
+                amount = tonumber(self.current.effect_amount) or 1
+            }
+        }
+        if self.current.effect_target_type and self.current.effect_target_type ~= "ANY" then
+            effect.target_type = self.current.effect_target_type
+        end
+    elseif effect_type == "custom_sequence" or effect_type == "custom_effect" then
+        effect = clone(self.current.raw_effect or { type = "none" })
+    elseif effect_type == "heal_part" then
+        effect.target = self.current.effect_heal_target or "most_damaged"
+        effect.amount = tonumber(self.current.effect_amount) or 1
+    elseif effect_type == "damage_opponent_part" then
+        effect.target_type = self.current.effect_target_type or "HEAD"
+        effect.amount = tonumber(self.current.effect_amount) or 1
+    elseif effect_type == "gain_crest" then
+        effect.crest = self.current.effect_crest or "Valor"
+        effect.amount = tonumber(self.current.effect_amount) or 1
+    else
+        effect = { type = "none" }
+    end
+
+    return {
+        id = trim(self.current.slot_id),
+        name = trim(self.current.slot_name),
+        cost = clone(self.current.slot_cost or {}),
+        timing = self.current.slot_timing or "spend",
+        effect = effect
+    }
+end
+
+function BPEditor:form_to_part()
+    return {
+        id = trim(self.current.id),
+        name = trim(self.current.name),
+        flavor = trim(self.current.flavor),
+        type = self.current.type or "ARM",
+        hp_value = tonumber(self.current.hp_value) or 1,
+        die = {
+            faces = clone(self.current.faces),
+            wound_faces = { 1, 2 },
+            maim_faces = { 3, 4 }
+        },
+        tags = split_csv(self.current.tags),
+        slot = self:build_slot()
+    }
+end
+
+function BPEditor:validate_current_part()
+    local part = self:form_to_part()
+    local errors = {}
+
+    if part.id == "" then
+        table.insert(errors, "Body Part ID is required")
+    end
+    if part.name == "" then
+        table.insert(errors, "Body Part name is required")
+    end
+    if part.slot and part.slot.name == "" then
+        table.insert(errors, "Slot name is required")
+    end
+
+    if part.id ~= "" then
+        local definitions = {
+            parts = {
+                [part.id] = part
+            },
+            loadouts = {
+                preview = {
+                    parts = { part.id }
+                }
+            }
+        }
+
+        for _, message in ipairs(Content.validate(definitions)) do
+            table.insert(errors, message)
+        end
+    end
+
+    return errors
+end
+
+function BPEditor:lua_effect(effect)
+    if not effect or effect.type == "none" then
+        return "{ type = \"none\" }"
+    elseif is_sequence_effect(effect) then
+        local rendered = {}
+        for _, action in ipairs(effect.actions or effect.sequence or {}) do
+            table.insert(rendered, self:lua_effect(action))
+        end
+        return "{ actions = { " .. table.concat(rendered, ", ") .. " } }"
+    elseif effect.type == "add_next_symbol" then
+        return "{ type = \"add_next_symbol\", symbol = " .. lua_symbol(effect.symbol) .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "add_symbol_to_matching_dice" or effect.type == "channel_symbol" then
+        local pieces = {
+            "type = \"add_symbol_to_matching_dice\"",
+            "match = " .. lua_symbol(effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE),
+            "symbol = " .. lua_symbol(effect.symbol or effect.add_symbol or Symbols.STRIKE),
+            "amount = " .. tostring(effect.amount or 1),
+            "duration = " .. lua_string(effect.duration or "allocation")
+        }
+        if effect.destination and effect.destination ~= "any" then
+            table.insert(pieces, "destination = " .. lua_string(effect.destination))
+        end
+        return "{ " .. table.concat(pieces, ", ") .. " }"
+    elseif effect.type == "assign_symbol_to_each_part" or effect.type == "auto_assign_symbol" then
+        return "{ type = \"assign_symbol_to_each_part\", destination = " .. lua_string(effect.destination or "socket")
+            .. ", target = " .. lua_string(effect.target or effect.target_side or "self")
+            .. ", symbol = " .. lua_symbol(effect.symbol or Symbols.WARD)
+            .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "open_spellmark" or effect.type == "spellmark" then
+        local pieces = {
+            "type = \"open_spellmark\"",
+            "destination = " .. lua_string(effect.destination or "rim"),
+            "symbol = " .. lua_symbol(effect.symbol or effect.accept_symbol or Symbols.ESSENCE)
+        }
+        if effect.name or effect.mark_name then
+            table.insert(pieces, "name = " .. lua_string(effect.name or effect.mark_name))
+        end
+        if effect.target or effect.target_side then
+            table.insert(pieces, "target = " .. lua_string(effect.target or effect.target_side))
+        end
+        if effect.target_type or effect.part_type then
+            table.insert(pieces, "target_type = " .. lua_string(effect.target_type or effect.part_type))
+        end
+        if effect.target_part_id then
+            table.insert(pieces, "target_part_id = " .. lua_string(effect.target_part_id))
+        end
+        if effect.single_use == false then
+            table.insert(pieces, "single_use = false")
+        end
+        table.insert(pieces, "on_mark = " .. self:lua_effect(effect.on_mark or effect.payload or effect.effect or { type = "none" }))
+        return "{ " .. table.concat(pieces, ", ") .. " }"
+    elseif effect.type == "damage_marked_part" or effect.type == "damage_target_part" or effect.type == "damage_assigned_part" then
+        return "{ type = \"damage_marked_part\", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "heal_part" then
+        return "{ type = \"heal_part\", target = " .. lua_string(effect.target or "most_damaged")
+            .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "damage_opponent_part" then
+        return "{ type = \"damage_opponent_part\", target_type = " .. lua_string(effect.target_type or "HEAD") .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+    elseif effect.type == "gain_crest" then
+        return "{ type = \"gain_crest\", crest = " .. lua_string(effect.crest or "Valor") .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+    end
+    return "{ type = " .. lua_string(effect.type) .. " }"
+end
+
+function BPEditor:lua_slot(slot, indent)
+    if not slot then
+        return nil
+    end
+
+    local i = indent or "            "
+    local lines = {
+        "{",
+        i .. "    id = " .. lua_string(slot.id) .. ",",
+        i .. "    name = " .. lua_string(slot.name) .. ",",
+        i .. "    cost = " .. lua_symbol_list(slot.cost) .. ",",
+        i .. "    timing = " .. lua_string(slot.timing or "spend") .. ",",
+        i .. "    effect = " .. self:lua_effect(slot.effect),
+        i .. "}"
+    }
+    return table.concat(lines, "\n")
+end
+
+function BPEditor:part_lua()
+    local part = self:form_to_part()
+    local lines = {
+        "[" .. lua_string(part.id) .. "] = {",
+        "    id = " .. lua_string(part.id) .. ",",
+        "    name = " .. lua_string(part.name) .. ",",
+        "    flavor = " .. lua_string(part.flavor) .. ",",
+        "    type = " .. lua_string(part.type) .. ",",
+        "    hp_value = " .. tostring(part.hp_value) .. ",",
+        "    die = {",
+        "        faces = {"
+    }
+
+    for index, face in ipairs(part.die.faces) do
+        table.insert(lines, "            " .. lua_face(face) .. (index < 6 and "," or ""))
+    end
+
+    table.insert(lines, "        },")
+    table.insert(lines, "        wound_faces = { 1, 2 },")
+    table.insert(lines, "        maim_faces = { 3, 4 }")
+    table.insert(lines, "    },")
+
+    if #part.tags > 0 then
+        local tags = {}
+        for _, tag in ipairs(part.tags) do
+            table.insert(tags, lua_string(tag))
+        end
+        table.insert(lines, "    tags = { " .. table.concat(tags, ", ") .. " },")
+    end
+
+    if part.slot then
+        table.insert(lines, "    slot = " .. self:lua_slot(part.slot, "    "))
+    else
+        table.insert(lines, "    slot = nil")
+    end
+
+    table.insert(lines, "}")
+    return table.concat(lines, "\n")
+end
+
+function BPEditor:effect_note(effect)
+    return Effects.describe(effect)
+end
+
+local function note_face(face)
+    local normalized = normalize_face(face)
+    if #normalized == 1 and normalized[1] == Symbols.BLANK then
+        return "[ ]"
+    end
+    return "[" .. Symbols.format_face(normalized) .. "]"
+end
+
+function BPEditor:part_note()
+    local part = self:form_to_part()
+    local slot = part.slot
+    local lines = {
+        "### " .. part.name,
+        "Type: " .. part.type,
+        "Heart: " .. tostring(part.hp_value)
+    }
+    if part.flavor ~= "" then
+        table.insert(lines, "Flavor: " .. part.flavor)
+    end
+    table.insert(lines, "Die:")
+    table.insert(lines, "- Wound: " .. note_face(part.die.faces[1]) .. " " .. note_face(part.die.faces[2]))
+    table.insert(lines, "- Maim: " .. note_face(part.die.faces[3]) .. " " .. note_face(part.die.faces[4]))
+    table.insert(lines, "- Durable: " .. note_face(part.die.faces[5]) .. " " .. note_face(part.die.faces[6]))
+
+    if slot then
+        table.insert(lines, "Slot: " .. slot.name)
+        local cost_parts = {}
+        for _, symbol in ipairs(slot.cost or {}) do
+            table.insert(cost_parts, note_face({ symbol }))
+        end
+        table.insert(lines, "Cost: " .. table.concat(cost_parts, " "))
+        table.insert(lines, "Timing: " .. tostring(slot.timing or "spend"))
+        table.insert(lines, "Effect: " .. self:effect_note(slot.effect))
+    else
+        table.insert(lines, "Slot: None")
+    end
+
+    return table.concat(lines, "\n")
+end
+
+function BPEditor:copy_lua()
+    local errors = self:validate_current_part()
+    if #errors > 0 then
+        self.message = "Fix before copying Lua: " .. tostring(errors[1])
+        return
+    end
+
+    local text = self:part_lua()
+    if love.system and love.system.setClipboardText then
+        love.system.setClipboardText(text)
+        self.message = "Copied Lua definition for " .. (self.current.name or self.current.id) .. "."
+    else
+        self.message = "Clipboard unavailable in this LOVE build."
+    end
+end
+
+function BPEditor:copy_note()
+    local text = self:part_note()
+    if love.system and love.system.setClipboardText then
+        love.system.setClipboardText(text)
+        self.message = "Copied note text for " .. (self.current.name or self.current.id) .. "."
+    else
+        self.message = "Clipboard unavailable in this LOVE build."
+    end
+end
+
+function BPEditor:mousepressed(x, y, button)
+    if button ~= 1 then
+        return
+    end
+
+    for face_index, face_rect in pairs(self.face_rects or {}) do
+        if point_in_rect(x, y, face_rect) then
+            self.selected_face = face_index
+            self.active_field = nil
+            return
+        end
+    end
+
+    for key, field_rect in pairs(self.fields or {}) do
+        if point_in_rect(x, y, field_rect) then
+            self.active_field = key
+            return
+        end
+    end
+
+    for _, key in ipairs(sorted_keys(self.buttons)) do
+        local button = self.buttons[key]
+        if point_in_rect(x, y, button.rect) and button.on_click then
+            self.active_field = nil
+            button.on_click()
+            return
+        end
+    end
+
+    self.active_field = nil
+end
+
+function BPEditor:textinput(text)
+    if not self.active_field then
+        return
+    end
+
+    if self.active_field == "search" then
+        self.search = self.search .. text
+        self.list_scroll = 0
+        return
+    end
+
+    self.current[self.active_field] = tostring(self.current[self.active_field] or "") .. text
+end
+
+function BPEditor:keypressed(key)
+    if key == "escape" then
+        GameState.switch(require("states.overworld"))
+        return
+    elseif key == "tab" then
+        self.active_field = nil
+        return
+    elseif key == "backspace" and self.active_field then
+        if self.active_field == "search" then
+            self.search = self.search:sub(1, -2)
+            self.list_scroll = 0
+        else
+            local value = tostring(self.current[self.active_field] or "")
+            self.current[self.active_field] = value:sub(1, -2)
+        end
+    elseif key == "delete" and self.active_field == "search" then
+        self.search = ""
+        self.list_scroll = 0
+    elseif key == "/" and not self.active_field then
+        self.active_field = "search"
+        return
+    elseif key == "down" then
+        self.list_scroll = (self.list_scroll or 0) + 1
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "up" then
+        self.list_scroll = (self.list_scroll or 0) - 1
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "pagedown" then
+        self.list_scroll = (self.list_scroll or 0) + LIST_VISIBLE_ROWS
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "pageup" then
+        self.list_scroll = (self.list_scroll or 0) - LIST_VISIBLE_ROWS
+        self:clamp_list_scroll(#self:filtered_parts())
+    elseif key == "return" and (love.keyboard.isDown("lgui") or love.keyboard.isDown("lctrl")) then
+        self:copy_lua()
+    end
+end
+
+function BPEditor:wheelmoved(_, y)
+    local mouse_x, mouse_y = love.mouse.getPosition()
+    if not point_in_rect(mouse_x, mouse_y, self.list_rect) then
+        return
+    end
+
+    self.list_scroll = (self.list_scroll or 0) - (y * 3)
+    self:clamp_list_scroll(#self:filtered_parts())
+end
+
+return BPEditor
+
+```
+
+## states/dialog.lua
 
 ```lua
 local Assets = require("core.assets")
 local GameState = require("core.gamestate")
-local Layouts = require("ui.layouts")
-local Engine = require("combat.engine")
-local Events = require("combat.events")
-local Combatant = require("combat.combatant")
+local Input = require("core.input")
+local Dialog = require("systems.dialog")
 
-local CombatState = {}
-CombatState.__index = CombatState
+local DialogState = {}
+DialogState.__index = DialogState
 
-local MAX_ENGINE_STEPS_PER_FRAME = 4
+local COLORS = {
+    box = { 0.045, 0.045, 0.075, 0.96 },
+    box_line = { 0.72, 0.70, 0.84, 0.82 },
+    speaker = { 0.10, 0.12, 0.18, 0.98 },
+    speaker_line = { 0.55, 0.66, 0.84, 0.86 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.66, 0.64, 0.75, 1 },
+    selected = { 0.28, 0.54, 0.62, 1 },
+    selected_line = { 0.68, 0.90, 0.92, 1 }
+}
 
-local TECH_CARD_WIDTH = 176
-local TECH_CARD_HEIGHT = 72
-local TECH_CARD_SPACING = 10
-local TECH_CARD_GAP = 20
-local TECH_CARD_CORNER_RADIUS = 12
-local TECH_FAN_STICKY_MARGIN = 28
+local CONTINUE_PROMPT_SIZE = 12
+local CONTINUE_PROMPT_FPS = 4
 
-local PANEL_CORNER_RADIUS = 14
-local PANEL_SPACING = 14
-local SELECTED_PANEL_HEIGHT = 96
-local DICE_PANEL_HEIGHT = 110
+local function set_color(color)
+    love.graphics.setColor(color)
+end
 
-local DIE_TOKEN_SIZE = 64
-local DIE_TOKEN_RADIUS = 10
-local DIE_TOKEN_SPACING = 14
-local DICE_SHELF_HEIGHT = DIE_TOKEN_SIZE + 32
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
 
-local PROMPT_BUTTON_WIDTH = 220
-local PROMPT_BUTTON_HEIGHT = 56
-local PROMPT_BUTTON_SPACING = 12
-local PROMPT_BUTTON_RADIUS = 12
-local PROMPT_PANEL_HEADER = 72
-local PROMPT_PANEL_BOTTOM_PADDING = 24
+local function draw_box(r, fill, outline, radius)
+    set_color(fill)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, radius or 5, radius or 5)
+    set_color(outline)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 5, radius or 5)
+end
 
-local function point_in_rect(x, y, rect)
-    if not rect then
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
         return false
     end
 
-    return x >= rect.x and x <= rect.x + rect.w and y >= rect.y and y <= rect.y + rect.h
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
 end
 
-local function normalize_dice_type(dice_type)
-    if not dice_type or dice_type == "" then
-        return "d6"
-    end
-
-    if type(dice_type) == "number" then
-        return "d" .. tostring(dice_type)
-    end
-
-    local str = tostring(dice_type)
-    if str:match("^d%d+") then
-        return str
-    end
-
-    return "d" .. str
-end
-
-local function format_dice_label(count, dice_type)
-    if not count or count <= 0 then
-        return nil
-    end
-
-    local type_label = normalize_dice_type(dice_type)
-    return string.format("%d%s", count, type_label)
-end
-
-local function draw_highlight_fill(rect, is_hovered)
-    local alpha = is_hovered and 0.32 or 0.18
-    love.graphics.setColor(0.18, 0.45, 0.85, alpha)
-    love.graphics.rectangle("fill", rect.x - 6, rect.y - 6, rect.w + 12, rect.h + 12, 12, 12)
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-local function draw_highlight_outline(rect, is_hovered)
-    local alpha = is_hovered and 0.9 or 0.4
-    love.graphics.setColor(0.45, 0.8, 1, alpha)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", rect.x - 6, rect.y - 6, rect.w + 12, rect.h + 12, 12, 12)
-    love.graphics.setLineWidth(1)
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-local function get_player_shelf_rect()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
-
-    local shelf_width = math.min(width * 0.36, 360)
-    local shelf_height = DICE_SHELF_HEIGHT
-    local x = width * 0.08
-    local y = height - shelf_height - 120
-
-    return x, y, shelf_width, shelf_height
-end
-
-local function get_enemy_shelf_rect()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
-
-    local shelf_width = math.min(width * 0.36, 360)
-    local shelf_height = DICE_SHELF_HEIGHT
-    local x = width - shelf_width - width * 0.08
-    local y = height - shelf_height - 120
-
-    return x, y, shelf_width, shelf_height
-end
-
-local function draw_die_token(die, is_hovered, is_dragging)
-    if not die or not die.rect then
-        return
-    end
-
-    local rect = die.rect
-    local fill = { 0.14, 0.32, 0.55, 0.82 }
-    local outline = { 0.58, 0.86, 1, 0.95 }
-
-    if die.assigned then
-        fill = { 0.12, 0.34, 0.25, 0.85 }
-        outline = { 0.48, 0.88, 0.64, 0.95 }
-    elseif die.interactable then
-        fill = { 0.18, 0.46, 0.78, 0.9 }
-        outline = { 0.62, 0.88, 1, 0.95 }
-    else
-        fill = { 0.1, 0.24, 0.38, 0.75 }
-        outline = { 0.35, 0.6, 0.9, 0.7 }
-    end
-
-    if is_hovered or is_dragging then
-        outline = { 1, 1, 1, 1 }
-    end
-
-    love.graphics.setColor(fill)
-    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, DIE_TOKEN_RADIUS, DIE_TOKEN_RADIUS)
-
-    love.graphics.setColor(outline)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, DIE_TOKEN_RADIUS, DIE_TOKEN_RADIUS)
-    love.graphics.setLineWidth(1)
-
-    local title = die.label or ""
-    local subtitle = die.subtitle or ""
-
-    love.graphics.setColor(1, 1, 1, 0.95)
-    love.graphics.printf(title, rect.x + 8, rect.y + 10, rect.w - 16, "center")
-
-    if subtitle ~= "" then
-        love.graphics.setColor(0.85, 0.95, 1, 0.88)
-        love.graphics.printf(subtitle, rect.x + 8, rect.y + rect.h - 26, rect.w - 16, "center")
-    end
-
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-local function draw_panel_background(x, y, w, h, intensity)
-    local base_alpha = intensity or 0.88
-    love.graphics.setColor(0.07, 0.1, 0.16, base_alpha)
-    love.graphics.rectangle("fill", x, y, w, h, PANEL_CORNER_RADIUS, PANEL_CORNER_RADIUS)
-    love.graphics.setColor(0.35, 0.7, 1, 0.45)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", x, y, w, h, PANEL_CORNER_RADIUS, PANEL_CORNER_RADIUS)
-    love.graphics.setLineWidth(1)
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-local function draw_tech_card(option, is_hovered)
-    local rect = option and option.card_rect or nil
-    if not rect then
-        return
-    end
-
-    local fill_alpha = is_hovered and 0.95 or 0.82
-    local border_alpha = is_hovered and 1 or 0.55
-
-    love.graphics.setColor(0.11, 0.18, 0.28, fill_alpha)
-    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, TECH_CARD_CORNER_RADIUS, TECH_CARD_CORNER_RADIUS)
-
-    love.graphics.setColor(0.58, 0.86, 1, border_alpha)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, TECH_CARD_CORNER_RADIUS, TECH_CARD_CORNER_RADIUS)
-    love.graphics.setLineWidth(1)
-
-    local text_x = rect.x + 14
-    local text_width = rect.w - 28
-
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf(option.tech_name or option.metadata and option.metadata.tech_name or "Tech", text_x, rect.y + 8, text_width, "left")
-
-    if option.body_part_name and option.body_part_name ~= "" then
-        love.graphics.setColor(0.78, 0.88, 1, 0.9)
-        love.graphics.printf(option.body_part_name, text_x, rect.y + 30, text_width, "left")
-    end
-
-    if option.summary and option.summary ~= "" then
-        love.graphics.setColor(0.85, 0.92, 1, 0.85)
-        love.graphics.printf(option.summary, text_x, rect.y + rect.h - 24, text_width, "left")
-    end
-
-    if option.selection_index then
-        love.graphics.setColor(0.75, 0.85, 1, 0.65)
-        love.graphics.printf("#" .. tostring(option.selection_index), rect.x + rect.w - 34, rect.y + 8, 24, "right")
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-end
-
-local function draw_prompt_button(button, is_hovered)
-    if not button or not button.rect then
-        return
-    end
-
-    local rect = button.rect
-    local fill = is_hovered and { 0.16, 0.4, 0.72, 0.92 } or { 0.12, 0.26, 0.42, 0.85 }
-    local outline = is_hovered and { 0.96, 0.98, 1, 1 } or { 0.58, 0.86, 1, 0.9 }
-
-    love.graphics.setColor(fill)
-    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, PROMPT_BUTTON_RADIUS, PROMPT_BUTTON_RADIUS)
-
-    love.graphics.setColor(outline)
-    love.graphics.setLineWidth(2)
-    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, PROMPT_BUTTON_RADIUS, PROMPT_BUTTON_RADIUS)
-    love.graphics.setLineWidth(1)
-
-    love.graphics.setColor(1, 1, 1, 0.96)
-    love.graphics.printf(button.label or "", rect.x + 14, rect.y + 12, rect.w - 28, "center")
-
-    if button.subtitle and button.subtitle ~= "" then
-        love.graphics.setColor(0.82, 0.92, 1, 0.85)
-        love.graphics.printf(button.subtitle, rect.x + 14, rect.y + rect.h - 26, rect.w - 28, "center")
-    end
-
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-local function build_tech_summary(tech)
-    if not tech or not tech.actions then
-        return ""
-    end
-
-    local segments = {}
-
-    for _, action in ipairs(tech.actions) do
-        if action.type == "attack_roll" or action.type == "defense_roll" then
-            local prefix = action.type == "attack_roll" and "ATK" or "DEF"
-            local dice_label = format_dice_label(action.dice_count, action.dice_type)
-            if dice_label then
-                table.insert(segments, string.format("%s %s", prefix, dice_label))
-            end
-        end
-    end
-
-    return table.concat(segments, "  ")
-end
-
-local function collect_dice_lines(tech)
-    local lines = {}
-
-    if not tech or not tech.actions then
-        return lines
-    end
-
-    for _, action in ipairs(tech.actions) do
-        if action.type == "attack_roll" or action.type == "defense_roll" then
-            local label = action.type == "attack_roll" and "Attack" or "Defense"
-            local dice_label = format_dice_label(action.dice_count, action.dice_type)
-            local name = action.name or ""
-
-            if dice_label and name ~= "" then
-                table.insert(lines, string.format("%s: %s (%s)", label, dice_label, name))
-            elseif dice_label then
-                table.insert(lines, string.format("%s: %s", label, dice_label))
-            elseif name ~= "" then
-                table.insert(lines, string.format("%s: %s", label, name))
-            end
-        end
-    end
-
-    return lines
-end
-
-local function collect_keyword_list(tech)
-    local keywords = {}
-
-    if not tech or not tech.keywords then
-        return keywords
-    end
-
-    for key, value in pairs(tech.keywords) do
-        if type(value) == "boolean" then
-            if value then
-                table.insert(keywords, key)
-            end
-        elseif value ~= nil then
-            table.insert(keywords, string.format("%s %s", key, tostring(value)))
-        end
-    end
-
-    table.sort(keywords)
-
-    return keywords
-end
-
-local function clone_crest_pool(source)
-    local copy = {}
-
-    if not source then
-        return copy
-    end
-
-    for crest, count in pairs(source) do
-        copy[crest] = count
-    end
-
-    return copy
-end
-
-local function copy_body_part(part)
-    local status = part.status or "healthy"
-    local tags = {}
-
-    if part.tags then
-        for index, tag in ipairs(part.tags) do
-            tags[index] = tag
-        end
-    end
-
-    local copied = {
-        id = part.id,
-        name = part.name,
-        type = part.type,
-        status = status,
-        toughness = part.toughness or 0,
-        hp_value = part.hp_value or 0,
-        techs = part.techs,
-        tags = tags,
-        layout_slot = part.layout_slot,
-        slot = part.slot,
-        asset_base = part.id or "placeholder"
-    }
-
-    copied.asset_id = (copied.asset_base or "placeholder") .. "_" .. status
-
-    return copied
-end
-
-local function build_ui_state(engine)
-    local state = {
-        combatants = {},
-        combatant_lookup = setmetatable({}, { __mode = "k" }),
-        part_lookup = setmetatable({}, { __mode = "k" })
-    }
-
-    if not engine then
-        return state
-    end
-
-    for index, combatant in ipairs(engine.combatants or {}) do
-        local view = {
-            id = combatant.id,
-            name = combatant.name,
-            is_player = combatant.is_player or false,
-            is_enemy = combatant.is_enemy or false,
-            heart_points = combatant.heart_points or 0,
-            crest_pool = clone_crest_pool(combatant.crest_pool),
-            body_parts = {}
-        }
-
-        view.index = index
-
-        state.combatants[index] = view
-        state.combatant_lookup[combatant] = view
-
-        for part_index, part in ipairs(combatant.body_parts or {}) do
-            local part_view = copy_body_part(part)
-            view.body_parts[part_index] = part_view
-            state.part_lookup[part] = part_view
-        end
-    end
-
-    return state
-end
-
-local function update_part_asset_id(part_view)
-    if not part_view then
-        return
-    end
-
-    local base = part_view.asset_base or part_view.id or "placeholder"
-    local status = part_view.status or "healthy"
-    part_view.asset_id = base .. "_" .. status
-end
-
-local function create_player_combatant()
-    local body_parts = {
-        {
-            id = "dreamer_head",
-            name = "Astral Visage",
-            type = "head",
-            status = "healthy",
-            toughness = 2,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "lucid_gaze",
-                    name = "Lucid Gaze",
-                    actions = {
-                        { type = "attack_roll", name = "Lucid Strike", dice_count = 2, dice_type = "d4", damage = 1 },
-                        { type = "defense_roll", name = "Astral Veil", dice_count = 1, dice_type = "d4" }
-                    }
-                }
-            }
-        },
-        {
-            id = "dreamer_torso",
-            name = "Liminal Core",
-            type = "torso",
-            status = "healthy",
-            toughness = 3,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "steady_breath",
-                    name = "Steady Breath",
-                    actions = {
-                        { type = "defense_roll", name = "Composed Guard", dice_count = 1, dice_type = "d6" }
-                    }
-                }
-            }
-        },
-        {
-            id = "dreamer_arm_left",
-            name = "Mnemonic Grip",
-            type = "arm_left",
-            status = "wounded",
-            toughness = 2,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "memory_shear",
-                    name = "Memory Shear",
-                    actions = {
-                        { type = "attack_roll", name = "Mnemonic Cut", dice_count = 1, dice_type = "d6", damage = 1 }
-                    }
-                }
-            }
-        },
-        {
-            id = "dreamer_arm_right",
-            name = "Aether Reach",
-            type = "arm_right",
-            status = "healthy",
-            toughness = 2,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "projection",
-                    name = "Projection",
-                    actions = {
-                        { type = "attack_roll", name = "Astral Jab", dice_count = 1, dice_type = "d6", damage = 1 }
-                    }
-                }
-            }
-        },
-        {
-            id = "dreamer_leg_left",
-            name = "Gliding Step",
-            type = "leg_left",
-            status = "healthy",
-            toughness = 2,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "sidestep",
-                    name = "Sidestep",
-                    actions = {
-                        { type = "defense_roll", name = "Flowing Evasion", dice_count = 1, dice_type = "d6" }
-                    }
-                }
-            }
-        },
-        {
-            id = "dreamer_leg_right",
-            name = "Anchoring Stride",
-            type = "leg_right",
-            status = "healthy",
-            toughness = 2,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "grounding_kick",
-                    name = "Grounding Kick",
-                    actions = {
-                        { type = "attack_roll", name = "Forceful Kick", dice_count = 1, dice_type = "d6", damage = 1 }
-                    }
-                }
-            }
-        }
-    }
-
-    return Combatant:new({
-        id = "player_demo",
-        name = "The Dreamer",
-        is_player = true,
-        heart_points = 3,
-        crest_pool = { Valor = 1, Shadow = 2 },
-        body_parts = body_parts
-    })
-end
-
-local function create_enemy_combatant()
-    local body_parts = {
-        {
-            id = "placeholder",
-            name = "Hollow Visor",
-            type = "head",
-            status = "healthy",
-            toughness = 1,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "glare",
-                    name = "Gloom Glare",
-                    actions = {
-                        { type = "attack_roll", name = "Piercing Glare", dice_count = 1, dice_type = "d4", damage = 1 }
-                    }
-                }
-            }
-        },
-        {
-            id = "placeholder",
-            name = "Threadbare Husk",
-            type = "torso",
-            status = "wounded",
-            toughness = 2,
-            hp_value = 1,
-            techs = {}
-        },
-        {
-            id = "nightmare_arm_left",
-            name = "Raveled Claw",
-            type = "arm_left",
-            status = "healthy",
-            toughness = 1,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "snatch",
-                    name = "Snatch",
-                    actions = {
-                        { type = "attack_roll", name = "Snare", dice_count = 1, dice_type = "d6", damage = 1 }
-                    }
-                }
-            }
-        },
-        {
-            id = "nightmare_arm_right",
-            name = "Splinter Lash",
-            type = "arm_right",
-            status = "maimed",
-            toughness = 0,
-            hp_value = 1,
-            techs = {}
-        },
-        {
-            id = "nightmare_leg_left",
-            name = "Staggered Limb",
-            type = "leg_left",
-            status = "healthy",
-            toughness = 1,
-            hp_value = 1,
-            techs = {
-                {
-                    id = "lurch",
-                    name = "Lurch",
-                    actions = {
-                        { type = "attack_roll", name = "Wild Swing", dice_count = 1, dice_type = "d8", damage = 1 }
-                    }
-                }
-            }
-        },
-        {
-            id = "nightmare_leg_right",
-            name = "Drifting Limb",
-            type = "leg_right",
-            status = "healthy",
-            toughness = 1,
-            hp_value = 1,
-            techs = {}
-        }
-    }
-
-    return Combatant:new({
-        id = "enemy_demo",
-        name = "Dream Eater",
-        is_enemy = true,
-        heart_points = 2,
-        crest_pool = { Madness = 1 },
-        body_parts = body_parts
-    })
-end
-
-function CombatState:enter()
-    self.engine = Engine:new()
-    self.background_color = { 0.05, 0.06, 0.09, 1 }
-    self.mouse_position = { x = 0, y = 0 }
-    self.tech_selection_ui = nil
-    self.assignment_ui = nil
-    self.prompt_ui = nil
-
-    local player = create_player_combatant()
-    local enemy = create_enemy_combatant()
-
-    self.engine:add_combatant(player)
-    self.engine:add_combatant(enemy)
-    self.ui_state = build_ui_state(self.engine)
-    self:register_event_listeners()
-
-    self.engine:start_combat()
-    self:refresh_ui_state()
-    self.engine:process_state()
-end
-
-function CombatState:update(dt)
-    if not self.engine then
-        return
-    end
-
-    local steps = 0
-
-    while self.engine and not self.engine:needs_input() and steps < MAX_ENGINE_STEPS_PER_FRAME do
-        self.engine:process_state()
-        steps = steps + 1
-    end
-
-    self:update_mouse_position()
-    self:update_interactive_input()
-end
-
-function CombatState:refresh_ui_state()
-    self.ui_state = build_ui_state(self.engine)
-end
-
-function CombatState:get_combatant_view(combatant)
-    if not self.ui_state then
-        return nil
-    end
-
-    local view = self.ui_state.combatant_lookup[combatant]
-
-    if not view then
-        self:refresh_ui_state()
-        if self.ui_state then
-            view = self.ui_state.combatant_lookup[combatant]
-        end
-    end
-
-    return view
-end
-
-function CombatState:get_body_part_view(part)
-    if not self.ui_state then
-        return nil
-    end
-
-    local view = self.ui_state.part_lookup[part]
-
-    if not view then
-        self:refresh_ui_state()
-        if self.ui_state then
-            view = self.ui_state.part_lookup[part]
-        end
-    end
-
-    return view
-end
-
-function CombatState:update_mouse_position(x, y)
-    if not self.mouse_position then
-        self.mouse_position = { x = 0, y = 0 }
-    end
-
-    if x and y then
-        self.mouse_position.x = x
-        self.mouse_position.y = y
-        return
-    end
-
-    if love and love.mouse and love.mouse.getPosition then
-        local mx, my = love.mouse.getPosition()
-        self.mouse_position.x = mx
-        self.mouse_position.y = my
-    end
-end
-
-function CombatState:build_tech_selection_context(metadata)
-    if not metadata then
-        return nil
-    end
-
-    local context = {
-        metadata = metadata,
-        combatant = metadata.combatant,
-        options = {},
-        option_lookup = {},
-        part_entries = {},
-        part_lookup = {},
-        parts_by_view = {},
-        hovered_part_entry = nil,
-        hovered_option = nil,
-        active_part_entry = nil,
-        preview_option = nil,
-        mouse_x = self.mouse_position and self.mouse_position.x or 0,
-        mouse_y = self.mouse_position and self.mouse_position.y or 0,
-        sticky_margin = TECH_FAN_STICKY_MARGIN,
-        active = true
-    }
-
-    local combatant_view = metadata.combatant and self:get_combatant_view(metadata.combatant) or nil
-    context.combatant_view = combatant_view
-    context.combatant_index = combatant_view and combatant_view.index or nil
-
-    if combatant_view then
-        context.side = Layouts.get_combatant_side(combatant_view, context.combatant_index)
-    end
-
-    for option_index, option in ipairs(metadata.options or {}) do
-        local tech = option.tech or option
-        local body_part = option.body_part or option.source_part or nil
-        local part_view = body_part and self:get_body_part_view(body_part) or nil
-
-        local entry = nil
-        if body_part then
-            entry = context.part_lookup[body_part]
-            if not entry then
-                entry = { part = body_part, view = part_view, options = {}, rect = nil }
-                context.part_lookup[body_part] = entry
-                table.insert(context.part_entries, entry)
-            end
-        else
-            entry = context.part_lookup.__fallback
-            if not entry then
-                entry = { part = nil, view = part_view, options = {}, rect = nil }
-                context.part_lookup.__fallback = entry
-                table.insert(context.part_entries, entry)
-            end
-        end
-
-        local card_option = {
-            index = option_index,
-            selection_index = option.index or option_index,
-            tech = tech,
-            tech_name = option.tech_name or (tech and (tech.name or tech.id)) or ("Tech " .. option_index),
-            body_part = body_part,
-            body_part_name = option.body_part_name or (body_part and (body_part.name or body_part.id)) or nil,
-            summary = build_tech_summary(tech),
-            dice_lines = collect_dice_lines(tech),
-            keywords = collect_keyword_list(tech),
-            metadata = option,
-            card_rect = nil
-        }
-
-        table.insert(entry.options, card_option)
-        table.insert(context.options, card_option)
-        context.option_lookup[card_option.selection_index] = card_option
-
-        if part_view then
-            context.parts_by_view[part_view] = entry
-        end
-    end
-
-    return context
-end
-
-local function gather_assignment_actions(tech, desired_type)
-    local actions = {}
-
-    if not tech or not tech.actions then
-        return actions
-    end
-
-    for index, action in ipairs(tech.actions) do
-        if action.type == desired_type then
-            table.insert(actions, { index = index, action = action })
-        end
-    end
-
-    return actions
-end
-
-function CombatState:sync_assignment_dice(context)
-    if not context then
-        return
-    end
-
-    local combatant = context.combatant
-    local tech = combatant and combatant.selected_tech
-    local desired_type = context.mode == "attack" and "attack_roll" or "defense_roll"
-
-    local rolled_values = {}
-    if context.metadata and context.metadata.action_index then
-        local metadata_value = context.metadata.rolled_value
-        if metadata_value ~= nil then
-            rolled_values[context.metadata.action_index] = metadata_value
-        end
-    end
-
-    if self.engine and combatant and combatant.is_player then
-        local totals = self.engine:get_pre_rolled_totals(combatant, desired_type)
-        for index, value in pairs(totals or {}) do
-            if value ~= nil then
-                rolled_values[index] = value
-            end
-        end
-    end
-
-    context.rolled_values = rolled_values
-
-    context.dice_map = context.dice_map or {}
-    local new_order = {}
-    local seen = {}
-
-    local assignments = nil
-    if self.engine then
-        if context.mode == "attack" then
-            assignments = self.engine.attack_assignments and self.engine.attack_assignments[combatant]
-        else
-            assignments = self.engine.defense_assignments and self.engine.defense_assignments[combatant]
-        end
-    end
-
-    for _, info in ipairs(gather_assignment_actions(tech, desired_type)) do
-        local action_index = info.index
-        local action = info.action
-        local die = context.dice_map[action_index]
-
-        if not die then
-            die = {
-                rect = { x = 0, y = 0, w = DIE_TOKEN_SIZE, h = DIE_TOKEN_SIZE },
-                home = { x = 0, y = 0 }
-            }
-            context.dice_map[action_index] = die
-        end
-
-        die.action = action
-        die.action_index = action_index
-        local rolled_total = rolled_values[action_index]
-        if rolled_total ~= nil then
-            die.label = tostring(rolled_total)
-            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
-            die.rolled_value = rolled_total
-        else
-            die.label = action.name or (context.mode == "attack" and "Attack" or "Defense")
-            die.subtitle = format_dice_label(action.dice_count, action.dice_type) or ""
-            die.rolled_value = nil
-        end
-        die.assigned = false
-        die.assigned_option = nil
-        die.assigned_part_view = nil
-        die.interactable = (context.metadata and context.metadata.action_index == action_index)
-
-        if assignments then
-            for _, assignment in ipairs(assignments) do
-                if assignment.action_index == action_index and assignment.target_part then
-                    die.assigned = true
-                    die.assigned_option = assignment
-                    die.assigned_part_view = self:get_body_part_view(assignment.target_part)
-                    break
-                end
-            end
-        end
-
-        die.rect.w = DIE_TOKEN_SIZE
-        die.rect.h = DIE_TOKEN_SIZE
-
-        seen[action_index] = true
-        table.insert(new_order, die)
-    end
-
-    for key, value in pairs(context.dice_map) do
-        if not seen[key] then
-            context.dice_map[key] = nil
-        end
-    end
-
-    context.dice = new_order
-end
-
-function CombatState:update_assignment_target_rects(context)
-    if not context then
-        return
-    end
-
-    local target_view = context.target_combatant_view
-    if not target_view then
-        context.target_parts_by_view = {}
-        return
-    end
-
-    local sprite_size = Layouts.get_sprite_size()
-    local index = target_view.index or 1
-    local mapping = {}
-
-    for _, entry in ipairs(context.target_entries or {}) do
-        local part_view = entry.part_view
-        if part_view then
-            entry.rect = entry.rect or {}
-            local px, py = Layouts.get_body_part_position(target_view, index, part_view)
-            entry.rect.x = px
-            entry.rect.y = py
-            entry.rect.w = sprite_size
-            entry.rect.h = sprite_size
-            mapping[part_view] = entry
-        end
-    end
-
-    context.target_parts_by_view = mapping
-end
-
-function CombatState:collect_enemy_assignments(context)
-    local assignments = {}
-
-    if not (self.engine and context and context.opponent_combatant) then
-        return assignments
-    end
-
-    local source = nil
-    if context.mode == "attack" then
-        source = self.engine.attack_assignments and self.engine.attack_assignments[context.opponent_combatant]
-    else
-        source = self.engine.defense_assignments and self.engine.defense_assignments[context.opponent_combatant]
-    end
-
-    if not source then
-        return assignments
-    end
-
-    local target_view = nil
-    if context.mode == "attack" then
-        target_view = context.combatant_view
-    else
-        target_view = context.opponent_view
-    end
-
-    if not target_view then
-        return assignments
-    end
-
-    for _, assignment in ipairs(source) do
-        local part = assignment.target_part
-        local part_view = self:get_body_part_view(part)
-        if part_view then
-            table.insert(assignments, {
-                action = assignment.action,
-                action_index = assignment.action_index,
-                part = part,
-                part_view = part_view,
-                target_view = target_view,
-                label = format_dice_label(assignment.action and assignment.action.dice_count, assignment.action and assignment.action.dice_type)
-                    or (context.mode == "attack" and "ATK" or "DEF")
-            })
-        end
-    end
-
-    return assignments
-end
-
-function CombatState:layout_assignment_dice(context)
-    if not context then
-        return
-    end
-
-    local shelf_x, shelf_y, shelf_w, shelf_h = get_player_shelf_rect()
-    context.shelf_rect = { x = shelf_x, y = shelf_y, w = shelf_w, h = shelf_h }
-
-    local sprite_size = Layouts.get_sprite_size()
-    local unassigned = {}
-
-    for _, die in ipairs(context.dice or {}) do
-        die.rect = die.rect or { x = shelf_x, y = shelf_y, w = DIE_TOKEN_SIZE, h = DIE_TOKEN_SIZE }
-        die.rect.w = DIE_TOKEN_SIZE
-        die.rect.h = DIE_TOKEN_SIZE
-
-        if die.assigned and die.assigned_part_view and context.target_combatant_view then
-            local px, py = Layouts.get_body_part_position(context.target_combatant_view, context.target_combatant_view.index or 1, die.assigned_part_view)
-            local cx = px + sprite_size * 0.5 - DIE_TOKEN_SIZE * 0.5
-            local cy = py + sprite_size * 0.5 - DIE_TOKEN_SIZE * 0.5
-
-            die.home = die.home or {}
-            die.home.x = cx
-            die.home.y = cy
-
-            if not (context.dragging and context.dragging.die == die) then
-                die.rect.x = cx
-                die.rect.y = cy
-            end
-        else
-            table.insert(unassigned, die)
-        end
-    end
-
-    if #unassigned > 0 then
-        local spacing = DIE_TOKEN_SPACING
-        local total_width = (#unassigned) * DIE_TOKEN_SIZE + math.max(0, (#unassigned - 1) * spacing)
-        local start_x = shelf_x + math.max(0, (shelf_w - total_width) * 0.5)
-        local y = shelf_y + (shelf_h - DIE_TOKEN_SIZE) * 0.5
-
-        for index, die in ipairs(unassigned) do
-            local target_x = start_x + (index - 1) * (DIE_TOKEN_SIZE + spacing)
-            if not (context.dragging and context.dragging.die == die) then
-                die.rect.x = target_x
-                die.rect.y = y
-            end
-
-            die.home = die.home or {}
-            die.home.x = target_x
-            die.home.y = y
-        end
-    end
-
-    if context.dragging and context.dragging.die then
-        local die = context.dragging.die
-        die.rect.x = context.mouse_x - (context.dragging.offset_x or 0)
-        die.rect.y = context.mouse_y - (context.dragging.offset_y or 0)
-    end
-end
-
-function CombatState:evaluate_assignment_hover(context)
-    if not context then
-        return
-    end
-
-    local mx = context.mouse_x or 0
-    local my = context.mouse_y or 0
-
-    context.hovered_die = nil
-    if not (context.dragging and context.dragging.die) then
-        for _, die in ipairs(context.dice or {}) do
-            if die.interactable and not die.assigned and point_in_rect(mx, my, die.rect) then
-                context.hovered_die = die
-                break
-            end
-        end
-    end
-
-    context.hovered_target = nil
-    for _, entry in ipairs(context.target_entries or {}) do
-        if point_in_rect(mx, my, entry.rect) then
-            context.hovered_target = entry
+local function animated_asset_id(base_id, time, max_frames)
+    local frame_count = 0
+    local limit = max_frames or 4
+
+    for index = 1, limit do
+        if Assets.images and Assets.images[base_id .. tostring(index)] then
+            frame_count = index
+        elseif frame_count > 0 then
             break
         end
     end
 
-    context.highlight = context.highlight or { parts_by_view = {} }
-    context.highlight.parts_by_view = context.target_parts_by_view or {}
-    context.highlight.hovered_part_entry = context.hovered_target
+    if frame_count > 0 then
+        local frame = (math.floor((time or 0) * CONTINUE_PROMPT_FPS) % frame_count) + 1
+        return base_id .. tostring(frame)
+    end
+
+    if Assets.images and Assets.images[base_id] then
+        return base_id
+    end
+
+    return nil
 end
 
-function CombatState:update_assignment_context(context)
-    if not context then
-        return
-    end
-
-    self:sync_assignment_dice(context)
-    self:update_assignment_target_rects(context)
-    context.enemy_assignments = self:collect_enemy_assignments(context)
-
-    context.mouse_x = self.mouse_position and self.mouse_position.x or context.mouse_x or 0
-    context.mouse_y = self.mouse_position and self.mouse_position.y or context.mouse_y or 0
-
-    self:layout_assignment_dice(context)
-    self:evaluate_assignment_hover(context)
-end
-
-function CombatState:build_assignment_context(metadata)
-    if not metadata then
-        return nil
-    end
-
-    local mode = metadata.type == "attack_assignment" and "attack" or "defense"
-    local combatant = metadata.combatant
-
-    local context = {
-        metadata = metadata,
-        type = metadata.type,
-        mode = mode,
-        combatant = combatant,
-        combatant_view = combatant and self:get_combatant_view(combatant) or nil,
-        opponent_combatant = nil,
-        opponent_view = nil,
-        target_combatant = nil,
-        target_combatant_view = nil,
-        options = metadata.options or {},
-        target_entries = {},
-        dice_map = {},
-        dice = {},
-        rolled_values = {},
-        mouse_x = self.mouse_position and self.mouse_position.x or 0,
-        mouse_y = self.mouse_position and self.mouse_position.y or 0,
-        shelf_rect = nil,
-        enemy_assignments = {}
-    }
-
-    local opponent = metadata.opponent or (self.engine and self.engine:get_opponent(combatant)) or nil
-    context.opponent_combatant = opponent
-    context.opponent_view = opponent and self:get_combatant_view(opponent) or nil
-
-    if mode == "attack" then
-        context.target_combatant = metadata.opponent or opponent
-        context.target_combatant_view = context.target_combatant and self:get_combatant_view(context.target_combatant) or context.opponent_view
-    else
-        context.target_combatant = combatant
-        context.target_combatant_view = context.combatant_view
-    end
-
-    for _, option in ipairs(context.options) do
-        local part_view = self:get_body_part_view(option.part)
-        local entry = {
-            option = option,
-            part = option.part,
-            part_view = part_view,
-            rect = nil
-        }
-
-        table.insert(context.target_entries, entry)
-    end
-
-    self:update_assignment_target_rects(context)
-    self:sync_assignment_dice(context)
-    context.enemy_assignments = self:collect_enemy_assignments(context)
-    self:evaluate_assignment_hover(context)
-
-    return context
-end
-
-function CombatState:update_tech_card_layout(context, entry)
-    if not context or not entry or not entry.options or #entry.options == 0 then
-        return
-    end
-
-    local combatant_view = context.combatant_view
-    if not combatant_view then
-        return
-    end
-
-    local part_view = entry.view
-    if not part_view then
-        return
-    end
-
-    local sprite_size = Layouts.get_sprite_size()
-    local index = context.combatant_index or combatant_view.index or 1
-    local px, py = Layouts.get_body_part_position(combatant_view, index, part_view)
-    local side = context.side or Layouts.get_combatant_side(combatant_view, index)
-    local direction = (side == "right") and -1 or 1
-    local base_x = direction == 1 and (px + sprite_size + TECH_CARD_GAP) or (px - TECH_CARD_GAP - TECH_CARD_WIDTH)
-
-    local count = #entry.options
-    local total_height = count * TECH_CARD_HEIGHT + (count - 1) * TECH_CARD_SPACING
-    local start_y = py + sprite_size * 0.5 - total_height * 0.5
-
-    for option_index, option in ipairs(entry.options) do
-        option.card_rect = option.card_rect or {}
-        option.card_rect.x = base_x
-        option.card_rect.y = start_y + (option_index - 1) * (TECH_CARD_HEIGHT + TECH_CARD_SPACING)
-        option.card_rect.w = TECH_CARD_WIDTH
-        option.card_rect.h = TECH_CARD_HEIGHT
-    end
-
-    local min_x, min_y, max_x, max_y
-
-    if entry.rect then
-        min_x = entry.rect.x
-        min_y = entry.rect.y
-        max_x = entry.rect.x + entry.rect.w
-        max_y = entry.rect.y + entry.rect.h
-    end
-
-    for _, option in ipairs(entry.options) do
-        local rect = option.card_rect
-        if rect then
-            if not min_x or rect.x < min_x then
-                min_x = rect.x
-            end
-            if not min_y or rect.y < min_y then
-                min_y = rect.y
-            end
-            local rect_max_x = rect.x + rect.w
-            local rect_max_y = rect.y + rect.h
-            if not max_x or rect_max_x > max_x then
-                max_x = rect_max_x
-            end
-            if not max_y or rect_max_y > max_y then
-                max_y = rect_max_y
-            end
-        end
-    end
-
-    if min_x and min_y and max_x and max_y then
-        local margin = context.sticky_margin or TECH_FAN_STICKY_MARGIN
-        entry.sticky_bounds = entry.sticky_bounds or {}
-        entry.sticky_bounds.x = min_x - margin
-        entry.sticky_bounds.y = min_y - margin
-        entry.sticky_bounds.w = (max_x - min_x) + margin * 2
-        entry.sticky_bounds.h = (max_y - min_y) + margin * 2
-    else
-        entry.sticky_bounds = nil
-    end
-end
-
-function CombatState:evaluate_tech_selection_hover(context)
-    if not context or not context.active then
-        return
-    end
-
-    local mx = context.mouse_x or 0
-    local my = context.mouse_y or 0
-    context.hovered_part_entry = nil
-    context.hovered_option = nil
-
-    local combatant_view = context.combatant_view
-    local index = context.combatant_index or combatant_view and combatant_view.index or 1
-    local sprite_size = Layouts.get_sprite_size()
-
-    for _, entry in ipairs(context.part_entries) do
-        local part_view = entry.view
-        if combatant_view and part_view then
-            entry.rect = entry.rect or {}
-            local px, py = Layouts.get_body_part_position(combatant_view, index, part_view)
-            entry.rect.x = px
-            entry.rect.y = py
-            entry.rect.w = sprite_size
-            entry.rect.h = sprite_size
-
-            if point_in_rect(mx, my, entry.rect) then
-                context.hovered_part_entry = entry
-            end
-        else
-            entry.rect = nil
-        end
-    end
-
-    local active_entry = context.active_part_entry
-
-    if context.hovered_part_entry then
-        active_entry = context.hovered_part_entry
-    end
-
-    if active_entry then
-        self:update_tech_card_layout(context, active_entry)
-    end
-
-    local hovered_option = nil
-    local within_card_fan = false
-
-    if active_entry then
-        for _, option in ipairs(active_entry.options) do
-            if point_in_rect(mx, my, option.card_rect) then
-                hovered_option = option
-                within_card_fan = true
-                break
-            end
-        end
-    end
-
-    local within_sticky_bounds = false
-    if active_entry and active_entry.sticky_bounds then
-        within_sticky_bounds = point_in_rect(mx, my, active_entry.sticky_bounds)
-    end
-
-    if not context.hovered_part_entry and active_entry and not within_card_fan and not within_sticky_bounds then
-        active_entry = nil
-        hovered_option = nil
-    end
-
-    context.active_part_entry = active_entry
-    context.hovered_option = hovered_option
-
-    if context.active_part_entry then
-        context.preview_option = context.hovered_option or context.active_part_entry.options[1]
-    else
-        context.preview_option = nil
-    end
-end
-
-function CombatState:update_interactive_input()
-    if not self.engine then
-        self.tech_selection_ui = nil
-        self.assignment_ui = nil
-        self.prompt_ui = nil
-        return
-    end
-
-    local metadata = self.engine:get_pending_input_metadata()
-    if not (self.engine:needs_input() and metadata) then
-        self.tech_selection_ui = nil
-        self.assignment_ui = nil
-        self.prompt_ui = nil
-        return
-    end
-
-    if metadata.type == "tech_select_phase" then
-        self.assignment_ui = nil
-        self.prompt_ui = nil
-
-        if not self.tech_selection_ui or self.tech_selection_ui.metadata ~= metadata then
-            self.tech_selection_ui = self:build_tech_selection_context(metadata)
-        end
-
-        if not self.tech_selection_ui then
-            return
-        end
-
-        self.tech_selection_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
-        self.tech_selection_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
-
-        self:evaluate_tech_selection_hover(self.tech_selection_ui)
-        return
-    end
-
-    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
-        self.tech_selection_ui = nil
-        self.prompt_ui = nil
-
-        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
-            self.assignment_ui = self:build_assignment_context(metadata)
-            if self.assignment_ui then
-                self.assignment_ui.metadata = metadata
-            end
-        end
-
-        if self.assignment_ui then
-            self.assignment_ui.mouse_x = self.mouse_position and self.mouse_position.x or 0
-            self.assignment_ui.mouse_y = self.mouse_position and self.mouse_position.y or 0
-            self:update_assignment_context(self.assignment_ui)
-        end
-
-        return
-    end
-
-    if metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select" then
-        self.tech_selection_ui = nil
-        self.assignment_ui = nil
-
-        self.prompt_ui = self:build_prompt_context(metadata)
-
-        if self.prompt_ui then
-            self.prompt_ui.metadata = metadata
-            self:update_prompt_context(self.prompt_ui)
-        end
-
-        return
-    end
-
-    self.tech_selection_ui = nil
-    self.assignment_ui = nil
-    self.prompt_ui = nil
-end
-
-function CombatState:handle_bp_status_changed(data)
-    if not data then
-        return
-    end
-
-    local part_view = self:get_body_part_view(data.body_part)
-    if not part_view then
-        return
-    end
-
-    part_view.status = data.new_status or data.body_part and data.body_part.status or part_view.status
-    part_view.toughness = data.body_part and data.body_part.toughness or part_view.toughness
-    part_view.name = data.body_part and data.body_part.name or part_view.name
-    update_part_asset_id(part_view)
-end
-
-function CombatState:handle_damage_dealt(data)
-    if not data then
-        return
-    end
-
-    local target = data.target
-    if not target then
-        return
-    end
-
-    local target_view = self:get_combatant_view(target)
-    if not target_view then
-        return
-    end
-
-    if target.heart_points ~= nil then
-        target_view.heart_points = target.heart_points
-    elseif data.heart_point_loss then
-        local current = target_view.heart_points or 0
-        local updated = math.max(0, current - data.heart_point_loss)
-        target_view.heart_points = updated
-    end
-end
-
-local function update_crest_count(view, crest, new_value)
-    if not view or not crest then
-        return
-    end
-
-    if new_value == nil then
-        return
-    end
-
-    view.crest_pool = view.crest_pool or {}
-
-    if new_value <= 0 then
-        view.crest_pool[crest] = 0
-        return
-    end
-
-    view.crest_pool[crest] = new_value
-end
-
-function CombatState:handle_crest_gained(data)
-    if not data then
-        return
-    end
-
-    local combatant = data.combatant
-    local crest = data.crest
-
-    local view = self:get_combatant_view(combatant)
-    if not view then
-        return
-    end
-
-    local total = data.total
-    if total == nil and combatant and combatant.get_crest_count then
-        total = combatant:get_crest_count(crest)
-    end
-
-    update_crest_count(view, crest, total)
-end
-
-function CombatState:handle_crest_expended(data)
-    if not data then
-        return
-    end
-
-    local combatant = data.combatant
-    local crest = data.crest
-
-    local view = self:get_combatant_view(combatant)
-    if not view then
-        return
-    end
-
-    local remaining = data.remaining
-    if remaining == nil and combatant and combatant.get_crest_count then
-        remaining = combatant:get_crest_count(crest)
-    end
-
-    update_crest_count(view, crest, remaining)
-end
-
-function CombatState:register_event_listeners()
-    if not self.engine then
-        return
-    end
-
-    self.engine:on(Events.BP_STATUS_CHANGED, function(data)
-        self:handle_bp_status_changed(data)
-    end)
-
-    self.engine:on(Events.DAMAGE_DEALT, function(data)
-        self:handle_damage_dealt(data)
-    end)
-
-    self.engine:on(Events.CREST_GAINED, function(data)
-        self:handle_crest_gained(data)
-    end)
-
-    self.engine:on(Events.CREST_EXPENDED, function(data)
-        self:handle_crest_expended(data)
-    end)
-end
-
-local function draw_body_part(part, x, y)
-    local sprite_size = Layouts.get_sprite_size()
-    local status = part.status or "healthy"
-    local asset_id = part.asset_id
-
+local function draw_animated_image(base_id, r, time, max_frames)
+    local asset_id = animated_asset_id(base_id, time, max_frames)
     if not asset_id then
-        local asset_base = part.asset_base or part.id or "placeholder"
-        asset_id = asset_base .. "_" .. status
+        return false
     end
 
-    local image = Assets:get(asset_id)
-
-    love.graphics.setColor(1, 1, 1, 1)
-    if image then
-        love.graphics.draw(image, x, y)
-    else
-        love.graphics.rectangle("line", x, y, sprite_size, sprite_size)
-    end
-
-    local label_y = y + sprite_size + 4
-    love.graphics.printf(part.name or part.id or "", x, label_y, sprite_size, "center")
-
-    local status_label = status:gsub("^%l", string.upper)
-    love.graphics.printf(status_label, x, label_y + 14, sprite_size, "center")
-
-    love.graphics.printf("T " .. tostring(part.toughness or 0), x, y - 18, sprite_size, "center")
+    return draw_image(asset_id, r)
 end
 
-local function draw_combatant(combatant, index, selection_context)
-    local sprite_size = Layouts.get_sprite_size()
-    local name_x, name_y, name_width = Layouts.get_name_region(combatant, index)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf(combatant.name or "", name_x, name_y, name_width, "center")
+function DialogState:enter(context)
+    context = context or {}
+    self.world = context.world
+    self.dialog = Dialog.new(context.dialog or context.source, context.dialog_id, {
+        world = self.world,
+        actor = context.actor
+    })
+    self.selected_response = 1
+    self.time = 0
+end
 
-    for _, part in ipairs(combatant.body_parts or {}) do
-        local px, py = Layouts.get_body_part_position(combatant, index, part)
-        local highlight_entry = nil
+function DialogState:update(dt)
+    self.time = (self.time or 0) + (dt or 0)
 
-        if selection_context and selection_context.parts_by_view then
-            highlight_entry = selection_context.parts_by_view[part]
-        end
+    if self.world and self.world.update_ambient then
+        self.world:update_ambient(dt)
+    end
+end
 
-        local rect = nil
-        if highlight_entry then
-            rect = highlight_entry.rect
-            if not rect then
-                rect = { x = px, y = py, w = sprite_size, h = sprite_size }
-                highlight_entry.rect = rect
+function DialogState:finish(result)
+    GameState.pop(result or (self.dialog and self.dialog.result))
+end
+
+function DialogState:advance(response_index)
+    local result = self.dialog:advance(response_index)
+    self.selected_response = 1
+    if result then
+        self:finish(result)
+    end
+end
+
+function DialogState:actionpressed(action)
+    local node = self.dialog and self.dialog:current_node()
+    if not node then
+        self:finish()
+        return true
+    end
+
+    if node.responses then
+        if action == "move_up" or action == "move_left" then
+            self.selected_response = 1
+            return true
+        elseif action == "move_down" or action == "move_right" then
+            self.selected_response = math.min(2, #node.responses)
+            return true
+        elseif action == "confirm" then
+            self:advance(self.selected_response)
+            return true
+        elseif action == "cancel" then
+            local result = self.dialog:cancel()
+            if result then
+                self:finish(result)
             else
-                rect.x = px
-                rect.y = py
-                rect.w = sprite_size
-                rect.h = sprite_size
+                self.selected_response = math.min(2, #node.responses)
             end
-
-            draw_highlight_fill(rect, selection_context.hovered_part_entry == highlight_entry)
+            return true
         end
-
-        draw_body_part(part, px, py)
-
-        if highlight_entry then
-            draw_highlight_outline(rect, selection_context.hovered_part_entry == highlight_entry)
-        end
+    elseif action == "confirm" then
+        self:advance()
+        return true
     end
 
-    local heart_x, heart_y = Layouts.get_heart_position(combatant, index)
-    love.graphics.print("HP: " .. tostring(combatant.heart_points or 0), heart_x, heart_y)
-
-    local crest_x, crest_y, crest_width = Layouts.get_crest_region(combatant, index)
-    local crest_entries = {}
-    for crest, count in pairs(combatant.crest_pool or {}) do
-        if (count or 0) > 0 then
-            table.insert(crest_entries, string.format("%s: %d", crest, count))
-        end
-    end
-    table.sort(crest_entries)
-
-    local crest_text = #crest_entries > 0 and table.concat(crest_entries, "    ") or "No Crests"
-    love.graphics.printf("Crests: " .. crest_text, crest_x, crest_y, crest_width, "center")
-
-    love.graphics.setColor(1, 1, 1, 0.4)
-    love.graphics.rectangle("line", name_x, name_y + sprite_size * 1.6, name_width, sprite_size * 1.6)
-    love.graphics.setColor(1, 1, 1, 1)
+    return action == "menu"
 end
 
-function CombatState:draw_selected_tech_panel(context, preview_option)
-    local x, prompt_y, width = Layouts.get_prompt_region()
-    local selected_y = prompt_y - (SELECTED_PANEL_HEIGHT + DICE_PANEL_HEIGHT + PANEL_SPACING * 2)
-
-    draw_panel_background(x, selected_y, width, SELECTED_PANEL_HEIGHT)
-
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf("Selected Tech", x + 16, selected_y + 12, width - 32, "left")
-
-    if preview_option then
-        love.graphics.printf(preview_option.tech_name or "", x + 16, selected_y + 36, width - 32, "left")
-
-        local source = preview_option.body_part_name or "Unknown Source"
-        love.graphics.setColor(0.82, 0.9, 1, 0.85)
-        love.graphics.printf("Source: " .. source, x + 16, selected_y + 56, width - 32, "left")
-
-        if preview_option.keywords and #preview_option.keywords > 0 then
-            love.graphics.setColor(0.85, 0.95, 1, 0.85)
-            love.graphics.printf("Keywords: " .. table.concat(preview_option.keywords, ", "), x + 16, selected_y + 76, width - 32, "left")
-        end
-    else
-        love.graphics.setColor(0.82, 0.88, 1, 0.8)
-        love.graphics.printf("Hover a body part to preview its Techs.", x + 16, selected_y + 40, width - 32, "left")
-    end
-
-    love.graphics.setColor(1, 1, 1, 1)
+function DialogState:keypressed(key)
+    return self:actionpressed(Input.action_for_key(key))
 end
 
-function CombatState:draw_dice_preview_panel(context, preview_option)
-    local x, prompt_y, width = Layouts.get_prompt_region()
-    local dice_y = prompt_y - (DICE_PANEL_HEIGHT + PANEL_SPACING)
-
-    draw_panel_background(x, dice_y, width, DICE_PANEL_HEIGHT)
-
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf("Dice Preview", x + 16, dice_y + 12, width - 32, "left")
-
-    local start_y = dice_y + 40
-    if preview_option and preview_option.dice_lines and #preview_option.dice_lines > 0 then
-        love.graphics.setColor(0.9, 0.95, 1, 0.9)
-        for line_index, line in ipairs(preview_option.dice_lines) do
-            love.graphics.printf(line, x + 16, start_y + (line_index - 1) * 22, width - 32, "left")
-        end
-    elseif preview_option then
-        love.graphics.setColor(0.82, 0.9, 1, 0.8)
-        love.graphics.printf("No dice generated by this Tech.", x + 16, start_y, width - 32, "left")
-    else
-        love.graphics.setColor(0.82, 0.88, 1, 0.8)
-        love.graphics.printf("Select a Tech to preview its dice.", x + 16, start_y, width - 32, "left")
+function DialogState:mousepressed(_, _, button)
+    if button == 1 then
+        return self:actionpressed("confirm")
     end
-
-    love.graphics.setColor(1, 1, 1, 1)
+    return false
 end
 
-function CombatState:build_prompt_context(metadata)
-    if not metadata then
-        return nil
-    end
-
-    local prompt_text = self.engine and self.engine:get_input_prompt() or ""
-    local x, anchor_y, width = Layouts.get_prompt_region()
-
-    local built_options = {}
-    local layout = "vertical"
-    local description = nil
-
-    if metadata.type == "crest_prompt" then
-        built_options = {
-            { label = "Yes", value = "y" },
-            { label = "No", value = "n" }
-        }
-        layout = "horizontal"
-        description = "Choose whether to expend a crest this round."
-    elseif metadata.type == "crest_select" then
-        for index, option in ipairs(metadata.options or {}) do
-            local name = option.name or option.id or ("Option " .. index)
-            local count = tonumber(option.count) or 0
-            table.insert(built_options, {
-                label = name,
-                subtitle = string.format("Available: %d", count),
-                value = tostring(option.index or index),
-                payload = option
-            })
-        end
-        description = "Select a crest to expend."
-    elseif metadata.type == "crest_target_select" then
-        for index, option in ipairs(metadata.options or {}) do
-            local name = option.name or option.id or ("Target " .. index)
-            local subtitle_parts = {}
-            if option.status and option.status ~= "" then
-                local status_text = tostring(option.status)
-                status_text = status_text:gsub("^%l", string.upper)
-                table.insert(subtitle_parts, status_text)
-            end
-            local toughness_value = tonumber(option.toughness)
-            if toughness_value and toughness_value >= 0 then
-                table.insert(subtitle_parts, "Toughness " .. tostring(toughness_value))
-            end
-            local subtitle = table.concat(subtitle_parts, " • ")
-            table.insert(built_options, {
-                label = name,
-                subtitle = subtitle ~= "" and subtitle or nil,
-                value = tostring(option.index or index),
-                payload = option
-            })
-        end
-        description = "Select a body part to shroud."
-    else
-        return nil
-    end
-
-    if #built_options == 0 then
-        return nil
-    end
-
-    local button_height = PROMPT_BUTTON_HEIGHT
-    local button_width = math.min(360, width - 64)
-    local button_area_height = button_height
-
-    if layout == "horizontal" then
-        local available_width = width - 48
-        button_width = math.min(PROMPT_BUTTON_WIDTH, (available_width - (#built_options - 1) * PROMPT_BUTTON_SPACING) / #built_options)
-        if button_width <= 0 then
-            button_width = available_width / math.max(1, #built_options)
-        end
-        button_area_height = button_height
-    else
-        button_area_height = #built_options * button_height + (#built_options - 1) * PROMPT_BUTTON_SPACING
-    end
-
-    local panel_height = PROMPT_PANEL_HEADER + button_area_height + PROMPT_PANEL_BOTTOM_PADDING
-    local panel_y = anchor_y - panel_height - 24
-    if panel_y < 40 then
-        panel_y = 40
-    end
-
-    local context = {
-        metadata = metadata,
-        prompt_text = prompt_text,
-        description = description,
-        buttons = {},
-        layout = layout,
-        panel = { x = x, y = panel_y, w = width, h = panel_height },
-        hovered_button = nil
-    }
-
-    if layout == "horizontal" then
-        local available_width = width - 48
-        local total_width = #built_options * button_width + (#built_options - 1) * PROMPT_BUTTON_SPACING
-        if total_width > available_width then
-            button_width = (available_width - (#built_options - 1) * PROMPT_BUTTON_SPACING) / #built_options
-            total_width = #built_options * button_width + (#built_options - 1) * PROMPT_BUTTON_SPACING
-        end
-        local start_x = x + (width - total_width) * 0.5
-        local button_y = context.panel.y + PROMPT_PANEL_HEADER
-
-        for index, option in ipairs(built_options) do
-            local bx = start_x + (index - 1) * (button_width + PROMPT_BUTTON_SPACING)
-            context.buttons[index] = {
-                label = option.label,
-                subtitle = option.subtitle,
-                value = option.value,
-                option = option.payload,
-                rect = { x = bx, y = button_y, w = button_width, h = button_height }
-            }
-        end
-    else
-        button_width = math.min(380, width - 64)
-        local start_x = x + (width - button_width) * 0.5
-        local start_y = context.panel.y + PROMPT_PANEL_HEADER
-
-        for index, option in ipairs(built_options) do
-            local by = start_y + (index - 1) * (button_height + PROMPT_BUTTON_SPACING)
-            context.buttons[index] = {
-                label = option.label,
-                subtitle = option.subtitle,
-                value = option.value,
-                option = option.payload,
-                rect = { x = start_x, y = by, w = button_width, h = button_height }
-            }
-        end
-    end
-
-    return context
-end
-
-function CombatState:update_prompt_context(context)
-    if not context then
+function DialogState:draw()
+    local node = self.dialog and self.dialog:current_node()
+    if not node then
         return
     end
 
-    local mx = self.mouse_position and self.mouse_position.x or 0
-    local my = self.mouse_position and self.mouse_position.y or 0
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local margin = 24
+    local box_h = 128
+    local box_x = margin
+    local box_y = height - box_h - margin
+    local box_w = width - margin * 2
+    local box_rect = rect(box_x, box_y, box_w, box_h)
 
-    context.mouse_x = mx
-    context.mouse_y = my
-    context.hovered_button = nil
+    if not draw_image("dialog_box_frame", box_rect) then
+        draw_box(box_rect, COLORS.box, COLORS.box_line, 5)
+    end
 
-    for _, button in ipairs(context.buttons or {}) do
-        if point_in_rect(mx, my, button.rect) then
-            context.hovered_button = button
+    if node.speaker then
+        local speaker_w = math.min(220, box_w - 24)
+        local speaker_rect = rect(box_x + 16, box_y - 18, speaker_w, 28)
+        if not draw_image("dialog_nameplate", speaker_rect) then
+            draw_box(speaker_rect, COLORS.speaker, COLORS.speaker_line, 4)
+        end
+        set_color(COLORS.ink)
+        love.graphics.printf(node.speaker, box_x + 28, box_y - 11, speaker_w - 24, "left")
+    end
+
+    set_color(COLORS.ink)
+    love.graphics.printf(node.text or "", box_x + 24, box_y + 28, box_w - 48, "left")
+
+    if node.responses then
+        local response_y = box_y + box_h - 42
+        local response_w = math.min(112, (box_w - 64) / 2)
+        local has_cursor = Assets.images and Assets.images.dialog_choice_cursor
+        for index, response in ipairs(node.responses) do
+            if index > 2 then
+                break
+            end
+
+            local x = box_x + box_w - 24 - (3 - index) * (response_w + 10)
+            if index == self.selected_response then
+                if has_cursor then
+                    draw_image("dialog_choice_cursor", rect(x - 14, response_y + 7, 8, 12))
+                elseif not draw_image("dialog_response_selected", rect(x, response_y, response_w, 26)) then
+                    draw_box(rect(x, response_y, response_w, 26), COLORS.selected, COLORS.selected_line, 4)
+                end
+                set_color(COLORS.ink)
+            else
+                set_color(COLORS.muted)
+            end
+            love.graphics.printf(response.label or (index == 1 and "Yes" or "No"), x, response_y + 6, response_w, "center")
+        end
+    else
+        local prompt = rect(box_x + box_w - 34, box_y + box_h - 28, CONTINUE_PROMPT_SIZE, CONTINUE_PROMPT_SIZE)
+        if not draw_animated_image("dialog_continue", prompt, self.time) then
+            set_color(COLORS.muted)
+            love.graphics.print("v", prompt.x, prompt.y)
+        end
+    end
+end
+
+return DialogState
+
+```
+
+## states/menu_screen.lua
+
+```lua
+local Assets = require("core.assets")
+local GameState = require("core.gamestate")
+local Input = require("core.input")
+local BPInspector = require("ui.bp_inspector")
+local BPCard = require("ui.bp_card")
+local Catalog = require("systems.bodypart_catalog")
+local SymbolDie = require("core.symbol_die")
+local Text = require("ui.text")
+
+local MenuScreen = {}
+MenuScreen.__index = MenuScreen
+MenuScreen.opaque = true
+
+local COLORS = {
+    bg = { 0.035, 0.04, 0.065, 1 },
+    panel = { 0.075, 0.08, 0.12, 1 },
+    surface = { 0.105, 0.11, 0.16, 1 },
+    surface_low = { 0.055, 0.06, 0.09, 0.96 },
+    line = { 0.70, 0.72, 0.84, 0.82 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.64, 0.63, 0.74, 1 },
+    accent = { 0.36, 0.70, 0.76, 1 },
+    warning = { 1, 0.72, 0.35, 1 },
+    selected = { 0.22, 0.46, 0.56, 1 }
+}
+
+local INSPECTOR_COLORS = {
+    bg = COLORS.surface_low,
+    line = COLORS.line,
+    ink = COLORS.ink,
+    muted = COLORS.muted,
+    accent = COLORS.accent,
+    warning = COLORS.warning
+}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function sorted_keys(tbl)
+    local keys = {}
+    for key in pairs(tbl or {}) do
+        table.insert(keys, key)
+    end
+    table.sort(keys)
+    return keys
+end
+
+local function title_case(value)
+    return (tostring(value or ""):gsub("^%l", string.upper))
+end
+
+local function clamp(value, min_value, max_value)
+    return math.max(min_value, math.min(max_value, value))
+end
+
+local function draw_panel(x, y, w, h)
+    set_color(COLORS.panel)
+    love.graphics.rectangle("fill", x, y, w, h, 5, 5)
+    set_color(COLORS.line)
+    love.graphics.rectangle("line", x, y, w, h, 5, 5)
+end
+
+local function draw_box(rect, fill, line, radius)
+    set_color(fill)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, radius or 4, radius or 4)
+    set_color(line)
+    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, radius or 4, radius or 4)
+end
+
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
+end
+
+local function draw_cursor(row_rect, selected)
+    if not selected then
+        return
+    end
+
+    if draw_image("menu_cursor", rect(row_rect.x + 6, row_rect.y + 7, 8, 12)) then
+        return
+    end
+
+    set_color(COLORS.ink)
+    love.graphics.print(">", row_rect.x + 6, row_rect.y + 6)
+end
+
+local function list_label(part)
+    if not part then
+        return "-"
+    end
+
+    return part.name or part.id or part.def_id or "Body Part"
+end
+
+local function text_width(text)
+    return Text.width(text)
+end
+
+local function truncate_text(text, max_width)
+    return Text.truncate(text, max_width)
+end
+
+function MenuScreen:enter(context)
+    context = context or {}
+    self.world = context.world
+    self.screen = context.screen or "inventory"
+    self.title = context.title or title_case(self.screen)
+    self.status = nil
+    self.selected_index = 1
+    self.scroll = 0
+    self:refresh_content()
+end
+
+function MenuScreen:refresh_content()
+    if self.screen == "dreamform" then
+        self.active_entries = Catalog.active_parts(self.world)
+        self.selected_index = clamp(self.selected_index or 1, 1, math.max(1, #self.active_entries))
+    elseif self.screen == "esoterica" then
+        self.esoterica_parts = Catalog.discovered_parts(self.world)
+        self.selected_index = clamp(self.selected_index or 1, 1, math.max(1, #self.esoterica_parts))
+        self.scroll = clamp(self.scroll or 0, 0, math.max(0, #self.esoterica_parts - 1))
+    end
+end
+
+function MenuScreen:close()
+    GameState.pop()
+end
+
+function MenuScreen:confirm()
+    if self.screen == "save" then
+        if not self.world then
+            self.status = "No active world to save."
+            return
+        end
+
+        local ok, err = self.world:autosave("manual")
+        if ok then
+            self.status = "Saved."
+        else
+            self.status = "Save unavailable: " .. tostring(err)
+        end
+    elseif self.screen == "options" then
+        self.status = "Options are not ready yet."
+    elseif self.screen == "quit" then
+        self.status = "Title flow is not ready yet."
+    end
+end
+
+function MenuScreen:move_selection(delta)
+    if self.screen ~= "dreamform" and self.screen ~= "esoterica" then
+        return false
+    end
+
+    self:refresh_content()
+
+    local count = self.screen == "dreamform" and #(self.active_entries or {}) or #(self.esoterica_parts or {})
+    if count == 0 then
+        return true
+    end
+
+    self.selected_index = clamp((self.selected_index or 1) + delta, 1, count)
+    return true
+end
+
+function MenuScreen:move_dreamform_selection(delta)
+    if self.screen ~= "dreamform" then
+        return false
+    end
+
+    return self:move_selection(delta)
+end
+
+function MenuScreen:actionpressed(action)
+    if action == "cancel" or action == "menu" then
+        self:close()
+        return true
+    elseif action == "confirm" then
+        self:confirm()
+        return true
+    elseif action == "move_up" then
+        if self.screen == "dreamform" then
+            return self:move_selection(-1)
+        end
+        return self:move_selection(-1)
+    elseif action == "move_down" then
+        if self.screen == "dreamform" then
+            return self:move_selection(1)
+        end
+        return self:move_selection(1)
+    elseif action == "move_left" then
+        if self.screen == "dreamform" then
+            return self:move_dreamform_selection(-1)
+        end
+    elseif action == "move_right" then
+        if self.screen == "dreamform" then
+            return self:move_dreamform_selection(1)
+        end
+    end
+
+    return false
+end
+
+function MenuScreen:keypressed(key)
+    return self:actionpressed(Input.action_for_key(key))
+end
+
+function MenuScreen:draw_inventory(x, y, w)
+    local items = sorted_keys(self.world and self.world.player and self.world.player.inventory)
+    if #items == 0 then
+        set_color(COLORS.muted)
+        love.graphics.print("No tools or items.", x, y)
+        return
+    end
+
+    for index, item in ipairs(items) do
+        set_color(COLORS.ink)
+        love.graphics.print(title_case(item), x, y + (index - 1) * 24)
+    end
+
+    local equipped = self.world and self.world.player and self.world.player.equipped
+    if equipped then
+        set_color(COLORS.accent)
+        love.graphics.printf("Equipped: " .. title_case(equipped), x, y + 168, w, "left")
+    end
+end
+
+function MenuScreen:selected_dreamform_part()
+    local entry = self.active_entries and self.active_entries[self.selected_index or 1]
+    return entry and entry.part
+end
+
+function MenuScreen:draw_pool_overview(parts, rect, selected_index)
+    draw_box(rect, COLORS.surface_low, COLORS.line, 5)
+
+    local pad = 10
+    local die_gap = 8
+    local strip_h = 38
+    local strip_y = rect.y + rect.h - strip_h
+    local die_area_y = rect.y + 10
+    local die_area_h = math.max(72, strip_y - die_area_y - 8)
+    local columns = 3
+    local rows = 2
+    local cell_w = math.floor((rect.w - pad * 2 - die_gap * (columns - 1)) / columns)
+    local cell_h = math.floor((die_area_h - die_gap * (rows - 1)) / rows)
+    local face_gap = 4
+    local face_size = math.max(16, math.min(
+        36,
+        math.floor((cell_w - 12 - face_gap * 2) / 3),
+        math.floor((cell_h - 8 - face_gap) / 2)))
+
+    for index, part in ipairs(parts or {}) do
+        local die_column = (index - 1) % columns
+        local die_row = math.floor((index - 1) / columns)
+        local cell_x = rect.x + pad + die_column * (cell_w + die_gap)
+        local cell_y = die_area_y + die_row * (cell_h + die_gap)
+        local grid_w = face_size * 3 + face_gap * 2
+        local grid_h = face_size * 2 + face_gap
+        local grid_x = cell_x + math.floor(math.max(0, cell_w - grid_w) / 2)
+        local grid_y = cell_y + math.floor(math.max(0, cell_h - grid_h) / 2)
+
+        if index == selected_index then
+            set_color({ COLORS.accent[1], COLORS.accent[2], COLORS.accent[3], 0.18 })
+            love.graphics.rectangle("fill", grid_x - 6, grid_y - 6, grid_w + 12, grid_h + 12, 4, 4)
+            set_color(COLORS.accent)
+            love.graphics.rectangle("line", grid_x - 6, grid_y - 6, grid_w + 12, grid_h + 12, 4, 4)
+        end
+
+        for face_index = 1, 6 do
+            local column = (face_index - 1) % 3
+            local row = math.floor((face_index - 1) / 3)
+            local face = SymbolDie.face_for_status(part.die, face_index, part.status)
+            BPCard.draw_die_face(face, {
+                x = grid_x + column * (face_size + face_gap),
+                y = grid_y + row * (face_size + face_gap),
+                w = face_size,
+                h = face_size
+            }, {
+                scale = face_size / 36
+            })
+        end
+    end
+
+    set_color(COLORS.line)
+    love.graphics.line(rect.x + pad, strip_y, rect.x + rect.w - pad, strip_y)
+
+    local entries = BPInspector.die_face_count_entries(parts)
+    local font = love.graphics.getFont()
+    local row_h = font and font:getHeight() + 4 or 16
+    local symbol_size = 13
+    local cursor_x = rect.x + pad
+    local cursor_y = strip_y + 6
+    local max_x = rect.x + rect.w - pad
+    local max_y = rect.y + rect.h - 2
+
+    for _, entry in ipairs(entries) do
+        local symbol_w = BPCard.symbol_sequence_width(entry.symbols, symbol_size)
+        local count_text = " x " .. tostring(entry.count)
+        local item_w = symbol_w + text_width(count_text) + 12
+        if cursor_x + item_w > max_x then
+            cursor_x = rect.x + pad
+            cursor_y = cursor_y + row_h
+        end
+        if cursor_y + row_h > max_y then
             break
         end
+
+        symbol_w = BPCard.draw_symbol_sequence(entry.symbols, cursor_x, cursor_y + 1, symbol_size)
+        set_color(COLORS.ink)
+        love.graphics.print(count_text, cursor_x + symbol_w + 4, cursor_y)
+        cursor_x = cursor_x + item_w
     end
 end
 
-function CombatState:draw_prompt_ui(context)
-    if not context or not context.panel then
-        return
-    end
+function MenuScreen:draw_dreamform(x, y, w, h)
+    self:refresh_content()
 
-    local panel = context.panel
+    local gap = 18
+    local card_gap = 8
+    local count = math.max(1, #(self.active_entries or {}))
+    local available_for_cards = w - card_gap * math.max(0, count - 1)
+    local card_scale = math.min(1, available_for_cards / (BPCard.total_width(1) * count))
+    local card_w = BPCard.total_width(card_scale)
+    local card_h = BPCard.total_height(card_scale)
+    local grid_w = count * card_w + math.max(0, count - 1) * card_gap
+    local start_x = x + math.floor(math.max(0, w - grid_w) / 2)
+    local row_y = y
 
-    draw_panel_background(panel.x, panel.y, panel.w, panel.h)
+    for index, entry in ipairs(self.active_entries or {}) do
+        local layout = BPCard.layout_at(
+            start_x + (index - 1) * (card_w + card_gap),
+            row_y,
+            "enemy",
+            card_scale)
 
-    love.graphics.setColor(1, 1, 1, 0.96)
-    love.graphics.printf(context.prompt_text or "", panel.x + 18, panel.y + 16, panel.w - 36, "center")
-
-    if context.description and context.description ~= "" then
-        love.graphics.setColor(0.82, 0.9, 1, 0.85)
-        love.graphics.printf(context.description, panel.x + 18, panel.y + 44, panel.w - 36, "center")
-    end
-
-    love.graphics.setColor(1, 1, 1, 1)
-
-    for _, button in ipairs(context.buttons or {}) do
-        draw_prompt_button(button, context.hovered_button == button)
-    end
-end
-
-function CombatState:draw_tech_selection_ui(context)
-    if not context or not context.active then
-        return
-    end
-
-    local entry = context.active_part_entry or context.hovered_part_entry
-    if entry then
-        self:update_tech_card_layout(context, entry)
-
-        for _, option in ipairs(entry.options) do
-            draw_tech_card(option, context.hovered_option == option)
-        end
-    end
-
-    self:draw_selected_tech_panel(context, context.preview_option)
-    self:draw_dice_preview_panel(context, context.preview_option)
-end
-
-function CombatState:draw_enemy_assignment_tokens(context)
-    local assignments = context and context.enemy_assignments or nil
-    if not assignments or #assignments == 0 then
-        return
-    end
-
-    local sprite_size = Layouts.get_sprite_size()
-    local counts_by_part = {}
-
-    for _, entry in ipairs(assignments) do
-        local part_view = entry.part_view
-        local target_view = entry.target_view
-        if part_view and target_view then
-            local index = target_view.index or 1
-            local px, py = Layouts.get_body_part_position(target_view, index, part_view)
-            local key = part_view
-            counts_by_part[key] = (counts_by_part[key] or 0) + 1
-            local stack_index = counts_by_part[key]
-
-            local size = DIE_TOKEN_SIZE * 0.55
-            local offset_x = (stack_index - 1) * (size * 0.35)
-            local x = px + sprite_size * 0.5 - size * 0.5 + offset_x
-            local y = py + sprite_size * 0.5 - size * 0.5 - 8
-
-            love.graphics.setColor(0.82, 0.35, 0.22, 0.82)
-            love.graphics.rectangle("fill", x, y, size, size, DIE_TOKEN_RADIUS * 0.8, DIE_TOKEN_RADIUS * 0.8)
-
-            love.graphics.setColor(1, 0.68, 0.42, 0.95)
-            love.graphics.setLineWidth(2)
-            love.graphics.rectangle("line", x, y, size, size, DIE_TOKEN_RADIUS * 0.8, DIE_TOKEN_RADIUS * 0.8)
-            love.graphics.setLineWidth(1)
-
-            love.graphics.setColor(1, 0.95, 0.9, 0.92)
-            love.graphics.printf(entry.label or "?", x + 6, y + size * 0.5 - 8, size - 12, "center")
-        end
-    end
-
-    love.graphics.setColor(1, 1, 1, 1)
-end
-
-function CombatState:draw_assignment_ui(context)
-    if not context then
-        return
-    end
-
-    local shelf = context.shelf_rect
-    if shelf then
-        draw_panel_background(shelf.x, shelf.y, shelf.w, shelf.h, 0.78)
-
-        local header = context.mode == "attack" and "Attack Dice" or "Defense Dice"
-        love.graphics.setColor(1, 1, 1, 0.95)
-        love.graphics.printf(header, shelf.x + 16, shelf.y + 10, shelf.w - 32, "left")
-
-        love.graphics.setColor(0.82, 0.9, 1, 0.85)
-        local instruction = context.mode == "attack" and "Drag a die onto an enemy body part." or "Drag a die onto one of your body parts."
-        love.graphics.printf(instruction, shelf.x + 16, shelf.y + shelf.h - 26, shelf.w - 32, "left")
-        love.graphics.setColor(1, 1, 1, 1)
-    end
-
-    local enemy_x, enemy_y, enemy_w, enemy_h = get_enemy_shelf_rect()
-    draw_panel_background(enemy_x, enemy_y, enemy_w, enemy_h, 0.65)
-    love.graphics.setColor(1, 0.92, 0.82, 0.9)
-    love.graphics.printf("Enemy Dice", enemy_x + 16, enemy_y + 10, enemy_w - 32, "right")
-    love.graphics.setColor(0.95, 0.75, 0.55, 0.85)
-    love.graphics.printf("Assigning...", enemy_x + 16, enemy_y + enemy_h - 26, enemy_w - 32, "right")
-    love.graphics.setColor(1, 1, 1, 1)
-
-    local dragging_die = context.dragging and context.dragging.die or nil
-
-    for _, die in ipairs(context.dice or {}) do
-        if die ~= dragging_die then
-            draw_die_token(die, context.hovered_die == die, false)
-        end
-    end
-
-    if dragging_die then
-        draw_die_token(dragging_die, true, true)
-    end
-
-    self:draw_enemy_assignment_tokens(context)
-end
-
-function CombatState:handle_assignment_mousepressed(context, x, y)
-    if not context then
-        return
-    end
-
-    self:update_assignment_context(context)
-
-    for _, die in ipairs(context.dice or {}) do
-        if die.interactable and not die.assigned and point_in_rect(x, y, die.rect) then
-            context.dragging = {
-                die = die,
-                offset_x = x - die.rect.x,
-                offset_y = y - die.rect.y
-            }
-            die.rect.x = x - context.dragging.offset_x
-            die.rect.y = y - context.dragging.offset_y
-            return
-        end
-    end
-end
-
-function CombatState:handle_assignment_mousereleased(context, x, y)
-    if not context or not context.dragging or not context.dragging.die then
-        return
-    end
-
-    local die = context.dragging.die
-    context.dragging = nil
-
-    self:update_assignment_context(context)
-    local target_entry = context.hovered_target
-
-    if target_entry and target_entry.option and target_entry.option.index then
-        die.assigned = true
-        die.assigned_part_view = target_entry.part_view
-        die.assigned_option = target_entry.option
-        self.assignment_ui = nil
-        self.engine:provide_input(target_entry.option.index)
-        return
-    end
-
-    if die.home then
-        die.rect.x = die.home.x
-        die.rect.y = die.home.y
-    end
-end
-
-function CombatState:draw()
-    if self.background_color then
-        love.graphics.clear(self.background_color[1], self.background_color[2], self.background_color[3], self.background_color[4])
-    else
-        love.graphics.clear(0, 0, 0, 1)
-    end
-
-    if not self.engine then
-        return
-    end
-
-    local selection_context = self.tech_selection_ui
-    local assignment_context = self.assignment_ui
-    local metadata = nil
-    if self.engine:needs_input() then
-        metadata = self.engine:get_pending_input_metadata()
-    end
-
-    for index, combatant in ipairs(self.ui_state and self.ui_state.combatants or {}) do
-        local highlight = nil
-        if selection_context and selection_context.combatant_view == combatant then
-            highlight = selection_context
-        elseif assignment_context and assignment_context.target_combatant_view == combatant then
-            highlight = assignment_context.highlight
-        end
-
-        draw_combatant(combatant, index, highlight)
-    end
-
-    if selection_context and metadata and metadata.type == "tech_select_phase" then
-        self:draw_tech_selection_ui(selection_context)
-    elseif assignment_context and metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment") then
-        self:draw_assignment_ui(assignment_context)
-    end
-
-    local x, y, width = Layouts.get_prompt_region()
-
-    if self.engine:needs_input() then
-        if metadata and metadata.type == "tech_select_phase" then
-            love.graphics.setColor(1, 1, 1, 0.95)
-            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
-            love.graphics.setColor(0.82, 0.9, 1, 0.85)
-            love.graphics.printf("Click a Tech card to select it.", x, y + 20, width, "center")
-            love.graphics.setColor(1, 1, 1, 1)
-        elseif metadata and metadata.type == "attack_assignment" then
-            love.graphics.setColor(1, 1, 1, 0.95)
-            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
-            love.graphics.setColor(0.82, 0.9, 1, 0.85)
-            love.graphics.printf("Drag an attack die onto a highlighted enemy body part.", x, y + 20, width, "center")
-            love.graphics.setColor(1, 1, 1, 1)
-        elseif metadata and metadata.type == "defense_assignment" then
-            love.graphics.setColor(1, 1, 1, 0.95)
-            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
-            love.graphics.setColor(0.82, 0.9, 1, 0.85)
-            love.graphics.printf("Drag a defense die onto one of your body parts.", x, y + 20, width, "center")
-            love.graphics.setColor(1, 1, 1, 1)
-        elseif metadata and (metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select") then
-            if self.prompt_ui then
-                self:draw_prompt_ui(self.prompt_ui)
-            else
-                love.graphics.setColor(1, 1, 1, 0.95)
-                love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
-                love.graphics.setColor(1, 1, 1, 1)
-            end
+        if entry.part then
+            BPCard.draw(entry.part, layout, {
+                selected_source = index == self.selected_index,
+                status = entry.part.status
+            })
         else
-            love.graphics.setColor(1, 1, 1, 0.95)
-            love.graphics.printf(self.engine:get_input_prompt() or "", x, y, width, "center")
-            love.graphics.setColor(1, 1, 1, 1)
+            BPCard.draw_empty(layout)
         end
+    end
+
+    local parts = {}
+    local selected_pool_index = nil
+    for index, entry in ipairs(self.active_entries or {}) do
+        if entry.part then
+            table.insert(parts, entry.part)
+            if index == self.selected_index then
+                selected_pool_index = #parts
+            end
+        end
+    end
+    local bottom_y = y + card_h + 22
+    local bottom_h = math.max(120, h - (bottom_y - y))
+    local overview_w = math.floor((w - gap) * 0.52)
+    local inspector_w = w - overview_w - gap
+    self:draw_pool_overview(parts, {
+        x = x,
+        y = bottom_y,
+        w = overview_w,
+        h = bottom_h
+    }, selected_pool_index)
+
+    local part = self:selected_dreamform_part()
+    BPInspector.draw_panel({
+        x = x + overview_w + gap,
+        y = bottom_y,
+        w = inspector_w,
+        h = bottom_h
+    }, {
+        part = part
+    }, {
+        colors = INSPECTOR_COLORS,
+        hide_header = true
+    })
+end
+
+function MenuScreen:selected_esoterica_part()
+    return self.esoterica_parts and self.esoterica_parts[self.selected_index or 1]
+end
+
+function MenuScreen:sync_esoterica_scroll(visible_rows)
+    visible_rows = math.max(1, visible_rows or 1)
+    local selected = self.selected_index or 1
+    self.scroll = self.scroll or 0
+
+    if selected <= self.scroll then
+        self.scroll = selected - 1
+    elseif selected > self.scroll + visible_rows then
+        self.scroll = selected - visible_rows
+    end
+end
+
+function MenuScreen:draw_esoterica(x, y, w, h)
+    self:refresh_content()
+
+    local inspector_w = math.min(292, math.floor(w * 0.34))
+    local list_w = math.min(238, math.floor(w * 0.29))
+    local gap = 18
+    local card_area_w = math.max(BPCard.total_width(1), w - list_w - inspector_w - gap * 2)
+    local row_h = 30
+    local visible_rows = math.max(1, math.floor((h - 52) / row_h))
+    self:sync_esoterica_scroll(visible_rows)
+
+    local list_rect = { x = x, y = y, w = list_w, h = h }
+    draw_box(list_rect, COLORS.surface_low, COLORS.line, 5)
+    set_color(COLORS.ink)
+    love.graphics.printf("Discovered Body Parts", x + 12, y + 10, list_w - 24, "left")
+
+    local start_index = (self.scroll or 0) + 1
+    local end_index = math.min(#(self.esoterica_parts or {}), start_index + visible_rows - 1)
+    local row_y = y + 42
+
+    for index = start_index, end_index do
+        local part = self.esoterica_parts[index]
+        local rect = { x = x + 10, y = row_y, w = list_w - 20, h = row_h - 4 }
+        if index == self.selected_index then
+            draw_cursor(rect, true)
+            set_color(COLORS.ink)
+        else
+            set_color(COLORS.muted)
+        end
+
+        local type_text = tostring(part and part.type or "")
+        local type_w = 48
+        local name_x = rect.x + 24
+        love.graphics.print(truncate_text(list_label(part), rect.w - 34 - type_w), name_x, rect.y + 6)
+        love.graphics.print(type_text, rect.x + rect.w - type_w, rect.y + 6)
+        row_y = row_y + row_h
+    end
+
+    if #(self.esoterica_parts or {}) == 0 then
+        set_color(COLORS.muted)
+        love.graphics.printf("No Body Parts discovered.", x + 12, y + 44, list_w - 24, "left")
+    end
+
+    local part = self:selected_esoterica_part()
+    local card_scale = math.max(1, math.min(2, math.floor(math.min(
+        card_area_w / BPCard.total_width(1),
+        h / BPCard.total_height(1)))))
+    local rendered_card_w = BPCard.total_width(card_scale)
+    local rendered_card_h = BPCard.total_height(card_scale)
+    local card_area_x = x + list_w + gap
+    local card_x = card_area_x + math.floor(math.max(0, card_area_w - rendered_card_w) / 2)
+    local card_y = y + math.floor(math.max(0, h - rendered_card_h) / 2)
+    local card_layout = BPCard.layout_at(card_x, card_y, "player", card_scale)
+    if part then
+        BPCard.draw(part, card_layout, {
+            status = part.status,
+            scale = card_scale,
+            fonts = BPCard.fonts(1)
+        })
     else
-        love.graphics.setColor(1, 1, 1, 0.5)
-        love.graphics.printf("Press ESC to return to the overworld", x, y, width, "center")
-        love.graphics.setColor(1, 1, 1, 1)
+        BPCard.draw_empty(card_layout, {
+            scale = card_scale,
+            fonts = BPCard.fonts(1)
+        })
+    end
+
+    BPInspector.draw_panel({
+        x = card_area_x + card_area_w + gap,
+        y = y,
+        w = inspector_w,
+        h = h
+    }, {
+        part = self:selected_esoterica_part()
+    }, {
+        colors = INSPECTOR_COLORS,
+        hide_header = true,
+        show_die = true
+    })
+end
+
+function MenuScreen:draw_save(x, y, w)
+    set_color(COLORS.ink)
+    love.graphics.print("Record the current dream state.", x, y)
+
+    if self.status then
+        set_color(self.status == "Saved." and COLORS.accent or COLORS.warning)
+        love.graphics.printf(self.status, x, y + 48, w, "left")
     end
 end
 
-function CombatState:mousepressed(x, y, button)
+function MenuScreen:draw_placeholder(x, y, w, text)
+    set_color(COLORS.muted)
+    love.graphics.printf(text, x, y, w, "left")
+    if self.status then
+        set_color(COLORS.warning)
+        love.graphics.printf(self.status, x, y + 56, w, "left")
+    end
+end
+
+function MenuScreen:draw()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local margin = 24
+    local content_x = margin + 28
+    local content_y = 92
+    local content_w = width - margin * 2 - 56
+    local content_h = height - content_y - margin - 28
+    local frame = rect(margin, margin, width - margin * 2, height - margin * 2)
+
+    set_color(COLORS.bg)
+    love.graphics.rectangle("fill", 0, 0, width, height)
+    local drew_frame = draw_image("menu_full_frame", frame)
+    if not drew_frame then
+        draw_panel(frame.x, frame.y, frame.w, frame.h)
+    end
+
+    set_color(COLORS.ink)
+    love.graphics.printf(self.title, margin + 24, margin + 22, width - margin * 2 - 48, "left")
+    if not drew_frame then
+        set_color(COLORS.line)
+        love.graphics.line(margin + 24, margin + 62, width - margin - 24, margin + 62)
+    end
+
+    if self.screen == "inventory" then
+        self:draw_inventory(content_x, content_y, content_w)
+    elseif self.screen == "dreamform" then
+        self:draw_dreamform(content_x, content_y, content_w, content_h)
+    elseif self.screen == "esoterica" then
+        self:draw_esoterica(content_x, content_y, content_w, content_h)
+    elseif self.screen == "save" then
+        self:draw_save(content_x, content_y, content_w)
+    elseif self.screen == "options" then
+        self:draw_placeholder(content_x, content_y, content_w, "Options are not ready yet.")
+    elseif self.screen == "quit" then
+        self:draw_placeholder(content_x, content_y, content_w, "Title flow is not ready yet.")
+    end
+end
+
+return MenuScreen
+
+```
+
+## states/menu_sidebar.lua
+
+```lua
+local Assets = require("core.assets")
+local GameState = require("core.gamestate")
+local Input = require("core.input")
+
+local MenuSidebar = {}
+MenuSidebar.__index = MenuSidebar
+
+local COLORS = {
+    panel = { 0.06, 0.065, 0.10, 0.97 },
+    line = { 0.76, 0.76, 0.88, 0.78 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.62, 0.61, 0.72, 1 },
+    selected = { 0.22, 0.46, 0.56, 1 },
+    selected_line = { 0.70, 0.92, 0.96, 1 }
+}
+
+local MENU_ITEMS = {
+    { id = "inventory", label = "Inventory" },
+    { id = "dreamform", label = "Dreamform" },
+    { id = "esoterica", label = "Esoterica" },
+    { id = "save", label = "Save" },
+    { id = "options", label = "Options" },
+    { id = "quit", label = "Quit" }
+}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function draw_image(id, r, color)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    love.graphics.draw(image, r.x, r.y, 0, r.w / image:getWidth(), r.h / image:getHeight())
+    return true
+end
+
+local function draw_panel(r)
+    if draw_image("menu_sidebar_frame", r) then
+        return
+    end
+
+    set_color(COLORS.panel)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, 5, 5)
+    set_color(COLORS.line)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, 5, 5)
+end
+
+function MenuSidebar:enter(context)
+    context = context or {}
+    self.world = context.world
+    self.items = MENU_ITEMS
+    self.selected_index = context.selected_index or 1
+    self.item_rects = {}
+end
+
+function MenuSidebar:close()
+    GameState.pop()
+end
+
+function MenuSidebar:open_selected()
+    local item = self.items[self.selected_index]
+    if not item then
+        return
+    end
+
+    GameState.push(require("states.menu_screen"), {
+        world = self.world,
+        screen = item.id,
+        title = item.label
+    })
+end
+
+function MenuSidebar:move_selection(delta)
+    local count = #self.items
+    self.selected_index = ((self.selected_index - 1 + delta) % count) + 1
+end
+
+function MenuSidebar:actionpressed(action)
+    if action == "cancel" or action == "menu" then
+        self:close()
+        return true
+    elseif action == "move_up" then
+        self:move_selection(-1)
+        return true
+    elseif action == "move_down" then
+        self:move_selection(1)
+        return true
+    elseif action == "confirm" then
+        self:open_selected()
+        return true
+    end
+
+    return false
+end
+
+function MenuSidebar:keypressed(key)
+    return self:actionpressed(Input.action_for_key(key))
+end
+
+function MenuSidebar:mousepressed(x, y, button)
     if button ~= 1 then
-        return
+        return false
     end
 
-    if not (self.engine and self.engine:needs_input()) then
-        return
-    end
-
-    local metadata = self.engine:get_pending_input_metadata()
-    if not metadata then
-        return
-    end
-
-    self:update_mouse_position(x, y)
-
-    if metadata.type == "tech_select_phase" then
-        if not self.tech_selection_ui then
-            return
+    for index, rect in ipairs(self.item_rects or {}) do
+        if x >= rect.x and x <= rect.x + rect.w and y >= rect.y and y <= rect.y + rect.h then
+            self.selected_index = index
+            self:open_selected()
+            return true
         end
-
-        local context = self.tech_selection_ui
-        context.mouse_x = x
-        context.mouse_y = y
-        self:evaluate_tech_selection_hover(context)
-
-        if context.hovered_option and context.hovered_option.selection_index then
-            self.engine:provide_input(context.hovered_option.selection_index)
-            self.tech_selection_ui = nil
-        end
-
-        return
     end
 
-    if metadata.type == "attack_assignment" or metadata.type == "defense_assignment" then
-        if not self.assignment_ui or self.assignment_ui.metadata ~= metadata then
-            self.assignment_ui = self:build_assignment_context(metadata)
-            if self.assignment_ui then
-                self.assignment_ui.metadata = metadata
+    return false
+end
+
+function MenuSidebar:draw()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local panel_w = math.min(210, width - 32)
+    local item_h = 32
+    local panel_h = 48 + #self.items * item_h + 16
+    local x = width - panel_w - 18
+    local y = 18
+    local panel = rect(x, y, panel_w, panel_h)
+
+    draw_panel(panel)
+
+    set_color(COLORS.ink)
+    love.graphics.printf("Menu", x + 16, y + 16, panel_w - 32, "left")
+
+    self.item_rects = {}
+    local item_y = y + 48
+    for index, item in ipairs(self.items) do
+        local rect = { x = x + 12, y = item_y, w = panel_w - 24, h = item_h - 4 }
+        self.item_rects[index] = rect
+
+        if index == self.selected_index then
+            if not draw_image("menu_cursor", { x = rect.x + 8, y = rect.y + 8, w = 8, h = 12 }) then
+                set_color(COLORS.ink)
+                love.graphics.print(">", rect.x + 8, rect.y + 7)
             end
+            set_color(COLORS.ink)
+        else
+            set_color(COLORS.muted)
         end
 
-        if self.assignment_ui then
-            self.assignment_ui.mouse_x = x
-            self.assignment_ui.mouse_y = y
-            self:handle_assignment_mousepressed(self.assignment_ui, x, y)
-        end
-
-        return
-    end
-
-    if metadata.type == "crest_prompt" or metadata.type == "crest_select" or metadata.type == "crest_target_select" then
-        self.prompt_ui = self:build_prompt_context(metadata)
-
-        if self.prompt_ui then
-            self.prompt_ui.metadata = metadata
-            self:update_prompt_context(self.prompt_ui)
-            local hovered = self.prompt_ui.hovered_button
-            if hovered and hovered.value then
-                self.engine:provide_input(hovered.value)
-                self.prompt_ui = nil
-            end
-        end
-
-        return
+        love.graphics.printf(item.label, rect.x + 26, rect.y + 7, rect.w - 34, "left")
+        item_y = item_y + item_h
     end
 end
 
-function CombatState:mousereleased(x, y, button)
-    if button ~= 1 then
-        return
-    end
-
-    self:update_mouse_position(x, y)
-
-    if self.assignment_ui then
-        self.assignment_ui.mouse_x = x
-        self.assignment_ui.mouse_y = y
-        self:handle_assignment_mousereleased(self.assignment_ui, x, y)
-    end
-end
-
-function CombatState:keypressed(key)
-    if key == "escape" then
-        GameState.switch(require("states.overworld"))
-    end
-end
-
-return CombatState
+return MenuSidebar
 
 ```
 
@@ -7030,139 +10330,4589 @@ local Overworld = {}
 Overworld.__index = Overworld
 
 local GameState = require("core.gamestate")
-local Player = require("systems.player")
-local TileMap = require("systems.tilemap")
+local Save = require("core.save")
+local World = require("systems.world")
 
 function Overworld:enter()
-    self.player = Player.new(5, 5)
-    self.map = TileMap.new("data.rooms.basement_1")
+    local save_data, save_error = Save.load()
+    if save_error then
+        print("Save load failed: " .. tostring(save_error))
+    end
+
+    self.world = World.new({ save = save_data })
+    self.world.on_encounter = function(encounter)
+        self:start_combat(encounter)
+    end
+    self.world.on_dialog = function(dialog)
+        self:start_dialog(dialog)
+    end
+end
+
+function Overworld:start_combat(encounter)
+    GameState.push(require("states.v2_combat"), {
+        encounter_id = encounter and encounter.encounter_id or "debug.demo",
+        encounter = encounter,
+        run = self.world and self.world.run
+    })
+end
+
+function Overworld:start_dialog(dialog)
+    GameState.push(require("states.dialog"), {
+        world = self.world,
+        dialog = dialog and dialog.dialog,
+        dialog_id = dialog and dialog.dialog_id,
+        actor = dialog and self.world.room and self.world.room.actor_by_id[dialog.actor_id]
+    })
+end
+
+function Overworld:resume(_, result)
+    if self.world and result and result.type == "combat_result" then
+        local summary = self.world:apply_combat_result(result)
+        if summary then
+            GameState.push(require("states.post_combat"), summary)
+        end
+    elseif self.world and result and result.type == "dialog_result" then
+        self.world:apply_dialog_result(result)
+    end
 end
 
 function Overworld:update(dt)
-    self.player:update(dt, self.map)
+    self.world:update(dt)
 end
 
 function Overworld:draw()
-    self.map:draw()
-    self.player:draw()
-
-    if self.player.equipped then
-        love.graphics.print("[" .. self.player.equipped .. "]", 10, 10)
-    end
+    self.world:draw()
 end
 
 function Overworld:keypressed(key)
     if key == "c" then
-        GameState.switch(require("states.combat"))
+        self:start_combat({ encounter_id = "debug.demo" })
         return
-    elseif key == "space" then
-        local entity = self.map:getEntityAt(self.player.x, self.player.y)
-        if entity then
-            local action, param = entity:interact(self.player)
-
-            if action == "message" then
-                print(param)
-            elseif action == "item" then
-                self.player:addItem(param)
-                print("Found: " .. param .. "!")
-            elseif action == "dig" then
-                print("You dig through the wall...")
-            end
-        end
-    else
-        self.player:keypressed(key, self.map)
     end
+
+    self.world:keypressed(key)
+end
+
+function Overworld:actionpressed(action)
+    if action == "debug_combat" then
+        self:start_combat({ encounter_id = "debug.demo" })
+        return true
+    elseif action == "menu" or action == "cancel" then
+        GameState.push(require("states.menu_sidebar"), { world = self.world })
+        return true
+    end
+
+    return self.world:actionpressed(action)
 end
 
 function Overworld:keyreleased(key)
-    self.player:keyreleased(key)
+    self.world:keyreleased(key)
 end
 
 return Overworld
 
 ```
 
-## systems/entity.lua
+## states/pause_menu.lua
 
 ```lua
-local Entity = {}
-Entity.__index = Entity
+return require("states.menu_sidebar")
+
+```
+
+## states/post_combat.lua
+
+```lua
+local GameState = require("core.gamestate")
+local Input = require("core.input")
+
+local PostCombat = {}
+PostCombat.__index = PostCombat
+
+local COLORS = {
+    scrim = { 0.02, 0.02, 0.04, 0.68 },
+    panel = { 0.08, 0.075, 0.12, 0.96 },
+    line = { 0.74, 0.70, 0.86, 0.75 },
+    ink = { 0.96, 0.94, 1, 1 },
+    muted = { 0.66, 0.63, 0.76, 1 },
+    good = { 0.37, 0.86, 0.58, 1 },
+    warning = { 1, 0.72, 0.32, 1 }
+}
+
+local OUTCOME_TITLES = {
+    victory = "Dream Won",
+    defeat = "Dream Bruised",
+    fled = "Dream Escaped",
+    draw = "Dream Unsettled",
+    scripted = "Dream Shifted"
+}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function title_for(summary)
+    return OUTCOME_TITLES[summary and summary.outcome] or "Combat Ended"
+end
+
+local function status_line(part)
+    local name = part.name or part.def_id or "Body Part"
+    local before = part.combat_status or "healthy"
+    local after = part.recovered_status or before
+    if before == after then
+        return name .. ": " .. after
+    end
+    return name .. ": " .. before .. " -> " .. after
+end
+
+local function part_name(part)
+    return part.name or part.def_id or part.id or "Unknown Part"
+end
+
+local SLOT_LABELS = {
+    head = "Head",
+    body = "Body",
+    arm_l = "Left Arm",
+    arm_r = "Right Arm",
+    leg_l = "Left Leg",
+    leg_r = "Right Leg"
+}
+
+function PostCombat:enter(summary)
+    self.summary = summary or {}
+    self.elapsed = 0
+end
+
+function PostCombat:update(dt)
+    self.elapsed = self.elapsed + (dt or 0)
+end
+
+function PostCombat:draw()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local panel_w = math.min(620, width - 48)
+    local panel_h = math.min(310, height - 48)
+    local x = math.floor((width - panel_w) / 2)
+    local y = math.floor((height - panel_h) / 2)
+    local summary = self.summary or {}
+
+    set_color(COLORS.scrim)
+    love.graphics.rectangle("fill", 0, 0, width, height)
+
+    set_color(COLORS.panel)
+    love.graphics.rectangle("fill", x, y, panel_w, panel_h, 6, 6)
+    set_color(COLORS.line)
+    love.graphics.rectangle("line", x, y, panel_w, panel_h, 6, 6)
+
+    set_color(COLORS.ink)
+    love.graphics.printf(title_for(summary), x + 24, y + 22, panel_w - 48, "center")
+
+    local line_y = y + 62
+    set_color(COLORS.muted)
+    love.graphics.printf("Encounter: " .. tostring(summary.encounter_id or "unknown"), x + 24, line_y, panel_w - 48, "center")
+
+    line_y = line_y + 34
+    set_color(COLORS.ink)
+    love.graphics.print("Dreamform recovery", x + 28, line_y)
+    line_y = line_y + 22
+
+    local recovered = summary.recovered_parts or {}
+    if #recovered == 0 then
+        set_color(COLORS.muted)
+        love.graphics.print("No body parts changed.", x + 40, line_y)
+        line_y = line_y + 20
+    else
+        for index, part in ipairs(recovered) do
+            if index > 4 then
+                set_color(COLORS.muted)
+                love.graphics.print("...", x + 40, line_y)
+                line_y = line_y + 18
+                break
+            end
+            set_color(part.combat_status ~= part.recovered_status and COLORS.good or COLORS.muted)
+            love.graphics.print(status_line(part), x + 40, line_y)
+            line_y = line_y + 18
+        end
+    end
+
+    line_y = line_y + 14
+    set_color(COLORS.ink)
+    love.graphics.print("Dreamform change", x + 28, line_y)
+    line_y = line_y + 22
+
+    local claim = summary.claim_summary
+    if claim and claim.def_id then
+        local claimed = summary.claimed_part or claim
+        local slot_label = SLOT_LABELS[summary.claimed_slot or claim.slot_id] or tostring(summary.claimed_slot or claim.slot_id or "slot")
+        set_color(COLORS.warning)
+        love.graphics.printf(part_name(claimed) .. " took root as " .. slot_label .. ".", x + 40, line_y, panel_w - 80, "left")
+        line_y = line_y + 18
+        if claim.replaced_part then
+            set_color(COLORS.muted)
+            love.graphics.printf(part_name(claim.replaced_part) .. " faded away.", x + 40, line_y, panel_w - 80, "left")
+        end
+    elseif summary.outcome == "victory" then
+        set_color(COLORS.muted)
+        love.graphics.print("Dreamform left unchanged.", x + 40, line_y)
+    else
+        set_color(COLORS.muted)
+        love.graphics.print("No claim.", x + 40, line_y)
+    end
+
+    set_color(COLORS.muted)
+    love.graphics.printf("Continue", x + 24, y + panel_h - 34, panel_w - 48, "center")
+end
+
+function PostCombat:close()
+    GameState.pop()
+end
+
+function PostCombat:keypressed(key)
+    return self:actionpressed(Input.action_for_key(key))
+end
+
+function PostCombat:actionpressed(action)
+    if action == "confirm" or action == "cancel" or action == "menu" then
+        self:close()
+        return true
+    end
+
+    return false
+end
+
+function PostCombat:mousepressed(_, _, button)
+    if button == 1 then
+        self:close()
+    end
+end
+
+return PostCombat
+
+```
+
+## states/v2_combat.lua
+
+```lua
+local GameState = require("core.gamestate")
+local Assets = require("core.assets")
+local Engine = require("combat.v2_engine")
+local Events = require("combat.events")
+local Keywords = require("combat.keywords")
+local Demo = require("combat.v2_demo")
+local Symbols = require("core.symbols")
+local SymbolDie = require("core.symbol_die")
+local V2AI = require("combat.v2_ai")
+local BPInspector = require("ui.bp_inspector")
+local BPCard = require("ui.bp_card")
+local Text = require("ui.text")
+
+local V2Combat = {}
+V2Combat.__index = V2Combat
+V2Combat.opaque = true
+
+local MARGIN = 8
+local RAIL_WIDTH = 152
+local GLOBAL_SPINE_WIDTH = 32
+local MAIN_GAP = 8
+local STRIP_HEIGHT = 130
+local DRAWER_HEIGHT = 54
+local DRAWER_GAP = 6
+local BODY_PART_SLOTS = 6
+local CARD_WIDTH = 116
+local CARD_HEIGHT = 88
+local TITLE_HEIGHT = 16
+local TITLE_MARGIN = 10
+local BP_LEFT_SECTOR_WIDTH = 44
+local CARD_GAP = 8
+local DIE_SIZE = 36
+local SYMBOL_SIZE = 12
+local CREST_SIZE = 24
+local HEART_STACK_MAX = 3
+local HEART_ICON_SIZE = 24
+local HEART_ICON_GAP = 4
+local SLOT_PIP_ROW_LIMIT = 3
+local SLOT_PIP_GAP = 1
+local SLOT_PIP_ROW_GAP = 1
+local AUTO_ALLOC_MOVE_DURATION = 0.42
+local AUTO_ALLOC_SETTLE_DURATION = 0.14
+local HATCH_SWALLOW_DURATION = 0.4
+local RESOLUTION_STEP_DURATION = 1.05
+local RESOLUTION_REVEAL_TIME = 0.68
+local SLOT_EFFECT_DURATION = 1.1
+local COMBAT_END_RETURN_DELAY = 2.35
+local CLAIM_ANIMATION_DURATION = 0.95
+local CLAIM_RETURN_DELAY = 0.28
+local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
+local OVERLAY_ANIMATION_FPS = 8
+local CREST_ORDER = { "Valor", "Shadow" }
+local CLAIM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
+local CLAIM_SLOT_TYPES = {
+    head = "HEAD",
+    body = "BODY",
+    arm_l = "ARM",
+    arm_r = "ARM",
+    leg_l = "LEG",
+    leg_r = "LEG"
+}
+local CLAIM_SLOT_LABELS = {
+    head = "Head",
+    body = "Body",
+    arm_l = "Left Arm",
+    arm_r = "Right Arm",
+    leg_l = "Left Leg",
+    leg_r = "Right Leg"
+}
+
+local COLORS = {
+    bg = { 34 / 255, 32 / 255, 52 / 255, 1 },
+    panel = { 44 / 255, 41 / 255, 64 / 255, 0.96 },
+    rail = { 26 / 255, 25 / 255, 40 / 255, 0.98 },
+    surface = { 38 / 255, 36 / 255, 56 / 255, 0.88 },
+    surface_low = { 18 / 255, 17 / 255, 29 / 255, 0.4 },
+    surface_high = { 70 / 255, 66 / 255, 96 / 255, 0.72 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.68, 0.66, 0.78, 1 },
+    line = { 0.86, 0.84, 0.94, 0.52 },
+    dashed = { 0.58, 0.55, 0.68, 0.58 },
+    player = { 0.16, 0.78, 0.61, 1 },
+    enemy = { 0.96, 0.35, 0.31, 1 },
+    selected = { 0.62, 0.78, 1, 1 },
+    valid = { 0.25, 0.88, 0.68, 1 },
+    invalid = { 0.48, 0.48, 0.56, 0.48 },
+    attack = { 0.98, 0.39, 0.32, 1 },
+    defense = { 0.35, 0.63, 1, 1 },
+    essence = { 1, 0.79, 0.28, 1 },
+    blood = { 0.88, 0.12, 0.22, 1 }
+}
+
+local STATUS_COLORS = {
+    healthy = { 0.22, 0.76, 0.38, 1 },
+    wounded = { 1, 0.68, 0.2, 1 },
+    maimed = { 0.68, 0.66, 0.78, 1 }
+}
+
+local CREST_VISUALS = {
+    Valor = {
+        asset = "crest_valor_chip",
+        symbol = Symbols.STRIKE,
+        fill = { 0.58, 0.34, 0.15, 1 },
+        line = COLORS.attack
+    },
+    Shadow = {
+        asset = "crest_shadow_chip",
+        symbol = Symbols.WARD,
+        fill = { 0.25, 0.25, 0.38, 1 },
+        line = COLORS.defense
+    }
+}
+
+local SYMBOL_ASSETS = {
+    [Symbols.STRIKE] = "sword_symbol",
+    [Symbols.WARD] = "shield_symbol",
+    [Symbols.ESSENCE] = "lightning_symbol",
+    [Symbols.BLOOD] = "blood_symbol"
+}
+
+local SYMBOL_OUTLINE_ASSETS = {
+    [Symbols.STRIKE] = "sword_symbol_outline",
+    [Symbols.WARD] = "shield_symbol_outline",
+    [Symbols.ESSENCE] = "lightning_symbol_outline",
+    [Symbols.BLOOD] = "blood_symbol_outline"
+}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function new_ui_font(size)
+    local ok, font = pcall(love.graphics.newFont, UI_FONT_PATH, size)
+    if not ok then
+        font = love.graphics.newFont(size)
+    end
+
+    if font and font.setFilter then
+        font:setFilter("nearest", "nearest")
+    end
+
+    return font
+end
+
+local function point_in_rect(x, y, rect)
+    return rect and x >= rect.x and x <= rect.x + rect.w and y >= rect.y and y <= rect.y + rect.h
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function copy_rect(r)
+    if not r then
+        return nil
+    end
+
+    return rect(r.x, r.y, r.w, r.h)
+end
+
+local function expand_rect(r, amount)
+    if not r then
+        return nil
+    end
+
+    local inset = amount or 0
+    return rect(r.x - inset, r.y - inset, r.w + inset * 2, r.h + inset * 2)
+end
+
+local function centered_rect(r, size)
+    if not r then
+        return rect(0, 0, size, size)
+    end
+
+    return rect(r.x + (r.w - size) / 2, r.y + (r.h - size) / 2, size, size)
+end
+
+local function lerp(a, b, t)
+    return a + (b - a) * t
+end
+
+local function ease_out_cubic(t)
+    local clamped = math.max(0, math.min(1, t or 0))
+    return 1 - ((1 - clamped) * (1 - clamped) * (1 - clamped))
+end
+
+local function lerp_rect(a, b, t)
+    if not a then
+        return copy_rect(b)
+    elseif not b then
+        return copy_rect(a)
+    end
+
+    return rect(
+        lerp(a.x, b.x, t),
+        lerp(a.y, b.y, t),
+        lerp(a.w, b.w, t),
+        lerp(a.h, b.h, t))
+end
+
+local function copy_card_layout(layout)
+    if not layout then
+        return nil
+    end
+
+    return {
+        card = copy_rect(layout.card),
+        rim = copy_rect(layout.rim),
+        socket = copy_rect(layout.socket),
+        hatch = copy_rect(layout.hatch),
+        track = copy_rect(layout.track),
+        slot_label = copy_rect(layout.slot_label),
+        label = copy_rect(layout.label),
+        meta = copy_rect(layout.meta),
+        side = layout.side,
+        scale = layout.scale
+    }
+end
+
+local function interpolate_card_layout(source, target, t)
+    if not source then
+        return copy_card_layout(target)
+    elseif not target then
+        return copy_card_layout(source)
+    end
+
+    return {
+        card = lerp_rect(source.card, target.card, t),
+        rim = lerp_rect(source.rim, target.rim, t),
+        socket = lerp_rect(source.socket, target.socket, t),
+        hatch = lerp_rect(source.hatch, target.hatch, t),
+        track = lerp_rect(source.track, target.track, t),
+        slot_label = lerp_rect(source.slot_label, target.slot_label, t),
+        label = lerp_rect(source.label, target.label, t),
+        meta = lerp_rect(source.meta, target.meta, t),
+        side = t < 0.5 and source.side or target.side,
+        scale = lerp(source.scale or 1, target.scale or 1, t)
+    }
+end
+
+local function contains(list, value)
+    for _, existing in ipairs(list or {}) do
+        if existing == value then
+            return true
+        end
+    end
+    return false
+end
+
+local function normalized_part_type(part)
+    return part and part.type and tostring(part.type):upper() or nil
+end
+
+local function claim_slot_label(slot_id)
+    return CLAIM_SLOT_LABELS[slot_id] or tostring(slot_id or "Slot")
+end
+
+local function claim_part_name(part)
+    return part and (part.name or part.id or part.def_id) or "Body Part"
+end
+
+local function is_destination_kind(kind)
+    return kind == "socket" or kind == "rim" or kind == "slot"
+end
+
+local function classify_preview_symbols(symbols, relevant_symbol)
+    local used = {}
+    local burned = {}
+    local relevant = Symbols.normalize(relevant_symbol)
+
+    for _, symbol in ipairs(symbols or {}) do
+        if symbol == relevant then
+            table.insert(used, symbol)
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    return used, burned
+end
+
+local function symbol_color(symbol)
+    if symbol == Symbols.STRIKE then
+        return COLORS.attack
+    elseif symbol == Symbols.WARD then
+        return COLORS.defense
+    elseif symbol == Symbols.ESSENCE then
+        return COLORS.essence
+    elseif symbol == Symbols.BLOOD then
+        return COLORS.blood
+    end
+
+    return COLORS.muted
+end
+
+local function draw_box(r, fill, outline, radius)
+    set_color(fill or COLORS.panel)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, radius or 6, radius or 6)
+    set_color(outline or COLORS.line)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 6, radius or 6)
+end
+
+local function draw_image(id, r, color, flip_y)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    local sx = r.w / image:getWidth()
+    local sy = r.h / image:getHeight()
+    local y = r.y
+    if flip_y then
+        y = r.y + r.h
+        sy = -sy
+    end
+    love.graphics.draw(image, r.x, y, 0, sx, sy)
+    return true
+end
+
+local function animated_asset_id(base_id, time, max_frames)
+    local frame_count = 0
+    local limit = max_frames or 4
+
+    for index = 1, limit do
+        if Assets.images and Assets.images[base_id .. tostring(index)] then
+            frame_count = index
+        elseif frame_count > 0 then
+            break
+        end
+    end
+
+    if frame_count > 0 then
+        local frame = (math.floor((time or 0) * OVERLAY_ANIMATION_FPS) % frame_count) + 1
+        return base_id .. tostring(frame)
+    end
+
+    if Assets.images and Assets.images[base_id] then
+        return base_id
+    end
+
+    return nil
+end
+
+local function draw_animated_image(base_id, r, time, color, flip_y, max_frames)
+    local asset_id = animated_asset_id(base_id, time, max_frames)
+    if not asset_id then
+        return false
+    end
+
+    return draw_image(asset_id, r, color, flip_y)
+end
+
+local function draw_sprite_outline(r, color, radius)
+    set_color(color or COLORS.line)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 3, radius or 3)
+end
+
+local function truncate_tracked_text(text, max_width)
+    return Text.truncate(text, max_width)
+end
+
+local function draw_text(text, x, y, w, align, color)
+    return Text.draw(text, x, y, w, align, color)
+end
+
+local function draw_single_line_text(text, x, y, w, align, color)
+    return Text.draw_line(text, x, y, w, align, color)
+end
+
+local function wrapped_text_height(text, w)
+    return Text.height(text, w)
+end
+
+local function draw_wrapped_text(text, x, y, w, align, color, gap)
+    draw_text(text, x, y, w, align, color)
+    return y + wrapped_text_height(text, w) + (gap or 4)
+end
+
+local function draw_status_dot(part, x, y)
+    set_color(STATUS_COLORS[part.status or "healthy"] or STATUS_COLORS.healthy)
+    love.graphics.circle("fill", x, y, 4)
+end
+
+local function draw_hp_badge(value, x, y)
+    local total = math.max(1, value or 1)
+    for index = 1, total do
+        local px = x + (index - 1) * 7
+        set_color(COLORS.ink)
+        love.graphics.polygon("fill",
+            px + 3, y,
+            px + 6, y + 3,
+            px + 3, y + 6,
+            px, y + 3)
+    end
+end
+
+local function draw_heart_icon(r, active, color)
+    local asset_id = active and "heart_point" or "heart_point_depleted"
+    if draw_image(asset_id, r) then
+        return
+    end
+
+    local fill = color or COLORS.player
+    local outline = active and COLORS.ink or COLORS.dashed
+    local alpha = active and 0.72 or 0.18
+    local cx = r.x + r.w / 2
+    local top = r.y + 4
+
+    set_color({ fill[1], fill[2], fill[3], alpha })
+    love.graphics.circle("fill", r.x + r.w * 0.32, top + 3, r.w * 0.22)
+    love.graphics.circle("fill", r.x + r.w * 0.68, top + 3, r.w * 0.22)
+    love.graphics.polygon("fill",
+        r.x + 2, top + 5,
+        r.x + r.w - 2, top + 5,
+        cx, r.y + r.h - 2)
+
+    set_color({ outline[1], outline[2], outline[3], active and 0.92 or 0.5 })
+    love.graphics.setLineWidth(1)
+    love.graphics.circle("line", r.x + r.w * 0.32, top + 3, r.w * 0.22)
+    love.graphics.circle("line", r.x + r.w * 0.68, top + 3, r.w * 0.22)
+    love.graphics.line(r.x + 2, top + 5, cx, r.y + r.h - 2, r.x + r.w - 2, top + 5)
+
+    if not active then
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.62 })
+        love.graphics.line(r.x + 5, r.y + 4, r.x + 9, r.y + 9)
+        love.graphics.line(r.x + 9, r.y + 9, r.x + 6, r.y + 14)
+        love.graphics.line(r.x + 11, r.y + 5, r.x + 8, r.y + 10)
+        love.graphics.line(r.x + 8, r.y + 10, r.x + 12, r.y + 15)
+    end
+end
+
+local function draw_damage_decoration(part, card, display_status)
+    local status = display_status or (part and part.status)
+    if not part or status == "healthy" then
+        return
+    end
+
+    if status == "wounded" then
+        set_color({ STATUS_COLORS.wounded[1], STATUS_COLORS.wounded[2], STATUS_COLORS.wounded[3], 0.16 })
+        love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.72 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(card.x + card.w - 24, card.y + 12, card.x + card.w - 16, card.y + 21)
+        love.graphics.line(card.x + card.w - 16, card.y + 21, card.x + card.w - 22, card.y + 31)
+    elseif status == "maimed" then
+        set_color({ 0, 0, 0, 0.24 })
+        love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.68 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(card.x + 12, card.y + 12, card.x + card.w - 12, card.y + card.h - 12)
+        love.graphics.line(card.x + card.w - 16, card.y + 14, card.x + 20, card.y + card.h - 16)
+    end
+end
+
+local function draw_symbol_chip(symbol, x, y, w, h)
+    local chip = rect(x, y, w, h)
+    draw_box(chip, COLORS.surface, symbol_color(symbol), 4)
+    draw_text(Symbols.display(symbol), x + 2, y + 7, w - 4, "center", symbol_color(symbol))
+end
+
+local function draw_symbol_sprite(symbol, x, y, size, outlined, alpha)
+    local normalized = Symbols.normalize(symbol)
+    if normalized == Symbols.BLANK then
+        return false
+    end
+
+    local asset_id = outlined and SYMBOL_OUTLINE_ASSETS[normalized] or SYMBOL_ASSETS[normalized]
+    local image = asset_id and Assets.images and Assets.images[asset_id]
+    if not image then
+        draw_symbol_chip(normalized, x, y, size, size)
+        return false
+    end
+
+    set_color({ 1, 1, 1, alpha or 1 })
+    love.graphics.draw(image, x, y, 0, size / image:getWidth(), size / image:getHeight())
+    return true
+end
+
+local function draw_hex_chip(r, fill, line, active)
+    local inset = 2
+    local points = {
+        r.x + r.w * 0.5, r.y + inset,
+        r.x + r.w - inset, r.y + r.h * 0.26,
+        r.x + r.w - inset, r.y + r.h * 0.74,
+        r.x + r.w * 0.5, r.y + r.h - inset,
+        r.x + inset, r.y + r.h * 0.74,
+        r.x + inset, r.y + r.h * 0.26
+    }
+
+    local fill_color = fill or COLORS.panel
+    if not active then
+        fill_color = { fill_color[1], fill_color[2], fill_color[3], 0.38 }
+    end
+
+    set_color(fill_color)
+    love.graphics.polygon("fill", points)
+    set_color(line or COLORS.line)
+    love.graphics.setLineWidth(active and 2 or 1)
+    love.graphics.polygon("line", points)
+end
+
+local function queue_entry_symbol(entry)
+    local effect = entry and entry.effect or {}
+    if effect.type == "gain_crest" then
+        return Symbols.ESSENCE
+    elseif effect.type == "add_next_symbol" then
+        return effect.symbol or Symbols.STRIKE
+    elseif effect.type == "damage_opponent_part" then
+        return Symbols.STRIKE
+    elseif effect.type == "heal_part" then
+        return Symbols.BLOOD
+    end
+
+    return Symbols.BLANK
+end
+
+local function visible_face_symbols(symbols)
+    local visible_symbols = {}
+    for _, symbol in ipairs(symbols or { Symbols.BLANK }) do
+        local normalized = Symbols.normalize(symbol)
+        if normalized and normalized ~= Symbols.BLANK then
+            table.insert(visible_symbols, normalized)
+        end
+    end
+    return visible_symbols
+end
+
+local function draw_symbol_cluster(symbols, r, alpha, outlined)
+    local visible_symbols = visible_face_symbols(symbols)
+    local count = #visible_symbols
+    if count == 1 then
+        draw_symbol_sprite(visible_symbols[1], r.x + 12, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+    elseif count == 2 then
+        draw_symbol_sprite(visible_symbols[1], r.x + 7, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+        draw_symbol_sprite(visible_symbols[2], r.x + 17, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+    elseif count >= 3 then
+        draw_symbol_sprite(visible_symbols[1], r.x + 5, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+        draw_symbol_sprite(visible_symbols[2], r.x + 12, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+        draw_symbol_sprite(visible_symbols[3], r.x + 19, r.y + 12, SYMBOL_SIZE, outlined, alpha)
+    end
+end
+
+local function draw_burned_symbols(symbols, x, y)
+    for index, symbol in ipairs(symbols or {}) do
+        local px = x + (index - 1) * (SYMBOL_SIZE + 2)
+        draw_symbol_sprite(symbol, px, y, SYMBOL_SIZE, false, 0.42)
+        set_color({ COLORS.attack[1], COLORS.attack[2], COLORS.attack[3], 0.78 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(px - 1, y + SYMBOL_SIZE + 1, px + SYMBOL_SIZE + 1, y - 1)
+    end
+end
+
+local function draw_die_face(symbols, r, is_selected)
+    local outline = is_selected and COLORS.selected or COLORS.line
+    if not draw_image("empty_die", r) then
+        draw_box(r, COLORS.surface, outline, 5)
+    end
+
+    draw_symbol_cluster(symbols, r, 1, false)
+
+    if is_selected then
+        draw_sprite_outline(r, outline, 4)
+    end
+end
+
+local function draw_die_back(r, color)
+    if not draw_image("empty_die", r, { 1, 1, 1, 0.82 }) then
+        draw_box(r, COLORS.surface_low, color or COLORS.line, 5)
+    end
+
+    set_color(color or COLORS.muted)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x + 5, r.y + 5, r.w - 10, r.h - 10, 3, 3)
+    love.graphics.line(r.x + 9, r.y + 10, r.x + r.w - 9, r.y + r.h - 10)
+    love.graphics.line(r.x + r.w - 9, r.y + 10, r.x + 9, r.y + r.h - 10)
+end
+
+local function face_has_degradation(list, face_index)
+    for _, index in ipairs(list or {}) do
+        if tonumber(index) == face_index then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function draw_crack_overlay(r, level)
+    if level == "heavy" then
+        set_color({ 0, 0, 0, 0.28 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.82 })
+        love.graphics.setLineWidth(2)
+        love.graphics.line(r.x + 6, r.y + 7, r.x + r.w - 7, r.y + r.h - 8)
+        love.graphics.line(r.x + r.w - 8, r.y + 8, r.x + 8, r.y + r.h - 7)
+    elseif level == "light" then
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.18 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.85 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(r.x + r.w - 11, r.y + 7, r.x + r.w - 7, r.y + 14)
+        love.graphics.line(r.x + r.w - 7, r.y + 14, r.x + r.w - 12, r.y + 22)
+    end
+end
+
+local function sorted_face_indexes(list)
+    local indexes = {}
+    for _, index in ipairs(list or {}) do
+        local numeric = tonumber(index)
+        if numeric then
+            table.insert(indexes, numeric)
+        end
+    end
+
+    table.sort(indexes)
+    return indexes
+end
+
+local function durable_face_indexes(die)
+    local indexes = {}
+    for face_index = 1, 6 do
+        if not face_has_degradation(die and die.wound_faces, face_index)
+            and not face_has_degradation(die and die.maim_faces, face_index) then
+            table.insert(indexes, face_index)
+        end
+    end
+
+    return indexes
+end
+
+local function make_log_line(event, data)
+    if event == Events.CREST_EXPENDED then
+        return string.format("%s expends %s.", data.combatant.name, data.crest)
+    elseif event == Events.SLOT_FED then
+        return string.format("%s feeds %s.", data.combatant.name, data.slot.name)
+    elseif event == Events.SLOT_RESOLVED then
+        return string.format("%s resolves %s.", data.combatant.name, data.slot.name)
+    elseif event == Events.SPELLMARK_OPENED then
+        return string.format("%s opens %s.", data.combatant.name, data.spellmark.name or "a spellmark")
+    elseif event == Events.SPELLMARK_RESOLVED then
+        return string.format("%s marks %s.", data.combatant.name, data.part.name)
+    elseif event == Events.LATCH_EJECTED then
+        return string.format("Latch ejected from %s.", data.part.name)
+    elseif event == Events.DAMAGE_DEALT then
+        return string.format("%s: %s -> %s.", data.body_part.name, data.status_before, data.status_after)
+    elseif event == Events.PART_RESOLVED then
+        return string.format("%s ATK %d / DEF %d.", data.part.name, data.strike_count, data.ward_count)
+    end
+    return nil
+end
+
+function V2Combat:enter(context)
+    self.context = context or {}
+    self.encounter_id = self.context.encounter_id
+        or (self.context.encounter and self.context.encounter.encounter_id)
+        or "debug.demo"
+    self.context.encounter_id = self.encounter_id
+    self.engine = Engine:new()
+    self.player, self.enemy = Demo.create_combatants(self.context)
+    self.engine:add_combatant(self.player)
+    self.engine:add_combatant(self.enemy)
+
+    self.card_rects = {}
+    self.die_rects = {}
+    self.enemy_die_rects = {}
+    self.crest_rects = {}
+    self.hover = nil
+    self.selected_die = nil
+    self.drag = nil
+    self.auto_allocation = nil
+    self.assignment_visibility = setmetatable({}, { __mode = "k" })
+    self.slot_activation_effects = {}
+    self.hatch_swallow_effects = setmetatable({}, { __mode = "k" })
+    self.combat_end = nil
+    self.claim_ceremony = nil
+    self.claim_result = nil
+    self.ui_time = 0
+    self.title_overflow_warnings = {}
+    self.player_can_allocate = false
+    self.enemy_response_pending = false
+    self.event_visibility_context = nil
+    self.returned_to_overworld = false
+    self.log = {}
+    self.message = "Drag a die to a rim, socket, or hatch. C confirms."
+    self.fonts = {
+        title = new_ui_font(24),
+        body = new_ui_font(12),
+        small = new_ui_font(10),
+        tiny = new_ui_font(9)
+    }
+
+    self:register_events()
+    self.engine:start_combat()
+    self:begin_allocation_phase()
+end
+
+function V2Combat:register_events()
+    local tracked = {
+        Events.CREST_EXPENDED,
+        Events.SLOT_FED,
+        Events.SLOT_RESOLVED,
+        Events.SPELLMARK_OPENED,
+        Events.SPELLMARK_RESOLVED,
+        Events.LATCH_EJECTED,
+        Events.PART_RESOLVED,
+        Events.DAMAGE_DEALT
+    }
+
+    for _, event_name in ipairs(tracked) do
+        self.engine:on(event_name, function(data)
+            if not self:should_log_event(event_name, data) then
+                return
+            end
+
+            local line = make_log_line(event_name, data)
+            if line then
+                table.insert(self.log, 1, line)
+                while #self.log > 8 do
+                    table.remove(self.log)
+                end
+            end
+        end)
+    end
+
+    self.engine:on(Events.SLOT_RESOLVED, function(data)
+        if self:should_log_event(Events.SLOT_RESOLVED, data) then
+            self:show_slot_activation(data)
+        end
+    end)
+end
+
+function V2Combat:should_log_event(_event_name, data)
+    if self.event_visibility_context == "hidden" and data and data.combatant == self.enemy then
+        return false
+    end
+
+    return true
+end
+
+function V2Combat:show_slot_activation(data)
+    if not data then
+        return
+    end
+
+    table.insert(self.slot_activation_effects, {
+        part = data.part,
+        slot = data.slot,
+        target_part = data.effect and data.effect.target_part,
+        effect = data.effect,
+        elapsed = 0,
+        duration = SLOT_EFFECT_DURATION
+    })
+end
+
+function V2Combat:main_x()
+    return MARGIN + GLOBAL_SPINE_WIDTH + MAIN_GAP
+end
+
+function V2Combat:rail_rect()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    return rect(width - RAIL_WIDTH - MARGIN, MARGIN, RAIL_WIDTH, height - MARGIN * 2)
+end
+
+function V2Combat:global_spine_rect()
+    local height = love.graphics.getHeight()
+    return rect(MARGIN, MARGIN, GLOBAL_SPINE_WIDTH, height - MARGIN * 2)
+end
+
+function V2Combat:main_width()
+    local rail = self:rail_rect()
+    return rail.x - self:main_x() - MAIN_GAP
+end
+
+function V2Combat:enemy_strip_rect()
+    return rect(self:main_x(), MARGIN, self:main_width(), STRIP_HEIGHT)
+end
+
+function V2Combat:enemy_drawer_rect()
+    local enemy_strip = self:enemy_strip_rect()
+    return rect(self:main_x(), enemy_strip.y + enemy_strip.h + DRAWER_GAP, self:main_width(), DRAWER_HEIGHT)
+end
+
+function V2Combat:player_drawer_rect()
+    local player_strip = self:player_strip_rect()
+    return rect(self:main_x(), player_strip.y - DRAWER_HEIGHT - DRAWER_GAP, self:main_width(), DRAWER_HEIGHT)
+end
+
+function V2Combat:center_rect()
+    local enemy_drawer = self:enemy_drawer_rect()
+    local player_drawer = self:player_drawer_rect()
+    local y = enemy_drawer.y + enemy_drawer.h + DRAWER_GAP
+    return rect(self:main_x(), y, self:main_width(), player_drawer.y - y - DRAWER_GAP)
+end
+
+function V2Combat:drawer_dice_area(drawer)
+    return rect(drawer.x + 96, drawer.y + 9, drawer.w - 196, DIE_SIZE)
+end
+
+function V2Combat:drawer_crest_y(drawer, side)
+    if side == "enemy" then
+        return drawer.y + drawer.h - CREST_SIZE - 3
+    end
+
+    return drawer.y + 3
+end
+
+function V2Combat:player_strip_rect()
+    local height = love.graphics.getHeight()
+    return rect(self:main_x(), height - MARGIN - STRIP_HEIGHT, self:main_width(), STRIP_HEIGHT)
+end
+
+function V2Combat:layout_cards(combatant, strip, side)
+    local total_w = BODY_PART_SLOTS * CARD_WIDTH + (BODY_PART_SLOTS - 1) * CARD_GAP
+    local start_x = strip.x + math.floor((strip.w - total_w) / 2)
+    local card_w = CARD_WIDTH
+    local card_h = CARD_HEIGHT
+    local y = strip.y + TITLE_MARGIN + TITLE_HEIGHT
+    if side == "player" then
+        y = strip.y + strip.h - TITLE_MARGIN - TITLE_HEIGHT - card_h
+    end
+
+    for index = 1, BODY_PART_SLOTS do
+        local part = (combatant.body_parts or {})[index]
+        local x = start_x + (index - 1) * (card_w + CARD_GAP)
+        local card = rect(x, y, card_w, card_h)
+        local left_x = card.x + 4
+        local right_x = card.x + BP_LEFT_SECTOR_WIDTH
+        local right_w = card.w - BP_LEFT_SECTOR_WIDTH - 4
+        local rim_y = side == "enemy" and (card.y + card.h - 6) or (card.y - DIE_SIZE + 6)
+        local rim = rect(left_x + 2, rim_y, DIE_SIZE, DIE_SIZE)
+        local socket_y = side == "enemy" and (rim_y - DIE_SIZE) or (card.y + 6)
+        local socket = rect(left_x + 2, socket_y, DIE_SIZE, DIE_SIZE)
+        local hatch = rect(right_x + math.floor((right_w - DIE_SIZE) / 2), card.y + 24, DIE_SIZE, DIE_SIZE)
+        local track = rect(right_x + 2, card.y + 62, right_w - 4, SYMBOL_SIZE * 2 + SLOT_PIP_ROW_GAP)
+        local slot_label = rect(right_x + 1, card.y + 7, right_w - 2, 12)
+        local label_y = side == "enemy" and (card.y - TITLE_HEIGHT) or (card.y + card.h)
+        local label = rect(card.x, label_y, card.w, TITLE_HEIGHT)
+        local meta_y = side == "enemy" and (card.y + 10) or (card.y + card.h - 16)
+        local meta = rect(left_x + 8, meta_y, 28, 10)
+
+        if part then
+            self.card_rects[part] = {
+                card = card,
+                rim = rim,
+                socket = socket,
+                hatch = hatch,
+                track = track,
+                slot_label = slot_label,
+                label = label,
+                meta = meta,
+                side = side,
+                combatant = combatant,
+                part = part,
+                slot_index = index
+            }
+        else
+            table.insert(self.empty_card_rects, {
+                card = card,
+                label = label,
+                side = side,
+                slot_index = index
+            })
+        end
+    end
+end
+
+function V2Combat:layout()
+    self.card_rects = {}
+    self.die_rects = {}
+    self.enemy_die_rects = {}
+    self.crest_rects = {}
+    self.enemy_crest_rects = {}
+    self.empty_card_rects = {}
+    self.drawers = {
+        enemy = self:enemy_drawer_rect(),
+        player = self:player_drawer_rect()
+    }
+
+    self:layout_cards(self.enemy, self:enemy_strip_rect(), "enemy")
+    self:layout_cards(self.player, self:player_strip_rect(), "player")
+
+    local function layout_pool_dice(pool, area, rects)
+        local total_w = math.max(0, #pool * DIE_SIZE + math.max(0, #pool - 1) * 8)
+        local start_x = area.x + math.floor((area.w - total_w) / 2)
+        local y = area.y
+
+        for index, die in ipairs(pool) do
+            rects[die] = rect(start_x + (index - 1) * (DIE_SIZE + 8), y, DIE_SIZE, DIE_SIZE)
+        end
+    end
+
+    local enemy_pool = self.engine:get_pool(self.enemy)
+    local player_pool = self.engine:get_pool(self.player)
+
+    layout_pool_dice(enemy_pool, self:drawer_dice_area(self.drawers.enemy), self.enemy_die_rects)
+    layout_pool_dice(player_pool, self:drawer_dice_area(self.drawers.player), self.die_rects)
+
+    local function layout_crests(combatant, combatant_rects, drawer, side)
+        local crest_x = drawer.x + 10
+        local crest_y = self:drawer_crest_y(drawer, side)
+        local visible_index = 0
+        for _, crest in ipairs(CREST_ORDER) do
+            if combatant:get_crest_count(crest) > 0 then
+                combatant_rects[crest] = rect(crest_x + visible_index * (CREST_SIZE + 7), crest_y, CREST_SIZE, CREST_SIZE)
+                visible_index = visible_index + 1
+            end
+        end
+    end
+
+    layout_crests(self.enemy, self.enemy_crest_rects, self.drawers.enemy, "enemy")
+    layout_crests(self.player, self.crest_rects, self.drawers.player, "player")
+
+    self.confirm_rect = rect(self.drawers.player.x + self.drawers.player.w - 92, self.drawers.player.y + 3, 84, 48)
+
+    local spine = self:global_spine_rect()
+    local heart_stack_h = HEART_STACK_MAX * HEART_ICON_SIZE + (HEART_STACK_MAX - 1) * HEART_ICON_GAP
+    local heart_x = spine.x + math.floor((spine.w - HEART_ICON_SIZE) / 2)
+    local enemy_heart_y = spine.y + 10
+    local player_heart_y = spine.y + spine.h - 10 - heart_stack_h
+
+    local function layout_heart_stack(start_y)
+        local rects = {}
+        for index = 1, HEART_STACK_MAX do
+            rects[index] = rect(heart_x, start_y + (index - 1) * (HEART_ICON_SIZE + HEART_ICON_GAP), HEART_ICON_SIZE, HEART_ICON_SIZE)
+        end
+        return rects
+    end
+
+    self.enemy_heart_rects = layout_heart_stack(enemy_heart_y)
+    self.player_heart_rects = layout_heart_stack(player_heart_y)
+    self.queue_rect = rect(spine.x + 4, spine.y + math.floor((spine.h - 190) / 2), 24, 190)
+
+    local initiative = tostring(self.engine and self.engine.initiative or "player")
+    local initiative_y = spine.y + math.floor((spine.h - 24) / 2)
+    if initiative == "enemy" then
+        initiative_y = enemy_heart_y + heart_stack_h + 10
+    elseif initiative == "player" then
+        initiative_y = player_heart_y - 34
+    end
+    self.initiative_rect = rect(spine.x + 4, initiative_y, 24, 24)
+end
+
+function V2Combat:update(dt)
+    self:layout()
+    local delta = dt or 0
+    self.ui_time = (self.ui_time or 0) + delta
+    local mx, my = love.mouse.getPosition()
+
+    if self.claim_ceremony then
+        self:update_hatch_swallow_effects(delta)
+        self:update_slot_activation_effects(delta)
+        self:update_claim_ceremony(delta)
+        self:update_claim_hover(mx, my)
+        return
+    end
+
+    if self.combat_end then
+        self:update_hatch_swallow_effects(delta)
+        self:update_slot_activation_effects(delta)
+        self:update_combat_end(delta)
+        self:update_hover(mx, my)
+        return
+    end
+
+    if self.drag then
+        self.drag.x = mx
+        self.drag.y = my
+    end
+    self:update_auto_allocation(delta)
+    self:update_resolution_playback(delta)
+    self:update_hatch_swallow_effects(delta)
+    self:update_slot_activation_effects(delta)
+
+    if self.engine.state == "COMPLETE" and not self.resolution_playback and not self.auto_allocation then
+        self:begin_combat_end()
+    end
+
+    self:update_hover(mx, my)
+end
+
+function V2Combat:update_slot_activation_effects(dt)
+    for index = #(self.slot_activation_effects or {}), 1, -1 do
+        local effect = self.slot_activation_effects[index]
+        effect.elapsed = (effect.elapsed or 0) + (dt or 0)
+        if effect.elapsed >= (effect.duration or SLOT_EFFECT_DURATION) then
+            table.remove(self.slot_activation_effects, index)
+        end
+    end
+end
+
+function V2Combat:show_hatch_swallow(part)
+    if not part then
+        return
+    end
+
+    self.hatch_swallow_effects = self.hatch_swallow_effects or setmetatable({}, { __mode = "k" })
+    self.hatch_swallow_effects[part] = HATCH_SWALLOW_DURATION
+end
+
+function V2Combat:update_hatch_swallow_effects(dt)
+    local effects = self.hatch_swallow_effects
+    if not effects then
+        return
+    end
+
+    for part, remaining in pairs(effects) do
+        local next_remaining = (remaining or 0) - (dt or 0)
+        if next_remaining <= 0 then
+            effects[part] = nil
+        else
+            effects[part] = next_remaining
+        end
+    end
+end
+
+function V2Combat:is_hatch_swallowing(part)
+    return part and self.hatch_swallow_effects and self.hatch_swallow_effects[part] ~= nil
+end
+
+function V2Combat:hatch_swallow_frame(part)
+    local remaining = part and self.hatch_swallow_effects and self.hatch_swallow_effects[part]
+    if not remaining then
+        return nil
+    end
+
+    local progress = 1 - math.max(0, math.min(1, remaining / HATCH_SWALLOW_DURATION))
+    if progress < 0.25 then
+        return "die-hatch4"
+    elseif progress < 0.5 then
+        return "die-hatch3"
+    elseif progress < 0.75 then
+        return "die-hatch2"
+    end
+
+    return "die-hatch1"
+end
+
+function V2Combat:claimable_enemy_parts()
+    local parts = {}
+
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        if part.status ~= "maimed" then
+            table.insert(parts, part)
+        end
+    end
+
+    return parts
+end
+
+function V2Combat:player_part_for_claim_slot(slot_id)
+    for _, part in ipairs(self.player and self.player.body_parts or {}) do
+        if part.dreamform_slot == slot_id then
+            return part
+        end
+    end
+
+    for index, existing_slot in ipairs(CLAIM_SLOT_ORDER) do
+        if existing_slot == slot_id then
+            return self.player and self.player.body_parts and self.player.body_parts[index] or nil
+        end
+    end
+
+    return nil
+end
+
+function V2Combat:claim_slot_options_for_part(part)
+    local wanted_type = normalized_part_type(part)
+    local options = {}
+
+    for _, slot_id in ipairs(CLAIM_SLOT_ORDER) do
+        if not wanted_type or CLAIM_SLOT_TYPES[slot_id] == wanted_type then
+            table.insert(options, {
+                slot_id = slot_id,
+                label = claim_slot_label(slot_id),
+                part = self:player_part_for_claim_slot(slot_id)
+            })
+        end
+    end
+
+    return options
+end
+
+function V2Combat:preferred_claim_slot_index(part, options)
+    if #options <= 1 then
+        return 1
+    end
+
+    local text = string.lower(tostring((part and part.id) or "") .. " " .. tostring(part and part.name or ""))
+    local preferred_suffix = nil
+    if text:find("left", 1, true) then
+        preferred_suffix = "_l"
+    elseif text:find("right", 1, true) then
+        preferred_suffix = "_r"
+    end
+
+    if preferred_suffix then
+        for index, option in ipairs(options) do
+            if option.slot_id and option.slot_id:sub(-2) == preferred_suffix then
+                return index
+            end
+        end
+    end
+
+    return 1
+end
+
+function V2Combat:begin_claim_ceremony(title)
+    local candidates = self:claimable_enemy_parts()
+    self.combat_end = nil
+    self.claim_result = nil
+    self.claim_ceremony = {
+        phase = #candidates > 0 and "part" or "empty",
+        title = title or "You Win",
+        candidates = candidates,
+        selected_part_index = 1,
+        selected_slot_index = 1,
+        slot_options = {},
+        animation = nil
+    }
+    self.player_can_allocate = false
+    self.enemy_response_pending = false
+    self.selected_die = nil
+    self.drag = nil
+
+    if #candidates > 0 then
+        self.message = "Choose one echo to graft, or leave your dreamform unchanged."
+    else
+        self.message = "No claimable echoes remain."
+    end
+end
+
+function V2Combat:selected_claim_part()
+    local ceremony = self.claim_ceremony
+    return ceremony and ceremony.candidates and ceremony.candidates[ceremony.selected_part_index] or nil
+end
+
+function V2Combat:selected_claim_slot()
+    local ceremony = self.claim_ceremony
+    return ceremony and ceremony.slot_options and ceremony.slot_options[ceremony.selected_slot_index] or nil
+end
+
+function V2Combat:move_claim_part(delta)
+    local ceremony = self.claim_ceremony
+    local count = ceremony and #(ceremony.candidates or {}) or 0
+    if count == 0 then
+        return false
+    end
+
+    ceremony.selected_part_index = ((ceremony.selected_part_index - 1 + delta) % count) + 1
+    self.message = "Claim: " .. claim_part_name(self:selected_claim_part()) .. "."
+    return true
+end
+
+function V2Combat:move_claim_slot(delta)
+    local ceremony = self.claim_ceremony
+    local count = ceremony and #(ceremony.slot_options or {}) or 0
+    if count == 0 then
+        return false
+    end
+
+    ceremony.selected_slot_index = ((ceremony.selected_slot_index - 1 + delta) % count) + 1
+    local option = self:selected_claim_slot()
+    self.message = "Replace: " .. (option and option.label or "Body Part") .. "."
+    return true
+end
+
+function V2Combat:confirm_claim_part()
+    local ceremony = self.claim_ceremony
+    local part = self:selected_claim_part()
+    if not (ceremony and part) then
+        return false
+    end
+
+    local options = self:claim_slot_options_for_part(part)
+    if #options == 0 then
+        self.message = "This echo has nowhere to take root."
+        return true
+    elseif #options == 1 then
+        self:start_claim_animation(part, options[1])
+        return true
+    end
+
+    ceremony.phase = "slot"
+    ceremony.slot_options = options
+    ceremony.selected_slot_index = self:preferred_claim_slot_index(part, options)
+    local option = self:selected_claim_slot()
+    self.message = "Choose which " .. string.lower(normalized_part_type(part) or "part") .. " changes."
+    if option then
+        self.message = self.message .. " " .. option.label .. " selected."
+    end
+    return true
+end
+
+function V2Combat:confirm_claim_slot()
+    local part = self:selected_claim_part()
+    local option = self:selected_claim_slot()
+    if not (part and option) then
+        return false
+    end
+
+    self:start_claim_animation(part, option)
+    return true
+end
+
+function V2Combat:start_claim_animation(part, slot_option)
+    if not (part and slot_option and slot_option.slot_id) then
+        return
+    end
+
+    self:layout()
+    local source_layout = copy_card_layout(self.card_rects[part])
+    local replaced_part = slot_option.part
+    local target_layout = copy_card_layout(replaced_part and self.card_rects[replaced_part])
+    if not target_layout then
+        target_layout = copy_card_layout(source_layout)
+    end
+
+    self.claim_result = {
+        part = part,
+        slot_id = slot_option.slot_id,
+        replaced_part = replaced_part
+    }
+    self.claim_ceremony.phase = "animate"
+    self.claim_ceremony.animation = {
+        claimed_part = part,
+        replaced_part = replaced_part,
+        source_layout = source_layout,
+        target_layout = target_layout,
+        elapsed = 0,
+        duration = CLAIM_ANIMATION_DURATION,
+        return_delay = CLAIM_RETURN_DELAY
+    }
+    self.message = claim_part_name(part) .. " takes root as " .. claim_slot_label(slot_option.slot_id) .. "."
+end
+
+function V2Combat:skip_claim_ceremony()
+    self.claim_result = nil
+    self:return_to_overworld()
+end
+
+function V2Combat:update_claim_ceremony(dt)
+    local ceremony = self.claim_ceremony
+    local animation = ceremony and ceremony.animation
+    if not animation then
+        return
+    end
+
+    animation.elapsed = (animation.elapsed or 0) + (dt or 0)
+    local total = (animation.duration or CLAIM_ANIMATION_DURATION) + (animation.return_delay or CLAIM_RETURN_DELAY)
+    if animation.elapsed >= total then
+        self:return_to_overworld()
+    end
+end
+
+function V2Combat:update_claim_hover(mx, my)
+    self.hover = nil
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return
+    end
+
+    if ceremony.phase == "part" then
+        for index, part in ipairs(ceremony.candidates or {}) do
+            local layout = self.card_rects[part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_part", part = part, candidate_index = index, data = layout }
+                return
+            end
+        end
+
+        for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+            local layout = self.card_rects[part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_unavailable", part = part, data = layout }
+                return
+            end
+        end
+    elseif ceremony.phase == "slot" then
+        for index, option in ipairs(ceremony.slot_options or {}) do
+            local layout = option.part and self.card_rects[option.part]
+            if layout and (point_in_rect(mx, my, layout.card) or point_in_rect(mx, my, layout.label)) then
+                self.hover = { kind = "claim_slot", part = option.part, slot_option = option, slot_index = index, data = layout }
+                return
+            end
+        end
+    end
+end
+
+function V2Combat:claim_actionpressed(action)
+    local ceremony = self.claim_ceremony
+    if not ceremony then
+        return false
+    end
+
+    if ceremony.phase == "animate" then
+        return true
+    end
+
+    if ceremony.phase == "empty" then
+        if action == "confirm" or action == "cancel" or action == "menu" then
+            self:return_to_overworld()
+            return true
+        end
+        return false
+    end
+
+    if ceremony.phase == "part" then
+        if action == "cancel" or action == "menu" then
+            self:skip_claim_ceremony()
+            return true
+        elseif action == "move_left" or action == "move_up" then
+            return self:move_claim_part(-1)
+        elseif action == "move_right" or action == "move_down" then
+            return self:move_claim_part(1)
+        elseif action == "confirm" then
+            return self:confirm_claim_part()
+        end
+    elseif ceremony.phase == "slot" then
+        if action == "cancel" then
+            ceremony.phase = "part"
+            self.message = "Choose one echo to graft, or leave your dreamform unchanged."
+            return true
+        elseif action == "menu" then
+            self:skip_claim_ceremony()
+            return true
+        elseif action == "move_left" or action == "move_up" then
+            return self:move_claim_slot(-1)
+        elseif action == "move_right" or action == "move_down" then
+            return self:move_claim_slot(1)
+        elseif action == "confirm" then
+            return self:confirm_claim_slot()
+        end
+    end
+
+    return false
+end
+
+function V2Combat:claim_mousepressed(x, y)
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return true
+    end
+
+    if ceremony.phase == "empty" then
+        self:return_to_overworld()
+        return true
+    end
+
+    self:update_claim_hover(x, y)
+    local hover = self.hover
+    if ceremony.phase == "part" then
+        if hover and hover.kind == "claim_part" then
+            if ceremony.selected_part_index == hover.candidate_index then
+                self:confirm_claim_part()
+            else
+                ceremony.selected_part_index = hover.candidate_index
+                self.message = "Claim: " .. claim_part_name(hover.part) .. "."
+            end
+            return true
+        elseif hover and hover.kind == "claim_unavailable" then
+            self.message = "Maimed echoes cannot be claimed."
+            return true
+        end
+    elseif ceremony.phase == "slot" and hover and hover.kind == "claim_slot" then
+        if ceremony.selected_slot_index == hover.slot_index then
+            self:confirm_claim_slot()
+        else
+            ceremony.selected_slot_index = hover.slot_index
+            self.message = "Replace: " .. (hover.slot_option and hover.slot_option.label or "Body Part") .. "."
+        end
+        return true
+    end
+
+    return true
+end
+
+function V2Combat:begin_combat_end()
+    if self.combat_end then
+        return
+    end
+
+    local winner = self.engine and self.engine.winner
+    local result = "draw"
+    local title = "Combat Ended"
+    if winner == self.player then
+        result = "win"
+        title = "You Win"
+    elseif winner == self.enemy then
+        result = "lose"
+        title = "You Lose"
+    end
+
+    if result == "win" then
+        self:begin_claim_ceremony(title)
+        return
+    end
+
+    self.combat_end = {
+        result = result,
+        title = title,
+        elapsed = 0,
+        delay = COMBAT_END_RETURN_DELAY
+    }
+    self.player_can_allocate = false
+    self.enemy_response_pending = false
+    self.selected_die = nil
+    self.drag = nil
+    self.message = title .. ". Returning to the Dream."
+end
+
+function V2Combat:update_combat_end(dt)
+    self.combat_end.elapsed = (self.combat_end.elapsed or 0) + (dt or 0)
+    if self.combat_end.elapsed >= (self.combat_end.delay or COMBAT_END_RETURN_DELAY) then
+        self:return_to_overworld()
+    end
+end
+
+local function snapshot_part(part)
+    return {
+        instance_id = part.instance_id,
+        dreamform_slot = part.dreamform_slot,
+        def_id = part.id,
+        id = part.id,
+        name = part.name,
+        type = part.type,
+        status = part.status or "healthy",
+        hp_value = part.hp_value
+    }
+end
+
+local function snapshot_parts(combatant)
+    local parts = {}
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        table.insert(parts, snapshot_part(part))
+    end
+    return parts
+end
+
+function V2Combat:outcome()
+    if self.combat_end then
+        if self.combat_end.result == "win" then
+            return "victory"
+        elseif self.combat_end.result == "lose" then
+            return "defeat"
+        end
+        return "draw"
+    end
+
+    local winner = self.engine and self.engine.winner
+    if winner == self.player then
+        return "victory"
+    elseif winner == self.enemy then
+        return "defeat"
+    end
+    return "draw"
+end
+
+function V2Combat:build_combat_result(forced_outcome)
+    local outcome = forced_outcome or self:outcome()
+    local claimable_parts = {}
+    local claimed_part = nil
+    local claimed_slot = nil
+    local replaced_part = nil
+
+    if outcome == "victory" then
+        for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+            if part.status ~= "maimed" then
+                table.insert(claimable_parts, snapshot_part(part))
+            end
+        end
+
+        if self.claim_result and self.claim_result.part then
+            claimed_part = snapshot_part(self.claim_result.part)
+            claimed_slot = self.claim_result.slot_id
+            if self.claim_result.replaced_part then
+                replaced_part = snapshot_part(self.claim_result.replaced_part)
+            end
+        end
+    end
+
+    return {
+        type = "combat_result",
+        outcome = outcome,
+        encounter_id = self.encounter_id,
+        player_parts = snapshot_parts(self.player),
+        enemy_parts = snapshot_parts(self.enemy),
+        claimable_parts = claimable_parts,
+        claimed_part = claimed_part,
+        claimed_slot = claimed_slot,
+        replaced_part = replaced_part
+    }
+end
+
+function V2Combat:return_to_overworld(forced_outcome)
+    if self.returned_to_overworld then
+        return
+    end
+
+    self.returned_to_overworld = true
+    local result = self:build_combat_result(forced_outcome)
+    if GameState.size and GameState.size() > 1 then
+        GameState.pop(result)
+    else
+        GameState.switch(require("states.overworld"))
+    end
+end
+
+function V2Combat:update_hover(mx, my)
+    self.hover = nil
+
+    if not self.drag then
+        for die, die_rect in pairs(self.die_rects) do
+            if point_in_rect(mx, my, die_rect) then
+                self.hover = { kind = "die", die = die, combatant = self.player }
+                return
+            end
+        end
+
+        for die, die_rect in pairs(self.enemy_die_rects) do
+            if point_in_rect(mx, my, die_rect) then
+                self.hover = { kind = "die", die = die, combatant = self.enemy }
+                return
+            end
+        end
+    end
+
+    for crest, crest_rect in pairs(self.crest_rects) do
+        if point_in_rect(mx, my, crest_rect) then
+            self.hover = { kind = "crest", crest = crest, combatant = self.player }
+            return
+        end
+    end
+
+    for crest, crest_rect in pairs(self.enemy_crest_rects or {}) do
+        if point_in_rect(mx, my, crest_rect) then
+            self.hover = { kind = "crest", crest = crest, combatant = self.enemy }
+            return
+        end
+    end
+
+    if point_in_rect(mx, my, self.confirm_rect) then
+        self.hover = { kind = "confirm" }
+        return
+    end
+
+    for part, data in pairs(self.card_rects) do
+        if point_in_rect(mx, my, data.socket) then
+            self.hover = { kind = "socket", part = part, data = data }
+            return
+        elseif point_in_rect(mx, my, data.rim) then
+            self.hover = { kind = "rim", part = part, data = data }
+            return
+        elseif point_in_rect(mx, my, data.hatch) or point_in_rect(mx, my, data.track) then
+            self.hover = { kind = "slot", part = part, data = data }
+            return
+        elseif point_in_rect(mx, my, data.card) or point_in_rect(mx, my, data.label) then
+            self.hover = { kind = "part", part = part, data = data }
+            return
+        end
+    end
+end
+
+function V2Combat:selected_valid_destinations()
+    local die = self:active_die()
+    if not die then
+        return nil
+    end
+    return self.engine:get_valid_destinations(self.player, die)
+end
+
+function V2Combat:active_die()
+    return self.drag and self.drag.die or self.selected_die
+end
+
+function V2Combat:is_valid_destination(kind, part)
+    local valid = self:selected_valid_destinations()
+    if not valid then
+        return false
+    end
+
+    if kind == "socket" then
+        return contains(valid.sockets, part)
+    elseif kind == "rim" then
+        return contains(valid.rims, part)
+    elseif kind == "slot" then
+        return contains(valid.slots, part)
+    end
+
+    return false
+end
+
+function V2Combat:slot_feed_preview(die, part)
+    local effective = self.engine:get_effective_symbols(self.player, die, "slot")
+    local slot = part and part.slot
+    local cost = slot and slot.cost or {}
+    local lit = {}
+    local burned = {}
+    local hungry = part and Keywords.slot_is_hungry(part, slot)
+
+    for _, symbol in ipairs(effective or {}) do
+        local matched_index = nil
+
+        if symbol ~= Symbols.BLANK then
+            for index, required in ipairs(cost) do
+                if not (part.slot_charge and part.slot_charge[index]) and not lit[index] then
+                    if hungry or required == symbol then
+                        matched_index = index
+                        break
+                    end
+                end
+            end
+        end
+
+        if matched_index then
+            lit[matched_index] = symbol
+        elseif symbol ~= Symbols.BLANK then
+            table.insert(burned, symbol)
+        end
+    end
+
+    local lit_symbols = {}
+    for index, symbol in pairs(lit) do
+        table.insert(lit_symbols, {
+            index = index,
+            symbol = symbol,
+            required = cost[index]
+        })
+    end
+    table.sort(lit_symbols, function(a, b) return a.index < b.index end)
+
+    local ordered = {}
+    for _, entry in ipairs(lit_symbols) do
+        table.insert(ordered, entry.symbol)
+    end
+
+    return ordered, burned, lit_symbols
+end
+
+function V2Combat:active_die_preview_lines()
+    local lines = {}
+    local die = self:active_die()
+    if not die then
+        return lines
+    end
+
+    local hover = self.hover
+    local preview_destination = hover and is_destination_kind(hover.kind) and hover.kind or nil
+    local effective = self.engine:get_effective_symbols(self.player, die, preview_destination)
+    table.insert(lines, (self.drag and "Held: " or "Selected: ") .. Symbols.format_face(effective))
+    table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
+
+    if hover and is_destination_kind(hover.kind) then
+        local valid = self:is_valid_destination(hover.kind, hover.part)
+        table.insert(lines, "")
+        if hover.kind == "socket" then
+            local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", hover.part, effective)
+            table.insert(lines, (spellmark and "Drop: mark " or "Drop: defend ") .. (hover.part.name or hover.part.id))
+            table.insert(lines, "Uses: " .. Symbols.format_face(used))
+            if #burned > 0 then
+                table.insert(lines, "Burns: " .. Symbols.format_face(burned))
+            end
+        elseif hover.kind == "rim" then
+            local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "rim", hover.part, effective)
+            table.insert(lines, (spellmark and "Drop: mark " or "Drop: attack ") .. (hover.part.name or hover.part.id))
+            table.insert(lines, "Uses: " .. Symbols.format_face(used))
+            if #burned > 0 then
+                table.insert(lines, "Burns: " .. Symbols.format_face(burned))
+            end
+        elseif hover.kind == "slot" then
+            local slot_name = hover.part.slot and hover.part.slot.name or "Slot"
+            table.insert(lines, "Drop: feed " .. slot_name)
+            local lit, burned = self:slot_feed_preview(die, hover.part)
+            table.insert(lines, "Lights: " .. Symbols.format_face(lit))
+            if #burned > 0 then
+                table.insert(lines, "Burns: " .. Symbols.format_face(burned))
+            end
+        end
+
+        if not valid then
+            table.insert(lines, "Not legal for this die.")
+        end
+    else
+        table.insert(lines, "")
+        table.insert(lines, self.drag and "Drop onto a glowing destination." or "Hover a glowing destination, then click to assign.")
+    end
+
+    return lines
+end
+
+function V2Combat:is_input_locked()
+    return self.claim_ceremony ~= nil
+        or self.combat_end ~= nil
+        or self.auto_allocation ~= nil
+        or self.resolution_playback ~= nil
+        or not self.player_can_allocate
+end
+
+function V2Combat:begin_allocation_phase()
+    self.selected_die = nil
+    self.drag = nil
+    self.player_can_allocate = false
+    self.enemy_response_pending = false
+
+    local initiative = self.engine.initiative or "player"
+    if initiative == "player" then
+        self:start_auto_allocation(self.enemy, {
+            visibility = "visible",
+            on_complete = function()
+                self.player_can_allocate = true
+                self.message = "Enemy allocation complete. Drag a die to respond."
+            end
+        })
+    elseif initiative == "contested" then
+        self:start_auto_allocation(self.enemy, {
+            visibility = "hidden",
+            on_complete = function()
+                self.player_can_allocate = true
+                self.message = "Enemy commitment hidden. Allocate your dice."
+            end
+        })
+    elseif initiative == "enemy" then
+        self.player_can_allocate = true
+        self.enemy_response_pending = true
+        self.message = "Player commits first. Enemy will respond after confirm."
+    else
+        self.player_can_allocate = true
+        self.message = "Allocate your dice."
+    end
+end
+
+function V2Combat:find_next_auto_allocation_move(combatant)
+    if V2AI.choose_next_allocation then
+        return V2AI.choose_next_allocation(self.engine, combatant)
+    end
+
+    for _, die in ipairs(self.engine:get_pool(combatant)) do
+        local move = V2AI.choose_allocation(self.engine, combatant, die)
+        if move then
+            return move
+        end
+    end
+
+    return nil
+end
+
+function V2Combat:source_rect_for_die(combatant, die)
+    if combatant == self.enemy and self.enemy_die_rects[die] then
+        return self.enemy_die_rects[die]
+    elseif combatant == self.player and self.die_rects[die] then
+        return self.die_rects[die]
+    end
+
+    local layout = die and die.source_part and self.card_rects[die.source_part]
+    if layout then
+        return centered_rect(layout.card, DIE_SIZE)
+    end
+
+    return centered_rect(self:center_rect(), DIE_SIZE)
+end
+
+function V2Combat:target_rect_for_move(move)
+    local layout = move and move.part and self.card_rects[move.part]
+    if not layout then
+        return centered_rect(self:center_rect(), DIE_SIZE)
+    end
+
+    if move.kind == "rim" then
+        return layout.rim
+    elseif move.kind == "socket" then
+        return layout.socket
+    elseif move.kind == "slot" then
+        return layout.hatch
+    end
+
+    return centered_rect(layout.card, DIE_SIZE)
+end
+
+function V2Combat:start_auto_allocation(combatant, options)
+    options = options or {}
+    self:layout()
+    self.auto_allocation = {
+        combatant = combatant,
+        visibility = options.visibility or "visible",
+        on_complete = options.on_complete,
+        current = nil,
+        phase = "idle",
+        timer = 0,
+        move_count = 0
+    }
+    self.player_can_allocate = false
+    self.message = (combatant.name or "Enemy") .. " is allocating."
+    self:start_next_auto_allocation_move()
+end
+
+function V2Combat:finish_auto_allocation()
+    local sequence = self.auto_allocation
+    self.auto_allocation = nil
+
+    if sequence and sequence.on_complete then
+        sequence.on_complete()
+    else
+        self.player_can_allocate = true
+    end
+end
+
+function V2Combat:start_next_auto_allocation_move()
+    local sequence = self.auto_allocation
+    if not sequence then
+        return
+    end
+
+    self:layout()
+    local move = self:find_next_auto_allocation_move(sequence.combatant)
+    if not move then
+        self:finish_auto_allocation()
+        return
+    end
+
+    sequence.current = {
+        move = move,
+        die = move.die,
+        kind = move.kind,
+        part = move.part,
+        source = copy_rect(self:source_rect_for_die(sequence.combatant, move.die)),
+        target = copy_rect(self:target_rect_for_move(move)),
+        elapsed = 0
+    }
+    sequence.phase = "move"
+    sequence.timer = 0
+    sequence.move_count = sequence.move_count + 1
+end
+
+function V2Combat:assignment_for_move(move)
+    if not move or not move.part then
+        return nil
+    end
+
+    if move.kind == "rim" then
+        return self.engine.assignments.rims[move.part]
+    elseif move.kind == "socket" then
+        return self.engine.assignments.sockets[move.part]
+    end
+
+    return nil
+end
+
+function V2Combat:commit_auto_allocation_current()
+    local sequence = self.auto_allocation
+    local current = sequence and sequence.current
+    if not current then
+        return
+    end
+
+    self.event_visibility_context = sequence.visibility
+    local ok, reason = self.engine:commit_allocation_move(sequence.combatant, current.move)
+    self.event_visibility_context = nil
+
+    if ok then
+        if current.move and current.move.kind == "slot" then
+            self:show_hatch_swallow(current.move.part)
+        end
+        local assignment = self:assignment_for_move(current.move)
+        if assignment and sequence.visibility == "hidden" then
+            self.assignment_visibility[assignment] = "hidden"
+        end
+        self.message = (sequence.combatant.name or "Enemy") .. " commits a die."
+    else
+        self.message = "Enemy allocation skipped: " .. tostring(reason)
+    end
+end
+
+function V2Combat:update_auto_allocation(dt)
+    local sequence = self.auto_allocation
+    if not sequence then
+        return
+    end
+
+    if sequence.phase == "move" then
+        if not sequence.current then
+            return
+        end
+
+        sequence.current.elapsed = sequence.current.elapsed + dt
+        if sequence.current.elapsed >= AUTO_ALLOC_MOVE_DURATION then
+            self:commit_auto_allocation_current()
+            sequence.current = nil
+            sequence.phase = "settle"
+            sequence.timer = AUTO_ALLOC_SETTLE_DURATION
+        end
+    elseif sequence.phase == "settle" then
+        sequence.timer = sequence.timer - dt
+        if sequence.timer <= 0 then
+            self:start_next_auto_allocation_move()
+        end
+    end
+end
+
+function V2Combat:auto_target_matches(kind, part)
+    local current = self.auto_allocation and self.auto_allocation.current
+    return current and current.kind == kind and current.part == part
+end
+
+function V2Combat:is_assignment_hidden(assignment)
+    return assignment and self.assignment_visibility and self.assignment_visibility[assignment] == "hidden"
+end
+
+function V2Combat:reveal_hidden_allocations()
+    self.assignment_visibility = setmetatable({}, { __mode = "k" })
+end
+
+function V2Combat:snapshot_resolution_state()
+    local snapshot = {
+        statuses = setmetatable({}, { __mode = "k" }),
+        hearts = setmetatable({}, { __mode = "k" })
+    }
+
+    for _, combatant in ipairs(self.engine.combatants or {}) do
+        snapshot.hearts[combatant] = combatant.heart_points
+        for _, part in ipairs(combatant.body_parts or {}) do
+            snapshot.statuses[part] = part.status
+        end
+    end
+
+    return snapshot
+end
+
+function V2Combat:build_resolution_entries(event_start_index)
+    local entries = {}
+    local latest_by_part = setmetatable({}, { __mode = "k" })
+
+    for index = event_start_index + 1, #self.engine.event_queue do
+        local event = self.engine.event_queue[index]
+        local data = event and event.data
+
+        if event and event.type == Events.PART_RESOLVED and data and data.attack then
+            local entry = {
+                defender = data.defender,
+                part = data.part,
+                attack = data.attack,
+                defense = data.defense,
+                strike_count = data.strike_count or 0,
+                ward_count = data.ward_count or 0,
+                hit = data.hit == true,
+                damage = nil,
+                elapsed = 0,
+                revealed = false
+            }
+            table.insert(entries, entry)
+            latest_by_part[data.part] = entry
+        elseif event and event.type == Events.DAMAGE_DEALT and data then
+            local entry = latest_by_part[data.body_part]
+            if entry then
+                entry.damage = data
+            end
+        end
+    end
+
+    return entries
+end
+
+function V2Combat:start_resolution_playback(entries, snapshot)
+    if not entries or #entries == 0 then
+        self:complete_resolution_playback()
+        return
+    end
+
+    self.resolution_status_overrides = snapshot and snapshot.statuses or setmetatable({}, { __mode = "k" })
+    self.resolution_playback = {
+        entries = entries,
+        index = 1,
+        current = entries[1]
+    }
+    self.player_can_allocate = false
+    self.selected_die = nil
+    self.drag = nil
+    self.message = "Resolution."
+end
+
+function V2Combat:reveal_resolution_entry(entry)
+    if not entry or entry.revealed then
+        return
+    end
+
+    entry.revealed = true
+    if self.resolution_status_overrides and entry.part then
+        self.resolution_status_overrides[entry.part] = nil
+    end
+end
+
+function V2Combat:complete_resolution_playback()
+    self.resolution_playback = nil
+    self.resolution_status_overrides = nil
+
+    if self.engine.state == "COMPLETE" then
+        self:begin_combat_end()
+        return
+    end
+
+    self.engine:start_round()
+    self:begin_allocation_phase()
+end
+
+function V2Combat:skip_resolution_playback()
+    if not self.resolution_playback then
+        return false
+    end
+
+    self:complete_resolution_playback()
+    return true
+end
+
+function V2Combat:update_resolution_playback(dt)
+    local playback = self.resolution_playback
+    local current = playback and playback.current
+    if not current then
+        return
+    end
+
+    current.elapsed = current.elapsed + dt
+    if current.damage and current.elapsed >= RESOLUTION_STEP_DURATION * RESOLUTION_REVEAL_TIME then
+        self:reveal_resolution_entry(current)
+    end
+
+    if current.elapsed < RESOLUTION_STEP_DURATION then
+        return
+    end
+
+    self:reveal_resolution_entry(current)
+    playback.index = playback.index + 1
+    playback.current = playback.entries[playback.index]
+
+    if playback.current then
+        playback.current.elapsed = 0
+        self.message = "Resolution."
+    else
+        self:complete_resolution_playback()
+    end
+end
+
+function V2Combat:display_status_for_part(part)
+    if self.resolution_status_overrides and self.resolution_status_overrides[part] then
+        return self.resolution_status_overrides[part]
+    end
+
+    return part and part.status
+end
+
+function V2Combat:message_for_result(ok, reason)
+    if ok then
+        self.message = "Assigned."
+    else
+        self.message = "Invalid: " .. tostring(reason)
+    end
+end
+
+function V2Combat:try_destination(kind, part)
+    if not self.selected_die then
+        return
+    end
+
+    local ok, reason
+    if kind == "socket" then
+        ok, reason = self.engine:assign_die_to_socket(self.player, self.selected_die.id, part)
+    elseif kind == "rim" then
+        ok, reason = self.engine:assign_die_to_rim(self.player, self.selected_die.id, part)
+    elseif kind == "slot" then
+        ok, reason = self.engine:feed_die_to_slot(self.player, self.selected_die.id, part)
+    end
+
+    self:message_for_result(ok, reason)
+    if ok then
+        if kind == "slot" then
+            self:show_hatch_swallow(part)
+        end
+        self.selected_die = nil
+    end
+end
+
+function V2Combat:resolve_and_advance_round()
+    self:reveal_hidden_allocations()
+    local snapshot = self:snapshot_resolution_state()
+    local event_start_index = #self.engine.event_queue
+    self.engine:resolve_round()
+
+    local entries = self:build_resolution_entries(event_start_index)
+    if #entries > 0 then
+        self:start_resolution_playback(entries, snapshot)
+        return
+    end
+
+    self:complete_resolution_playback()
+end
+
+function V2Combat:confirm_round()
+    if self:skip_resolution_playback() then
+        return
+    end
+
+    if self:is_input_locked() then
+        self.message = "Wait for enemy allocation to finish."
+        return
+    end
+
+    if self.enemy_response_pending then
+        self.enemy_response_pending = false
+        self.player_can_allocate = false
+        self:start_auto_allocation(self.enemy, {
+            visibility = "visible",
+            on_complete = function()
+                self:resolve_and_advance_round()
+            end
+        })
+        return
+    end
+
+    self:resolve_and_advance_round()
+end
+
+function V2Combat:mousepressed(x, y, button)
+    if button ~= 1 then
+        return
+    end
+
+    if self.claim_ceremony then
+        self:claim_mousepressed(x, y)
+        return
+    end
+
+    if self.combat_end then
+        self:return_to_overworld()
+        return
+    end
+
+    if self:skip_resolution_playback() then
+        return
+    end
+
+    if self:is_input_locked() then
+        self.message = "Enemy allocation is still resolving."
+        return
+    end
+
+    self:update_hover(x, y)
+    local hover = self.hover
+
+    if not hover then
+        self.selected_die = nil
+        return
+    end
+
+    if hover.kind == "die" and hover.combatant == self.player then
+        self.selected_die = hover.die
+        local die_rect = self.die_rects[hover.die]
+        self.drag = {
+            die = hover.die,
+            x = x,
+            y = y,
+            offset_x = die_rect and (x - die_rect.x) or DIE_SIZE / 2,
+            offset_y = die_rect and (y - die_rect.y) or DIE_SIZE / 2
+        }
+        self.message = "Dragging die from " .. (hover.die.source_part and hover.die.source_part.name or "?") .. "."
+    elseif hover.kind == "die" then
+        self.selected_die = nil
+    elseif hover.kind == "crest" then
+        if hover.combatant == self.player then
+            local ok, reason = self.engine:expend_crest(self.player, hover.crest)
+            self:message_for_result(ok, reason)
+        else
+            self.selected_die = nil
+        end
+    elseif hover.kind == "confirm" then
+        self:confirm_round()
+    elseif hover.kind == "socket" or hover.kind == "rim" or hover.kind == "slot" then
+        self:try_destination(hover.kind, hover.part)
+    elseif hover.kind == "part" then
+        self.selected_die = nil
+    end
+end
+
+function V2Combat:mousereleased(x, y, button)
+    if button ~= 1 or not self.drag then
+        return
+    end
+
+    if self:is_input_locked() then
+        self.drag = nil
+        return
+    end
+
+    self:update_hover(x, y)
+    local hover = self.hover
+    local dropped = false
+
+    if hover and is_destination_kind(hover.kind) then
+        self:try_destination(hover.kind, hover.part)
+        dropped = self.selected_die == nil
+    end
+
+    if not dropped and self.selected_die then
+        self.message = "Drop canceled. Die remains selected."
+    end
+
+    self.drag = nil
+    self:update_hover(x, y)
+end
+
+function V2Combat:actionpressed(action)
+    if self.claim_ceremony then
+        return self:claim_actionpressed(action)
+    end
+
+    if self.combat_end and (action == "confirm" or action == "cancel" or action == "menu") then
+        self:return_to_overworld()
+        return true
+    elseif action == "cancel" then
+        self:return_to_overworld("fled")
+        return true
+    elseif self.resolution_playback and action == "confirm" then
+        self:skip_resolution_playback()
+        return true
+    elseif action == "confirm" then
+        self:confirm_round()
+        return true
+    end
+
+    return false
+end
+
+function V2Combat:keypressed(key)
+    if self.claim_ceremony then
+        if key == "c" then
+            self:claim_actionpressed("confirm")
+        elseif key == "escape" then
+            self:claim_actionpressed("cancel")
+        elseif key == "up" or key == "w" then
+            self:claim_actionpressed("move_up")
+        elseif key == "down" or key == "s" then
+            self:claim_actionpressed("move_down")
+        elseif key == "left" or key == "a" then
+            self:claim_actionpressed("move_left")
+        elseif key == "right" or key == "d" then
+            self:claim_actionpressed("move_right")
+        elseif key == "space" or key == "return" then
+            self:claim_actionpressed("confirm")
+        end
+    elseif self.combat_end and (key == "space" or key == "c" or key == "return" or key == "escape") then
+        self:return_to_overworld()
+    elseif key == "escape" then
+        self:return_to_overworld("fled")
+    elseif self.resolution_playback and (key == "space" or key == "c" or key == "return") then
+        self:skip_resolution_playback()
+    elseif key == "c" or key == "return" then
+        self:confirm_round()
+    elseif key == "r" then
+        self:enter(self.context)
+    end
+end
+
+function V2Combat:draw_tableau_band(strip, side, combatant)
+    love.graphics.setFont(self.fonts.body)
+    local accent = side == "enemy" and COLORS.enemy or COLORS.player
+    local asset_id = side == "enemy" and "combat_enemy_tableau" or "combat_player_tableau"
+
+    if not draw_image(asset_id, strip) then
+        set_color(COLORS.panel)
+        love.graphics.rectangle("fill", strip.x, strip.y, strip.w, strip.h, 8, 8)
+        set_color({ COLORS.line[1], COLORS.line[2], COLORS.line[3], 0.24 })
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle("line", strip.x, strip.y, strip.w, strip.h, 8, 8)
+
+        local edge_y = side == "enemy" and (strip.y + strip.h - 1) or strip.y
+        set_color({ accent[1], accent[2], accent[3], 0.2 })
+        love.graphics.line(strip.x + 12, edge_y, strip.x + strip.w - 12, edge_y)
+    end
+
+end
+
+function V2Combat:hover_matches(kind, part)
+    return self.hover and self.hover.kind == kind and self.hover.part == part
+end
+
+function V2Combat:destination_preview(kind, part)
+    local die = self:active_die()
+    if not die or not part or not self:hover_matches(kind, part) then
+        return nil
+    end
+
+    local valid = self:is_valid_destination(kind, part)
+    local effective = self.engine:get_effective_symbols(self.player, die, kind)
+
+    if kind == "socket" then
+        local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", part, effective)
+        return {
+            valid = valid,
+            used = used,
+            burned = burned,
+            spellmark = spellmark
+        }
+    elseif kind == "rim" then
+        local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "rim", part, effective)
+        return {
+            valid = valid,
+            used = used,
+            burned = burned,
+            spellmark = spellmark
+        }
+    elseif kind == "slot" then
+        local lit, burned, lit_entries = self:slot_feed_preview(die, part)
+        return {
+            valid = valid,
+            lit = lit,
+            lit_entries = lit_entries,
+            burned = burned
+        }
+    end
+
+    return nil
+end
+
+function V2Combat:claim_animation_hides_part(part)
+    local animation = self.claim_ceremony and self.claim_ceremony.animation
+    return animation and animation.claimed_part == part
+end
+
+function V2Combat:draw_socket_or_rim_preview(kind, part, target_rect)
+    local preview = self:destination_preview(kind, part)
+    if not preview then
+        return
+    end
+
+    if not preview.valid then
+        draw_sprite_outline(target_rect, COLORS.invalid, 3)
+        return
+    end
+
+    set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.1 })
+    love.graphics.rectangle("fill", target_rect.x + 3, target_rect.y + 3, target_rect.w - 6, target_rect.h - 6, 3, 3)
+    draw_symbol_cluster(preview.used, target_rect, 0.9, false)
+
+    if #preview.burned > 0 then
+        local burn_x = target_rect.x + target_rect.w + 3
+        draw_burned_symbols(preview.burned, burn_x, target_rect.y + target_rect.h - SYMBOL_SIZE - 4)
+    end
+end
+
+function V2Combat:draw_settled_dice_row(side, combatant, area, die_rects, accent)
+    local pool = self.engine:get_pool(combatant)
+    local current = self.auto_allocation and self.auto_allocation.current
+    local hidden = self.auto_allocation
+        and self.auto_allocation.combatant == combatant
+        and self.auto_allocation.visibility == "hidden"
+
+    if #pool > 0 then
+        local guide_asset = side == "enemy" and "die_row_guideline_enemy" or "die_row_guideline_player"
+        local guide_y = side == "enemy" and (area.y - 6) or (area.y + area.h + 4)
+        local guide = rect(area.x, guide_y, area.w, 4)
+
+        if not draw_image(guide_asset, guide) then
+            set_color({ accent[1], accent[2], accent[3], 0.12 })
+            love.graphics.rectangle("fill", guide.x, guide.y + 1, guide.w, 2)
+            set_color({ accent[1], accent[2], accent[3], 0.34 })
+            love.graphics.setLineWidth(1)
+            love.graphics.line(guide.x, guide.y + 2, guide.x + guide.w, guide.y + 2)
+        end
+    end
+
+    for _, die in ipairs(pool) do
+        if not (current and current.die == die) and not (self.drag and self.drag.die == die) then
+            local die_rect = die_rects[die]
+            if die_rect then
+                set_color({ 0, 0, 0, 0.18 })
+                love.graphics.rectangle("fill", die_rect.x + 3, die_rect.y + die_rect.h + 2, die_rect.w - 6, 3, 2, 2)
+                if hidden then
+                    draw_die_back(die_rect, accent)
+                else
+                    draw_die_face(die.effective_symbols or die.symbols, die_rect, self.selected_die == die)
+                end
+            end
+        end
+    end
+end
+
+function V2Combat:draw_queue_ticker(r)
+    if not draw_image("combat_queue_stack", r) then
+        draw_box(r, COLORS.surface_low, COLORS.line, 5)
+    end
+
+    local entries = self.engine.slot_queue or {}
+    local cell_size = 16
+    local cell_gap = 4
+    local cell_x = r.x + math.floor((r.w - cell_size) / 2)
+    local cell_y = r.y + 10
+    local max_cells = math.max(1, math.floor((r.h - 20) / (cell_size + cell_gap)))
+
+    for index = 1, math.min(#entries, max_cells, 8) do
+        local cell = rect(cell_x, cell_y + (index - 1) * (cell_size + cell_gap), cell_size, cell_size)
+        local entry = entries[index]
+        if entry then
+            draw_symbol_sprite(queue_entry_symbol(entry), cell.x + 2, cell.y + 2, cell_size - 4, false, 0.95)
+        end
+    end
+end
+
+function V2Combat:draw_initiative_badge(r)
+    local initiative = tostring(self.engine.initiative or "player")
+    local color = COLORS.player
+    local label = "P"
+    if initiative == "enemy" then
+        color = COLORS.enemy
+        label = "E"
+    elseif initiative == "contested" then
+        color = COLORS.essence
+        label = "C"
+    end
+
+    if not draw_image("combat_initiative_badge", r) then
+        draw_box(r, COLORS.surface, color, 5)
+    end
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text(label, r.x + 4, r.y + 6, r.w - 8, "center", color)
+end
+
+function V2Combat:draw_heart_stack(combatant, rects, color, side)
+    local current = math.max(0, math.min(HEART_STACK_MAX, combatant and combatant.heart_points or 0))
+    for index = 1, HEART_STACK_MAX do
+        local r = rects and rects[index]
+        if r then
+            local active = index <= current
+            if side == "player" then
+                active = index > HEART_STACK_MAX - current
+            end
+            draw_heart_icon(r, active, color)
+        end
+    end
+end
+
+function V2Combat:draw_crest_chip(combatant, crest, r)
+    local count = combatant and combatant:get_crest_count(crest) or 0
+    if count <= 0 or not r then
+        return
+    end
+
+    local active = count > 0
+    local hovered = self.hover and self.hover.kind == "crest" and self.hover.crest == crest and self.hover.combatant == combatant
+    local visual = CREST_VISUALS[crest] or {
+        symbol = Symbols.ESSENCE,
+        fill = COLORS.surface,
+        line = COLORS.line
+    }
+
+    local drew_asset = visual.asset and draw_image(visual.asset, r)
+    if drew_asset then
+        if hovered then
+            draw_sprite_outline(r, COLORS.selected, 4)
+        end
+    else
+        draw_hex_chip(r, visual.fill, hovered and COLORS.selected or (active and visual.line or COLORS.dashed), active)
+        draw_symbol_sprite(visual.symbol, r.x + (r.w - SYMBOL_SIZE) / 2, r.y + (r.h - SYMBOL_SIZE) / 2, SYMBOL_SIZE, not active, active and 1 or 0.38)
+    end
+
+    if count > 0 then
+        local badge = rect(r.x + r.w - 10, r.y + r.h - 11, 13, 11)
+        draw_box(badge, COLORS.rail, visual.line, 4)
+        love.graphics.setFont(self.fonts.tiny)
+        draw_text(tostring(count), badge.x + 1, badge.y + 2, badge.w - 2, "center", COLORS.ink)
+    end
+end
+
+function V2Combat:draw_global_spine()
+    local spine = self:global_spine_rect()
+    if not draw_image("combat_spine", spine) then
+        draw_box(spine, COLORS.panel, COLORS.line, 7)
+    end
+    self:draw_heart_stack(self.enemy, self.enemy_heart_rects, COLORS.enemy, "enemy")
+    self:draw_heart_stack(self.player, self.player_heart_rects, COLORS.player, "player")
+    self:draw_initiative_badge(self.initiative_rect)
+    self:draw_queue_ticker(self.queue_rect)
+end
+
+function V2Combat:draw_combatant_resource_row(side, combatant, drawer, die_rects, crest_rects)
+    local accent = side == "enemy" and COLORS.enemy or COLORS.player
+    self:draw_settled_dice_row(side, combatant, self:drawer_dice_area(drawer), die_rects, accent)
+
+    local first_crest = nil
+    local last_crest = nil
+    for _, crest in ipairs(CREST_ORDER) do
+        local crest_rect = crest_rects[crest]
+        if crest_rect then
+            first_crest = first_crest or crest_rect
+            last_crest = crest_rect
+        end
+    end
+
+    if first_crest and last_crest then
+        local strip_rect = rect(
+            first_crest.x - 6,
+            first_crest.y + math.floor(first_crest.h / 2) - 2,
+            last_crest.x + last_crest.w - first_crest.x + 12,
+            4)
+        local strip_asset = side == "enemy" and "crest_strip_enemy" or "crest_strip_player"
+        if not draw_image(strip_asset, strip_rect) then
+            set_color({ accent[1], accent[2], accent[3], 0.16 })
+            love.graphics.rectangle("fill", strip_rect.x, strip_rect.y, strip_rect.w, strip_rect.h, 2, 2)
+            set_color({ accent[1], accent[2], accent[3], 0.36 })
+            love.graphics.setLineWidth(1)
+            love.graphics.line(strip_rect.x, strip_rect.y + 2, strip_rect.x + strip_rect.w, strip_rect.y + 2)
+        end
+    end
+
+    for _, crest in ipairs(CREST_ORDER) do
+        if crest_rects[crest] then
+            self:draw_crest_chip(combatant, crest, crest_rects[crest])
+        end
+    end
+end
+
+function V2Combat:draw_slot_track(part, layout, hatch_outline, display_status)
+    local slot = part.slot
+    if not slot then
+        if not draw_image("die-hatch1", layout.hatch, { 1, 1, 1, 0.35 }) then
+            draw_box(layout.hatch, COLORS.surface_low, COLORS.invalid, 3)
+        end
+        draw_sprite_outline(layout.hatch, COLORS.invalid, 3)
+        return
+    end
+
+    local hatch_id = "die-hatch1"
+    local hungry = Keywords.slot_is_hungry(part, slot)
+    local accepting = hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy
+    local hovered = hatch_outline == COLORS.valid and self:hover_matches("slot", part)
+    local swallow_frame = self:hatch_swallow_frame(part)
+    if swallow_frame then
+        hatch_id = swallow_frame
+    elseif display_status == "maimed" then
+        hatch_id = "die-hatch1"
+    elseif accepting and hovered then
+        hatch_id = "die-hatch3"
+    elseif accepting or hungry then
+        hatch_id = "die-hatch2"
+    end
+
+    local hatch_tint = display_status == "maimed" and { 1, 1, 1, 0.45 } or nil
+    if not draw_image(hatch_id, layout.hatch, hatch_tint) then
+        draw_box(layout.hatch, COLORS.surface, hatch_outline or COLORS.line, 3)
+    end
+
+    if hatch_outline == COLORS.valid then
+        draw_sprite_outline(layout.hatch, COLORS.valid, 3)
+    elseif hatch_outline == COLORS.enemy then
+        draw_sprite_outline(layout.hatch, COLORS.enemy, 3)
+    elseif display_status == "maimed" then
+        draw_sprite_outline(layout.hatch, COLORS.invalid, 3)
+    end
+
+    local preview = self:destination_preview("slot", part)
+    local preview_by_index = {}
+    if preview and preview.valid then
+        for _, entry in ipairs(preview.lit_entries or {}) do
+            preview_by_index[entry.index] = entry
+        end
+    elseif preview then
+        draw_sprite_outline(layout.hatch, COLORS.invalid, 3)
+    end
+
+    local cost = slot.cost or {}
+    local row_count = #cost > SLOT_PIP_ROW_LIMIT and 2 or 1
+    local columns_per_row = math.max(1, math.ceil(#cost / row_count))
+    local first_row_y = layout.track.y + math.floor(math.max(0, layout.track.h - (row_count * SYMBOL_SIZE + (row_count - 1) * SLOT_PIP_ROW_GAP)) / 2)
+    local last_pip_x = layout.track.x
+    local last_pip_y = first_row_y
+
+    for index, symbol in ipairs(cost) do
+        local lit = part.slot_charge and part.slot_charge[index]
+        local previewed = preview_by_index[index] ~= nil
+        local row_index = math.floor((index - 1) / columns_per_row) + 1
+        local column_index = ((index - 1) % columns_per_row) + 1
+        local row_start_index = (row_index - 1) * columns_per_row + 1
+        local pips_in_row = math.min(columns_per_row, #cost - row_start_index + 1)
+        local row_width = pips_in_row * SYMBOL_SIZE + math.max(0, pips_in_row - 1) * SLOT_PIP_GAP
+        local row_start_x = layout.track.x + math.floor(math.max(0, layout.track.w - row_width) / 2)
+        local pip_x = row_start_x + (column_index - 1) * (SYMBOL_SIZE + SLOT_PIP_GAP)
+        local pip_y = first_row_y + (row_index - 1) * (SYMBOL_SIZE + SLOT_PIP_ROW_GAP)
+        if previewed then
+            set_color({ 1, 0.88, 0.35, 0.5 })
+            love.graphics.rectangle("fill", pip_x - 1, pip_y - 1, SYMBOL_SIZE + 2, SYMBOL_SIZE + 2, 2, 2)
+        end
+        draw_symbol_sprite(symbol, pip_x, pip_y, SYMBOL_SIZE, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85))
+        last_pip_x = pip_x
+        last_pip_y = pip_y
+    end
+
+    if preview and preview.valid and #preview.burned > 0 then
+        draw_burned_symbols(preview.burned, last_pip_x + SYMBOL_SIZE + 4, last_pip_y)
+    end
+
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text(truncate_tracked_text(slot.name or "Slot", layout.slot_label.w),
+        layout.slot_label.x, layout.slot_label.y, layout.slot_label.w, "center", COLORS.muted)
+end
+
+function V2Combat:draw_assignment_die(assignment, target_rect)
+    if not assignment then
+        return
+    end
+
+    if self:is_assignment_hidden(assignment) then
+        draw_die_back(target_rect, COLORS.enemy)
+        return
+    end
+
+    draw_die_face(assignment.symbols or assignment.die.symbols, target_rect, false)
+    if assignment.burned_symbols and #assignment.burned_symbols > 0 then
+        draw_burned_symbols(assignment.burned_symbols, target_rect.x + target_rect.w + 3, target_rect.y + target_rect.h - SYMBOL_SIZE - 4)
+    end
+end
+
+function V2Combat:destination_has_spellmark(kind, part)
+    if not (self.engine and self.engine.get_assignment_spellmark) then
+        return false
+    end
+
+    for _, combatant in ipairs(self.engine.combatants or {}) do
+        local spellmarks = combatant.get_spellmarks and combatant:get_spellmarks() or {}
+        for _, pending in ipairs(spellmarks) do
+            local target_side = pending.target or pending.target_side or (kind == "rim" and "opponent" or "self")
+            local target_combatant = target_side == "opponent" and self.engine:get_opponent(combatant) or combatant
+            local owns_part = false
+            for _, owned_part in ipairs(target_combatant and target_combatant.body_parts or {}) do
+                if owned_part == part then
+                    owns_part = true
+                    break
+                end
+            end
+
+            if owns_part and self.engine:get_assignment_spellmark(combatant, kind, part, { Symbols.ESSENCE }) then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function V2Combat:warn_title_overflow(part, name, width, max_width)
+    local key = part and (part.id or part.name) or name
+    if not key then
+        return
+    end
+
+    self.title_overflow_warnings = self.title_overflow_warnings or {}
+    if self.title_overflow_warnings[key] then
+        return
+    end
+
+    self.title_overflow_warnings[key] = true
+    print(string.format(
+        "[V2Combat] BP title '%s' is %.0fpx wide; title strip allows %.0fpx. Shorten the authored name.",
+        tostring(name),
+        width or 0,
+        max_width or 0))
+end
+
+function V2Combat:draw_title_strip(part, layout, color)
+    local title = layout and layout.label
+    if not title then
+        return
+    end
+
+    local flip_y = layout.side == "player"
+    if not draw_image("bp_title", title, nil, flip_y) then
+        draw_box(title, COLORS.surface_low, COLORS.line, 3)
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    local font = love.graphics.getFont()
+    local text_h = font and font:getHeight() or 12
+    local text = part.name or part.id or "Part"
+    local text_rect = rect(title.x + 4, title.y, title.w - 8, title.h)
+    local text_y = text_rect.y + math.floor((text_rect.h - text_h) / 2)
+    local fits, width = draw_single_line_text(text, text_rect.x, text_y, text_rect.w, "center", color or COLORS.ink)
+
+    if not fits then
+        self:warn_title_overflow(part, text, width, text_rect.w)
+    end
+end
+
+function V2Combat:draw_card_state_overlays(part, layout, display_status, any_valid, selected_source, source_highlight)
+    local card = layout.card
+    local time = self.ui_time or 0
+    local hovered = self.hover and self.hover.part == part
+    local damage_asset = nil
+
+    if display_status == "wounded" then
+        damage_asset = "bp_card_wounded"
+    elseif display_status == "maimed" then
+        damage_asset = "bp_card_maimed"
+    end
+
+    if damage_asset then
+        if not draw_image(damage_asset, card) then
+            draw_damage_decoration(part, card, display_status)
+        end
+    end
+
+    if self:active_die() then
+        if any_valid then
+            draw_animated_image("bp_card_valid", card, time)
+        elseif hovered then
+            draw_animated_image("bp_card_invalid", card, time)
+        end
+    end
+
+    if source_highlight then
+        if not draw_animated_image("bp_card_hover", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    end
+
+    if selected_source then
+        if not draw_animated_image("bp_card_selected", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    elseif hovered and not source_highlight then
+        draw_animated_image("bp_card_hover", card, time)
+    end
+end
+
+function V2Combat:draw_socket_or_rim_frame(kind, part, layout, display_status, valid, auto_target)
+    local is_socket = kind == "socket"
+    local target = is_socket and layout.socket or layout.rim
+    local prefix = is_socket and "die_socket" or "die_rim"
+    local assignment = is_socket and self.engine.assignments.sockets[part] or self.engine.assignments.rims[part]
+    local flip_y = layout.side == "enemy"
+    local outline = auto_target and COLORS.enemy or (valid and COLORS.valid or COLORS.dashed)
+
+    if not draw_image(prefix, target, nil, flip_y) then
+        draw_box(target, COLORS.surface_low, outline, 3)
+    end
+
+    local state_prefix = nil
+    local state_color = outline
+    if display_status == "maimed" then
+        state_prefix = prefix .. "_locked"
+        state_color = COLORS.invalid
+    elseif assignment then
+        state_prefix = prefix .. "_occupied"
+        state_color = COLORS.line
+    elseif valid or auto_target then
+        state_prefix = prefix .. "_valid"
+        state_color = outline
+    elseif self:destination_has_spellmark(kind, part) then
+        state_prefix = prefix .. "_spellmarked"
+        state_color = COLORS.essence
+    end
+
+    if state_prefix and not draw_animated_image(state_prefix, target, self.ui_time or 0, nil, flip_y) then
+        draw_sprite_outline(target, state_color, 3)
+    end
+end
+
+function V2Combat:draw_part_card(part, layout)
+    if self:claim_animation_hides_part(part) then
+        return
+    end
+
+    local display_status = self:display_status_for_part(part)
+    local source_highlight = self.hover and self.hover.kind == "die" and self.hover.die.source_part == part
+    local selected_source = self.selected_die and self.selected_die.source_part == part
+
+    local socket_valid = self:is_valid_destination("socket", part)
+    local rim_valid = self:is_valid_destination("rim", part)
+    local slot_valid = self:is_valid_destination("slot", part)
+    local auto_socket_target = self:auto_target_matches("socket", part)
+    local auto_rim_target = self:auto_target_matches("rim", part)
+    local auto_slot_target = self:auto_target_matches("slot", part)
+
+    BPCard.draw(part, layout, {
+        fonts = self.fonts,
+        time = self.ui_time or 0,
+        status = display_status,
+        active_die = self:active_die() ~= nil,
+        hovered = self.hover and self.hover.part == part,
+        source_highlight = source_highlight,
+        selected_source = selected_source,
+        socket_valid = socket_valid,
+        rim_valid = rim_valid,
+        slot_valid = slot_valid,
+        auto_socket_target = auto_socket_target,
+        auto_rim_target = auto_rim_target,
+        auto_slot_target = auto_slot_target,
+        socket_assignment = self.engine.assignments.sockets[part],
+        rim_assignment = self.engine.assignments.rims[part],
+        assignment_hidden = function(assignment)
+            return self:is_assignment_hidden(assignment)
+        end,
+        destination_preview = function(kind, target_part)
+            return self:destination_preview(kind, target_part)
+        end,
+        destination_has_spellmark = function(kind, target_part)
+            return self:destination_has_spellmark(kind, target_part)
+        end,
+        draw_socket_or_rim_preview = function(kind, target_part, target_rect)
+            return self:draw_socket_or_rim_preview(kind, target_part, target_rect)
+        end,
+        hover_matches = function(kind, target_part)
+            return self:hover_matches(kind, target_part)
+        end,
+        hatch_swallow_frame = function(target_part)
+            return self:hatch_swallow_frame(target_part)
+        end,
+        warn_title_overflow = function(target_part, name, width, max_width)
+            return self:warn_title_overflow(target_part, name, width, max_width)
+        end
+    })
+end
+
+function V2Combat:draw_empty_card(layout)
+    BPCard.draw_empty(layout, { fonts = self.fonts })
+end
+
+function V2Combat:draw_center()
+    love.graphics.setFont(self.fonts.body)
+    local center = self:center_rect()
+    if not draw_image("combat_conduit_field", center) then
+        set_color({ COLORS.surface_low[1], COLORS.surface_low[2], COLORS.surface_low[3], 0.32 })
+        love.graphics.rectangle("fill", center.x, center.y, center.w, center.h, 8, 8)
+        set_color({ COLORS.line[1], COLORS.line[2], COLORS.line[3], 0.12 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(center.x + 12, center.y, center.x + center.w - 12, center.y)
+        love.graphics.line(center.x + 12, center.y + center.h, center.x + center.w - 12, center.y + center.h)
+    end
+end
+
+function V2Combat:draw_pool()
+    self:draw_combatant_resource_row("enemy", self.enemy, self.drawers.enemy, self.enemy_die_rects, self.enemy_crest_rects)
+    self:draw_combatant_resource_row("player", self.player, self.drawers.player, self.die_rects, self.crest_rects)
+
+    local confirm_outline = self.hover and self.hover.kind == "confirm" and COLORS.selected or COLORS.line
+    local confirm_asset = self.hover and self.hover.kind == "confirm" and "combat_confirm_chit_hover" or "combat_confirm_chit"
+    local drew_confirm_asset = draw_image(confirm_asset, self.confirm_rect)
+    if not drew_confirm_asset then
+        draw_box(self.confirm_rect, COLORS.surface, confirm_outline, 6)
+    elseif self.hover and self.hover.kind == "confirm" then
+        draw_sprite_outline(self.confirm_rect, confirm_outline, 6)
+    end
+    if not drew_confirm_asset then
+        love.graphics.setFont(self.fonts.tiny)
+        local font = love.graphics.getFont()
+        local text_y = self.confirm_rect.y + math.floor((self.confirm_rect.h - (font and font:getHeight() or 12)) / 2)
+        draw_text("confirm", self.confirm_rect.x + 4, text_y, self.confirm_rect.w - 8, "center", COLORS.ink)
+    end
+end
+
+function V2Combat:draw_drag_ghost()
+    if not (self.drag and self.drag.die) then
+        return
+    end
+
+    local r = rect(
+        self.drag.x - (self.drag.offset_x or DIE_SIZE / 2),
+        self.drag.y - (self.drag.offset_y or DIE_SIZE / 2),
+        DIE_SIZE,
+        DIE_SIZE)
+
+    draw_die_face(self.drag.die.effective_symbols or self.drag.die.symbols, r, true)
+end
+
+function V2Combat:draw_auto_allocation_ghost()
+    local sequence = self.auto_allocation
+    local current = sequence and sequence.current
+    if not current then
+        return
+    end
+
+    local progress = ease_out_cubic(current.elapsed / AUTO_ALLOC_MOVE_DURATION)
+    local r = rect(
+        lerp(current.source.x, current.target.x, progress),
+        lerp(current.source.y, current.target.y, progress),
+        DIE_SIZE,
+        DIE_SIZE)
+
+    if sequence.visibility == "hidden" then
+        draw_die_back(r, COLORS.enemy)
+    else
+        local effective = self.engine:get_effective_symbols(sequence.combatant, current.die, current.kind)
+        draw_die_face(effective, r, true)
+    end
+end
+
+function V2Combat:resolution_shake_offset()
+    local current = self.resolution_playback and self.resolution_playback.current
+    if not (current and current.hit and current.damage) then
+        return 0, 0
+    end
+
+    local progress = math.max(0, math.min(1, current.elapsed / RESOLUTION_STEP_DURATION))
+    if progress < RESOLUTION_REVEAL_TIME then
+        return 0, 0
+    end
+
+    local remaining = 1 - progress
+    local magnitude = 5 * remaining
+    local pulse = math.sin(current.elapsed * 82)
+    return pulse * magnitude, math.cos(current.elapsed * 67) * magnitude * 0.5
+end
+
+function V2Combat:draw_resolution_effects()
+    local playback = self.resolution_playback
+    local current = playback and playback.current
+    if not current then
+        return
+    end
+
+    local layout = current.part and self.card_rects[current.part]
+    if not layout then
+        return
+    end
+
+    local progress = math.max(0, math.min(1, current.elapsed / RESOLUTION_STEP_DURATION))
+    local flash = 0.55 + 0.35 * math.sin(current.elapsed * 18)
+    local focus_color = current.hit and COLORS.attack or COLORS.defense
+    local card = layout.card
+
+    set_color({ focus_color[1], focus_color[2], focus_color[3], 0.24 + 0.18 * flash })
+    love.graphics.rectangle("fill", card.x - 3, card.y - 3, card.w + 6, card.h + 6, 7, 7)
+    set_color({ focus_color[1], focus_color[2], focus_color[3], 0.92 })
+    love.graphics.setLineWidth(3)
+    love.graphics.rectangle("line", card.x - 4, card.y - 4, card.w + 8, card.h + 8, 7, 7)
+
+    local label_w = 108
+    local label_h = current.damage and 48 or 34
+    local main_x = self:main_x()
+    local main_right = main_x + self:main_width()
+    local label_x = math.max(main_x, math.min(card.x + card.w / 2 - label_w / 2, main_right - label_w))
+    local label_y = card.y - label_h - 8
+    if label_y < MARGIN then
+        label_y = card.y + card.h + 8
+    end
+
+    draw_box(rect(label_x, label_y, label_w, label_h), COLORS.rail, focus_color, 6)
+    love.graphics.setFont(self.fonts.small)
+    draw_text("ATK " .. tostring(current.strike_count) .. " / DEF " .. tostring(current.ward_count),
+        label_x + 6, label_y + 6, label_w - 12, "center", COLORS.ink)
+
+    local result_text = current.hit and "HIT" or "BLOCK"
+    if progress < 0.42 then
+        result_text = "..."
+    end
+
+    love.graphics.setFont(self.fonts.body)
+    draw_text(result_text, label_x + 6, label_y + 20, label_w - 12, "center", focus_color)
+
+    if current.damage and progress >= RESOLUTION_REVEAL_TIME then
+        love.graphics.setFont(self.fonts.tiny)
+        local status = tostring(current.damage.status_before) .. " -> " .. tostring(current.damage.status_after)
+        draw_text(status, label_x + 6, label_y + 36, label_w - 12, "center", COLORS.muted)
+    end
+end
+
+function V2Combat:draw_slot_activation_effects()
+    for _, effect in ipairs(self.slot_activation_effects or {}) do
+        local source_layout = effect.part and self.card_rects[effect.part]
+        if source_layout then
+            local duration = effect.duration or SLOT_EFFECT_DURATION
+            local progress = math.max(0, math.min(1, (effect.elapsed or 0) / duration))
+            local pulse = 0.55 + 0.35 * math.sin((effect.elapsed or 0) * 22)
+            local alpha = (1 - progress) * (0.35 + 0.25 * pulse)
+            local slot_name = effect.slot and effect.slot.name or "Slot"
+            local card = source_layout.card
+            local hatch = source_layout.hatch
+            local color = COLORS.essence
+
+            set_color({ color[1], color[2], color[3], alpha })
+            love.graphics.rectangle("fill", card.x - 4, card.y - 4, card.w + 8, card.h + 8, 7, 7)
+            set_color({ color[1], color[2], color[3], math.min(1, alpha + 0.35) })
+            love.graphics.setLineWidth(3)
+            love.graphics.rectangle("line", hatch.x - 3, hatch.y - 3, hatch.w + 6, hatch.h + 6, 4, 4)
+
+            local label_w = 118
+            local label_h = 24
+            local main_x = self:main_x()
+            local main_right = main_x + self:main_width()
+            local label_x = math.max(main_x, math.min(card.x + card.w / 2 - label_w / 2, main_right - label_w))
+            local label_y = card.y + card.h / 2 - label_h / 2
+
+            draw_box(rect(label_x, label_y, label_w, label_h), {
+                COLORS.rail[1],
+                COLORS.rail[2],
+                COLORS.rail[3],
+                0.94 * (1 - progress * 0.25)
+            }, color, 6)
+            love.graphics.setFont(self.fonts.small)
+            draw_text(truncate_tracked_text(slot_name, label_w - 12),
+                label_x + 6, label_y + 7, label_w - 12, "center", COLORS.ink)
+        end
+
+        local target_layout = effect.target_part and self.card_rects[effect.target_part]
+        if target_layout then
+            local duration = effect.duration or SLOT_EFFECT_DURATION
+            local progress = math.max(0, math.min(1, (effect.elapsed or 0) / duration))
+            local alpha = (1 - progress) * 0.42
+            local target = target_layout.card
+            local color = COLORS.attack
+
+            set_color({ color[1], color[2], color[3], alpha })
+            love.graphics.rectangle("fill", target.x - 5, target.y - 5, target.w + 10, target.h + 10, 7, 7)
+            set_color({ color[1], color[2], color[3], math.min(1, alpha + 0.42) })
+            love.graphics.setLineWidth(3)
+            love.graphics.rectangle("line", target.x - 5, target.y - 5, target.w + 10, target.h + 10, 7, 7)
+        end
+    end
+end
+
+function V2Combat:inspected_die_source()
+    if self.drag then
+        return nil, nil
+    end
+
+    if self.selected_die and self.selected_die.source_part then
+        return self.selected_die.source_part, self.selected_die.face_index
+    end
+
+    if not self.hover then
+        return nil, nil
+    end
+
+    if self.hover.kind == "die" and self.hover.die then
+        return self.hover.die.source_part, self.hover.die.face_index
+    elseif self.hover.kind == "part"
+        or self.hover.kind == "socket"
+        or self.hover.kind == "rim"
+        or self.hover.kind == "slot"
+        or self.hover.kind == "claim_part"
+        or self.hover.kind == "claim_slot"
+        or self.hover.kind == "claim_unavailable" then
+        return self.hover.part, nil
+    end
+
+    return nil, nil
+end
+
+function V2Combat:draw_unfolded_die_view(part, current_face_index, x, y, width)
+    if not (part and part.die) then
+        return y
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    draw_text("Die", x, y, width, "left", COLORS.ink)
+    y = y + 16
+
+    local die_size = DIE_SIZE
+    local gap = 6
+    local columns = 3
+    local grid_w = columns * die_size + (columns - 1) * gap
+    local start_x = x + math.floor((width - grid_w) / 2)
+
+    local face_columns = {
+        sorted_face_indexes(part.die.wound_faces),
+        sorted_face_indexes(part.die.maim_faces),
+        durable_face_indexes(part.die)
+    }
+    local status = self:display_status_for_part(part) or "healthy"
+
+    for column = 1, columns do
+        for row = 1, 2 do
+            local face_index = face_columns[column] and face_columns[column][row]
+            if face_index then
+                local die_rect = rect(start_x + (column - 1) * (die_size + gap), y + (row - 1) * (die_size + gap), die_size, die_size)
+                local healthy_face = SymbolDie.face_for_status(part.die, face_index, "healthy")
+                local is_wound_face = column == 1
+                local is_maim_face = column == 2
+                local display_face = healthy_face
+                local crack_level = nil
+
+                if status == "maimed" and (is_wound_face or is_maim_face) then
+                    display_face = { Symbols.BLOOD }
+                elseif status == "wounded" and is_wound_face then
+                    display_face = { Symbols.BLOOD }
+                end
+
+                if status == "healthy" then
+                    if is_wound_face then
+                        crack_level = "heavy"
+                    elseif is_maim_face then
+                        crack_level = "light"
+                    end
+                elseif status == "wounded" and is_maim_face then
+                    crack_level = "heavy"
+                end
+
+                draw_die_face(display_face, die_rect, current_face_index == face_index)
+                draw_crack_overlay(die_rect, crack_level)
+
+                if current_face_index == face_index then
+                    draw_sprite_outline(die_rect, COLORS.selected, 4)
+                end
+            end
+        end
+    end
+
+    y = y + die_size * 2 + gap + 8
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text("faces break left to right", x, y, width, "left", COLORS.muted)
+
+    return y + 18
+end
+
+function V2Combat:draw_inspector()
+    love.graphics.setFont(self.fonts.body)
+    local rail = self:rail_rect()
+    if not draw_image("combat_inspector_rail", rail) then
+        draw_box(rail, COLORS.rail, COLORS.line, 8)
+    end
+
+    local y = rail.y + 14
+    local lines = {}
+
+    if self.drag or self.selected_die then
+        lines = self:active_die_preview_lines()
+    elseif self.hover then
+        if self.hover.kind == "die" then
+            local die = self.hover.die
+            table.insert(lines, "Die: " .. Symbols.format_face(die.symbols))
+            if self.hover.combatant then
+                table.insert(lines, "Owner: " .. (self.hover.combatant.name or "?"))
+            end
+            table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
+            table.insert(lines, "Face: " .. tostring(die.face_index))
+        elseif self.hover.kind == "slot" then
+            local part = self.hover.part
+            if part.slot then
+                lines = BPInspector.slot_lines(part.slot, part)
+                table.insert(lines, 1, "Installed in: " .. tostring(part.name or part.id or "Body Part"))
+            else
+                table.insert(lines, tostring(part.name or part.id or "Body Part") .. " has no Slot.")
+            end
+        elseif self.hover.kind == "part" or self.hover.kind == "socket" or self.hover.kind == "rim" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+        elseif self.hover.kind == "claim_part" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Claim candidate.")
+        elseif self.hover.kind == "claim_slot" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Will be replaced: " .. tostring(self.hover.slot_option and self.hover.slot_option.label or "Body Part") .. ".")
+        elseif self.hover.kind == "claim_unavailable" then
+            lines = BPInspector.part_lines(self.hover.part, {
+                status = self:display_status_for_part(self.hover.part)
+            })
+            table.insert(lines, 1, "Maimed. Cannot be claimed.")
+        elseif self.hover.kind == "crest" then
+            local owner = self.hover.combatant and (self.hover.combatant.name or "?") or "?"
+            local count = self.hover.combatant and self.hover.combatant:get_crest_count(self.hover.crest) or 0
+            table.insert(lines, owner .. " Crest: " .. self.hover.crest .. " x" .. tostring(count))
+            if self.hover.crest == "Valor" then
+                table.insert(lines, "Spend: next die gains ATK.")
+            elseif self.hover.crest == "Shadow" then
+                table.insert(lines, "Spend: slots shroud their BP.")
+            end
+        elseif self.hover.kind == "confirm" then
+            table.insert(lines, "Resolve current allocations.")
+        end
+    else
+        table.insert(lines, "Hover a die, card, crest, or slot.")
+    end
+
+    for _, line in ipairs(lines) do
+        y = draw_wrapped_text(line, rail.x + 14, y, rail.w - 28, "left", COLORS.ink, 6)
+    end
+
+    local inspected_part, current_face_index = self:inspected_die_source()
+    local flavor_rule_y = rail.y + rail.h - 158
+    if inspected_part and y + 108 < flavor_rule_y then
+        y = y + 4
+        self:draw_unfolded_die_view(inspected_part, current_face_index, rail.x + 14, y, rail.w - 28)
+    end
+
+    set_color(COLORS.line)
+    love.graphics.line(rail.x + 14, flavor_rule_y, rail.x + rail.w - 14, flavor_rule_y)
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text("Flavor", rail.x + 14, flavor_rule_y + 10, rail.w - 28, "left", COLORS.muted)
+    love.graphics.setFont(self.fonts.body)
+    draw_wrapped_text(BPInspector.flavor(inspected_part), rail.x + 14, flavor_rule_y + 30, rail.w - 28, "left", COLORS.ink, 2)
+end
+
+function V2Combat:draw_claim_prompt()
+    local ceremony = self.claim_ceremony
+    if not ceremony then
+        return
+    end
+
+    local center = self:center_rect()
+    local panel_w = math.min(360, center.w - 28)
+    local panel_h = 78
+    local panel = rect(center.x + math.floor((center.w - panel_w) / 2), center.y + 14, panel_w, panel_h)
+    local title = "Claim an Echo"
+    local body = "Choose one non-maimed part, or leave your dreamform unchanged."
+
+    if ceremony.phase == "slot" then
+        local part = self:selected_claim_part()
+        title = "Choose the Graft"
+        body = claim_part_name(part) .. " will replace one " .. string.lower(normalized_part_type(part) or "part") .. "."
+    elseif ceremony.phase == "animate" then
+        local animation = ceremony.animation
+        title = "Dreamform Changes"
+        body = claim_part_name(animation and animation.claimed_part) .. " takes root."
+    elseif ceremony.phase == "empty" then
+        title = "No Claim"
+        body = "No non-maimed enemy parts remain to graft."
+    end
+
+    set_color({ 0, 0, 0, 0.46 })
+    love.graphics.rectangle("fill", panel.x - 6, panel.y - 6, panel.w + 12, panel.h + 12, 8, 8)
+    draw_box(panel, COLORS.rail, COLORS.player, 8)
+
+    love.graphics.setFont(self.fonts.body)
+    draw_text(title, panel.x + 12, panel.y + 10, panel.w - 24, "center", COLORS.player)
+    love.graphics.setFont(self.fonts.small)
+    draw_text(body, panel.x + 14, panel.y + 40, panel.w - 28, "center", COLORS.ink)
+end
+
+function V2Combat:draw_claim_card_outlines()
+    local ceremony = self.claim_ceremony
+    if not ceremony or ceremony.phase == "animate" then
+        return
+    end
+
+    local selected_part = self:selected_claim_part()
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        local layout = self.card_rects[part]
+        if layout then
+            if part.status == "maimed" then
+                set_color({ 0, 0, 0, 0.36 })
+                love.graphics.rectangle("fill", layout.card.x, layout.card.y, layout.card.w, layout.card.h, 6, 6)
+                draw_sprite_outline(expand_rect(layout.card, 1), COLORS.invalid, 5)
+            else
+                local hovered = self.hover and self.hover.kind == "claim_part" and self.hover.part == part
+                local selected = selected_part == part
+                local color = selected and COLORS.selected or (hovered and COLORS.valid or { COLORS.valid[1], COLORS.valid[2], COLORS.valid[3], 0.45 })
+                draw_sprite_outline(expand_rect(layout.card, selected and 3 or 1), color, 5)
+            end
+        end
+    end
+
+    if ceremony.phase ~= "slot" then
+        return
+    end
+
+    local selected_slot = self:selected_claim_slot()
+    for _, option in ipairs(ceremony.slot_options or {}) do
+        local layout = option.part and self.card_rects[option.part]
+        if layout then
+            local hovered = self.hover and self.hover.kind == "claim_slot" and self.hover.slot_option == option
+            local selected = selected_slot == option
+            local color = selected and COLORS.selected or (hovered and COLORS.player or { COLORS.player[1], COLORS.player[2], COLORS.player[3], 0.45 })
+            draw_sprite_outline(expand_rect(layout.card, selected and 3 or 1), color, 5)
+            love.graphics.setFont(self.fonts.tiny)
+            draw_text(option.label, layout.label.x, layout.label.y, layout.label.w, "center", color)
+        end
+    end
+end
+
+function V2Combat:draw_claim_animation()
+    local animation = self.claim_ceremony and self.claim_ceremony.animation
+    if not animation then
+        return
+    end
+
+    local duration = animation.duration or CLAIM_ANIMATION_DURATION
+    local progress = ease_out_cubic(math.min(1, (animation.elapsed or 0) / duration))
+    local target = animation.target_layout
+
+    if animation.replaced_part and target and target.card then
+        set_color({ 0, 0, 0, 0.22 + 0.5 * progress })
+        love.graphics.rectangle("fill", target.card.x, target.card.y, target.card.w, target.card.h, 6, 6)
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.72 * progress })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(target.card.x + 10, target.card.y + 10, target.card.x + target.card.w - 10, target.card.y + target.card.h - 10)
+        love.graphics.line(target.card.x + target.card.w - 14, target.card.y + 12, target.card.x + 14, target.card.y + target.card.h - 12)
+    end
+
+    local layout = interpolate_card_layout(animation.source_layout, animation.target_layout, progress)
+    if layout then
+        BPCard.draw(animation.claimed_part, layout, {
+            fonts = self.fonts,
+            time = self.ui_time or 0,
+            status = animation.claimed_part and animation.claimed_part.status or "healthy"
+        })
+        draw_sprite_outline(expand_rect(layout.card, 2), COLORS.player, 5)
+    end
+end
+
+function V2Combat:draw_claim_ceremony()
+    if not self.claim_ceremony then
+        return
+    end
+
+    self:draw_claim_card_outlines()
+    self:draw_claim_animation()
+    self:draw_claim_prompt()
+end
+
+function V2Combat:draw_combat_end_overlay()
+    if not self.combat_end then
+        return
+    end
+
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    local panel_w = 236
+    local panel_h = 94
+    local panel = rect((width - panel_w) / 2, (height - panel_h) / 2, panel_w, panel_h)
+    local color = COLORS.muted
+
+    if self.combat_end.result == "win" then
+        color = COLORS.player
+    elseif self.combat_end.result == "lose" then
+        color = COLORS.enemy
+    end
+
+    set_color({ 0, 0, 0, 0.48 })
+    love.graphics.rectangle("fill", 0, 0, width, height)
+    draw_box(panel, COLORS.rail, color, 8)
+
+    love.graphics.setFont(self.fonts.title)
+    draw_text(self.combat_end.title, panel.x + 14, panel.y + 18, panel.w - 28, "center", color)
+
+    local remaining = math.max(0, (self.combat_end.delay or COMBAT_END_RETURN_DELAY) - (self.combat_end.elapsed or 0))
+    local dots = string.rep(".", math.floor((self.combat_end.elapsed or 0) * 3) % 4)
+    love.graphics.setFont(self.fonts.small)
+    draw_text("Returning" .. dots, panel.x + 14, panel.y + 58, panel.w - 28, "center", COLORS.ink)
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text(string.format("%.1fs", remaining), panel.x + 14, panel.y + 76, panel.w - 28, "center", COLORS.muted)
+end
+
+function V2Combat:draw()
+    love.graphics.clear(COLORS.bg)
+    draw_image("combat_tabletop", rect(0, 0, love.graphics.getWidth(), love.graphics.getHeight()))
+    love.graphics.setFont(self.fonts.body)
+    self:layout()
+
+    local shake_x, shake_y = self:resolution_shake_offset()
+    if love.graphics.push then
+        love.graphics.push()
+        love.graphics.translate(shake_x, shake_y)
+    end
+
+    self:draw_tableau_band(self:enemy_strip_rect(), "enemy", self.enemy)
+    self:draw_tableau_band(self:player_strip_rect(), "player", self.player)
+    self:draw_center()
+    self:draw_pool()
+
+    for _, layout in ipairs(self.empty_card_rects or {}) do
+        self:draw_empty_card(layout)
+    end
+
+    for _, part in ipairs(self.enemy.body_parts or {}) do
+        self:draw_part_card(part, self.card_rects[part])
+    end
+
+    for _, part in ipairs(self.player.body_parts or {}) do
+        self:draw_part_card(part, self.card_rects[part])
+    end
+
+    self:draw_slot_activation_effects()
+    self:draw_auto_allocation_ghost()
+    self:draw_resolution_effects()
+    self:draw_drag_ghost()
+    self:draw_claim_ceremony()
+
+    if love.graphics.pop then
+        love.graphics.pop()
+    end
+
+    self:draw_global_spine()
+    self:draw_inspector()
+    self:draw_combat_end_overlay()
+end
+
+return V2Combat
+
+```
+
+## systems/actor_registry.lua
+
+```lua
+local Actor = require("systems.actor")
+local Assets = require("core.assets")
+
+local Registry = {
+    definitions = {}
+}
 
 local TILE_SIZE = 32
 
-function Entity.new(data)
-    local self = setmetatable({}, Entity)
-    self.type = data.type
-    self.x = data.x
-    self.y = data.y
+local COLORS = {
+    crack = { 0.08, 0.08, 0.09, 1 },
+    pipe = { 0.3, 0.3, 0.4, 1 },
+    shovel = { 0.62, 0.42, 0.2, 1 },
+    message = { 0.36, 0.28, 0.42, 1 }
+}
 
-    for k, v in pairs(data) do
-        if k ~= "type" and k ~= "x" and k ~= "y" then
-            self[k] = v
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function sprite_property(actor, key)
+    return actor.properties and actor.properties[key]
+end
+
+local function actor_sprite_candidates(actor, default_id)
+    local explicit = sprite_property(actor, "asset_id")
+        or sprite_property(actor, "sprite_id")
+        or sprite_property(actor, "sprite")
+    local candidates = {}
+    local function add(id)
+        if id then
+            table.insert(candidates, id)
         end
     end
 
-    return self
-end
-
-function Entity:draw()
-    if self.type == "crack" then
-        love.graphics.setColor(0.1, 0.1, 0.1)
-        love.graphics.rectangle(
-            "fill",
-            (self.x - 1) * TILE_SIZE + 12,
-            (self.y - 1) * TILE_SIZE + 4,
-            8,
-            24
-        )
-    elseif self.type == "pipe" then
-        love.graphics.setColor(0.3, 0.3, 0.4)
-        love.graphics.rectangle(
-            "fill",
-            (self.x - 1) * TILE_SIZE + 4,
-            (self.y - 1) * TILE_SIZE + 8,
-            24,
-            16
-        )
-        if self.has_shovel then
-            love.graphics.setColor(0.6, 0.4, 0.2)
-            love.graphics.rectangle(
-                "fill",
-                (self.x - 1) * TILE_SIZE + 10,
-                (self.y - 1) * TILE_SIZE + 24,
-                12,
-                4
-            )
+    if actor.state and (actor.state.resolved or actor.state.removed) then
+        add(sprite_property(actor, "resolved_asset_id"))
+        add(sprite_property(actor, "resolved_sprite_id"))
+        if explicit then
+            add(explicit .. "_resolved")
+        end
+        if default_id then
+            add(default_id .. "_resolved")
         end
     end
 
-    love.graphics.setColor(1, 1, 1)
+    add(explicit)
+    add(default_id)
+
+    return candidates
 end
 
-function Entity:interact(player)
-    if self.type == "crack" then
-        if player.equipped == "shovel" then
-            return "dig"
+local function draw_actor_sprite(actor, default_id)
+    for _, id in ipairs(actor_sprite_candidates(actor, default_id)) do
+        local image = id and Assets.images[id]
+        if image then
+            local x, y, w, h = actor:tile_rect(TILE_SIZE)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.draw(image, x, y, 0, w / image:getWidth(), h / image:getHeight())
+            return true
+        end
+    end
+
+    return false
+end
+
+local function player_has_tool(player, tool)
+    if not tool then
+        return true
+    end
+
+    return player and (player.equipped == tool or (player.hasItem and player:hasItem(tool)))
+end
+
+local function bool_value(value, default)
+    if value == nil then
+        return default
+    end
+    return value == true or value == "true" or value == 1
+end
+
+local function nested_action(properties, key)
+    properties = properties or {}
+    local action = properties[key]
+
+    if type(action) == "table" then
+        return action
+    elseif type(action) == "string" then
+        return { type = action }
+    end
+
+    local prefix = key .. "."
+    local nested = {}
+    for prop_key, value in pairs(properties) do
+        if type(prop_key) == "string" and prop_key:sub(1, #prefix) == prefix then
+            nested[prop_key:sub(#prefix + 1)] = value
+        end
+    end
+
+    if next(nested) then
+        return nested
+    end
+
+    return nil
+end
+
+local function action_result(actor, action, fallback_message)
+    action = action or {}
+    local action_type = action.type or "message"
+    local text = action.message or actor.properties.message or fallback_message
+
+    if action_type == "encounter" or action_type == "start_encounter" then
+        return {
+            type = "encounter",
+            encounter_id = action.encounter_id or actor.properties.encounter_id,
+            text = text
+        }
+    elseif action_type == "passage" or action_type == "open_passage" then
+        return {
+            type = "passage",
+            target_room = action.target_room or actor.properties.target_room,
+            target_spawn = action.target_spawn or actor.properties.target_spawn,
+            text = text
+        }
+    elseif action_type == "item" or action_type == "give_item" then
+        return {
+            type = "item",
+            item = action.item or actor.properties.item,
+            text = text
+        }
+    end
+
+    return {
+        type = "message",
+        text = text or "There is nothing special here."
+    }
+end
+
+local function tool_use_result(actor, player, defaults)
+    defaults = defaults or {}
+
+    if actor.state.resolved then
+        return {
+            type = "message",
+            text = actor.properties.resolved_message
+                or defaults.resolved_message
+                or "There is nothing else to do here."
+        }
+    end
+
+    local action = nested_action(actor.properties, "on_tool_use") or {}
+    local required_tool = action.tool or defaults.tool
+    if not player_has_tool(player, required_tool) then
+        return {
+            type = "message",
+            text = actor.properties.missing_tool_message
+                or defaults.missing_tool_message
+                or "You need the right tool."
+        }
+    end
+
+    if bool_value(action.once, defaults.once ~= false) then
+        actor.state.resolved = true
+    end
+
+    return action_result(actor, action, defaults.message)
+end
+
+local function draw_pipe(actor)
+    local default_id = actor.properties.item and not actor.state.removed
+        and "actor_pipe_shovel"
+        or "actor_pipe"
+    if draw_actor_sprite(actor, default_id) then
+        return
+    end
+
+    local x, y = actor:tile_rect(TILE_SIZE)
+    set_color(COLORS.pipe)
+    love.graphics.rectangle("fill", x + 4, y + 8, 24, 16)
+
+    if actor.properties.item and not actor.state.removed then
+        set_color(COLORS.shovel)
+        love.graphics.rectangle("fill", x + 10, y + 24, 12, 4)
+    end
+end
+
+local function draw_crack(actor)
+    if draw_actor_sprite(actor, "actor_crack") then
+        return
+    end
+
+    local x, y = actor:tile_rect(TILE_SIZE)
+    set_color(COLORS.crack)
+    love.graphics.rectangle("fill", x + 12, y + 4, 8, 24)
+
+    if actor.state.resolved then
+        love.graphics.rectangle("fill", x + 7, y + 10, 18, 12)
+    end
+end
+
+local function draw_message(actor)
+    if draw_actor_sprite(actor, "actor_hidden_wall_marker") then
+        return
+    end
+
+    local x, y = actor:tile_rect(TILE_SIZE)
+    set_color(COLORS.message)
+    love.graphics.rectangle("fill", x + 8, y + 8, 16, 16)
+end
+
+function Registry.register(actor_type, definition)
+    Registry.definitions[actor_type] = definition
+end
+
+function Registry.has(actor_type)
+    return Registry.definitions[actor_type] ~= nil
+end
+
+function Registry.apply(actor)
+    local definition = Registry.definitions[actor.type]
+    if not definition then
+        return actor
+    end
+
+    if definition.configure then
+        definition.configure(actor)
+    end
+
+    actor.draw_fn = definition.draw or actor.draw_fn
+    actor.update_fn = definition.update or actor.update_fn
+    actor.ambient_update_fn = definition.update_ambient or actor.ambient_update_fn
+    actor.interact_fn = definition.interact or actor.interact_fn
+
+    if definition.solid ~= nil and actor.properties.solid == nil then
+        actor.solid = definition.solid
+    end
+    if definition.interactable ~= nil and actor.properties.interactable == nil then
+        actor.interactable = definition.interactable
+    end
+
+    return actor
+end
+
+function Registry.create(data, room)
+    local actor = Actor.new(data, room)
+    return Registry.apply(actor)
+end
+
+Registry.register("pipe", {
+    interactable = true,
+    draw = draw_pipe,
+    interact = function(actor)
+        if actor.properties.item and not actor.state.removed then
+            local item = actor.properties.item
+            actor.state.removed = true
+            return {
+                type = "item",
+                item = item,
+                text = actor.properties.message or ("Found: " .. item .. "!")
+            }
+        end
+
+        return {
+            type = "message",
+            text = actor.properties.empty_message or actor.properties.message or "An empty drainage pipe."
+        }
+    end
+})
+
+Registry.register("crack", {
+    interactable = true,
+    draw = draw_crack,
+    interact = function(actor, world, player)
+        return tool_use_result(actor, player, {
+            tool = "shovel",
+            once = true,
+            message = "You dig through the wall.",
+            missing_tool_message = "The crack is too narrow to fit through...",
+            resolved_message = "The opening has already been dug."
+        })
+    end
+})
+
+Registry.register("message", {
+    interactable = true,
+    draw = draw_message,
+    interact = function(actor)
+        if actor.properties.dialog or actor.properties.dialog_id then
+            return {
+                type = "dialog",
+                dialog = actor.properties.dialog,
+                dialog_id = actor.properties.dialog_id,
+                actor_id = actor.id
+            }
+        end
+
+        return {
+            type = "message",
+            text = actor.properties.message or "There is nothing special here."
+        }
+    end
+})
+
+return Registry
+
+```
+
+## systems/actor.lua
+
+```lua
+local Actor = {}
+Actor.__index = Actor
+
+local DEFAULT_TILE_SIZE = 32
+
+local function copy_table(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do
+        if type(value) == "table" then
+            copy[key] = copy_table(value)
         else
-            return "message", "The crack is too narrow to fit through..."
+            copy[key] = value
         end
-    elseif self.type == "pipe" then
-        if self.has_shovel then
-            self.has_shovel = false
-            return "item", "shovel"
+    end
+    return copy
+end
+
+local function normalize_properties(source)
+    local properties = {}
+
+    for key, value in pairs(source or {}) do
+        if type(key) == "number" and type(value) == "table" and value.name then
+            properties[value.name] = value.value
+        elseif type(value) == "table" then
+            properties[key] = copy_table(value)
         else
-            return "message", "An empty drainage pipe."
+            properties[key] = value
         end
+    end
+
+    return properties
+end
+
+local function bool_value(value, default)
+    if value == nil then
+        return default
+    end
+    return value == true or value == "true" or value == 1
+end
+
+local function uses_pixel_coordinates(data, properties, room)
+    if data.tile_x or data.tile_y or properties.tile_x or properties.tile_y then
+        return false
+    end
+
+    if data.units == "pixels" or data.pixel_coordinates or properties.pixel_coordinates then
+        return true
+    end
+
+    if data.gid or data.rotation or data.shape or data.polygon or data.polyline then
+        return true
+    end
+
+    if type(data.id) == "number" and (data.x ~= nil or data.y ~= nil) then
+        return true
+    end
+
+    local x = tonumber(data.x)
+    local y = tonumber(data.y)
+    if room and x and y and (x > (room.width or 0) or y > (room.height or 0)) then
+        return true
+    end
+
+    return false
+end
+
+local function object_tile_position(data, tile_size, room, properties)
+    if data.tile_x and data.tile_y then
+        return tonumber(data.tile_x) or 1, tonumber(data.tile_y) or 1
+    end
+
+    if properties.tile_x and properties.tile_y then
+        return tonumber(properties.tile_x) or 1, tonumber(properties.tile_y) or 1
+    end
+
+    local size = tile_size or DEFAULT_TILE_SIZE
+    if uses_pixel_coordinates(data, properties, room) then
+        return math.floor((tonumber(data.x) or 0) / size) + 1,
+            math.floor((tonumber(data.y) or 0) / size) + 1
+    end
+
+    return tonumber(data.x) or 1, tonumber(data.y) or 1
+end
+
+function Actor.new(data, room)
+    data = data or {}
+    local properties = normalize_properties(data.properties or {})
+    local actor_type = properties.actor_type or data.actor_type or data.type or "message"
+    local x, y = object_tile_position(data, room and room.tile_size or DEFAULT_TILE_SIZE, room, properties)
+    local id = tostring(properties.id or data.name or data.id or (actor_type .. "_" .. tostring(x) .. "_" .. tostring(y)))
+
+    local actor = {
+        id = id,
+        name = data.name or id,
+        type = actor_type,
+        x = x,
+        y = y,
+        width = data.width,
+        height = data.height,
+        layer = data.layer or properties.layer or "actors",
+        visible = bool_value(data.visible, true),
+        solid = bool_value(properties.solid or data.solid, false),
+        interactable = bool_value(properties.interactable or data.interactable, false),
+        properties = properties,
+        state = {},
+        room = room
+    }
+
+    return setmetatable(actor, Actor)
+end
+
+function Actor:tile_rect(tile_size)
+    local size = tile_size or DEFAULT_TILE_SIZE
+    return (self.x - 1) * size,
+        (self.y - 1) * size,
+        tonumber(self.width) or size,
+        tonumber(self.height) or size
+end
+
+function Actor:sort_y(tile_size)
+    local _, y, _, height = self:tile_rect(tile_size)
+    return y + height
+end
+
+function Actor:update(world, dt)
+    if self.update_fn then
+        self:update_fn(world, dt)
     end
 end
 
-return Entity
+function Actor:update_ambient(world, dt)
+    if self.ambient_update_fn then
+        self:ambient_update_fn(world, dt)
+    end
+end
+
+function Actor:draw(world)
+    if self.visible == false then
+        return
+    end
+
+    if self.draw_fn then
+        self:draw_fn(world)
+    end
+end
+
+function Actor:interact(world, player)
+    if self.interact_fn then
+        return self:interact_fn(world, player)
+    end
+
+    local message = self.properties and self.properties.message
+    if message then
+        return { type = "message", text = message }
+    end
+
+    return nil
+end
+
+return Actor
+
+```
+
+## systems/bodypart_catalog.lua
+
+```lua
+local Content = require("combat.v2_content")
+
+local Catalog = {}
+
+Catalog.MODULE_NAME = "data.combat.alpha_basement"
+
+Catalog.SLOT_ORDER = {
+    { id = "head", label = "Head" },
+    { id = "body", label = "Body" },
+    { id = "arm_l", label = "Left Arm" },
+    { id = "arm_r", label = "Right Arm" },
+    { id = "leg_l", label = "Left Leg" },
+    { id = "leg_r", label = "Right Leg" }
+}
+
+local definitions_cache = {}
+
+local function module_names()
+    local ok, index = pcall(require, "data.combat.content_index")
+    if ok and type(index) == "table" and type(index.modules) == "table" and #index.modules > 0 then
+        return index.modules
+    end
+
+    return { Catalog.MODULE_NAME }
+end
+
+local function definitions_for_module(module_name)
+    if not definitions_cache[module_name] then
+        definitions_cache[module_name] = Content.load_module(module_name)
+    end
+
+    return definitions_cache[module_name]
+end
+
+local function definitions()
+    return definitions_for_module(module_names()[1] or Catalog.MODULE_NAME)
+end
+
+local function first_owned_instance(world, def_id)
+    local run = world and world.run
+    for instance_id, instance in pairs(run and run.parts or {}) do
+        if instance and instance.def_id == def_id then
+            return instance_id, instance
+        end
+    end
+
+    return nil, nil
+end
+
+local function decorate_part(part, instance_id, instance, slot)
+    if not part then
+        return nil
+    end
+
+    part.def_id = part.id
+    part.instance_id = instance_id
+    part.status = instance and (instance.status or "healthy") or part.status or "healthy"
+    part.source = instance and instance.source or nil
+    part.claimed_from = instance and instance.claimed_from or nil
+    part.menu_slot = slot
+    return part
+end
+
+function Catalog.definitions()
+    return definitions()
+end
+
+function Catalog.module_names()
+    return module_names()
+end
+
+function Catalog.part_definition(def_id)
+    for _, module_name in ipairs(module_names()) do
+        local defs = definitions_for_module(module_name)
+        if defs.parts and defs.parts[def_id] then
+            return defs.parts[def_id], defs, module_name
+        end
+    end
+
+    return nil, nil, nil
+end
+
+function Catalog.build_part(def_id, instance_id, instance, slot)
+    if not def_id then
+        return nil
+    end
+
+    local _, defs = Catalog.part_definition(def_id)
+    if not defs then
+        error("Unknown body part: " .. tostring(def_id))
+    end
+
+    return decorate_part(Content.build_part(defs, def_id), instance_id, instance, slot)
+end
+
+function Catalog.part_from_instance(instance_id, instance, slot)
+    if not (instance and instance.def_id) then
+        return nil
+    end
+
+    return Catalog.build_part(instance.def_id, instance_id, instance, slot)
+end
+
+function Catalog.active_parts(world)
+    local run = world and world.run or {}
+    local parts = run.parts or {}
+    local active = {}
+
+    for _, slot in ipairs(Catalog.SLOT_ORDER) do
+        local instance_id = run.dreamform and run.dreamform[slot.id]
+        local instance = instance_id and parts[instance_id]
+        active[#active + 1] = {
+            slot = slot,
+            instance_id = instance_id,
+            instance = instance,
+            part = Catalog.part_from_instance(instance_id, instance, slot)
+        }
+    end
+
+    return active
+end
+
+function Catalog.active_body_parts(world)
+    local parts = {}
+    for _, entry in ipairs(Catalog.active_parts(world)) do
+        if entry.part then
+            table.insert(parts, entry.part)
+        end
+    end
+    return parts
+end
+
+function Catalog.discovered_part_ids(world)
+    local run = world and world.run or {}
+    local discovered = {}
+
+    for def_id, value in pairs(run.discovered_parts or {}) do
+        if value then
+            discovered[def_id] = true
+        end
+    end
+
+    for _, instance in pairs(run.parts or {}) do
+        if instance and instance.def_id then
+            discovered[instance.def_id] = true
+        end
+    end
+
+    local ids = {}
+    for def_id in pairs(discovered) do
+        table.insert(ids, def_id)
+    end
+
+    table.sort(ids, function(left, right)
+        local left_def = Catalog.part_definition(left)
+        local right_def = Catalog.part_definition(right)
+        local left_name = left_def and left_def.name or left
+        local right_name = right_def and right_def.name or right
+        if left_name == right_name then
+            return left < right
+        end
+        return left_name < right_name
+    end)
+
+    return ids
+end
+
+function Catalog.discovered_parts(world)
+    local parts = {}
+
+    for _, def_id in ipairs(Catalog.discovered_part_ids(world)) do
+        local instance_id, instance = first_owned_instance(world, def_id)
+        table.insert(parts, Catalog.build_part(def_id, instance_id, instance))
+    end
+
+    return parts
+end
+
+return Catalog
+
+```
+
+## systems/dialog.lua
+
+```lua
+local Dialog = {}
+Dialog.__index = Dialog
+
+local function copy_list(list)
+    local copy = {}
+    for _, value in ipairs(list or {}) do
+        table.insert(copy, value)
+    end
+    return copy
+end
+
+local function require_if_needed(source)
+    if type(source) == "string" then
+        return require(source)
+    end
+    return source or {}
+end
+
+local function effect_list(value)
+    if not value then
+        return {}
+    elseif value.type then
+        return { value }
+    end
+    return copy_list(value)
+end
+
+local function has_condition_fields(condition)
+    return condition
+        and (
+            condition.flag
+            or condition.not_flag
+            or condition.has_item
+            or condition.equipped_item
+            or condition.equipped_bp_tag
+            or condition.all
+            or condition.any
+            or condition.none
+        )
+end
+
+local function flag_matches(world, flag, expected)
+    if not flag then
+        return true
+    end
+
+    local actual = world and world.get_flag and world:get_flag(flag) or false
+    if expected == nil then
+        expected = true
+    end
+    return actual == expected
+end
+
+local function condition_matches(condition, context)
+    condition = condition or {}
+    context = context or {}
+    local world = context.world
+    local player = world and world.player
+
+    if condition.all then
+        for _, nested in ipairs(condition.all or {}) do
+            if not condition_matches(nested, context) then
+                return false
+            end
+        end
+    end
+
+    if condition.any then
+        local matched = false
+        for _, nested in ipairs(condition.any or {}) do
+            if condition_matches(nested, context) then
+                matched = true
+                break
+            end
+        end
+        if not matched then
+            return false
+        end
+    end
+
+    if condition.none then
+        for _, nested in ipairs(condition.none or {}) do
+            if condition_matches(nested, context) then
+                return false
+            end
+        end
+    end
+
+    if condition.flag and not flag_matches(world, condition.flag, condition.equals) then
+        return false
+    end
+
+    if condition.not_flag and not flag_matches(world, condition.not_flag, false) then
+        return false
+    end
+
+    if condition.has_item and not (player and player:hasItem(condition.has_item)) then
+        return false
+    end
+
+    if condition.equipped_item and not (player and player.equipped == condition.equipped_item) then
+        return false
+    end
+
+    if condition.equipped_bp_tag
+        and not (world and world.has_equipped_bp_tag and world:has_equipped_bp_tag(condition.equipped_bp_tag)) then
+        return false
+    end
+
+    return true
+end
+
+local function load_tree(source, dialog_id)
+    local data = require_if_needed(source)
+    if data.nodes then
+        return data
+    end
+
+    local tree = data[dialog_id]
+    if not tree then
+        error("Unknown dialog tree: " .. tostring(dialog_id))
+    end
+    return tree
+end
+
+function Dialog.new(source, dialog_id, context)
+    local tree = load_tree(source, dialog_id)
+    local dialog = {
+        id = dialog_id,
+        tree = tree,
+        nodes = tree.nodes or {},
+        node_id = tree.start or "start",
+        context = context or {},
+        pending_effects = {},
+        finished = false,
+        result = nil
+    }
+
+    return setmetatable(dialog, Dialog)
+end
+
+function Dialog:condition_matches(condition)
+    return condition_matches(condition, self.context)
+end
+
+function Dialog:resolve_node_id(node_id)
+    local guard = 0
+
+    while node_id do
+        guard = guard + 1
+        if guard > 32 then
+            error("Dialog branch loop near node " .. tostring(node_id))
+        end
+
+        local node = self.nodes[node_id]
+        if not node then
+            error("Unknown dialog node: " .. tostring(node_id))
+        end
+
+        local branch_target = nil
+        for _, branch in ipairs(node.branches or {}) do
+            local condition = branch.condition or branch.when
+            if not condition and has_condition_fields(branch) then
+                condition = branch
+            end
+
+            if (not condition or self:condition_matches(condition)) and branch.next then
+                branch_target = branch.next
+                break
+            end
+        end
+
+        if not branch_target then
+            return node_id
+        end
+        node_id = branch_target
+    end
+
+    return nil
+end
+
+function Dialog:current_node()
+    if self.finished then
+        return nil
+    end
+
+    local resolved = self:resolve_node_id(self.node_id)
+    self.node_id = resolved
+    return resolved and self.nodes[resolved] or nil
+end
+
+function Dialog:add_effects(effects)
+    for _, effect in ipairs(effect_list(effects)) do
+        table.insert(self.pending_effects, effect)
+    end
+end
+
+function Dialog:finish(finish_data)
+    finish_data = finish_data or {}
+    self:add_effects(finish_data.effects)
+    self.finished = true
+    self.result = {
+        type = "dialog_result",
+        dialog_id = self.id,
+        effects = copy_list(self.pending_effects),
+        result = finish_data.result
+    }
+    return self.result
+end
+
+function Dialog:advance(response_index)
+    local node = self:current_node()
+    if not node then
+        return self:finish()
+    end
+
+    if node.responses then
+        local response = node.responses[response_index or 1]
+        if not response then
+            return nil
+        end
+
+        self:add_effects(response.effects)
+        if response.finish then
+            return self:finish(response.finish)
+        elseif response.result then
+            return self:finish({ result = response.result })
+        elseif response.next then
+            self.node_id = response.next
+            return nil
+        end
+        return self:finish()
+    end
+
+    self:add_effects(node.effects)
+    if node.finish then
+        return self:finish(node.finish)
+    elseif node.result then
+        return self:finish({ result = node.result })
+    elseif node.next then
+        self.node_id = node.next
+        return nil
+    end
+
+    return self:finish()
+end
+
+function Dialog:cancel()
+    local node = self:current_node()
+    if node and node.responses and #node.responses >= 2 then
+        return self:advance(2)
+    end
+    return nil
+end
+
+return Dialog
 
 ```
 
 ## systems/player.lua
 
 ```lua
+local Assets = require("core.assets")
+
 local Player = {}
 Player.__index = Player
 
@@ -7170,48 +14920,128 @@ function Player.new(x, y)
     local self = setmetatable({}, Player)
     self.x = x or 1
     self.y = y or 1
-    self.move_timer = 0
-    self.move_delay = 0.15
+    self.render_x = self.x
+    self.render_y = self.y
+    self.facing = "down"
+    self.move_duration = 0.14
+    self.move_elapsed = 0
+    self.move_from_x = self.x
+    self.move_from_y = self.y
+    self.move_to_x = self.x
+    self.move_to_y = self.y
+    self.moving = false
     self.inventory = {}
     self.equipped = nil
     return self
 end
 
 function Player:update(dt)
-    self.move_timer = math.max(0, self.move_timer - dt)
-end
-
-local function attempt_move(self, dx, dy, map)
-    local new_x = self.x + dx
-    local new_y = self.y + dy
-
-    if not map:isSolid(new_x, new_y) then
-        self.x = new_x
-        self.y = new_y
-        self.move_timer = self.move_delay
-    end
-end
-
-function Player:keypressed(key, map)
-    if self.move_timer > 0 then
+    if not self.moving then
+        self.render_x = self.x
+        self.render_y = self.y
         return
     end
 
-    if key == "up" then
-        attempt_move(self, 0, -1, map)
-    elseif key == "down" then
-        attempt_move(self, 0, 1, map)
-    elseif key == "left" then
-        attempt_move(self, -1, 0, map)
-    elseif key == "right" then
-        attempt_move(self, 1, 0, map)
+    self.move_elapsed = math.min(self.move_duration, self.move_elapsed + (dt or 0))
+    local t = self.move_elapsed / self.move_duration
+    t = 1 - ((1 - t) * (1 - t))
+
+    self.render_x = self.move_from_x + (self.move_to_x - self.move_from_x) * t
+    self.render_y = self.move_from_y + (self.move_to_y - self.move_from_y) * t
+
+    if self.move_elapsed >= self.move_duration then
+        self.x = self.move_to_x
+        self.y = self.move_to_y
+        self.render_x = self.x
+        self.render_y = self.y
+        self.moving = false
     end
+end
+
+local function facing_for_delta(dx, dy)
+    if dy < 0 then
+        return "up"
+    elseif dy > 0 then
+        return "down"
+    elseif dx < 0 then
+        return "left"
+    elseif dx > 0 then
+        return "right"
+    end
+
+    return "down"
+end
+
+function Player:try_move(dx, dy, room)
+    self.facing = facing_for_delta(dx, dy)
+
+    if self.moving then
+        return false
+    end
+
+    local new_x = self.x + dx
+    local new_y = self.y + dy
+
+    if room and room:is_blocked(new_x, new_y) then
+        return false
+    end
+
+    self.move_from_x = self.x
+    self.move_from_y = self.y
+    self.move_to_x = new_x
+    self.move_to_y = new_y
+    self.move_elapsed = 0
+    self.moving = true
+    return true
+end
+
+function Player:front_tile()
+    if self.facing == "up" then
+        return self.x, self.y - 1
+    elseif self.facing == "down" then
+        return self.x, self.y + 1
+    elseif self.facing == "left" then
+        return self.x - 1, self.y
+    elseif self.facing == "right" then
+        return self.x + 1, self.y
+    end
+
+    return self.x, self.y
+end
+
+function Player:pixel_position(tile_size)
+    local size = tile_size or 32
+    return (self.render_x - 1) * size + size / 2,
+        (self.render_y - 1) * size + size / 2
+end
+
+function Player:sort_y(tile_size)
+    local size = tile_size or 32
+    return (self.render_y - 1) * size + size
+end
+
+function Player:keypressed(key, room)
+    if key == "up" then
+        return self:try_move(0, -1, room)
+    elseif key == "down" then
+        return self:try_move(0, 1, room)
+    elseif key == "left" then
+        return self:try_move(-1, 0, room)
+    elseif key == "right" then
+        return self:try_move(1, 0, room)
+    end
+
+    return false
 end
 
 function Player:keyreleased(_)
 end
 
 function Player:addItem(item)
+    if not item then
+        return
+    end
+
     self.inventory[item] = true
     if not self.equipped then
         self.equipped = item
@@ -7222,12 +15052,35 @@ function Player:hasItem(item)
     return self.inventory[item] == true
 end
 
-function Player:draw()
+function Player:draw(tile_size, camera)
+    local size = tile_size or 32
+    local sprite_id = "player_idle_" .. tostring(self.facing or "down")
+    local image = Assets.images[sprite_id] or Assets.images.player_idle_down
+    local draw_x = (self.render_x - 1) * size
+    local draw_y = (self.render_y - 1) * size
+    if camera and camera.snap_world then
+        draw_x = camera:snap_world(draw_x)
+        draw_y = camera:snap_world(draw_y)
+    end
+
+    if image then
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(
+            image,
+            draw_x,
+            draw_y,
+            0,
+            size / image:getWidth(),
+            size / image:getHeight()
+        )
+        return
+    end
+
     love.graphics.setColor(0.7, 0.7, 1)
     love.graphics.rectangle(
         "fill",
-        (self.x - 1) * 32 + 8,
-        (self.y - 1) * 32 + 8,
+        draw_x + 8,
+        draw_y + 8,
         16,
         16
     )
@@ -7238,592 +15091,3891 @@ return Player
 
 ```
 
-## systems/tilemap.lua
+## systems/room.lua
 
 ```lua
-local TileMap = {}
-TileMap.__index = TileMap
+local ActorRegistry = require("systems.actor_registry")
+local Assets = require("core.assets")
 
-local TILE_SIZE = 32
+local Room = {}
+Room.__index = Room
 
-local Entity = require("systems.entity")
+local DEFAULT_TILE_SIZE = 32
+local GID_FLIPPED_HORIZONTALLY = 2147483648
+local GID_FLIPPED_VERTICALLY = 1073741824
+local GID_FLIPPED_DIAGONALLY = 536870912
+local DRAWN_TILE_LAYERS = {
+    ground = true,
+    ground_detail = true,
+    walls = true,
+    objects_low = true,
+    objects_high = true,
+    effects = true
+}
+local KNOWN_LAYERS = {
+    ground = true,
+    ground_detail = true,
+    walls = true,
+    objects_low = true,
+    actors = true,
+    objects_high = true,
+    effects = true,
+    regions = true,
+    collision = true
+}
+local VALID_CAMERA_MODES = {
+    wide = true,
+    standard = true,
+    close = true
+}
 
-local function create_entities(room_data)
-    local entities = {}
-    for _, entity in ipairs(room_data.entities or {}) do
-        entities[#entities + 1] = Entity.new(entity)
+local TILE_COLORS = {
+    ground = { 0.18, 0.17, 0.18, 1 },
+    ground_detail = { 0.24, 0.2, 0.2, 1 },
+    walls = { 0.4, 0.3, 0.3, 1 },
+    objects_low = { 0.28, 0.24, 0.28, 1 },
+    objects_high = { 0.24, 0.21, 0.25, 1 },
+    effects = { 0.42, 0.28, 0.46, 0.5 }
+}
+
+local function require_if_needed(room_source)
+    if type(room_source) == "string" then
+        return require(room_source)
     end
-    return entities
+    return room_source or {}
 end
 
-function TileMap.new(room_module)
-    local room_data = require(room_module)
+local function property_value(properties, key)
+    if type(properties) ~= "table" then
+        return nil
+    end
 
-    local map = {
-        width = room_data.width or 0,
-        height = room_data.height or 0,
-        tiles = room_data.tiles or {},
-        entities = create_entities(room_data),
-        tile_size = TILE_SIZE
+    if properties[key] ~= nil then
+        return properties[key]
+    end
+
+    for _, property in ipairs(properties) do
+        if type(property) == "table" and property.name == key then
+            return property.value
+        end
+    end
+
+    return nil
+end
+
+local function bool_value(value, default)
+    if value == nil then
+        return default
+    end
+    return value == true or value == "true" or value == 1
+end
+
+local function object_world_rect(object, tile_size)
+    local size = tile_size or DEFAULT_TILE_SIZE
+    if object.tile_x or object.tile_y then
+        local x = ((tonumber(object.tile_x) or 1) - 1) * size
+        local y = ((tonumber(object.tile_y) or 1) - 1) * size
+        local width = (tonumber(object.tile_width) or 1) * size
+        local height = (tonumber(object.tile_height) or 1) * size
+        return x, y, width, height
+    end
+
+    return tonumber(object.x) or 0,
+        tonumber(object.y) or 0,
+        tonumber(object.width) or size,
+        tonumber(object.height) or size
+end
+
+local function build_region(object, tile_size)
+    local x, y, width, height = object_world_rect(object, tile_size)
+    local region = {
+        id = tostring(object.name or object.id or "region"),
+        name = object.name,
+        type = property_value(object.properties, "region_type")
+            or object.type
+            or object.class
+            or "region",
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        properties = object.properties or {}
     }
 
-    return setmetatable(map, TileMap)
-end
-
-function TileMap:isSolid(x, y)
-    if x < 1 or y < 1 or x > self.width or y > self.height then
-        return true
+    function region:property(key, default)
+        local value = property_value(self.properties, key)
+        if value == nil then
+            return default
+        end
+        if key == "camera_bounds" then
+            return bool_value(value, default)
+        end
+        return value
     end
 
-    local row = self.tiles[y]
-    if not row then
-        return true
+    function region:contains(world_x, world_y)
+        return world_x >= self.x
+            and world_y >= self.y
+            and world_x < self.x + self.width
+            and world_y < self.y + self.height
     end
 
-    return row[x] ~= 0
+    return region
 end
 
-function TileMap:getEntityAt(x, y)
-    for _, entity in ipairs(self.entities) do
-        if entity.x == x and entity.y == y then
-            return entity
+local function basename_without_extension(path)
+    if type(path) ~= "string" then
+        return nil
+    end
+
+    local normalized = path:gsub("\\", "/")
+    local basename = normalized:match("([^/]+)$") or normalized
+    return basename:gsub("%.[^%.]+$", "")
+end
+
+local function tileset_asset_id(tileset)
+    return tileset.asset_id
+        or property_value(tileset.properties, "asset_id")
+        or property_value(tileset.properties, "image_id")
+        or basename_without_extension(tileset.image)
+        or tileset.name
+end
+
+local function decoded_gid(raw_gid)
+    local gid = tonumber(raw_gid) or 0
+    local flags = {
+        horizontal = false,
+        vertical = false,
+        diagonal = false
+    }
+
+    if gid >= GID_FLIPPED_HORIZONTALLY then
+        flags.horizontal = true
+        gid = gid - GID_FLIPPED_HORIZONTALLY
+    end
+    if gid >= GID_FLIPPED_VERTICALLY then
+        flags.vertical = true
+        gid = gid - GID_FLIPPED_VERTICALLY
+    end
+    if gid >= GID_FLIPPED_DIAGONALLY then
+        flags.diagonal = true
+        gid = gid - GID_FLIPPED_DIAGONALLY
+    end
+
+    return gid, flags
+end
+
+local function has_flip(flags)
+    return flags.horizontal or flags.vertical or flags.diagonal
+end
+
+local function add_message(collection, message)
+    collection[#collection + 1] = message
+end
+
+local function normalize_legacy_room(data)
+    if data.layers then
+        return data
+    end
+
+    return {
+        id = data.id or "legacy_room",
+        width = data.width,
+        height = data.height,
+        tilewidth = data.tile_size or DEFAULT_TILE_SIZE,
+        tileheight = data.tile_size or DEFAULT_TILE_SIZE,
+        layers = {
+            {
+                name = "ground",
+                type = "tilelayer",
+                data = data.tiles
+            },
+            {
+                name = "collision",
+                type = "tilelayer",
+                visible = false,
+                data = data.tiles
+            },
+            {
+                name = "actors",
+                type = "objectgroup",
+                objects = data.entities or {}
+            }
+        }
+    }
+end
+
+local function layer_tile(layer, x, y, width)
+    if not layer or not layer.data then
+        return 0
+    end
+
+    local row = layer.data[y]
+    if type(row) == "table" then
+        return row[x] or 0
+    end
+
+    return layer.data[(y - 1) * width + x] or 0
+end
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function build_tileset(tileset)
+    return {
+        firstgid = tonumber(tileset.firstgid) or 1,
+        name = tileset.name,
+        image = tileset.image,
+        image_id = tileset_asset_id(tileset),
+        tilewidth = tonumber(tileset.tilewidth) or DEFAULT_TILE_SIZE,
+        tileheight = tonumber(tileset.tileheight) or DEFAULT_TILE_SIZE,
+        imagewidth = tonumber(tileset.imagewidth),
+        imageheight = tonumber(tileset.imageheight),
+        columns = tonumber(tileset.columns),
+        tilecount = tonumber(tileset.tilecount),
+        margin = tonumber(tileset.margin) or 0,
+        spacing = tonumber(tileset.spacing) or 0,
+        properties = tileset.properties or {},
+        source = tileset,
+        quads = {}
+    }
+end
+
+function Room.new(room_source, world)
+    local data = normalize_legacy_room(require_if_needed(room_source))
+    local room = {
+        id = data.id or data.name or "room",
+        width = data.width or 0,
+        height = data.height or 0,
+        tile_size = data.tilewidth or data.tileheight or data.tile_size or DEFAULT_TILE_SIZE,
+        properties = data.properties or {},
+        layers = data.layers or {},
+        tilesets = {},
+        actors = {},
+        actor_by_id = {},
+        regions = {},
+        world = world,
+        state = world and world.room_states and world.room_states[data.id or data.name or "room"] or {}
+    }
+
+    setmetatable(room, Room)
+    if world and world.room_states then
+        world.room_states[room.id] = room.state
+    end
+    room:load_tilesets(data.tilesets or {})
+    room:load_actors()
+    room:load_regions()
+    room.validation = room:validate()
+    room:print_validation()
+    return room
+end
+
+function Room:property(key, default)
+    local value = property_value(self.properties, key)
+    if value == nil then
+        return default
+    end
+    return value
+end
+
+function Room:layer(name)
+    for _, layer in ipairs(self.layers or {}) do
+        if layer.name == name then
+            return layer
         end
     end
     return nil
 end
 
-function TileMap:draw()
-    for y = 1, self.height do
-        local row = self.tiles[y]
-        for x = 1, self.width do
-            local tile = row and row[x] or 1
-            if tile == 1 then
-                love.graphics.setColor(0.4, 0.3, 0.3)
-            else
-                love.graphics.setColor(0.2, 0.2, 0.2)
+function Room:load_tilesets(tilesets)
+    self.tilesets = {}
+
+    for _, tileset in ipairs(tilesets or {}) do
+        table.insert(self.tilesets, build_tileset(tileset))
+    end
+
+    table.sort(self.tilesets, function(a, b)
+        return a.firstgid < b.firstgid
+    end)
+end
+
+function Room:tileset_for_gid(gid)
+    gid = tonumber(gid) or 0
+    local match
+
+    for _, tileset in ipairs(self.tilesets or {}) do
+        if gid >= tileset.firstgid then
+            match = tileset
+        else
+            break
+        end
+    end
+
+    if not match then
+        return nil
+    end
+
+    if match.tilecount and gid >= match.firstgid + match.tilecount then
+        return nil
+    end
+
+    return match
+end
+
+function Room:tileset_image(tileset)
+    if not tileset then
+        return nil
+    end
+
+    return tileset.image_id and Assets.images[tileset.image_id] or nil
+end
+
+function Room:quad_for_gid(tileset, gid)
+    if not (tileset and love and love.graphics and love.graphics.newQuad) then
+        return nil
+    end
+
+    local image = self:tileset_image(tileset)
+    if not image then
+        return nil
+    end
+
+    local local_id = (tonumber(gid) or 0) - tileset.firstgid
+    if local_id < 0 then
+        return nil
+    end
+
+    if tileset.quads[local_id] then
+        return tileset.quads[local_id], image
+    end
+
+    local image_width = tileset.imagewidth or image:getWidth()
+    local image_height = tileset.imageheight or image:getHeight()
+    local tile_width = tileset.tilewidth
+    local tile_height = tileset.tileheight
+    local stride_x = tile_width + tileset.spacing
+    local stride_y = tile_height + tileset.spacing
+    local columns = tileset.columns
+        or math.max(1, math.floor((image_width - tileset.margin * 2 + tileset.spacing) / stride_x))
+    local tile_x = tileset.margin + (local_id % columns) * stride_x
+    local tile_y = tileset.margin + math.floor(local_id / columns) * stride_y
+
+    if tile_x + tile_width > image_width or tile_y + tile_height > image_height then
+        return nil
+    end
+
+    local quad = love.graphics.newQuad(tile_x, tile_y, tile_width, tile_height, image_width, image_height)
+    tileset.quads[local_id] = quad
+    return quad, image
+end
+
+function Room:tile_at(layer_name, x, y)
+    return layer_tile(self:layer(layer_name), x, y, self.width)
+end
+
+function Room:is_tile_solid(x, y)
+    if x < 1 or y < 1 or x > self.width or y > self.height then
+        return true
+    end
+
+    local collision = self:layer("collision")
+    if collision then
+        return self:tile_at("collision", x, y) ~= 0
+    end
+
+    return self:tile_at("walls", x, y) ~= 0
+end
+
+function Room:is_blocked(x, y)
+    if self:is_tile_solid(x, y) then
+        return true
+    end
+
+    for _, actor in ipairs(self.actors or {}) do
+        if actor.solid and actor.x == x and actor.y == y and actor.visible ~= false then
+            return true
+        end
+    end
+
+    return false
+end
+
+function Room:load_actors()
+    for _, layer in ipairs(self.layers or {}) do
+        if layer.type == "objectgroup" and layer.name == "actors" then
+            for _, object in ipairs(layer.objects or {}) do
+                local actor = ActorRegistry.create(object, self)
+                self:add_actor(actor)
+            end
+        end
+    end
+end
+
+function Room:load_regions()
+    self.regions = {}
+
+    for _, layer in ipairs(self.layers or {}) do
+        if layer.type == "objectgroup" and layer.name == "regions" then
+            for _, object in ipairs(layer.objects or {}) do
+                table.insert(self.regions, build_region(object, self.tile_size))
+            end
+        end
+    end
+end
+
+function Room:camera_zone_at(world_x, world_y)
+    local match
+    local match_priority = -math.huge
+
+    for _, region in ipairs(self.regions or {}) do
+        if region.type == "camera_zone" and region:contains(world_x, world_y) then
+            local priority = tonumber(region:property("priority", 0)) or 0
+            if not match or priority >= match_priority then
+                match = region
+                match_priority = priority
+            end
+        end
+    end
+
+    return match
+end
+
+function Room:validate_tilesets(result)
+    for _, tileset in ipairs(self.tilesets or {}) do
+        if not tileset.image_id then
+            add_message(result.warnings, string.format(
+                "Tileset '%s' has no image or asset_id; its tiles will use fallback rectangles.",
+                tileset.name or tostring(tileset.firstgid)))
+        elseif not Assets.images[tileset.image_id] then
+            add_message(result.warnings, string.format(
+                "Tileset '%s' expects overworld asset '%s', but it is not loaded.",
+                tileset.name or tostring(tileset.firstgid),
+                tileset.image_id))
+        end
+    end
+end
+
+function Room:validate_layers(result)
+    local seen = {}
+    local warned_gid = {}
+    local warned_diagonal = false
+    local has_tilesets = #(self.tilesets or {}) > 0
+
+    for _, layer in ipairs(self.layers or {}) do
+        local name = layer.name or "(unnamed)"
+        if seen[name] then
+            add_message(result.errors, string.format("Layer '%s' is duplicated.", name))
+        end
+        seen[name] = true
+
+        if not KNOWN_LAYERS[name] then
+            add_message(result.warnings, string.format(
+                "Layer '%s' is not in the documented overworld layer vocabulary.",
+                name))
+        end
+
+        if layer.type == "tilelayer" then
+            if not layer.data then
+                add_message(result.warnings, string.format(
+                    "Tile layer '%s' has no Lua tile data. Infinite/chunked maps are not supported yet.",
+                    name))
             end
 
-            love.graphics.rectangle(
-                "fill",
-                (x - 1) * self.tile_size,
-                (y - 1) * self.tile_size,
-                self.tile_size,
-                self.tile_size
-            )
-        end
-    end
-
-    for _, entity in ipairs(self.entities) do
-        entity:draw()
-    end
-
-    love.graphics.setColor(1, 1, 1)
-end
-
-return TileMap
-
-```
-
-## test_combat_cli.lua
-
-```lua
-local Engine = require("combat.engine")
-local Events = require("combat.events")
-local Combatant = require("combat.combatant")
-
-math.randomseed(12345)
-
-local engine = Engine:new()
-
-engine:on(Events.ROUND_START, function(data)
-    print("\n=== ROUND " .. data.round .. " ===")
-end)
-
-engine:on(Events.UPKEEP_PHASE, function(_)
-    print("Upkeep Phase")
-    for _, combatant in ipairs(engine.combatants) do
-        local crest_strings = {}
-        for crest, count in pairs(combatant.crest_pool or {}) do
-            if count > 0 then
-                table.insert(crest_strings, crest .. ":" .. tostring(count))
+            if layer.width and tonumber(layer.width) ~= self.width then
+                add_message(result.warnings, string.format(
+                    "Tile layer '%s' width differs from room width.",
+                    name))
             end
-        end
+            if layer.height and tonumber(layer.height) ~= self.height then
+                add_message(result.warnings, string.format(
+                    "Tile layer '%s' height differs from room height.",
+                    name))
+            end
 
-        local crest_summary = #crest_strings > 0 and table.concat(crest_strings, ", ") or "None"
-        local attack_bonus = combatant.get_modifier and combatant:get_modifier("attack_bonus") or 0
-        local modifier_summary = attack_bonus > 0 and ("Attack Bonus +" .. attack_bonus) or "No passive bonuses"
+            if has_tilesets and layer.data then
+                for y = 1, self.height do
+                    for x = 1, self.width do
+                        local raw_gid = layer_tile(layer, x, y, self.width)
+                        local gid, flags = decoded_gid(raw_gid)
+                        if gid ~= 0 then
+                            if has_flip(flags) and flags.diagonal and not warned_diagonal then
+                                add_message(result.warnings,
+                                    "Diagonal tile flips are present; avoid them until diagonal rendering is implemented.")
+                                warned_diagonal = true
+                            end
 
-        print(string.format(" - %s Crests [%s] | %s", combatant.name, crest_summary, modifier_summary))
-    end
-end)
-
-engine:on(Events.TECH_SELECT_PHASE, function(data)
-    if data.combatant and data.available_techs then
-        print("\nSelect tech for " .. data.combatant.name)
-        print("Available techs:")
-        for index, tech in ipairs(data.available_techs) do
-            print(index .. ". " .. (tech.name or tech.id))
-        end
-    elseif data.combatants then
-        print("\nTech Selection Phase")
-    end
-end)
-
-engine:on(Events.ATTACK_ASSIGN_PHASE, function(_)
-    print("\nAttack Assignment Phase")
-end)
-
-engine:on(Events.DEFENSE_ASSIGN_PHASE, function(_)
-    print("\nDefense Assignment Phase")
-end)
-
-engine:on(Events.DAMAGE_DEALT, function(data)
-    if data.heart_point_loss then
-        print(string.format("%s loses %d Heart Point(s)!", data.target.name, data.heart_point_loss))
-        return
-    end
-
-    if data.body_part then
-        print(string.format("%s takes damage to %s (%s -> %s)",
-            data.target.name,
-            data.body_part.name,
-            data.status_before or "?",
-            data.status_after or "?"))
-
-        local context = data.context or {}
-        local notes = context.notes or {}
-        if notes.brutal and notes.brutal ~= 0 then
-            print(string.format("  Brutal adds +%d damage", notes.brutal))
-        end
-    end
-end)
-
-engine:on(Events.HEAL_APPLIED, function(data)
-    local healer_name = data.healer and data.healer.name or "Unknown"
-    local target_name = data.target and data.target.name or "Unknown"
-    local body_part_name = data.body_part and data.body_part.name or "body part"
-
-    if data.no_effect then
-        print(string.format("%s attempts to heal %s's %s, but it has no effect.", healer_name, target_name, body_part_name))
-        return
-    end
-
-    print(string.format("%s heals %s's %s (%s -> %s)",
-        healer_name,
-        target_name,
-        body_part_name,
-        data.status_before or "?",
-        data.status_after or "?"))
-end)
-
-engine:on(Events.DICE_ROLLED, function(data)
-    local actor_name = data.attacker and data.attacker.name or "Unknown"
-    local result = data.result or {}
-    local rolls = {}
-    for _, value in ipairs(result.rolls or {}) do
-        table.insert(rolls, tostring(value))
-    end
-
-    local roll_string = #rolls > 0 and table.concat(rolls, ", ") or ""
-    local dice_label = result.count and result.type and (result.count .. result.type) or (result.type or "dice")
-    local modified_total = data.modified_total or result.total or 0
-    local context = data.context or {}
-
-    if data.defense then
-        local body_part_name = data.body_part and data.body_part.name or "target"
-        print(string.format("%s defends %s with %s [%s] -> total %d", actor_name, body_part_name, dice_label, roll_string, result.total or 0))
-    else
-        if modified_total ~= (result.total or 0) then
-            print(string.format("%s rolls %s [%s] -> total %d (modified to %d)", actor_name, dice_label, roll_string, result.total or 0, modified_total))
-        else
-            print(string.format("%s rolls %s [%s] -> total %d", actor_name, dice_label, roll_string, modified_total))
-        end
-
-        if result.consistent_value then
-            print(string.format("  Consistent keyword forces each die to %d", result.consistent_value))
-        end
-
-        local notes = context.notes or {}
-        if notes.piercing and notes.piercing > 0 then
-            print(string.format("  Piercing ignores %d defense", notes.piercing))
-        end
-    end
-end)
-
-engine:on(Events.CREST_GAINED, function(data)
-    local combatant_name = data.combatant and data.combatant.name or "Unknown"
-    local crest = data.crest or "?"
-    local amount = data.amount or 0
-    local total = data.total or amount
-    print(string.format("%s gains %d %s crest(s). Total: %d", combatant_name, amount, crest, total))
-end)
-
-engine:on(Events.CREST_EXPENDED, function(data)
-    local combatant_name = data.combatant and data.combatant.name or "Unknown"
-    local crest = data.crest or "?"
-    local remaining = data.remaining
-    local effect = data.effect or {}
-
-    local effect_summary = ""
-    if effect.type == "shadow" then
-        local target = effect.target
-        local target_name = target and target.name or (target and target.id) or "target"
-        if effect.skipped then
-            effect_summary = "No valid target."
-        else
-            effect_summary = string.format("%s becomes untargetable this round.", target_name)
-        end
-    elseif effect.type == "valor" then
-        effect_summary = "Next attack gains +2." 
-    elseif effect.type == "madness" then
-        local gained = effect.gained_crest or "an unknown crest"
-        effect_summary = string.format("Forced reroll will occur. Gained %s.", gained)
-    else
-        effect_summary = "Effect resolved."
-    end
-
-    local remaining_text = remaining ~= nil and (" Remaining: " .. tostring(remaining)) or ""
-    print(string.format("%s expends %s crest.%s %s", combatant_name, crest, remaining_text, effect_summary))
-end)
-
-engine:on(Events.DIE_REROLLED, function(data)
-    local combatant_name = data.combatant and data.combatant.name or "Unknown"
-    local previous = data.previous_value or "?"
-    local new_value = data.new_value or "?"
-    print(string.format("Madness forces %s to reroll a die: %s -> %s", combatant_name, tostring(previous), tostring(new_value)))
-end)
-
-engine:on(Events.COMBAT_END, function(data)
-    local winner = engine.winner
-    if winner then
-        print("\nCombat ends! Winner: " .. winner.name)
-    else
-        print("\nCombat ends in a draw.")
-    end
-end)
-
-local function get_player_input(prompt)
-    io.write(prompt .. ": ")
-    return io.read()
-end
-
-local function create_demo_combatants()
-    local valor_surge = {
-        id = "valor_surge",
-        name = "Valor Surge",
-        keywords = { Piercing = 1 },
-        actions = {
-            { type = "gain_crest", crest = "Valor", amount = 1, name = "Rallying Cry" },
-            { type = "attack_roll", dice_count = 2, dice_type = "d6", name = "Blade Sweep", keywords = { Consistent = 4 } },
-            { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Guarded Stance" }
-        }
-    }
-
-    local soothing_light = {
-        id = "soothing_light",
-        name = "Soothing Light",
-        actions = {
-            { type = "heal_body_part", amount = 1, name = "Mending Pulse" }
-        }
-    }
-
-    local crushing_blow = {
-        id = "crushing_blow",
-        name = "Crushing Blow",
-        keywords = { Brutal = 1 },
-        actions = {
-            { type = "attack_roll", dice_count = 1, dice_type = "d8", name = "Heavy Smash" },
-            { type = "defense_roll", dice_count = 1, dice_type = "d4", name = "Harden Hide" }
-        }
-    }
-
-    local player = Combatant:new({ id = "player", name = "Dreamer", is_player = true })
-    player:add_body_part({
-        id = "player_arm",
-        name = "Dreamblade Arm",
-        type = "ARM",
-        toughness = 2,
-        hp_value = 1,
-        techs = { valor_surge }
-    })
-    player:add_body_part({
-        id = "player_legs",
-        name = "Surefooted Legs",
-        type = "LEG",
-        toughness = 2,
-        hp_value = 1,
-        techs = { soothing_light }
-    })
-
-    local enemy = Combatant:new({ id = "enemy", name = "Nightmare" })
-    enemy:add_body_part({
-        id = "enemy_claw",
-        name = "Gnarled Claw",
-        type = "ARM",
-        toughness = 2,
-        hp_value = 1,
-        techs = { crushing_blow }
-    })
-    enemy:add_body_part({
-        id = "enemy_hide",
-        name = "Thick Hide",
-        type = "BODY",
-        toughness = 3,
-        hp_value = 1,
-        techs = {}
-    })
-
-    return player, enemy
-end
-
-local function run_test_combat()
-    local player, enemy = create_demo_combatants()
-    engine:add_combatant(player)
-    engine:add_combatant(enemy)
-
-    engine:start_combat()
-
-    while engine.state ~= "COMPLETE" do
-        engine:process_state()
-
-        if engine:needs_input() then
-            local metadata = engine:get_pending_input_metadata()
-            if metadata then
-                if metadata.type == "attack_assignment" then
-                    print(string.format("\n%s is assigning attack (%s) against %s.",
-                        metadata.combatant and metadata.combatant.name or "?",
-                        metadata.action_label or "attack",
-                        metadata.opponent and metadata.opponent.name or "opponent"))
-                elseif metadata.type == "defense_assignment" then
-                    print(string.format("\n%s is assigning defense (%s).",
-                        metadata.combatant and metadata.combatant.name or "?",
-                        metadata.action_label or "defense"))
-                elseif metadata.type == "crest_prompt" then
-                    print(string.format("\n%s may expend a crest.", metadata.combatant and metadata.combatant.name or "?"))
-                    local crest_options = metadata.options or {}
-                    if #crest_options > 0 then
-                        print("Available crests:")
-                        for _, option in ipairs(crest_options) do
-                            print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
+                            if not self:tileset_for_gid(gid) and not warned_gid[gid] then
+                                add_message(result.warnings, string.format(
+                                    "Tile layer '%s' uses GID %s, but no loaded tileset owns it.",
+                                    name,
+                                    tostring(gid)))
+                                warned_gid[gid] = true
+                            end
                         end
                     end
-                elseif metadata.type == "crest_select" then
-                    print("\nChoose a crest to expend:")
-                    for _, option in ipairs(metadata.options or {}) do
-                        print(string.format("%d. %s (x%d)", option.index or 0, option.name or "?", option.count or 0))
-                    end
-                elseif metadata.type == "crest_target_select" then
-                    print(string.format("\nSelect a body part to shroud for %s.", metadata.combatant and metadata.combatant.name or "?"))
                 end
             end
+        end
+    end
 
-            if metadata and (metadata.type == "attack_assignment" or metadata.type == "defense_assignment" or metadata.type == "crest_target_select") then
-                print("Targets:")
-                for _, option in ipairs(metadata.options or {}) do
-                    local part = option.part
-                    local name = part and part.name or option.id or ("Option " .. tostring(option.index))
-                    local status = part and part.status or "unknown"
-                    local toughness = part and part.toughness or 0
-                    print(string.format("%d. %s (Status: %s, Toughness: %d)", option.index, name, status, toughness))
-                end
-            end
+    if not seen.ground then
+        add_message(result.warnings, "Room has no 'ground' tile layer.")
+    end
+    if not seen.actors then
+        add_message(result.warnings, "Room has no 'actors' object layer.")
+    end
+end
 
-            local input = get_player_input(engine:get_input_prompt())
-            engine:provide_input(input)
+function Room:validate_actors(result)
+    local seen = {}
+
+    for _, actor in ipairs(self.actors or {}) do
+        if seen[actor.id] then
+            add_message(result.errors, string.format("Actor id '%s' is duplicated.", actor.id))
+        end
+        seen[actor.id] = true
+
+        if actor.name == tostring(actor.id) and tonumber(actor.id) then
+            add_message(result.warnings, string.format(
+                "Actor '%s' is using Tiled's numeric object id. Give persistent actors stable names.",
+                tostring(actor.id)))
+        end
+
+        if not ActorRegistry.has(actor.type) then
+            add_message(result.warnings, string.format(
+                "Actor '%s' has unknown type '%s'. It will have only base Actor behavior.",
+                actor.id,
+                tostring(actor.type)))
+        end
+
+        local explicit_sprite = actor.properties
+            and (actor.properties.asset_id or actor.properties.sprite_id or actor.properties.sprite)
+        if explicit_sprite and not Assets.images[explicit_sprite] then
+            add_message(result.warnings, string.format(
+                "Actor '%s' references missing sprite asset '%s'.",
+                actor.id,
+                tostring(explicit_sprite)))
         end
     end
 end
 
-run_test_combat()
+function Room:validate()
+    local result = {
+        errors = {},
+        warnings = {}
+    }
+
+    if self.width <= 0 or self.height <= 0 then
+        add_message(result.errors, "Room width and height must both be greater than zero.")
+    end
+
+    if self.tile_size ~= DEFAULT_TILE_SIZE then
+        add_message(result.warnings, string.format(
+            "Room tile size is %s; current overworld runtime expects %s.",
+            tostring(self.tile_size),
+            tostring(DEFAULT_TILE_SIZE)))
+    end
+
+    local camera_mode = self:property("camera_zoom") or self:property("camera_mode")
+    if camera_mode and not VALID_CAMERA_MODES[camera_mode] then
+        add_message(result.errors, string.format(
+            "Room camera mode '%s' is invalid; expected wide, standard, or close.",
+            tostring(camera_mode)))
+    end
+
+    for _, region in ipairs(self.regions or {}) do
+        if region.type == "camera_zone" then
+            local zone_mode = region:property("camera_zoom")
+                or region:property("camera_mode")
+                or region:property("zoom")
+            if zone_mode and not VALID_CAMERA_MODES[zone_mode] then
+                add_message(result.errors, string.format(
+                    "Camera zone '%s' uses invalid mode '%s'.",
+                    region.id,
+                    tostring(zone_mode)))
+            end
+            if region.width <= 0 or region.height <= 0 then
+                add_message(result.errors, string.format(
+                    "Camera zone '%s' must have positive width and height.",
+                    region.id))
+            end
+        end
+    end
+
+    self:validate_tilesets(result)
+    self:validate_layers(result)
+    self:validate_actors(result)
+
+    return result
+end
+
+function Room:print_validation()
+    if not self.validation then
+        return
+    end
+
+    for _, message in ipairs(self.validation.errors or {}) do
+        print(string.format("[Room:%s] ERROR: %s", self.id, message))
+    end
+    for _, message in ipairs(self.validation.warnings or {}) do
+        print(string.format("[Room:%s] warning: %s", self.id, message))
+    end
+end
+
+function Room:add_actor(actor)
+    self.state[actor.id] = self.state[actor.id] or actor.state or {}
+    actor.state = self.state[actor.id]
+    table.insert(self.actors, actor)
+    self.actor_by_id[actor.id] = actor
+end
+
+function Room:actor_at(x, y, predicate)
+    for index = #(self.actors or {}), 1, -1 do
+        local actor = self.actors[index]
+        if actor.x == x and actor.y == y and actor.visible ~= false then
+            if not predicate or predicate(actor) then
+                return actor
+            end
+        end
+    end
+
+    return nil
+end
+
+function Room:interactable_at(x, y)
+    return self:actor_at(x, y, function(actor)
+        return actor.interactable == true
+    end)
+end
+
+function Room:update(world, dt)
+    for _, actor in ipairs(self.actors or {}) do
+        actor:update(world, dt)
+    end
+end
+
+function Room:update_ambient(world, dt)
+    for _, actor in ipairs(self.actors or {}) do
+        actor:update_ambient(world, dt)
+    end
+end
+
+function Room:draw_tile(layer, raw_gid, x, y)
+    local gid, flags = decoded_gid(raw_gid)
+    if gid == 0 then
+        return true
+    end
+
+    local tileset = self:tileset_for_gid(gid)
+    local quad, image = self:quad_for_gid(tileset, gid)
+    if not (quad and image) then
+        return false
+    end
+
+    local offset_x = tonumber(layer.offsetx) or 0
+    local offset_y = tonumber(layer.offsety) or 0
+    local draw_x = (x - 1) * self.tile_size + offset_x
+    local draw_y = (y - 1) * self.tile_size + offset_y
+    local scale_x = self.tile_size / tileset.tilewidth
+    local scale_y = self.tile_size / tileset.tileheight
+
+    if flags.horizontal then
+        draw_x = draw_x + self.tile_size
+        scale_x = -scale_x
+    end
+    if flags.vertical then
+        draw_y = draw_y + self.tile_size
+        scale_y = -scale_y
+    end
+
+    love.graphics.setColor(1, 1, 1, tonumber(layer.opacity) or 1)
+    love.graphics.draw(image, quad, draw_x, draw_y, 0, scale_x, scale_y)
+    return true
+end
+
+function Room:draw_fallback_tile(layer, x, y)
+    local color = TILE_COLORS[layer.name] or TILE_COLORS.ground
+    local opacity = tonumber(layer.opacity) or 1
+    set_color({
+        color[1],
+        color[2],
+        color[3],
+        (color[4] or 1) * opacity
+    })
+
+    love.graphics.rectangle(
+        "fill",
+        (x - 1) * self.tile_size + (tonumber(layer.offsetx) or 0),
+        (y - 1) * self.tile_size + (tonumber(layer.offsety) or 0),
+        self.tile_size,
+        self.tile_size
+    )
+end
+
+function Room:draw_tile_layer(layer)
+    if not layer or layer.visible == false or not DRAWN_TILE_LAYERS[layer.name] then
+        return
+    end
+
+    for y = 1, self.height do
+        for x = 1, self.width do
+            local raw_gid = layer_tile(layer, x, y, self.width)
+            if raw_gid ~= 0 and not self:draw_tile(layer, raw_gid, x, y) then
+                self:draw_fallback_tile(layer, x, y)
+            end
+        end
+    end
+end
+
+function Room:draw_actor_band(world, include_player)
+    local drawables = {}
+
+    for _, actor in ipairs(self.actors or {}) do
+        if actor.layer == "actors" and actor.visible ~= false then
+            table.insert(drawables, {
+                sort_y = actor:sort_y(self.tile_size),
+                draw = function()
+                    actor:draw(world)
+                end
+            })
+        end
+    end
+
+    if include_player and world and world.player then
+        table.insert(drawables, {
+            sort_y = world.player:sort_y(self.tile_size),
+            draw = function()
+                world.player:draw(self.tile_size, world.camera)
+            end
+        })
+    end
+
+    table.sort(drawables, function(a, b)
+        return a.sort_y < b.sort_y
+    end)
+
+    for _, drawable in ipairs(drawables) do
+        drawable.draw()
+    end
+end
+
+function Room:draw(world)
+    self:draw_tile_layer(self:layer("ground"))
+    self:draw_tile_layer(self:layer("ground_detail"))
+    self:draw_tile_layer(self:layer("walls"))
+    self:draw_tile_layer(self:layer("objects_low"))
+    self:draw_actor_band(world, true)
+    self:draw_tile_layer(self:layer("objects_high"))
+    self:draw_tile_layer(self:layer("effects"))
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+return Room
 
 ```
 
-## ui/layouts.lua
+## systems/world.lua
 
 ```lua
-local Layouts = {}
+local Player = require("systems.player")
+local Room = require("systems.room")
+local Catalog = require("systems.bodypart_catalog")
+local Save = require("core.save")
+local OverworldCamera = require("systems.overworld_camera")
 
-local SPRITE_SIZE = 128
-local DEFAULT_WIDTH = 220
+local World = {}
+World.__index = World
 
-local SLOT_ALIASES = {
-    head = "head",
-    skull = "head",
-    torso = "torso",
-    body = "torso",
-    chest = "torso",
-    core = "torso",
-    arm = "arm",
-    arm_left = "arm_left",
-    left_arm = "arm_left",
-    l_arm = "arm_left",
-    arm_right = "arm_right",
-    right_arm = "arm_right",
-    r_arm = "arm_right",
-    leg = "leg",
-    leg_left = "leg_left",
-    left_leg = "leg_left",
-    l_leg = "leg_left",
-    leg_right = "leg_right",
-    right_leg = "leg_right",
-    r_leg = "leg_right"
+local DEFAULT_ROOM = "data.rooms.basement_1"
+local MESSAGE_DURATION = 4
+local DEFAULT_DREAMFORM = {
+    head = "part_inst_dreamer_head",
+    body = "part_inst_dreamer_body",
+    arm_l = "part_inst_dreamer_left_arm",
+    arm_r = "part_inst_dreamer_right_arm",
+    leg_l = "part_inst_dreamer_left_leg",
+    leg_r = "part_inst_dreamer_right_leg"
 }
-
-local SLOT_OFFSETS = {
-    head = { x = 0, y = -SPRITE_SIZE * 1.3 },
-    torso = { x = 0, y = -SPRITE_SIZE * 0.1 },
-    arm_left = { x = -SPRITE_SIZE * 1.2, y = -SPRITE_SIZE * 0.1 },
-    arm_right = { x = SPRITE_SIZE * 1.2, y = -SPRITE_SIZE * 0.1 },
-    leg_left = { x = -SPRITE_SIZE * 0.6, y = SPRITE_SIZE * 1.15 },
-    leg_right = { x = SPRITE_SIZE * 0.6, y = SPRITE_SIZE * 1.15 }
+local DEFAULT_PARTS = {
+    part_inst_dreamer_head = { def_id = "dreamer_head", status = "healthy", source = "initial" },
+    part_inst_dreamer_body = { def_id = "dreamer_body", status = "healthy", source = "initial" },
+    part_inst_dreamer_left_arm = { def_id = "dreamer_left_arm", status = "healthy", source = "initial" },
+    part_inst_dreamer_right_arm = { def_id = "dreamer_right_arm", status = "healthy", source = "initial" },
+    part_inst_dreamer_left_leg = { def_id = "dreamer_left_leg", status = "healthy", source = "initial" },
+    part_inst_dreamer_right_leg = { def_id = "dreamer_right_leg", status = "healthy", source = "initial" }
 }
+local DREAMFORM_SLOT_TYPES = {
+    head = "HEAD",
+    body = "BODY",
+    arm_l = "ARM",
+    arm_r = "ARM",
+    leg_l = "LEG",
+    leg_r = "LEG"
+}
+local DREAMFORM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
 
-local function clamp_width(width)
-    if not width or width <= 0 then
-        return DEFAULT_WIDTH
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
     end
-    return width
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
 end
 
-local function resolve_side(combatant, index)
-    if combatant and combatant.is_player then
-        return "left"
+local function recover_status(status)
+    if status == "maimed" then
+        return "wounded"
+    elseif status == "wounded" then
+        return "healthy"
     end
 
-    if combatant and combatant.is_enemy then
-        return "right"
-    end
-
-    if index == 1 then
-        return "left"
-    end
-
-    return "right"
+    return "healthy"
 end
 
-local function resolve_slot(part)
+local function part_def_id(part)
+    return type(part) == "table" and (part.def_id or part.id) or part
+end
+
+local function part_type(part)
+    if type(part) == "table" and part.type then
+        return tostring(part.type):upper()
+    end
+
+    return nil
+end
+
+local function discover_part(run, part)
+    local def_id = part_def_id(part)
+    if not def_id then
+        return
+    end
+
+    run.discovered_parts = run.discovered_parts or {}
+    run.discovered_parts[def_id] = true
+end
+
+local function prune_unequipped_parts(run)
+    local equipped = {}
+    for _, instance_id in pairs(run.dreamform or {}) do
+        if instance_id then
+            equipped[instance_id] = true
+        end
+    end
+
+    for instance_id in pairs(run.parts or {}) do
+        if not equipped[instance_id] then
+            run.parts[instance_id] = nil
+        end
+    end
+end
+
+local function normalize_run_state(run)
+    run = run or {}
+    run.dreamform = run.dreamform or copy_table(DEFAULT_DREAMFORM)
+    run.parts = run.parts or {}
+    run.discovered_parts = run.discovered_parts or {}
+    run.encounters = run.encounters or {}
+    run.combat_history = run.combat_history or {}
+    run.next_part_instance_index = run.next_part_instance_index or 1
+
+    for slot, instance_id in pairs(DEFAULT_DREAMFORM) do
+        run.dreamform[slot] = run.dreamform[slot] or instance_id
+    end
+
+    for instance_id, part in pairs(DEFAULT_PARTS) do
+        if not run.parts[instance_id] then
+            run.parts[instance_id] = copy_table(part)
+        end
+        run.parts[instance_id].instance_id = instance_id
+        run.parts[instance_id].status = run.parts[instance_id].status or "healthy"
+        discover_part(run, run.parts[instance_id])
+    end
+
+    for _, part in pairs(run.parts) do
+        discover_part(run, part)
+    end
+
+    prune_unequipped_parts(run)
+
+    return run
+end
+
+function World.new(options)
+    options = options or {}
+    local save_data = copy_table(options.save or {})
+    local saved_run = copy_table(save_data.run or {})
+    local saved_player = saved_run.player or {}
+    local world = {
+        room_module = options.room or saved_run.current_room or DEFAULT_ROOM,
+        player = Player.new(options.player_x or saved_player.x or 5, options.player_y or saved_player.y or 5),
+        inventory = {},
+        profile = copy_table(save_data.profile or options.profile or {}),
+        run = normalize_run_state(copy_table(options.run or saved_run)),
+        on_encounter = options.on_encounter,
+        on_dialog = options.on_dialog,
+        flags = copy_table(options.flags or saved_run.flags or {}),
+        room_states = copy_table(options.room_states or save_data.rooms or {}),
+        autosave_enabled = options.autosave ~= false and Save.available(options.save_backend),
+        save_path = options.save_path or Save.DEFAULT_PATH,
+        save_backend = options.save_backend,
+        last_save_reason = nil,
+        last_save_error = nil,
+        message = nil,
+        message_timer = 0,
+        camera = OverworldCamera.new()
+    }
+
+    setmetatable(world, World)
+    world:apply_player_state(saved_player)
+    world:load_room(world.room_module)
+    return world
+end
+
+function World:apply_player_state(state)
+    state = state or {}
+    self.player.facing = state.facing or self.player.facing
+    self.player.inventory = copy_table(state.inventory or self.player.inventory or {})
+    self.player.equipped = state.equipped
+end
+
+function World:load_room(room_module)
+    self.room_module = room_module
+    self.run.current_room = room_module
+    self.room = Room.new(room_module, self)
+    self:update_camera()
+end
+
+function World:player_save_data()
+    return {
+        x = self.player.x,
+        y = self.player.y,
+        facing = self.player.facing,
+        inventory = copy_table(self.player.inventory or {}),
+        equipped = self.player.equipped
+    }
+end
+
+function World:save_data()
+    local run = copy_table(self.run or {})
+    run.current_room = self.room_module
+    run.player = self:player_save_data()
+    run.flags = copy_table(self.flags or {})
+
+    return {
+        save_version = Save.VERSION,
+        profile = copy_table(self.profile or {}),
+        run = run,
+        rooms = copy_table(self.room_states or {})
+    }
+end
+
+function World:autosave(reason)
+    if not self.autosave_enabled then
+        return false, "autosave disabled"
+    end
+
+    local ok, err = Save.write(self:save_data(), self.save_path, self.save_backend)
+    if ok then
+        self.last_save_reason = reason
+        self.last_save_error = nil
+    else
+        self.last_save_error = err
+        print("Autosave failed: " .. tostring(err))
+    end
+
+    return ok, err
+end
+
+function World:update(dt)
+    self.player:update(dt, self.room)
+    if self.room then
+        self.room:update(self, dt)
+    end
+
+    if self.message_timer > 0 then
+        self.message_timer = math.max(0, self.message_timer - (dt or 0))
+        if self.message_timer == 0 then
+            self.message = nil
+        end
+    end
+
+    self:update_camera()
+end
+
+function World:update_ambient(dt)
+    if self.room and self.room.update_ambient then
+        self.room:update_ambient(self, dt)
+    end
+
+    self:update_camera()
+end
+
+function World:update_camera()
+    if not (love and love.graphics and self.room) then
+        return
+    end
+
+    local px, py = self.player:pixel_position(self.room.tile_size)
+    self.camera:update(
+        self.room,
+        px,
+        py,
+        love.graphics.getWidth(),
+        love.graphics.getHeight())
+end
+
+function World:draw()
+    self.camera:attach()
+    if self.room then
+        self.room:draw(self)
+    end
+    local px, py = self.player:pixel_position(self.room and self.room.tile_size or 32)
+    self.camera:draw_world_guides(self.room, px, py)
+    self.camera:detach()
+
+    self:draw_hud()
+end
+
+function World:draw_hud()
+    if self.player.equipped then
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print("[" .. self.player.equipped .. "]", 10, 10)
+    end
+
+    if self.message then
+        local width = love.graphics.getWidth()
+        local height = love.graphics.getHeight()
+        local box_height = 54
+        love.graphics.setColor(0.05, 0.05, 0.08, 0.92)
+        love.graphics.rectangle("fill", 16, height - box_height - 16, width - 32, box_height, 4, 4)
+        love.graphics.setColor(0.8, 0.78, 0.88, 1)
+        love.graphics.rectangle("line", 16, height - box_height - 16, width - 32, box_height, 4, 4)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf(self.message, 28, height - box_height, width - 56, "left")
+    end
+
+    if self.camera and self.camera.show_guides then
+        local label = self.camera:debug_label()
+        love.graphics.setColor(0.04, 0.04, 0.07, 0.9)
+        love.graphics.rectangle("fill", love.graphics.getWidth() - 238, 10, 228, 24, 3, 3)
+        love.graphics.setColor(0.9, 0.89, 0.98, 1)
+        love.graphics.printf(label, love.graphics.getWidth() - 232, 16, 216, "center")
+    end
+end
+
+function World:set_message(message)
+    if not message then
+        return
+    end
+
+    self.message = message
+    self.message_timer = MESSAGE_DURATION
+    print(message)
+end
+
+function World:get_flag(flag)
+    return self.flags and self.flags[flag] == true
+end
+
+function World:set_flag(flag, value)
+    if not flag then
+        return
+    end
+
+    self.flags[flag] = value ~= false
+end
+
+function World:has_equipped_bp_tag(tag)
+    if not tag then
+        return false
+    end
+
+    for _, instance_id in pairs(self.run.dreamform or {}) do
+        local instance = self.run.parts and self.run.parts[instance_id]
+        local part_def = instance and Catalog.part_definition(instance.def_id)
+        for _, existing in ipairs((part_def and part_def.tags) or instance and instance.tags or {}) do
+            if existing == tag then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+function World:handle_result(result)
+    if not result then
+        self:set_message("There is nothing special here.")
+        return
+    end
+
+    if result.type == "item" then
+        self.player:addItem(result.item)
+        self:set_message(result.text or ("Found: " .. tostring(result.item) .. "!"))
+        self:autosave("item")
+    elseif result.type == "encounter" then
+        self:set_message(result.text or ("Encounter: " .. tostring(result.encounter_id)))
+        self:start_encounter(result)
+    elseif result.type == "dialog" then
+        self:start_dialog(result)
+    elseif result.type == "passage" then
+        self:set_message(result.text or "A passage opens.")
+        self:autosave("passage")
+    else
+        self:set_message(result.text)
+    end
+end
+
+function World:start_dialog(dialog)
+    if self.on_dialog then
+        self.on_dialog(dialog, self)
+    else
+        self:set_message("There is something to say here.")
+    end
+end
+
+function World:apply_dialog_effect(effect)
+    if not effect then
+        return
+    end
+
+    if effect.type == "set_flag" then
+        self:set_flag(effect.flag, effect.value)
+    elseif effect.type == "clear_flag" then
+        self:set_flag(effect.flag, false)
+    elseif effect.type == "give_item" or effect.type == "item" then
+        self.player:addItem(effect.item)
+    end
+end
+
+function World:apply_dialog_result(dialog_result)
+    if not (dialog_result and dialog_result.type == "dialog_result") then
+        return
+    end
+
+    for _, effect in ipairs(dialog_result.effects or {}) do
+        self:apply_dialog_effect(effect)
+    end
+
+    self:autosave("dialog")
+
+    if dialog_result.result then
+        self:handle_result(dialog_result.result)
+    end
+end
+
+function World:start_encounter(encounter)
+    if not encounter then
+        return
+    end
+
+    local encounter_id = encounter.encounter_id
+    local encounter_state = encounter_id and self.run.encounters[encounter_id]
+    if encounter_state and encounter_state.resolved then
+        self:set_message("The dream here has already gone quiet.")
+        return
+    end
+
+    if self.on_encounter then
+        self.on_encounter(encounter, self)
+    end
+end
+
+function World:active_part_instance_for_def(def_id)
+    if not def_id then
+        return nil
+    end
+
+    for _, instance_id in pairs(self.run.dreamform or {}) do
+        local instance = self.run.parts and self.run.parts[instance_id]
+        if instance and instance.def_id == def_id then
+            return instance_id, instance
+        end
+    end
+
+    return nil
+end
+
+function World:apply_player_part_statuses(parts)
+    local recovered_parts = {}
+
+    for _, part in ipairs(parts or {}) do
+        local instance_id = part.instance_id
+        local instance = instance_id and self.run.parts[instance_id]
+
+        if not instance then
+            instance_id, instance = self:active_part_instance_for_def(part.def_id or part.id)
+        end
+
+        if instance then
+            local combat_status = part.status or "healthy"
+            local recovered_status = recover_status(combat_status)
+            instance.last_combat_status = combat_status
+            instance.status = recovered_status
+            table.insert(recovered_parts, {
+                instance_id = instance_id,
+                def_id = instance.def_id,
+                name = part.name or instance.name or instance.def_id,
+                combat_status = combat_status,
+                recovered_status = recovered_status
+            })
+        end
+    end
+
+    return recovered_parts
+end
+
+function World:eligible_dreamform_slots_for_part(part)
+    local wanted_type = part_type(part)
+    local slots = {}
+
+    for _, slot_id in ipairs(DREAMFORM_SLOT_ORDER) do
+        if not wanted_type or DREAMFORM_SLOT_TYPES[slot_id] == wanted_type then
+            table.insert(slots, slot_id)
+        end
+    end
+
+    return slots
+end
+
+function World:claim_part_into_slot(part, slot_id, encounter_id)
+    local def_id = part_def_id(part)
+    if not def_id then
+        return nil, "missing_def_id"
+    end
+
+    if type(part) == "table" and part.status == "maimed" then
+        return nil, "maimed_part_unclaimable"
+    end
+
+    local wanted_type = part_type(part)
+    local slot_type = slot_id and DREAMFORM_SLOT_TYPES[slot_id]
+    if not slot_type then
+        return nil, "unknown_slot"
+    end
+
+    if wanted_type and wanted_type ~= slot_type then
+        return nil, "slot_type_mismatch"
+    end
+
+    self.run.parts = self.run.parts or {}
+    self.run.dreamform = self.run.dreamform or copy_table(DEFAULT_DREAMFORM)
+    self.run.discovered_parts = self.run.discovered_parts or {}
+    self.run.next_part_instance_index = self.run.next_part_instance_index or 1
+
+    local replaced_instance_id = self.run.dreamform[slot_id]
+    local replaced_part = replaced_instance_id and self.run.parts[replaced_instance_id] and copy_table(self.run.parts[replaced_instance_id])
+    if replaced_part then
+        replaced_part.instance_id = replaced_instance_id
+    end
+
+    if replaced_instance_id then
+        self.run.parts[replaced_instance_id] = nil
+    end
+
+    local instance_id = "part_inst_" .. tostring(def_id)
+    if self.run.parts[instance_id] then
+        repeat
+            instance_id = "part_inst_" .. tostring(def_id) .. "_" .. tostring(self.run.next_part_instance_index)
+            self.run.next_part_instance_index = self.run.next_part_instance_index + 1
+        until not self.run.parts[instance_id]
+    end
+
+    self.run.parts[instance_id] = {
+        instance_id = instance_id,
+        def_id = def_id,
+        status = type(part) == "table" and recover_status(part.status) or "healthy",
+        name = type(part) == "table" and part.name or nil,
+        type = wanted_type,
+        claimed_from = encounter_id
+    }
+    self.run.dreamform[slot_id] = instance_id
+    discover_part(self.run, def_id)
+
+    return instance_id, {
+        instance_id = instance_id,
+        def_id = def_id,
+        slot_id = slot_id,
+        replaced_instance_id = replaced_instance_id,
+        replaced_part = replaced_part
+    }
+end
+
+function World:add_claimed_part(part, encounter_id, slot_id)
+    local slots = self:eligible_dreamform_slots_for_part(part)
+    local target_slot = slot_id or slots[1]
+    local instance_id = self:claim_part_into_slot(part, target_slot, encounter_id)
+    return instance_id
+end
+
+function World:apply_combat_result(result)
+    if not (result and result.type == "combat_result") then
+        return
+    end
+
+    self.last_combat_result = result
+    table.insert(self.run.combat_history, {
+        encounter_id = result.encounter_id,
+        outcome = result.outcome,
+        claimable_parts = copy_table(result.claimable_parts or {}),
+        claimed_part = copy_table(result.claimed_part),
+        claimed_slot = result.claimed_slot,
+        replaced_part = copy_table(result.replaced_part)
+    })
+
+    local recovered_parts = self:apply_player_part_statuses(result.player_parts)
+
+    local claimed_instance_id
+    local claim_summary
+    local claim_error
+    if result.claimed_part then
+        claimed_instance_id, claim_summary = self:claim_part_into_slot(result.claimed_part, result.claimed_slot, result.encounter_id)
+        if not claimed_instance_id then
+            claim_error = claim_summary
+            claim_summary = nil
+            print("[World] Claim failed: " .. tostring(claim_error))
+        end
+    end
+
+    if result.encounter_id then
+        local encounter_state = self.run.encounters[result.encounter_id] or {}
+        encounter_state.last_outcome = result.outcome
+        encounter_state.resolved = encounter_state.resolved
+            or result.outcome == "victory"
+            or result.outcome == "scripted"
+        encounter_state.claimable_parts = copy_table(result.claimable_parts or {})
+        encounter_state.claimed_part = claim_summary and copy_table(claim_summary) or nil
+        self.run.encounters[result.encounter_id] = encounter_state
+    end
+
+    if result.outcome == "victory" then
+        if claim_summary then
+            self:set_message("Combat won. Your dreamform changes shape.")
+        else
+            self:set_message("Combat won. Your dreamform knits itself back together.")
+        end
+    elseif result.outcome == "defeat" then
+        self:set_message("Combat lost. Your dreamform knits enough to keep going.")
+    elseif result.outcome == "fled" then
+        self:set_message("You pull away from the fight. Your dreamform steadies.")
+    else
+        self:set_message("Combat ended. Your dreamform steadies.")
+    end
+
+    self:autosave("combat_result")
+
+    return {
+        type = "post_combat_summary",
+        outcome = result.outcome,
+        encounter_id = result.encounter_id,
+        recovered_parts = recovered_parts,
+        claimable_parts = copy_table(result.claimable_parts or {}),
+        claimed_part = result.claimed_part,
+        claimed_slot = result.claimed_slot,
+        claim_summary = copy_table(claim_summary),
+        claim_error = claim_error,
+        claimed_instance_id = claimed_instance_id
+    }
+end
+
+function World:interact()
+    if not self.room then
+        return
+    end
+
+    local front_x, front_y = self.player:front_tile()
+    local actor = self.room:interactable_at(front_x, front_y)
+        or self.room:interactable_at(self.player.x, self.player.y)
+
+    if actor then
+        self:handle_result(actor:interact(self, self.player))
+    else
+        self:set_message("There is nothing special here.")
+    end
+end
+
+function World:actionpressed(action)
+    if action == "confirm" then
+        self:interact()
+        return true
+    elseif action == "move_up" then
+        self.player:try_move(0, -1, self.room)
+        return true
+    elseif action == "move_down" then
+        self.player:try_move(0, 1, self.room)
+        return true
+    elseif action == "move_left" then
+        self.player:try_move(-1, 0, self.room)
+        return true
+    elseif action == "move_right" then
+        self.player:try_move(1, 0, self.room)
+        return true
+    end
+
+    return false
+end
+
+function World:keypressed(key)
+    if key == "f2" and self.camera then
+        local override = self.camera:cycle_debug_override()
+        self:update_camera()
+        self:set_message(override and ("Camera override: " .. override) or "Camera override cleared.")
+        return
+    elseif key == "f3" and self.camera then
+        self.camera:toggle_guides()
+        return
+    end
+
+    if key == "space" or key == "return" then
+        self:interact()
+        return
+    end
+
+    if key == "up" then
+        self.player:try_move(0, -1, self.room)
+    elseif key == "down" then
+        self.player:try_move(0, 1, self.room)
+    elseif key == "left" then
+        self.player:try_move(-1, 0, self.room)
+    elseif key == "right" then
+        self.player:try_move(1, 0, self.room)
+    end
+end
+
+function World:keyreleased(_)
+end
+
+return World
+
+```
+
+## test_dialog_cli.lua
+
+```lua
+local GameState = require("core.gamestate")
+local Dialog = require("systems.dialog")
+local Overworld = require("states.overworld")
+local World = require("systems.world")
+
+local world = World.new({ autosave = false })
+local actor = world.room.actor_by_id.whispering_wall
+assert(actor, "expected whispering_wall actor")
+
+local actor_result = actor:interact(world, world.player)
+assert(actor_result.type == "dialog", "expected actor to start dialog")
+assert(actor_result.dialog == "data.dialog.basement", "expected dialog module")
+assert(actor_result.dialog_id == "whispering_wall", "expected dialog id")
+
+local dialog = Dialog.new("data.dialog.basement", "whispering_wall", { world = world })
+assert(dialog:current_node().text == "Something inside the wall whispers through the plaster.")
+assert(dialog:advance() == nil, "first line should advance")
+assert(dialog:current_node().responses[1].label == "Yes", "expected yes response")
+dialog:advance(1)
+local result = dialog:advance()
+assert(result.type == "dialog_result", "expected dialog result")
+assert(result.effects[1].flag == "basement.whispering_wall_heard", "expected heard flag effect")
+assert(result.result.type == "encounter", "expected encounter result")
+
+local triggered
+world.on_encounter = function(encounter)
+    triggered = encounter.encounter_id
+end
+world:apply_dialog_result(result)
+assert(world:get_flag("basement.whispering_wall_heard") == true, "expected flag to be set")
+assert(triggered == "zombie", "expected zombie encounter")
+
+local repeat_dialog = Dialog.new("data.dialog.basement", "whispering_wall", { world = world })
+assert(repeat_dialog:current_node().text == "The wall is quiet now, but it remembers the shape of your ear.")
+local repeat_result = repeat_dialog:advance()
+world:apply_dialog_result(repeat_result)
+assert(world:get_flag("basement.whispering_wall_revisited") == true, "expected revisit flag")
+
+local refusal_world = World.new({ autosave = false })
+GameState.clear()
+GameState.switch(Overworld)
+Overworld:start_dialog({
+    dialog = "data.dialog.basement",
+    dialog_id = "whispering_wall"
+})
+assert(GameState.size() == 2, "dialog should be stacked over overworld")
+assert(GameState.actionpressed("confirm") == true, "confirm should advance first line")
+assert(GameState.actionpressed("cancel") == true, "cancel should select the second response")
+assert(GameState.size() == 1, "dialog should close after no response")
+assert(Overworld.world:get_flag("basement.whispering_wall_refused") == true, "expected refused flag")
+
+local no_dialog = Dialog.new("data.dialog.basement", "whispering_wall", { world = refusal_world })
+no_dialog:advance()
+local no_result = no_dialog:cancel()
+refusal_world:apply_dialog_result(no_result)
+assert(refusal_world:get_flag("basement.whispering_wall_refused") == true, "expected no branch flag")
+
+print("dialog smoke test passed.")
+
+```
+
+## test_input_menu_cli.lua
+
+```lua
+local GameState = require("core.gamestate")
+local Input = require("core.input")
+local Overworld = require("states.overworld")
+local MenuSidebar = require("states.menu_sidebar")
+local World = require("systems.world")
+
+local function memory_filesystem()
+    local files = {}
+    return {
+        files = files,
+        getInfo = function(path)
+            return files[path] and { type = "file" } or nil
+        end,
+        read = function(path)
+            return files[path]
+        end,
+        write = function(path, source)
+            files[path] = source
+            return true
+        end,
+        createDirectory = function()
+            return true
+        end
+    }
+end
+
+local actions = Input.keypressed("space")
+assert(actions[1] == "confirm", "space should map to confirm")
+assert(Input.is_down("confirm") == true, "confirm should be down")
+assert(Input.was_pressed("confirm") == true, "confirm should be pressed")
+Input.update()
+assert(Input.was_pressed("confirm") == false, "pressed actions should clear on update")
+assert(Input.is_down("confirm") == true, "down action should persist until release")
+Input.keyreleased("space")
+assert(Input.is_down("confirm") == false, "confirm should release")
+assert(Input.action_for_key("tab") == "menu", "tab should map to menu")
+assert(Input.actions_for_button("a")[1] == "confirm", "gamepad a should map to confirm")
+
+GameState.clear()
+GameState.switch(Overworld)
+assert(GameState.size() == 1, "overworld should be the only state")
+assert(GameState.actionpressed("menu") == true, "menu action should be handled")
+assert(GameState.size() == 2, "menu should push sidebar")
+assert(GameState.current.selected_index == 1, "sidebar selection should start at inventory")
+assert(GameState.actionpressed("move_down") == true, "sidebar should handle move_down")
+assert(GameState.current.selected_index == 2, "sidebar selection should move down")
+assert(GameState.actionpressed("cancel") == true, "cancel should close sidebar")
+assert(GameState.size() == 1, "sidebar should close")
+
+local fs = memory_filesystem()
+local world = World.new({ save_backend = fs, save_path = "saves/menu_save.lua" })
+GameState.clear()
+GameState.push(MenuSidebar, { world = world })
+GameState.actionpressed("move_down")
+GameState.actionpressed("move_down")
+assert(GameState.current.items[GameState.current.selected_index].label == "Esoterica", "expected esoterica item")
+assert(GameState.actionpressed("confirm") == true, "confirm should open esoterica screen")
+assert(GameState.current.screen == "esoterica", "expected esoterica screen")
+assert(GameState.actionpressed("move_down") == true, "esoterica should handle move_down")
+assert(GameState.current.selected_index == 2, "esoterica selection should move down")
+assert(GameState.actionpressed("cancel") == true, "cancel should return to sidebar")
+GameState.actionpressed("move_down")
+assert(GameState.current.items[GameState.current.selected_index].label == "Save", "expected save item")
+assert(GameState.actionpressed("confirm") == true, "confirm should open save screen")
+assert(GameState.size() == 2, "save screen should stack over sidebar")
+assert(GameState.current.screen == "save", "expected save screen")
+assert(GameState.actionpressed("confirm") == true, "save action should be handled")
+assert(fs.files["saves/menu_save.lua"], "expected manual save file")
+assert(GameState.current.status == "Saved.", "expected save status")
+assert(GameState.actionpressed("cancel") == true, "cancel should return to sidebar")
+assert(GameState.current.items[GameState.current.selected_index].label == "Save", "expected sidebar underneath save screen")
+
+GameState.clear()
+GameState.push(require("states.menu_screen"), { world = world, screen = "dreamform", title = "Dreamform" })
+assert(GameState.current.selected_index == 1, "dreamform should start on first part")
+assert(GameState.actionpressed("move_right") == true, "dreamform should handle move_right")
+assert(GameState.current.selected_index == 2, "dreamform selection should move right")
+
+print("input/menu smoke test passed.")
+
+```
+
+## test_save_cli.lua
+
+```lua
+local Save = require("core.save")
+local World = require("systems.world")
+
+local function memory_filesystem()
+    local files = {}
+    local directories = {}
+
+    return {
+        files = files,
+        directories = directories,
+        getInfo = function(path)
+            if files[path] then
+                return { type = "file" }
+            end
+            return nil
+        end,
+        read = function(path)
+            return files[path]
+        end,
+        write = function(path, source)
+            files[path] = source
+            return true
+        end,
+        createDirectory = function(path)
+            directories[path] = true
+            return true
+        end
+    }
+end
+
+local function assert_equal(actual, expected, label)
+    if actual ~= expected then
+        error((label or "value") .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual), 2)
+    end
+end
+
+local fs = memory_filesystem()
+local path = "saves/test_slot.lua"
+
+local world = World.new({
+    autosave = true,
+    save_backend = fs,
+    save_path = path
+})
+
+world.player.x = 4
+world.player.y = 6
+world.player.facing = "left"
+world.player:addItem("shovel")
+world.room_states.basement_1.pipe_shovel = { removed = true }
+local claimed_instance_id = world:add_claimed_part({ def_id = "bone_demon_skull", type = "HEAD", status = "healthy" }, "test.encounter")
+world:autosave("test")
+
+assert(fs.files[path], "expected save file to be written")
+assert(fs.directories.saves, "expected save directory to be created")
+
+local loaded = assert(Save.load(path, fs))
+assert_equal(loaded.save_version, Save.VERSION, "save version")
+assert_equal(loaded.run.player.x, 4, "player x")
+assert_equal(loaded.run.player.y, 6, "player y")
+assert_equal(loaded.run.player.facing, "left", "player facing")
+assert_equal(loaded.run.player.inventory.shovel, true, "player inventory")
+assert_equal(loaded.run.dreamform.head, claimed_instance_id, "claimed part equipped into head slot")
+assert_equal(loaded.run.parts[claimed_instance_id].def_id, "bone_demon_skull", "claimed part is current body")
+assert_equal(loaded.run.parts.part_inst_dreamer_head, nil, "replaced part should not remain in run parts")
+assert_equal(loaded.run.discovered_parts.dreamer_head, true, "discovered starter part")
+assert_equal(loaded.run.discovered_parts.bone_demon_skull, true, "discovered claimed part")
+assert_equal(loaded.rooms.basement_1.pipe_shovel.removed, true, "actor state")
+
+local restored = World.new({
+    save = loaded,
+    autosave = false
+})
+
+assert_equal(restored.player.x, 4, "restored player x")
+assert_equal(restored.player.y, 6, "restored player y")
+assert_equal(restored.player.facing, "left", "restored player facing")
+assert_equal(restored.player:hasItem("shovel"), true, "restored inventory")
+assert_equal(restored.room_states.basement_1.pipe_shovel.removed, true, "restored actor state")
+assert_equal(restored.run.dreamform.head, claimed_instance_id, "restored claimed head slot")
+assert_equal(restored.run.parts[claimed_instance_id].def_id, "bone_demon_skull", "restored current claimed body part")
+
+local pipe = restored.room.actor_by_id.pipe_shovel
+assert(pipe, "expected pipe actor")
+assert_equal(pipe.state.removed, true, "bound actor state")
+
+local combat_world = World.new({ autosave = false })
+local replaced_arm_id = combat_world.run.dreamform.arm_r
+local summary = combat_world:apply_combat_result({
+    type = "combat_result",
+    outcome = "victory",
+    encounter_id = "test.claim",
+    player_parts = {},
+    enemy_parts = {},
+    claimable_parts = {
+        { def_id = "bone_demon_right_bare_bones", type = "ARM", status = "wounded" }
+    },
+    claimed_part = { def_id = "bone_demon_right_bare_bones", id = "bone_demon_right_bare_bones", name = "Bare Bones", type = "ARM", status = "wounded" },
+    claimed_slot = "arm_r"
+})
+
+local claimed_arm_id = combat_world.run.dreamform.arm_r
+assert(claimed_arm_id ~= replaced_arm_id, "claimed arm should replace the old right arm instance")
+assert_equal(combat_world.run.parts[replaced_arm_id], nil, "replaced arm should be deleted from current parts")
+assert_equal(combat_world.run.parts[claimed_arm_id].def_id, "bone_demon_right_bare_bones", "claimed arm def")
+assert_equal(combat_world.run.parts[claimed_arm_id].status, "healthy", "claimed wounded part gets post-combat recovery")
+assert_equal(combat_world.run.discovered_parts.bone_demon_right_bare_bones, true, "claimed arm discovered")
+assert_equal(summary.claim_summary.slot_id, "arm_r", "claim summary slot")
+assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_right_arm", "claim summary replaced part")
+
+print("save smoke test passed.")
+
+```
+
+## test_tiled_room_cli.lua
+
+```lua
+love = {
+    graphics = {}
+}
+
+local draw_calls = {}
+local rectangles = {}
+local quads = {}
+
+function love.graphics.setColor(...)
+end
+
+function love.graphics.newQuad(x, y, width, height, image_width, image_height)
+    local quad = {
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        image_width = image_width,
+        image_height = image_height
+    }
+    table.insert(quads, quad)
+    return quad
+end
+
+function love.graphics.draw(image, quad, x, y, rotation, scale_x, scale_y)
+    table.insert(draw_calls, {
+        image = image,
+        quad = quad,
+        x = x,
+        y = y,
+        rotation = rotation,
+        scale_x = scale_x,
+        scale_y = scale_y
+    })
+end
+
+function love.graphics.rectangle(...)
+    table.insert(rectangles, { ... })
+end
+
+local function fake_image(width, height)
+    return {
+        getWidth = function()
+            return width
+        end,
+        getHeight = function()
+            return height
+        end
+    }
+end
+
+local Assets = require("core.assets")
+Assets.images = {
+    basement_tiles = fake_image(64, 32),
+    actor_pipe = fake_image(32, 32),
+    actor_pipe_shovel = fake_image(32, 32),
+    player_idle_down = fake_image(32, 32)
+}
+
+local Player = require("systems.player")
+local Room = require("systems.room")
+
+local room = Room.new({
+    id = "tiled_test",
+    width = 2,
+    height = 2,
+    tilewidth = 32,
+    tileheight = 32,
+    tilesets = {
+        {
+            firstgid = 1,
+            name = "basement",
+            image = "../overworld/basement_tiles.png",
+            imagewidth = 64,
+            imageheight = 32,
+            tilewidth = 32,
+            tileheight = 32,
+            tilecount = 2,
+            columns = 2
+        }
+    },
+    layers = {
+        {
+            name = "ground",
+            type = "tilelayer",
+            width = 2,
+            height = 2,
+            data = {
+                1, 2147483650,
+                0, 1
+            }
+        },
+        {
+            name = "collision",
+            type = "tilelayer",
+            visible = false,
+            width = 2,
+            height = 2,
+            data = {
+                0, 1,
+                0, 0
+            }
+        },
+        {
+            name = "actors",
+            type = "objectgroup",
+            objects = {
+                {
+                    id = 7,
+                    name = "pipe_spawn",
+                    type = "pipe",
+                    x = 32,
+                    y = 32,
+                    width = 32,
+                    height = 32,
+                    properties = {
+                        { name = "item", value = "shovel" }
+                    }
+                }
+            }
+        },
+        {
+            name = "regions",
+            type = "objectgroup",
+            objects = {
+                {
+                    id = 8,
+                    name = "close_room",
+                    type = "camera_zone",
+                    x = 0,
+                    y = 0,
+                    width = 64,
+                    height = 32,
+                    properties = {
+                        { name = "camera_zoom", value = "close" },
+                        { name = "camera_bounds", value = true }
+                    }
+                }
+            }
+        }
+    }
+}, { room_states = {} })
+
+assert(#room.validation.errors == 0, "expected no Tiled validation errors")
+assert(#room.validation.warnings == 0, "expected no Tiled validation warnings")
+assert(room:tile_at("ground", 2, 1) == 2147483650, "expected raw GID lookup")
+assert(room:is_tile_solid(2, 1) == true, "expected collision layer to drive solidity")
+
+local actor = room.actor_by_id.pipe_spawn
+assert(actor, "expected named Tiled actor")
+assert(actor.x == 2 and actor.y == 2, "expected Tiled pixel coordinates to convert to tile coordinates")
+assert(actor:tile_rect(32) == 32, "expected actor world x")
+
+local camera_zone = room:camera_zone_at(16, 16)
+assert(camera_zone and camera_zone.id == "close_room", "expected camera zone lookup")
+assert(camera_zone:property("camera_zoom") == "close", "expected camera zone mode")
+assert(camera_zone:property("camera_bounds") == true, "expected camera zone bounds flag")
+
+room:draw_tile_layer(room:layer("ground"))
+assert(#draw_calls == 3, "expected three tile draw calls")
+assert(#rectangles == 0, "expected tileset-backed drawing to avoid fallback rectangles")
+assert(draw_calls[2].quad.x == 32 and draw_calls[2].quad.y == 0, "expected second tile quad")
+assert(draw_calls[2].x == 64 and draw_calls[2].scale_x == -1, "expected horizontal GID flip")
+
+draw_calls = {}
+actor:draw({})
+assert(#draw_calls == 1, "expected actor sprite draw")
+assert(draw_calls[1].image == Assets.images.actor_pipe_shovel, "expected actor sprite asset")
+
+draw_calls = {}
+actor.state.removed = true
+actor:draw({})
+assert(#draw_calls == 1, "expected removed actor sprite draw")
+assert(draw_calls[1].image == Assets.images.actor_pipe,
+    "expected removed pipe item to use empty pipe sprite")
+
+draw_calls = {}
+local player = Player.new(1, 1)
+player:draw(32)
+assert(#draw_calls == 1, "expected player sprite draw")
+assert(draw_calls[1].image == Assets.images.player_idle_down, "expected player idle sprite asset")
+
+print("tiled room smoke test passed.")
+
+```
+
+## test_v2_combat_cli.lua
+
+```lua
+local Engine = require("combat.v2_engine")
+local Events = require("combat.events")
+local Symbols = require("core.symbols")
+local Demo = require("combat.v2_demo")
+local V2AI = require("combat.v2_ai")
+local V2Encounters = require("combat.v2_encounters")
+
+math.randomseed(20260615)
+
+local function assert_true(condition, message)
+    if not condition then
+        error(message or "assertion failed", 2)
+    end
+end
+
+local function die_for(engine, combatant, part_id)
+    for _, die in ipairs(engine:get_pool(combatant)) do
+        if die.source_part and die.source_part.id == part_id then
+            return die
+        end
+    end
+
+    return nil
+end
+
+local function log_events(engine)
+    engine:on(Events.ROUND_START, function(data)
+        print("\n== Round " .. tostring(data.round) .. " ==")
+    end)
+
+    engine:on(Events.DICE_ROLLED, function(data)
+        print(string.format("%s rolls %s from %s",
+            data.combatant.name,
+            data.formatted,
+            data.source_part.name))
+    end)
+
+    engine:on(Events.DIE_ASSIGNED, function(data)
+        local target = data.part and data.part.name or "?"
+        local burned = #data.burned_symbols > 0 and (" burn " .. Symbols.format_face(data.burned_symbols)) or ""
+        print(string.format("%s assigns %s to %s %s.%s",
+            data.combatant.name,
+            Symbols.format_face(data.die.effective_symbols or data.die.symbols),
+            data.destination,
+            target,
+            burned))
+    end)
+
+    engine:on(Events.SLOT_FED, function(data)
+        print(string.format("%s feeds %s into %s (%s)",
+            data.combatant.name,
+            Symbols.format_face(data.die.effective_symbols or data.die.symbols),
+            data.slot.name,
+            data.filled and "filled" or "charging"))
+    end)
+
+    engine:on(Events.SLOT_RESOLVED, function(data)
+        local target = data.effect and data.effect.target_part
+        local target_text = target and (" -> " .. target.name) or ""
+        print(string.format("%s resolves %s%s",
+            data.combatant.name,
+            data.slot.name,
+            target_text))
+    end)
+
+    engine:on(Events.DAMAGE_DEALT, function(data)
+        print(string.format("%s: %s -> %s",
+            data.body_part.name,
+            data.status_before,
+            data.status_after))
+    end)
+end
+
+local function start_engine()
+    local player, enemy = Demo.create_combatants()
+    local engine = Engine:new()
+    log_events(engine)
+    engine:add_combatant(player)
+    engine:add_combatant(enemy)
+    engine:start_combat()
+    return engine, player, enemy
+end
+
+local function start_encounter(encounter_id)
+    local player, enemy = V2Encounters.create_combatants({ encounter_id = encounter_id })
+    local engine = Engine:new()
+    engine:add_combatant(player)
+    engine:add_combatant(enemy)
+    engine:start_combat()
+    return engine, player, enemy
+end
+
+local function run()
+    local content_errors = Demo.validate()
+    assert_true(#content_errors == 0, table.concat(content_errors, "\n"))
+
+    local engine, player, enemy = start_engine()
+    assert_true(#player.body_parts == 6, "baseline Dreamer should have six body parts")
+    assert_true(#enemy.body_parts == 6, "Bone Demon should have a complete six-part body")
+    assert_true(enemy.ai_personality == "bone_caster", "Bone Demon should use the bone caster AI personality")
+
+    local head = player:get_body_part_by_id("dreamer_head")
+    local skull = enemy:get_body_part_by_id("bone_demon_skull")
+    local head_die = die_for(engine, player, "dreamer_head")
+    local leg_die = die_for(engine, player, "dreamer_right_leg")
+
+    head_die.symbols = { Symbols.ESSENCE }
+    leg_die.symbols = { Symbols.BLANK }
+
+    local ok, reason = engine:feed_die_to_slot(player, head_die.id, head)
+    assert_true(ok, "Moment of Valor should accept Essence: " .. tostring(reason))
+
+    ok, reason = engine:assign_die_to_rim(player, leg_die.id, skull)
+    assert_true(ok, "Moment of Valor should make the next blank die rim-valid: " .. tostring(reason))
+    assert_true(Symbols.count(engine.assignments.rims[skull].symbols, Symbols.STRIKE) == 1,
+        "Moment of Valor should add exactly one Strike")
+
+    local engine2, player2, enemy2 = start_engine()
+    local skull2 = enemy2:get_body_part_by_id("bone_demon_skull")
+    local player_head2 = player2:get_body_part_by_id("dreamer_head")
+
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_right_tentacle",
+        "bone_demon_left_tentacle",
+        "bone_demon_right_bare_bones"
+    }) do
+        local die = die_for(engine2, enemy2, part_id)
+        die.symbols = { Symbols.ESSENCE }
+    end
+
+    local ai_move = V2AI.choose_next_allocation(engine2, enemy2)
+    assert_true(ai_move and ai_move.kind == "slot" and ai_move.part == skull2,
+        "bone_caster AI should prioritize charging Speak Doom")
+
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_right_tentacle",
+        "bone_demon_left_tentacle",
+        "bone_demon_right_bare_bones"
+    }) do
+        local die = die_for(engine2, enemy2, part_id)
+        ok, reason = engine2:feed_die_to_slot(enemy2, die.id, skull2)
+        assert_true(ok, "Bone Demon should feed Speak Doom with Essence: " .. tostring(reason))
+    end
+
+    assert_true(player_head2.status == "wounded", "Speak Doom should wound the Dreamer's Head")
+
+    local engine3, player3, enemy3 = start_engine()
+    local skull3 = enemy3:get_body_part_by_id("bone_demon_skull")
+    local player_head3 = player3:get_body_part_by_id("dreamer_head")
+    player_head3.status = "wounded"
+
+    for _, part_id in ipairs({
+        "bone_demon_skull",
+        "bone_demon_right_tentacle",
+        "bone_demon_left_tentacle",
+        "bone_demon_right_bare_bones"
+    }) do
+        local die = die_for(engine3, enemy3, part_id)
+        die.symbols = { Symbols.ESSENCE }
+        ok, reason = engine3:feed_die_to_slot(enemy3, die.id, skull3)
+        assert_true(ok, "Speak Doom should be able to charge for a finishing cast: " .. tostring(reason))
+    end
+
+    assert_true(player_head3.status == "maimed", "Speak Doom should maim an already wounded Head")
+    assert_true(player3.heart_points == 0, "Maiming the Dreamer's Head should deplete baseline Hearts")
+    assert_true(engine3.state == "COMPLETE", "A slot-caused defeat should complete combat immediately")
+    assert_true(engine3.winner == enemy3, "Bone Demon should win after a lethal Speak Doom")
+
+    local caster_engine, _, caster = start_encounter("basement.bone_demon")
+    local caster_skull = caster:get_body_part_by_id("bone_demon_skull")
+    local caster_ribcage = caster:get_body_part_by_id("bone_demon_rib_cage")
+    local caster_faces = {
+        bone_demon_skull = { Symbols.ESSENCE },
+        bone_demon_rib_cage = { Symbols.STRIKE },
+        bone_demon_right_bare_bones = { Symbols.WARD },
+        bone_demon_left_bare_bones = { Symbols.WARD },
+        bone_demon_right_tentacle = { Symbols.ESSENCE },
+        bone_demon_left_tentacle = { Symbols.STRIKE }
+    }
+
+    for part_id, symbols in pairs(caster_faces) do
+        die_for(caster_engine, caster, part_id).symbols = symbols
+    end
+
+    V2AI.auto_allocate(caster_engine, caster)
+    assert_true(caster_engine.assignments.sockets[caster_skull] ~= nil,
+        "Bone caster should turtle by warding Speak Doom")
+    assert_true(caster_engine.assignments.sockets[caster_ribcage] ~= nil,
+        "Bone caster should turtle by warding Bonestorm")
+    assert_true(caster_skull.slot_charge[1] and caster_skull.slot_charge[2],
+        "Bone caster should feed Essence to Speak Doom")
+    assert_true(caster_ribcage.slot_charge[1] and caster_ribcage.slot_charge[2],
+        "Bone caster should feed Strike to Bonestorm")
+
+    local caster_rim_count = 0
+    for _ in pairs(caster_engine.assignments.rims) do
+        caster_rim_count = caster_rim_count + 1
+    end
+    assert_true(caster_rim_count == 0,
+        "Bone caster should not use ritual fuel for direct attacks while its Slots can accept it")
+
+    local mixed_engine, _, mixed_caster = start_encounter("bone_demon")
+    local mixed_die = die_for(mixed_engine, mixed_caster, "bone_demon_right_tentacle")
+    mixed_die.symbols = { Symbols.ESSENCE, Symbols.WARD }
+    local mixed_move = V2AI.choose_allocation(mixed_engine, mixed_caster, mixed_die)
+    assert_true(mixed_move and mixed_move.kind == "socket"
+            and mixed_move.part == mixed_caster:get_body_part_by_id("bone_demon_skull"),
+        "Bone caster should use Ward to turtle even when the same die could feed Essence")
+
+    local storm_engine, storm_player, storm_caster = start_encounter("bone_demon")
+    local storm_ribcage = storm_caster:get_body_part_by_id("bone_demon_rib_cage")
+    for _, part_id in ipairs({
+        "bone_demon_rib_cage",
+        "bone_demon_right_bare_bones",
+        "bone_demon_left_bare_bones",
+        "bone_demon_left_tentacle"
+    }) do
+        local die = die_for(storm_engine, storm_caster, part_id)
+        die.symbols = { Symbols.STRIKE }
+        ok, reason = storm_engine:feed_die_to_slot(storm_caster, die.id, storm_ribcage)
+        assert_true(ok, "Bonestorm should accept Strike: " .. tostring(reason))
+    end
+
+    for _, part in ipairs(storm_player.body_parts) do
+        local assignment = storm_engine.assignments.rims[part]
+        assert_true(assignment and assignment.virtual,
+            "Bonestorm should threaten every open player rim")
+        assert_true(Symbols.count(assignment.symbols, Symbols.STRIKE) == 1,
+            "Bonestorm should assign exactly one Strike to each player part")
+    end
+
+    local engine4, player4, enemy4 = start_engine()
+    local channel_head = player4:get_body_part_by_id("dreamer_head")
+    local channel_target = enemy4:get_body_part_by_id("bone_demon_skull")
+    channel_head.slot = {
+        id = "spellblade",
+        name = "Spellblade",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            actions = {
+                {
+                    type = "add_symbol_to_matching_dice",
+                    match = Symbols.ESSENCE,
+                    symbol = Symbols.STRIKE,
+                    amount = 1,
+                    destination = "rim"
+                },
+                {
+                    type = "add_next_symbol",
+                    symbol = Symbols.WARD,
+                    amount = 1
+                }
+            }
+        }
+    }
+
+    local channel_feed = die_for(engine4, player4, "dreamer_head")
+    local channel_die = die_for(engine4, player4, "dreamer_body")
+    channel_feed.symbols = { Symbols.ESSENCE }
+    channel_die.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine4:feed_die_to_slot(player4, channel_feed.id, channel_head)
+    assert_true(ok, "Spellblade should accept Essence: " .. tostring(reason))
+
+    ok, reason = engine4:assign_die_to_rim(player4, channel_die.id, channel_target)
+    assert_true(ok, "Spellblade should make an Essence die rim-valid: " .. tostring(reason))
+    assert_true(Symbols.count(engine4.assignments.rims[channel_target].symbols, Symbols.STRIKE) == 1,
+        "Spellblade should add Strike to Essence dice on rims")
+    assert_true(Symbols.count(engine4.assignments.rims[channel_target].added_symbols, Symbols.WARD) == 1,
+        "Composed effects should still apply add-next-symbol actions")
+
+    local engine5, player5 = start_engine()
+    local field_head = player5:get_body_part_by_id("dreamer_head")
+    field_head.slot = {
+        id = "force_field",
+        name = "Force Field",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            type = "assign_symbol_to_each_part",
+            destination = "socket",
+            target = "self",
+            symbol = Symbols.WARD,
+            amount = 1
+        }
+    }
+
+    local field_feed = die_for(engine5, player5, "dreamer_head")
+    field_feed.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine5:feed_die_to_slot(player5, field_feed.id, field_head)
+    assert_true(ok, "Force Field should accept Essence: " .. tostring(reason))
+
+    local socket_count = 0
+    for _, part in ipairs(player5.body_parts) do
+        local assignment = engine5.assignments.sockets[part]
+        assert_true(assignment ~= nil, "Force Field should defend " .. tostring(part.name))
+        assert_true(assignment.virtual == true, "Force Field assignments should be marked virtual")
+        assert_true(Symbols.count(assignment.symbols, Symbols.WARD) == 1,
+            "Force Field should assign exactly one Ward")
+        socket_count = socket_count + 1
+    end
+    assert_true(socket_count == #player5.body_parts, "Force Field should cover every unmaimed player part")
+
+    local engine6, player6, enemy6 = start_engine()
+    local mark_head = player6:get_body_part_by_id("dreamer_head")
+    local marked_skull = enemy6:get_body_part_by_id("bone_demon_skull")
+    local unmarked_rib = enemy6:get_body_part_by_id("bone_demon_rib_cage")
+    mark_head.slot = {
+        id = "hexing_gaze",
+        name = "Hexing Gaze",
+        cost = { Symbols.ESSENCE },
+        timing = "spend",
+        effect = {
+            type = "open_spellmark",
+            destination = "rim",
+            symbol = Symbols.ESSENCE,
+            on_mark = {
+                type = "damage_marked_part",
+                amount = 1
+            }
+        }
+    }
+
+    local mark_feed = die_for(engine6, player6, "dreamer_head")
+    local mark_die = die_for(engine6, player6, "dreamer_body")
+    local after_mark_die = die_for(engine6, player6, "dreamer_right_arm")
+    mark_feed.symbols = { Symbols.ESSENCE }
+    mark_die.symbols = { Symbols.ESSENCE }
+    after_mark_die.symbols = { Symbols.ESSENCE }
+
+    ok, reason = engine6:assign_die_to_rim(player6, mark_die.id, marked_skull)
+    assert_true(not ok and reason == "no_strike", "Essence should not target a rim before a spellmark")
+
+    ok, reason = engine6:feed_die_to_slot(player6, mark_feed.id, mark_head)
+    assert_true(ok, "Hexing Gaze should accept Essence: " .. tostring(reason))
+
+    ok, reason = engine6:assign_die_to_rim(player6, mark_die.id, marked_skull)
+    assert_true(ok, "Spellmark should let an Essence die assign to an enemy rim: " .. tostring(reason))
+    assert_true(engine6.assignments.rims[marked_skull].spellmark ~= nil,
+        "Spellmark assignment should retain spellmark metadata")
+    assert_true(Symbols.count(engine6.assignments.rims[marked_skull].used_symbols, Symbols.ESSENCE) == 1,
+        "Spellmark assignment should use Essence rather than burn it")
+    assert_true(Symbols.count(engine6.assignments.rims[marked_skull].symbols, Symbols.STRIKE) == 0,
+        "Essence-only spellmark assignment should not add direct Strike pressure")
+    assert_true(marked_skull.status == "wounded", "Spellmark payload should damage the marked part")
+
+    ok, reason = engine6:assign_die_to_rim(player6, after_mark_die.id, unmarked_rib)
+    assert_true(not ok and reason == "no_strike", "Single-use spellmark should not leave all rims Essence-valid")
+
+    local engine7, player7, enemy7 = start_engine()
+    local armored_skull = enemy7:get_body_part_by_id("bone_demon_skull")
+    local light_strike_die = die_for(engine7, player7, "dreamer_right_leg")
+    local heavy_strike_die = die_for(engine7, player7, "dreamer_right_arm")
+    armored_skull.keywords = { "Armored" }
+    light_strike_die.symbols = { Symbols.STRIKE }
+    heavy_strike_die.symbols = { Symbols.STRIKE, Symbols.STRIKE }
+
+    ok, reason = engine7:assign_die_to_rim(player7, light_strike_die.id, armored_skull)
+    assert_true(not ok and reason == "armored_requires_two_strikes",
+        "Armored rims should reject one-Strike dice: " .. tostring(reason))
+
+    ok, reason = engine7:assign_die_to_rim(player7, heavy_strike_die.id, armored_skull)
+    assert_true(ok, "Armored rims should accept dice showing two Strikes: " .. tostring(reason))
+
+    local engine8, player8, enemy8 = start_engine()
+    local brittle_rib = enemy8:get_body_part_by_id("bone_demon_right_bare_bones")
+    local brittle_attack = die_for(engine8, player8, "dreamer_right_leg")
+    brittle_rib.keywords = { "Brittle" }
+    brittle_attack.symbols = { Symbols.STRIKE }
+
+    ok, reason = engine8:assign_die_to_rim(player8, brittle_attack.id, brittle_rib)
+    assert_true(ok, "Brittle test should assign a simple attack: " .. tostring(reason))
+    engine8:resolve_round()
+    assert_true(brittle_rib.status == "maimed", "Brittle parts should maim from any damage")
+    assert_true(enemy8.heart_points == 2, "Brittle maim should still apply normal Heart loss")
+
+    local engine9, player9 = start_engine()
+    local hungry_head = player9:get_body_part_by_id("dreamer_head")
+    local hungry_feed = die_for(engine9, player9, "dreamer_head")
+    hungry_head.slot = {
+        id = "hungry_test",
+        name = "Hungry Test",
+        cost = { Symbols.ESSENCE, Symbols.ESSENCE, Symbols.ESSENCE },
+        hungry = true,
+        timing = "upkeep",
+        effect = { type = "none" }
+    }
+    hungry_feed.symbols = { Symbols.STRIKE, Symbols.WARD }
+
+    ok, reason = engine9:feed_die_to_slot(player9, hungry_feed.id, hungry_head)
+    assert_true(ok, "Hungry slots should accept any nonblank symbols: " .. tostring(reason))
+    assert_true(hungry_head.slot_charge[1] == true and hungry_head.slot_charge[2] == true and not hungry_head.slot_charge[3],
+        "Hungry slots should light one wildcard pip per ingested symbol")
+
+    local engine10, player10, enemy10 = start_engine()
+    local absorbent_body = player10:get_body_part_by_id("dreamer_body")
+    local absorbent_defense = die_for(engine10, player10, "dreamer_body")
+    local absorbent_attack = die_for(engine10, enemy10, "bone_demon_right_bare_bones")
+    absorbent_body.keywords = { "Absorbent" }
+    absorbent_body.slot = {
+        id = "absorbent_test",
+        name = "Absorbent Test",
+        cost = { Symbols.WARD, Symbols.WARD },
+        timing = "upkeep",
+        effect = { type = "none" }
+    }
+    absorbent_defense.symbols = { Symbols.WARD }
+    absorbent_attack.symbols = { Symbols.STRIKE }
+
+    ok, reason = engine10:assign_die_to_rim(enemy10, absorbent_attack.id, absorbent_body)
+    assert_true(ok, "Absorbent test should assign an incoming attack: " .. tostring(reason))
+    ok, reason = engine10:assign_die_to_socket(player10, absorbent_defense.id, absorbent_body)
+    assert_true(ok, "Absorbent test should assign socket defense: " .. tostring(reason))
+    engine10:resolve_round()
+    assert_true(absorbent_body.status == "healthy", "Absorbent should only fire after a no-damage defense")
+    assert_true(absorbent_body.slot_charge[1] == true and not absorbent_body.slot_charge[2],
+        "Absorbent should feed the socket die into its Slot")
+    assert_true(engine10.assignments.sockets[absorbent_body] == nil,
+        "Absorbent should move the socket die out of the socket assignment")
+
+    local zombie_engine, _, zombie = start_encounter("basement.zombie")
+    assert_true(#zombie.body_parts == 6, "Zombie should have a complete six-part body")
+
+    local brain_pan = zombie:get_body_part_by_id("zombie_brain_pan")
+    local rotting_ribcage = zombie:get_body_part_by_id("zombie_rotting_ribcage")
+    local dead_right_arm = zombie:get_body_part_by_id("zombie_right_arm")
+    assert_true(brain_pan.hp_value == 3, "Brain Pan should be the three-Heart headshot route")
+    assert_true(brain_pan.slot and brain_pan.slot.id == "bite", "Brain Pan should threaten Bite instead of Regrowth")
+    assert_true(rotting_ribcage.slot and rotting_ribcage.slot.id == "regenerate",
+        "Zombie body parts should carry Regrowth")
+
+    rotting_ribcage.status = "wounded"
+    dead_right_arm.status = "wounded"
+    local regeneration_feed = die_for(zombie_engine, zombie, "zombie_left_arm")
+    regeneration_feed.symbols = { Symbols.BLOOD }
+
+    ok, reason = zombie_engine:feed_die_to_slot(zombie, regeneration_feed.id, dead_right_arm)
+    assert_true(ok, "Regrowth should accept Blood: " .. tostring(reason))
+    assert_true(dead_right_arm.status == "healthy", "Regrowth should heal its slotted Body Part")
+    assert_true(rotting_ribcage.status == "wounded", "Regrowth should not redirect healing to another wounded part")
+
+    local bite_engine, bite_player, biting_zombie = start_encounter("zombie")
+    local biting_head = biting_zombie:get_body_part_by_id("zombie_brain_pan")
+    local first_blood = die_for(bite_engine, biting_zombie, "zombie_brain_pan")
+    local second_blood = die_for(bite_engine, biting_zombie, "zombie_rotting_ribcage")
+    local bite_attack = die_for(bite_engine, biting_zombie, "zombie_right_arm")
+    local bite_target = bite_player:get_body_part_by_id("dreamer_body")
+    first_blood.symbols = { Symbols.BLOOD }
+    second_blood.symbols = { Symbols.BLOOD }
+    bite_attack.symbols = { Symbols.BLANK }
+
+    ok, reason = bite_engine:feed_die_to_slot(biting_zombie, first_blood.id, biting_head)
+    assert_true(ok, "Bite should bank its first Blood: " .. tostring(reason))
+    ok, reason = bite_engine:feed_die_to_slot(biting_zombie, second_blood.id, biting_head)
+    assert_true(ok, "Bite should trigger on its second Blood: " .. tostring(reason))
+    ok, reason = bite_engine:assign_die_to_rim(biting_zombie, bite_attack.id, bite_target)
+    assert_true(ok, "Bite should make the next blank die rim-valid: " .. tostring(reason))
+    assert_true(Symbols.count(bite_engine.assignments.rims[bite_target].symbols, Symbols.STRIKE) == 2,
+        "Bite should add exactly two Strikes")
+
+    local zombie_ai_engine, _, zombie_ai = start_encounter("zombie")
+    local wounded_leg = zombie_ai:get_body_part_by_id("zombie_right_leg")
+    wounded_leg.status = "wounded"
+    for _, die in ipairs(zombie_ai_engine:get_pool(zombie_ai)) do
+        die.symbols = { Symbols.BLOOD }
+    end
+
+    local zombie_move = V2AI.choose_next_allocation(zombie_ai_engine, zombie_ai)
+    assert_true(zombie_move and zombie_move.kind == "slot" and zombie_move.part == wounded_leg,
+        "Zombie AI should spend Blood to heal a wounded Regrowth part")
+
+    local hard_kill_engine, hard_kill_player, hard_kill_zombie = start_encounter("zombie")
+    local preserved_head = hard_kill_zombie:get_body_part_by_id("zombie_brain_pan")
+    local hard_kill_body = hard_kill_zombie:get_body_part_by_id("zombie_rotting_ribcage")
+    local hard_kill_arm = hard_kill_zombie:get_body_part_by_id("zombie_left_arm")
+    hard_kill_engine:apply_damage(hard_kill_player, hard_kill_zombie, hard_kill_body, { source = "test" })
+    hard_kill_engine:apply_damage(hard_kill_player, hard_kill_zombie, hard_kill_body, { source = "test" })
+    hard_kill_engine:apply_damage(hard_kill_player, hard_kill_zombie, hard_kill_arm, { source = "test" })
+    hard_kill_engine:apply_damage(hard_kill_player, hard_kill_zombie, hard_kill_arm, { source = "test" })
+    assert_true(hard_kill_zombie.heart_points == 0, "Maiming the body and one limb should defeat the Zombie")
+    assert_true(preserved_head.status == "healthy", "The hard kill should preserve the claimable Brain Pan")
+
+    print("\nV2 combat smoke test passed.")
+end
+
+run()
+
+```
+
+## ui/bp_card.lua
+
+```lua
+local Assets = require("core.assets")
+local Keywords = require("combat.keywords")
+local Symbols = require("core.symbols")
+local Text = require("ui.text")
+
+local BPCard = {}
+
+local CARD_WIDTH = 116
+local CARD_HEIGHT = 88
+local TITLE_HEIGHT = 16
+local BP_LEFT_SECTOR_WIDTH = 44
+local DIE_SIZE = 36
+local SYMBOL_SIZE = 12
+local SLOT_PIP_ROW_LIMIT = 3
+local SLOT_PIP_GAP = 1
+local SLOT_PIP_ROW_GAP = 1
+local OVERLAY_ANIMATION_FPS = 8
+local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
+
+local COLORS = {
+    panel = { 44 / 255, 41 / 255, 64 / 255, 0.96 },
+    surface = { 38 / 255, 36 / 255, 56 / 255, 0.88 },
+    surface_low = { 18 / 255, 17 / 255, 29 / 255, 0.4 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.68, 0.66, 0.78, 1 },
+    line = { 0.86, 0.84, 0.94, 0.52 },
+    dashed = { 0.58, 0.55, 0.68, 0.58 },
+    enemy = { 0.96, 0.35, 0.31, 1 },
+    selected = { 0.62, 0.78, 1, 1 },
+    valid = { 0.25, 0.88, 0.68, 1 },
+    invalid = { 0.48, 0.48, 0.56, 0.48 },
+    attack = { 0.98, 0.39, 0.32, 1 },
+    defense = { 0.35, 0.63, 1, 1 },
+    essence = { 1, 0.79, 0.28, 1 },
+    blood = { 0.88, 0.12, 0.22, 1 }
+}
+
+local STATUS_COLORS = {
+    healthy = { 0.22, 0.76, 0.38, 1 },
+    wounded = { 1, 0.68, 0.2, 1 },
+    maimed = { 0.68, 0.66, 0.78, 1 }
+}
+
+local SYMBOL_ASSETS = {
+    [Symbols.STRIKE] = "sword_symbol",
+    [Symbols.WARD] = "shield_symbol",
+    [Symbols.ESSENCE] = "lightning_symbol",
+    [Symbols.BLOOD] = "blood_symbol"
+}
+
+local SYMBOL_OUTLINE_ASSETS = {
+    [Symbols.STRIKE] = "sword_symbol_outline",
+    [Symbols.WARD] = "shield_symbol_outline",
+    [Symbols.ESSENCE] = "lightning_symbol_outline",
+    [Symbols.BLOOD] = "blood_symbol_outline"
+}
+
+local KEYWORD_BADGE_COLORS = {
+    Armored = { fill = { 0.13, 0.24, 0.34, 0.96 }, line = COLORS.defense },
+    Brittle = { fill = { 0.34, 0.12, 0.18, 0.96 }, line = COLORS.blood },
+    Absorbent = { fill = { 0.14, 0.28, 0.23, 0.96 }, line = COLORS.valid },
+    Hungry = { fill = { 0.34, 0.27, 0.12, 0.96 }, line = COLORS.essence }
+}
+
+local font_cache = {}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function scaled(value, scale)
+    return math.floor(value * (scale or 1) + 0.5)
+end
+
+local function new_ui_font(size)
+    local key = tostring(size)
+    if font_cache[key] then
+        return font_cache[key]
+    end
+
+    local ok, font = pcall(love.graphics.newFont, UI_FONT_PATH, size)
+    if not ok then
+        font = love.graphics.newFont(size)
+    end
+
+    if font and font.setFilter then
+        font:setFilter("nearest", "nearest")
+    end
+
+    font_cache[key] = font
+    return font
+end
+
+function BPCard.fonts(scale)
+    scale = scale or 1
+    return {
+        small = new_ui_font(math.max(8, scaled(10, scale))),
+        tiny = new_ui_font(math.max(7, scaled(9, scale)))
+    }
+end
+
+local function draw_box(r, fill, outline, radius)
+    set_color(fill or COLORS.panel)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, radius or 6, radius or 6)
+    set_color(outline or COLORS.line)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 6, radius or 6)
+end
+
+local function draw_image(id, r, color, flip_y)
+    local image = Assets.images and Assets.images[id]
+    if not image then
+        return false
+    end
+
+    set_color(color or { 1, 1, 1, 1 })
+    local sx = r.w / image:getWidth()
+    local sy = r.h / image:getHeight()
+    local y = r.y
+    if flip_y then
+        y = r.y + r.h
+        sy = -sy
+    end
+    love.graphics.draw(image, r.x, y, 0, sx, sy)
+    return true
+end
+
+local function animated_asset_id(base_id, time, max_frames)
+    local frame_count = 0
+    local limit = max_frames or 4
+
+    for index = 1, limit do
+        if Assets.images and Assets.images[base_id .. tostring(index)] then
+            frame_count = index
+        elseif frame_count > 0 then
+            break
+        end
+    end
+
+    if frame_count > 0 then
+        local frame = (math.floor((time or 0) * OVERLAY_ANIMATION_FPS) % frame_count) + 1
+        return base_id .. tostring(frame)
+    end
+
+    if Assets.images and Assets.images[base_id] then
+        return base_id
+    end
+
+    return nil
+end
+
+local function draw_animated_image(base_id, r, time, color, flip_y, max_frames)
+    local asset_id = animated_asset_id(base_id, time, max_frames)
+    if not asset_id then
+        return false
+    end
+
+    return draw_image(asset_id, r, color, flip_y)
+end
+
+local function draw_sprite_outline(r, color, radius)
+    set_color(color or COLORS.line)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, radius or 3, radius or 3)
+end
+
+local function truncate_tracked_text(text, max_width, tracking)
+    return Text.truncate(text, max_width, { tracking = tracking })
+end
+
+local function draw_text(text, x, y, w, align, color, tracking)
+    return Text.draw_line(text, x, y, w, align, color, { tracking = tracking })
+end
+
+local function symbol_color(symbol)
+    if symbol == Symbols.STRIKE then
+        return COLORS.attack
+    elseif symbol == Symbols.WARD then
+        return COLORS.defense
+    elseif symbol == Symbols.ESSENCE then
+        return COLORS.essence
+    elseif symbol == Symbols.BLOOD then
+        return COLORS.blood
+    end
+
+    return COLORS.muted
+end
+
+local function draw_hp_badge(value, x, y, scale)
+    local total = math.max(1, value or 1)
+    local step = scaled(7, scale)
+    for index = 1, total do
+        local px = x + (index - 1) * step
+        set_color(COLORS.ink)
+        love.graphics.polygon("fill",
+            px + scaled(3, scale), y,
+            px + scaled(6, scale), y + scaled(3, scale),
+            px + scaled(3, scale), y + scaled(6, scale),
+            px, y + scaled(3, scale))
+    end
+end
+
+local function draw_keyword_badge(definition, x, y, w, h, options)
+    local scale = options.scale or 1
+    local colors = KEYWORD_BADGE_COLORS[definition.name] or { fill = COLORS.surface, line = COLORS.line }
+    local badge = rect(x, y, w, h)
+    if definition.asset and draw_image(definition.asset, badge) then
+        return
+    end
+
+    draw_box(badge, colors.fill, colors.line, scaled(2, scale))
+
+    love.graphics.setFont((options.fonts and options.fonts.tiny) or BPCard.fonts(scale).tiny)
+    local font = love.graphics.getFont()
+    local text_h = font and font:getHeight() or h
+    local text_y = y + math.floor((h - text_h) / 2) - scaled(1, scale)
+    draw_text(definition.short or definition.name:sub(1, 2), x + scaled(1, scale), text_y,
+        w - scaled(2, scale), "center", COLORS.ink, 0)
+end
+
+local function draw_keyword_badges(part, layout, options)
+    local badges = Keywords.badges_for_part(part)
+    if #badges == 0 then
+        return
+    end
+
+    local scale = options.scale or 1
+    local badge_w = scaled(13, scale)
+    local badge_h = scaled(9, scale)
+    local gap = scaled(1, scale)
+    local max_per_row = math.max(1, math.floor((layout.meta.w + gap) / (badge_w + gap)))
+    local max_badges = max_per_row * 2
+    local first_row_y = layout.side == "enemy"
+        and (layout.meta.y + layout.meta.h + scaled(2, scale))
+        or (layout.meta.y - badge_h - scaled(2, scale))
+
+    for index, definition in ipairs(badges) do
+        if index > max_badges then
+            break
+        end
+
+        local row = math.floor((index - 1) / max_per_row)
+        local column = ((index - 1) % max_per_row) + 1
+        local remaining = math.min(max_per_row, #badges - row * max_per_row)
+        local row_width = remaining * badge_w + math.max(0, remaining - 1) * gap
+        local x = layout.meta.x + math.floor((layout.meta.w - row_width) / 2) + (column - 1) * (badge_w + gap)
+        local y = layout.side == "enemy"
+            and (first_row_y + row * (badge_h + gap))
+            or (first_row_y - row * (badge_h + gap))
+        draw_keyword_badge(definition, x, y, badge_w, badge_h, options)
+    end
+end
+
+local function draw_damage_decoration(part, card, display_status)
+    local status = display_status or (part and part.status)
+    if not part or status == "healthy" then
+        return
+    end
+
+    if status == "wounded" then
+        set_color({ STATUS_COLORS.wounded[1], STATUS_COLORS.wounded[2], STATUS_COLORS.wounded[3], 0.16 })
+        love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.72 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(card.x + card.w - 24, card.y + 12, card.x + card.w - 16, card.y + 21)
+        love.graphics.line(card.x + card.w - 16, card.y + 21, card.x + card.w - 22, card.y + 31)
+    elseif status == "maimed" then
+        set_color({ 0, 0, 0, 0.24 })
+        love.graphics.rectangle("fill", card.x + 2, card.y + 2, card.w - 4, card.h - 4)
+        set_color({ COLORS.ink[1], COLORS.ink[2], COLORS.ink[3], 0.68 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(card.x + 12, card.y + 12, card.x + card.w - 12, card.y + card.h - 12)
+        love.graphics.line(card.x + card.w - 16, card.y + 14, card.x + 20, card.y + card.h - 16)
+    end
+end
+
+local function draw_symbol_chip(symbol, x, y, w, h, scale)
+    local chip = rect(x, y, w, h)
+    draw_box(chip, COLORS.surface, symbol_color(symbol), scaled(4, scale))
+    draw_text(Symbols.display(symbol), x + scaled(2, scale), y + scaled(7, scale), w - scaled(4, scale),
+        "center", symbol_color(symbol), scaled(Text.TRACKING, scale))
+end
+
+local function draw_symbol_sprite(symbol, x, y, size, outlined, alpha, scale)
+    local normalized = Symbols.normalize(symbol)
+    if normalized == Symbols.BLANK then
+        return false
+    end
+
+    local asset_id = outlined and SYMBOL_OUTLINE_ASSETS[normalized] or SYMBOL_ASSETS[normalized]
+    local image = asset_id and Assets.images and Assets.images[asset_id]
+    if not image then
+        draw_symbol_chip(normalized, x, y, size, size, scale)
+        return false
+    end
+
+    set_color({ 1, 1, 1, alpha or 1 })
+    love.graphics.draw(image, x, y, 0, size / image:getWidth(), size / image:getHeight())
+    return true
+end
+
+local function draw_wildcard_pip(x, y, size, lit, previewed)
+    local pip_rect = rect(x, y, size, size)
+    local tint = lit and { 1, 1, 1, 1 } or (previewed and { 1, 1, 1, 0.9 } or { 1, 1, 1, 0.72 })
+    if draw_image("slot_cell_wild", pip_rect, tint) then
+        if lit then
+            draw_sprite_outline(pip_rect, COLORS.essence, 2)
+        elseif previewed then
+            draw_sprite_outline(pip_rect, COLORS.valid, 2)
+        end
+        return
+    end
+
+    local cx = x + math.floor(size / 2)
+    local cy = y + math.floor(size / 2)
+    local radius = math.max(2, math.floor(size / 2) - 3)
+
+    if lit then
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.82 })
+        love.graphics.circle("fill", cx, cy, radius)
+        set_color(COLORS.ink)
+        love.graphics.circle("line", cx, cy, radius)
+    elseif previewed then
+        set_color({ COLORS.essence[1], COLORS.essence[2], COLORS.essence[3], 0.28 })
+        love.graphics.circle("fill", cx, cy, radius)
+        set_color(COLORS.essence)
+        love.graphics.circle("line", cx, cy, radius)
+    else
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.62 })
+        love.graphics.circle("line", cx, cy, radius)
+        set_color({ COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.38 })
+        love.graphics.circle("fill", cx, cy, math.max(1, math.floor(radius / 2)))
+    end
+end
+
+local function draw_burned_symbols(symbols, x, y, scale)
+    local symbol_size = scaled(SYMBOL_SIZE, scale)
+    for index, symbol in ipairs(symbols or {}) do
+        local px = x + (index - 1) * (symbol_size + scaled(2, scale))
+        draw_symbol_sprite(symbol, px, y, symbol_size, false, 0.42, scale)
+        set_color({ COLORS.attack[1], COLORS.attack[2], COLORS.attack[3], 0.78 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(px - 1, y + symbol_size + 1, px + symbol_size + 1, y - 1)
+    end
+end
+
+local function draw_die_back(r, color)
+    if not draw_image("empty_die", r, { 1, 1, 1, 0.82 }) then
+        draw_box(r, COLORS.surface_low, color or COLORS.line, 5)
+    end
+
+    set_color(color or COLORS.muted)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", r.x + 5, r.y + 5, r.w - 10, r.h - 10, 3, 3)
+    love.graphics.line(r.x + 9, r.y + 10, r.x + r.w - 9, r.y + r.h - 10)
+    love.graphics.line(r.x + r.w - 9, r.y + 10, r.x + 9, r.y + r.h - 10)
+end
+
+local function visible_face_symbols(symbols)
+    local visible_symbols = {}
+    for _, symbol in ipairs(symbols or { Symbols.BLANK }) do
+        local normalized = Symbols.normalize(symbol)
+        if normalized and normalized ~= Symbols.BLANK then
+            table.insert(visible_symbols, normalized)
+        end
+    end
+    return visible_symbols
+end
+
+local function draw_symbol_cluster(symbols, r, alpha, outlined, scale)
+    local visible_symbols = visible_face_symbols(symbols)
+    local count = #visible_symbols
+    local symbol_size = scaled(SYMBOL_SIZE, scale)
+    if count == 1 then
+        draw_symbol_sprite(visible_symbols[1], r.x + scaled(12, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+    elseif count == 2 then
+        draw_symbol_sprite(visible_symbols[1], r.x + scaled(7, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+        draw_symbol_sprite(visible_symbols[2], r.x + scaled(17, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+    elseif count >= 3 then
+        draw_symbol_sprite(visible_symbols[1], r.x + scaled(5, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+        draw_symbol_sprite(visible_symbols[2], r.x + scaled(12, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+        draw_symbol_sprite(visible_symbols[3], r.x + scaled(19, scale), r.y + scaled(12, scale), symbol_size, outlined, alpha, scale)
+    end
+end
+
+local function draw_die_face(symbols, r, is_selected, scale)
+    local outline = is_selected and COLORS.selected or COLORS.line
+    if not draw_image("empty_die", r) then
+        draw_box(r, COLORS.surface, outline, scaled(5, scale))
+    end
+
+    draw_symbol_cluster(symbols, r, 1, false, scale)
+
+    if is_selected then
+        draw_sprite_outline(r, outline, scaled(4, scale))
+    end
+end
+
+function BPCard.draw_die_face(symbols, r, options)
+    options = options or {}
+    return draw_die_face(symbols, r, options.selected == true, options.scale or 1)
+end
+
+local function normalized_nonblank_symbols(symbols)
+    local normalized = {}
+    for _, symbol in ipairs(symbols or {}) do
+        local value = Symbols.normalize(symbol)
+        if value and value ~= Symbols.BLANK then
+            table.insert(normalized, value)
+        end
+    end
+    return normalized
+end
+
+function BPCard.symbol_sequence_width(symbols, size, options)
+    options = options or {}
+    local scale = options.scale or 1
+    local gap = options.gap or scaled(2, scale)
+    local normalized = normalized_nonblank_symbols(symbols)
+
+    if #normalized == 0 then
+        return size
+    end
+
+    return #normalized * size + math.max(0, #normalized - 1) * gap
+end
+
+function BPCard.draw_symbol_sequence(symbols, x, y, size, options)
+    options = options or {}
+    local scale = options.scale or 1
+    local gap = options.gap or scaled(2, scale)
+    local normalized = normalized_nonblank_symbols(symbols)
+
+    if #normalized == 0 then
+        local r = rect(x, y, size, size)
+        if not draw_image("empty_die", r, { 1, 1, 1, options.alpha or 0.8 }) then
+            draw_box(r, COLORS.surface_low, COLORS.line, scaled(4, scale))
+        end
+        return size
+    end
+
+    for index, symbol in ipairs(normalized) do
+        draw_symbol_sprite(symbol, x + (index - 1) * (size + gap), y, size, options.outlined, options.alpha or 1, scale)
+    end
+
+    return #normalized * size + math.max(0, #normalized - 1) * gap
+end
+
+local function draw_assignment_die(assignment, target_rect, options)
+    if not assignment then
+        return
+    end
+
+    if options.assignment_hidden and options.assignment_hidden(assignment) then
+        draw_die_back(target_rect, COLORS.enemy)
+        return
+    end
+
+    draw_die_face(assignment.symbols or assignment.die.symbols, target_rect, false, options.scale)
+    if assignment.burned_symbols and #assignment.burned_symbols > 0 then
+        draw_burned_symbols(assignment.burned_symbols,
+            target_rect.x + target_rect.w + scaled(3, options.scale),
+            target_rect.y + target_rect.h - scaled(SYMBOL_SIZE, options.scale) - scaled(4, options.scale),
+            options.scale)
+    end
+end
+
+local function draw_title_strip(part, layout, options)
+    local title = layout and layout.label
+    if not title then
+        return
+    end
+
+    local scale = options.scale or 1
+    local flip_y = layout.side == "player"
+    if not draw_image("bp_title", title, nil, flip_y) then
+        draw_box(title, COLORS.surface_low, COLORS.line, scaled(3, scale))
+    end
+
+    love.graphics.setFont((options.fonts and options.fonts.small) or BPCard.fonts(scale).small)
+    local font = love.graphics.getFont()
+    local text_h = font and font:getHeight() or scaled(12, scale)
+    local text = part.name or part.id or "Part"
+    local text_rect = rect(title.x + scaled(4, scale), title.y, title.w - scaled(8, scale), title.h)
+    local text_y = text_rect.y + math.floor((text_rect.h - text_h) / 2)
+    local tracking = scaled(Text.TRACKING, scale)
+    local fits, width = draw_text(text, text_rect.x, text_y, text_rect.w, "center", options.label_color or COLORS.ink, tracking)
+
+    if not fits and options.warn_title_overflow then
+        options.warn_title_overflow(part, text, width, text_rect.w)
+    end
+end
+
+local function draw_card_state_overlays(part, layout, options)
+    local card = layout.card
+    local display_status = options.status or (part and part.status) or "healthy"
+    local time = options.time or 0
+    local damage_asset = nil
+
+    if display_status == "wounded" then
+        damage_asset = "bp_card_wounded"
+    elseif display_status == "maimed" then
+        damage_asset = "bp_card_maimed"
+    end
+
+    if damage_asset then
+        if not draw_image(damage_asset, card) then
+            draw_damage_decoration(part, card, display_status)
+        end
+    end
+
+    if options.active_die then
+        if options.any_valid then
+            draw_animated_image("bp_card_valid", card, time)
+        elseif options.hovered then
+            draw_animated_image("bp_card_invalid", card, time)
+        end
+    end
+
+    if options.source_highlight then
+        if not draw_animated_image("bp_card_hover", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    end
+
+    if options.selected_source then
+        if not draw_animated_image("bp_card_selected", card, time) then
+            draw_sprite_outline(card, COLORS.selected, 2)
+        end
+    elseif options.hovered and not options.source_highlight then
+        draw_animated_image("bp_card_hover", card, time)
+    end
+end
+
+local function draw_socket_or_rim_frame(kind, part, layout, options)
+    local is_socket = kind == "socket"
+    local target = is_socket and layout.socket or layout.rim
+    local prefix = is_socket and "die_socket" or "die_rim"
+    local assignment = is_socket and options.socket_assignment or options.rim_assignment
+    local flip_y = layout.side == "enemy"
+    local valid = is_socket and options.socket_valid or options.rim_valid
+    local auto_target = is_socket and options.auto_socket_target or options.auto_rim_target
+    local outline = auto_target and COLORS.enemy or (valid and COLORS.valid or COLORS.dashed)
+    local scale = options.scale or 1
+
+    if not draw_image(prefix, target, nil, flip_y) then
+        draw_box(target, COLORS.surface_low, outline, scaled(3, scale))
+    end
+
+    local state_prefix = nil
+    local state_color = outline
+    if options.status == "maimed" then
+        state_prefix = prefix .. "_locked"
+        state_color = COLORS.invalid
+    elseif assignment then
+        state_prefix = prefix .. "_occupied"
+        state_color = COLORS.line
+    elseif valid or auto_target then
+        state_prefix = prefix .. "_valid"
+        state_color = outline
+    elseif options.destination_has_spellmark and options.destination_has_spellmark(kind, part) then
+        state_prefix = prefix .. "_spellmarked"
+        state_color = COLORS.essence
+    end
+
+    if state_prefix and not draw_animated_image(state_prefix, target, options.time or 0, nil, flip_y) then
+        draw_sprite_outline(target, state_color, scaled(3, scale))
+    end
+end
+
+local function draw_slot_track(part, layout, options)
+    local slot = part.slot
+    local scale = options.scale or 1
+    local symbol_size = scaled(SYMBOL_SIZE, scale)
+    local row_gap = scaled(SLOT_PIP_ROW_GAP, scale)
+    local pip_gap = scaled(SLOT_PIP_GAP, scale)
+    local hatch_outline = options.hatch_outline or COLORS.line
+
+    if not slot then
+        if not draw_image("die-hatch1", layout.hatch, { 1, 1, 1, 0.35 }) then
+            draw_box(layout.hatch, COLORS.surface_low, COLORS.invalid, scaled(3, scale))
+        end
+        draw_sprite_outline(layout.hatch, COLORS.invalid, scaled(3, scale))
+        return
+    end
+
+    local hatch_id = "die-hatch1"
+    local hungry = Keywords.slot_is_hungry(part, slot)
+    local accepting = hatch_outline == COLORS.valid or hatch_outline == COLORS.enemy
+    local hovered = hatch_outline == COLORS.valid and options.hover_matches and options.hover_matches("slot", part)
+    local swallow_frame = options.hatch_swallow_frame and options.hatch_swallow_frame(part)
+    if swallow_frame then
+        hatch_id = swallow_frame
+    elseif options.status == "maimed" then
+        hatch_id = "die-hatch1"
+    elseif accepting and hovered then
+        hatch_id = "die-hatch3"
+    elseif accepting or hungry then
+        hatch_id = "die-hatch2"
+    end
+
+    local hatch_tint = options.status == "maimed" and { 1, 1, 1, 0.45 } or nil
+    if not draw_image(hatch_id, layout.hatch, hatch_tint) then
+        draw_box(layout.hatch, COLORS.surface, hatch_outline or COLORS.line, scaled(3, scale))
+    end
+
+    if hatch_outline == COLORS.valid then
+        draw_sprite_outline(layout.hatch, COLORS.valid, scaled(3, scale))
+    elseif hatch_outline == COLORS.enemy then
+        draw_sprite_outline(layout.hatch, COLORS.enemy, scaled(3, scale))
+    elseif options.status == "maimed" then
+        draw_sprite_outline(layout.hatch, COLORS.invalid, scaled(3, scale))
+    end
+
+    local preview = options.destination_preview and options.destination_preview("slot", part)
+    local preview_by_index = {}
+    if preview and preview.valid then
+        for _, entry in ipairs(preview.lit_entries or {}) do
+            preview_by_index[entry.index] = entry
+        end
+    elseif preview then
+        draw_sprite_outline(layout.hatch, COLORS.invalid, scaled(3, scale))
+    end
+
+    local cost = slot.cost or {}
+    local row_count = #cost > SLOT_PIP_ROW_LIMIT and 2 or 1
+    local columns_per_row = math.max(1, math.ceil(#cost / row_count))
+    local track_content_h = row_count * symbol_size + (row_count - 1) * row_gap
+    local first_row_y = layout.track.y + math.floor(math.max(0, layout.track.h - track_content_h) / 2)
+    local last_pip_x = layout.track.x
+    local last_pip_y = first_row_y
+
+    for index, symbol in ipairs(cost) do
+        local lit = part.slot_charge and part.slot_charge[index]
+        local previewed = preview_by_index[index] ~= nil
+        local row_index = math.floor((index - 1) / columns_per_row) + 1
+        local column_index = ((index - 1) % columns_per_row) + 1
+        local row_start_index = (row_index - 1) * columns_per_row + 1
+        local pips_in_row = math.min(columns_per_row, #cost - row_start_index + 1)
+        local row_width = pips_in_row * symbol_size + math.max(0, pips_in_row - 1) * pip_gap
+        local row_start_x = layout.track.x + math.floor(math.max(0, layout.track.w - row_width) / 2)
+        local pip_x = row_start_x + (column_index - 1) * (symbol_size + pip_gap)
+        local pip_y = first_row_y + (row_index - 1) * (symbol_size + row_gap)
+        if previewed then
+            set_color({ 1, 0.88, 0.35, 0.5 })
+            love.graphics.rectangle("fill", pip_x - 1, pip_y - 1, symbol_size + 2, symbol_size + 2, 2, 2)
+        end
+        if hungry then
+            draw_wildcard_pip(pip_x, pip_y, symbol_size, lit, previewed)
+        else
+            draw_symbol_sprite(symbol, pip_x, pip_y, symbol_size, not (lit or previewed), lit and 1 or (previewed and 0.95 or 0.85), scale)
+        end
+        last_pip_x = pip_x
+        last_pip_y = pip_y
+    end
+
+    if preview and preview.valid and #preview.burned > 0 then
+        draw_burned_symbols(preview.burned, last_pip_x + symbol_size + scaled(4, scale), last_pip_y, scale)
+    end
+
+    love.graphics.setFont((options.fonts and options.fonts.tiny) or BPCard.fonts(scale).tiny)
+    draw_text(truncate_tracked_text(slot.name or "Slot", layout.slot_label.w, scaled(Text.TRACKING, scale)),
+        layout.slot_label.x, layout.slot_label.y, layout.slot_label.w, "center", COLORS.muted, scaled(Text.TRACKING, scale))
+end
+
+function BPCard.total_width(scale)
+    return scaled(CARD_WIDTH, scale)
+end
+
+function BPCard.total_height(scale)
+    scale = scale or 1
+    return scaled(DIE_SIZE - 6 + CARD_HEIGHT + TITLE_HEIGHT, scale)
+end
+
+function BPCard.layout_at(x, y, side, scale)
+    scale = scale or 1
+    side = side or "player"
+
+    local card_w = scaled(CARD_WIDTH, scale)
+    local card_h = scaled(CARD_HEIGHT, scale)
+    local title_h = scaled(TITLE_HEIGHT, scale)
+    local die_size = scaled(DIE_SIZE, scale)
+    local card_y = y
+    if side == "player" then
+        card_y = y + scaled(DIE_SIZE - 6, scale)
+    elseif side == "enemy" then
+        card_y = y + title_h
+    end
+
+    local card = rect(x, card_y, card_w, card_h)
+    local left_x = card.x + scaled(4, scale)
+    local right_x = card.x + scaled(BP_LEFT_SECTOR_WIDTH, scale)
+    local right_w = card.w - scaled(BP_LEFT_SECTOR_WIDTH, scale) - scaled(4, scale)
+    local rim_y = side == "enemy" and (card.y + card.h - scaled(6, scale)) or (card.y - die_size + scaled(6, scale))
+    local socket_y = side == "enemy" and (rim_y - die_size) or (card.y + scaled(6, scale))
+    local label_y = side == "enemy" and (card.y - title_h) or (card.y + card.h)
+    local meta_y = side == "enemy" and (card.y + scaled(10, scale)) or (card.y + card.h - scaled(16, scale))
+
+    return {
+        card = card,
+        rim = rect(left_x + scaled(2, scale), rim_y, die_size, die_size),
+        socket = rect(left_x + scaled(2, scale), socket_y, die_size, die_size),
+        hatch = rect(right_x + math.floor((right_w - die_size) / 2), card.y + scaled(24, scale), die_size, die_size),
+        track = rect(right_x + scaled(2, scale), card.y + scaled(62, scale), right_w - scaled(4, scale),
+            scaled(SYMBOL_SIZE * 2 + SLOT_PIP_ROW_GAP, scale)),
+        slot_label = rect(right_x + scaled(1, scale), card.y + scaled(7, scale), right_w - scaled(2, scale),
+            scaled(12, scale)),
+        label = rect(card.x, label_y, card.w, title_h),
+        meta = rect(left_x + scaled(8, scale), meta_y, scaled(28, scale), scaled(10, scale)),
+        side = side,
+        scale = scale
+    }
+end
+
+function BPCard.draw(part, layout, options)
     if not part then
-        return "torso"
+        return BPCard.draw_empty(layout, options)
     end
 
-    if part.layout_slot then
-        return part.layout_slot
+    options = options or {}
+    options.scale = options.scale or layout.scale or (layout.card and layout.card.w / CARD_WIDTH) or 1
+    options.status = options.status or part.status or "healthy"
+
+    love.graphics.setFont((options.fonts and options.fonts.small) or BPCard.fonts(options.scale).small)
+    if not draw_image("bp_card", layout.card) then
+        draw_box(layout.card, COLORS.panel, COLORS.line, scaled(6, options.scale))
+    end
+
+    options.hovered = options.hovered or false
+    options.any_valid = options.any_valid
+        or options.socket_valid
+        or options.rim_valid
+        or options.slot_valid
+        or options.auto_socket_target
+        or options.auto_rim_target
+        or options.auto_slot_target
+
+    options.hatch_outline = options.auto_slot_target and COLORS.enemy or (options.slot_valid and COLORS.valid or COLORS.line)
+    draw_card_state_overlays(part, layout, options)
+    draw_hp_badge(part.hp_value or 1, layout.meta.x, layout.meta.y, options.scale)
+    draw_keyword_badges(part, layout, options)
+
+    draw_socket_or_rim_frame("socket", part, layout, options)
+    draw_socket_or_rim_frame("rim", part, layout, options)
+
+    draw_assignment_die(options.socket_assignment, layout.socket, options)
+    draw_assignment_die(options.rim_assignment, layout.rim, options)
+    if options.draw_socket_or_rim_preview then
+        options.draw_socket_or_rim_preview("socket", part, layout.socket)
+        options.draw_socket_or_rim_preview("rim", part, layout.rim)
+    end
+
+    if options.status == "maimed" and not options.slot_valid then
+        options.hatch_outline = COLORS.invalid
+    end
+    draw_slot_track(part, layout, options)
+
+    options.label_color = (options.source_highlight or options.selected_source) and COLORS.selected or COLORS.ink
+    draw_title_strip(part, layout, options)
+end
+
+function BPCard.draw_empty(layout, options)
+    options = options or {}
+    local scale = options.scale or layout.scale or 1
+    love.graphics.setFont((options.fonts and options.fonts.small) or BPCard.fonts(scale).small)
+    if not draw_image("bp_card_empty", layout.card) then
+        set_color({ COLORS.surface_low[1], COLORS.surface_low[2], COLORS.surface_low[3], 0.18 })
+        love.graphics.rectangle("fill", layout.card.x, layout.card.y, layout.card.w, layout.card.h, scaled(6, scale), scaled(6, scale))
+        set_color({ COLORS.dashed[1], COLORS.dashed[2], COLORS.dashed[3], 0.38 })
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle("line", layout.card.x, layout.card.y, layout.card.w, layout.card.h, scaled(6, scale), scaled(6, scale))
+    end
+    draw_text("empty", layout.card.x, layout.card.y + layout.card.h * 0.42, layout.card.w, "center",
+        { COLORS.muted[1], COLORS.muted[2], COLORS.muted[3], 0.52 }, scaled(Text.TRACKING, scale))
+end
+
+return BPCard
+
+```
+
+## ui/bp_inspector.lua
+
+```lua
+local Effects = require("combat.v2_effects")
+local Keywords = require("combat.keywords")
+local Symbols = require("core.symbols")
+local SymbolDie = require("core.symbol_die")
+local BPCard = require("ui.bp_card")
+local Text = require("ui.text")
+
+local BPInspector = {}
+
+local COLORS = {
+    bg = { 0.055, 0.06, 0.09, 0.96 },
+    panel = { 0.075, 0.08, 0.12, 1 },
+    line = { 0.70, 0.72, 0.84, 0.74 },
+    ink = { 0.96, 0.95, 1, 1 },
+    muted = { 0.64, 0.63, 0.74, 1 },
+    accent = { 0.36, 0.70, 0.76, 1 },
+    warning = { 1, 0.72, 0.35, 1 }
+}
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function copy_color(color)
+    if not color then
+        return nil
+    end
+
+    return { color[1], color[2], color[3], color[4] }
+end
+
+local function merge_colors(overrides)
+    local colors = {}
+    for key, value in pairs(COLORS) do
+        colors[key] = copy_color(value)
+    end
+
+    for key, value in pairs(overrides or {}) do
+        colors[key] = copy_color(value)
+    end
+
+    return colors
+end
+
+local function title_case(value)
+    local text = tostring(value or "")
+    return (text:gsub("^%l", string.upper))
+end
+
+local function slot_cost_text(slot, part)
+    local cost = slot and slot.cost or {}
+    if Keywords.slot_is_hungry(part, slot) then
+        local count = math.max(0, #cost)
+        local noun = count == 1 and "wildcard pip" or "wildcard pips"
+        return tostring(count) .. " " .. noun
+    end
+
+    return Symbols.format_face(cost)
+end
+
+function BPInspector.slot_effect_text(effect)
+    return Effects.describe(effect)
+end
+
+function BPInspector.slot_lines(slot, part)
+    if not slot then
+        return { "No Slot." }
+    end
+
+    local lines = {
+        "Slot: " .. tostring(slot.name or slot.id or "Unnamed"),
+        "Cost: " .. slot_cost_text(slot, part),
+        "Timing: " .. title_case(slot.timing or "spend"),
+        "Effect: " .. BPInspector.slot_effect_text(slot.effect)
+    }
+
+    return lines
+end
+
+function BPInspector.part_lines(part, options)
+    options = options or {}
+    if not part then
+        return { "No Body Part selected." }
+    end
+
+    local status = options.status or part.status or "healthy"
+    local lines = {
+        string.format("%s / %s", part.name or part.id or "Body Part", title_case(status)),
+        "Type: " .. tostring(part.type or "unknown") .. " / Heart: " .. tostring(part.hp_value or 0)
+    }
+
+    if part.tags and #part.tags > 0 then
+        table.insert(lines, "Tags: " .. table.concat(part.tags, ", "))
+    end
+
+    local badges = Keywords.badges_for_part(part)
+    for _, definition in ipairs(badges) do
+        table.insert(lines, tostring(definition.name) .. ": " .. tostring(definition.description))
     end
 
     if part.slot then
-        return part.slot
+        table.insert(lines, "Slot: " .. tostring(part.slot.name or part.slot.id or "Unnamed"))
+        table.insert(lines, "Cost: " .. slot_cost_text(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
+        table.insert(lines, "Effect: " .. BPInspector.slot_effect_text(part.slot.effect))
+    else
+        table.insert(lines, "Slot: none")
     end
 
-    local part_type = part.type
-    if type(part_type) == "string" then
-        part_type = part_type:lower()
-        if SLOT_ALIASES[part_type] then
-            local mapped = SLOT_ALIASES[part_type]
-            if mapped ~= "arm" and mapped ~= "leg" then
-                return mapped
-            end
+    return lines
+end
 
-            part_type = mapped
+function BPInspector.flavor(part)
+    local text = part and part.flavor
+    if text and text ~= "" then
+        return text
+    end
+
+    return "No dream-memory recorded."
+end
+
+function BPInspector.die_face_counts(parts, options)
+    options = options or {}
+    local counts = {}
+    local order = {}
+
+    for _, part in ipairs(parts or {}) do
+        local status = options.status or part.status or "healthy"
+        for face_index = 1, 6 do
+            local label = Symbols.format_face(SymbolDie.face_for_status(part and part.die, face_index, status))
+            if not counts[label] then
+                counts[label] = 0
+                table.insert(order, label)
+            end
+            counts[label] = counts[label] + 1
         end
     end
 
-    local id = part.id
-    if type(id) == "string" then
-        local lowered = id:lower()
-        if lowered:find("left", 1, true) then
-            if part_type == "arm" then
-                return "arm_left"
-            elseif part_type == "leg" then
-                return "leg_left"
+    table.sort(order, function(left, right)
+        local left_count = counts[left] or 0
+        local right_count = counts[right] or 0
+        if left_count == right_count then
+            return left < right
+        end
+        return left_count > right_count
+    end)
+
+    return counts, order
+end
+
+function BPInspector.die_face_count_entries(parts, options)
+    options = options or {}
+    local entries_by_key = {}
+    local entries = {}
+
+    for _, part in ipairs(parts or {}) do
+        local status = options.status or part.status or "healthy"
+        for face_index = 1, 6 do
+            local symbols = SymbolDie.face_for_status(part and part.die, face_index, status)
+            local label = Symbols.format_face(symbols)
+            local entry = entries_by_key[label]
+            if not entry then
+                entry = {
+                    key = label,
+                    symbols = Symbols.copy_face(symbols),
+                    count = 0
+                }
+                entries_by_key[label] = entry
+                table.insert(entries, entry)
             end
-        elseif lowered:find("right", 1, true) then
-            if part_type == "arm" then
-                return "arm_right"
-            elseif part_type == "leg" then
-                return "leg_right"
+            entry.count = entry.count + 1
+        end
+    end
+
+    table.sort(entries, function(left, right)
+        if left.count == right.count then
+            return left.key < right.key
+        end
+        return left.count > right.count
+    end)
+
+    return entries
+end
+
+function BPInspector.die_face_count_lines(parts, options)
+    local counts, order = BPInspector.die_face_counts(parts, options)
+    local lines = {}
+
+    for _, label in ipairs(order) do
+        table.insert(lines, label .. " x" .. tostring(counts[label]))
+    end
+
+    if #lines == 0 then
+        table.insert(lines, "No dice in current pool.")
+    end
+
+    return lines
+end
+
+local function draw_box(rect, fill, line, radius)
+    set_color(fill)
+    love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h, radius or 4, radius or 4)
+    set_color(line)
+    love.graphics.rectangle("line", rect.x, rect.y, rect.w, rect.h, radius or 4, radius or 4)
+end
+
+local function draw_wrapped(text, x, y, w, color, gap)
+    set_color(color)
+    Text.draw(text, x, y, w, "left", color)
+    return y + Text.height(text, w) + (gap or 4)
+end
+
+local function face_has_degradation(list, face_index)
+    for _, index in ipairs(list or {}) do
+        if tonumber(index) == face_index then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function sorted_face_indexes(list)
+    local indexes = {}
+    for _, index in ipairs(list or {}) do
+        local numeric = tonumber(index)
+        if numeric then
+            table.insert(indexes, numeric)
+        end
+    end
+
+    table.sort(indexes)
+    return indexes
+end
+
+local function durable_face_indexes(die)
+    local indexes = {}
+    for face_index = 1, 6 do
+        if not face_has_degradation(die and die.wound_faces, face_index)
+            and not face_has_degradation(die and die.maim_faces, face_index) then
+            table.insert(indexes, face_index)
+        end
+    end
+
+    return indexes
+end
+
+local function draw_crack_overlay(r, level, colors)
+    if level == "heavy" then
+        set_color({ 0, 0, 0, 0.28 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ colors.ink[1], colors.ink[2], colors.ink[3], 0.82 })
+        love.graphics.setLineWidth(2)
+        love.graphics.line(r.x + 6, r.y + 7, r.x + r.w - 7, r.y + r.h - 8)
+        love.graphics.line(r.x + r.w - 8, r.y + 8, r.x + 8, r.y + r.h - 7)
+    elseif level == "light" then
+        set_color({ colors.accent[1], colors.accent[2], colors.accent[3], 0.18 })
+        love.graphics.rectangle("fill", r.x + 2, r.y + 2, r.w - 4, r.h - 4, 4, 4)
+        set_color({ colors.accent[1], colors.accent[2], colors.accent[3], 0.85 })
+        love.graphics.setLineWidth(1)
+        love.graphics.line(r.x + r.w - 11, r.y + 7, r.x + r.w - 7, r.y + 14)
+        love.graphics.line(r.x + r.w - 7, r.y + 14, r.x + r.w - 12, r.y + 22)
+    end
+end
+
+local function draw_die_diagram(part, x, y, w, available_h, colors)
+    if not (part and part.die) then
+        return y
+    end
+
+    local face_gap = 4
+    local face_size = math.min(
+        32,
+        math.floor((w - face_gap * 2) / 3),
+        math.floor((available_h - face_gap) / 2))
+
+    if face_size < 12 then
+        return y
+    end
+
+    local grid_w = face_size * 3 + face_gap * 2
+    local grid_h = face_size * 2 + face_gap
+    local grid_x = x + math.floor(math.max(0, w - grid_w) / 2)
+    local face_columns = {
+        sorted_face_indexes(part.die.wound_faces),
+        sorted_face_indexes(part.die.maim_faces),
+        durable_face_indexes(part.die)
+    }
+
+    set_color(colors.line)
+    love.graphics.rectangle("line", grid_x - 6, y - 6, grid_w + 12, grid_h + 12, 4, 4)
+
+    for column = 1, 3 do
+        for row = 1, 2 do
+            local face_index = face_columns[column] and face_columns[column][row]
+            if face_index then
+                local face_rect = {
+                    x = grid_x + (column - 1) * (face_size + face_gap),
+                    y = y + (row - 1) * (face_size + face_gap),
+                    w = face_size,
+                    h = face_size
+                }
+                local face = SymbolDie.face_for_status(part.die, face_index, "healthy")
+                BPCard.draw_die_face(face, face_rect, {
+                    scale = face_size / 36
+                })
+
+                if column == 1 then
+                    draw_crack_overlay(face_rect, "heavy", colors)
+                elseif column == 2 then
+                    draw_crack_overlay(face_rect, "light", colors)
+                end
             end
         end
     end
 
-    if part_type == "arm" then
-        return "arm_right"
-    elseif part_type == "leg" then
-        return "leg_right"
+    return y + grid_h + 12
+end
+
+function BPInspector.draw_panel(rect, data, options)
+    options = options or {}
+    data = data or {}
+
+    local colors = merge_colors(options.colors)
+    local padding = options.padding or 14
+    local header_hidden = options.hide_header == true
+    local default_flavor_h = header_hidden
+        and math.min(150, math.floor(rect.h * 0.48))
+        or math.min(126, math.floor(rect.h * 0.28))
+    local flavor_h = options.flavor_h or default_flavor_h
+    local title = data.title or "Inspector"
+    local subtitle = data.subtitle
+    local lines = data.lines or (data.part and BPInspector.part_lines(data.part)) or {}
+    local flavor = data.flavor or (data.part and BPInspector.flavor(data.part))
+
+    draw_box(rect, colors.bg, colors.line, options.radius or 5)
+
+    local y = rect.y + padding
+    if not header_hidden then
+        set_color(colors.ink)
+        Text.draw(title, rect.x + padding, y, rect.w - padding * 2, "left", colors.ink)
+        y = y + 24
+
+        if subtitle then
+            y = draw_wrapped(subtitle, rect.x + padding, y, rect.w - padding * 2, colors.muted, 8)
+        end
     end
 
-    return part_type or "torso"
+    local flavor_rule_y = rect.y + rect.h - flavor_h
+    set_color(colors.line)
+    love.graphics.line(rect.x + padding, flavor_rule_y, rect.x + rect.w - padding, flavor_rule_y)
+
+    for _, line in ipairs(lines) do
+        if y > flavor_rule_y - 22 then
+            break
+        end
+        y = draw_wrapped(line, rect.x + padding, y, rect.w - padding * 2, colors.ink, 6)
+    end
+
+    if options.show_die and data.part and data.part.die then
+        local available_h = flavor_rule_y - y - 12
+        if available_h >= 32 then
+            y = draw_die_diagram(data.part, rect.x + padding, y + 4, rect.w - padding * 2, available_h, colors)
+        end
+    end
+
+    y = flavor_rule_y + 12
+    set_color(colors.muted)
+    Text.draw("Flavor", rect.x + padding, y, rect.w - padding * 2, "left", colors.muted)
+    y = y + 20
+    draw_wrapped(flavor or "No dream-memory recorded.", rect.x + padding, y, rect.w - padding * 2, colors.ink, 4)
 end
 
-local function get_anchor(side)
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+return BPInspector
 
-    local center_x = width * (side == "right" and 0.72 or 0.28)
-    local center_y = height * 0.40
+```
 
-    return center_x, center_y
+## ui/text.lua
+
+```lua
+local Text = {}
+
+Text.TRACKING = 1
+
+local native = {}
+local installed = false
+
+local function graphics()
+    return love and love.graphics or nil
 end
 
-function Layouts.get_combatant_side(combatant, index)
-    return resolve_side(combatant, index)
+local function tracking_for(options)
+    if options and options.tracking ~= nil then
+        return options.tracking
+    end
+
+    return Text.TRACKING
 end
 
-function Layouts.get_body_part_position(combatant, index, part)
-    local side = resolve_side(combatant, index)
-    local slot = resolve_slot(part)
-    local anchor_x, anchor_y = get_anchor(side)
-    local offset = SLOT_OFFSETS[slot] or SLOT_OFFSETS.torso or { x = 0, y = 0 }
-
-    local x = anchor_x + offset.x - SPRITE_SIZE * 0.5
-    local y = anchor_y + offset.y - SPRITE_SIZE * 0.5
-
-    return x, y
+local function current_font()
+    local g = graphics()
+    return g and g.getFont and g.getFont() or nil
 end
 
-function Layouts.get_name_region(combatant, index)
-    local side = resolve_side(combatant, index)
-    local anchor_x, anchor_y = get_anchor(side)
-    local width = clamp_width(SPRITE_SIZE * 2.2)
-    local x = anchor_x - width * 0.5
-    local y = anchor_y - SPRITE_SIZE * 2.1
-
-    return x, y, width
+local function native_print()
+    local g = graphics()
+    return native.print or (g and g.print)
 end
 
-function Layouts.get_heart_position(combatant, index)
-    local side = resolve_side(combatant, index)
-    local anchor_x, anchor_y = get_anchor(side)
-    local x = anchor_x - SPRITE_SIZE * 0.7
-    local y = anchor_y + SPRITE_SIZE * 1.2
-
-    return x, y
+local function native_printf()
+    local g = graphics()
+    return native.printf or (g and g.printf)
 end
 
-function Layouts.get_crest_region(combatant, index)
-    local side = resolve_side(combatant, index)
-    local anchor_x, anchor_y = get_anchor(side)
-    local width = clamp_width(SPRITE_SIZE * 2.4)
-    local x = anchor_x - width * 0.5
-    local y = anchor_y + SPRITE_SIZE * 1.8
+local function utf8_char_size(first_byte)
+    if not first_byte or first_byte < 0x80 then
+        return 1
+    elseif first_byte >= 0xC2 and first_byte <= 0xDF then
+        return 2
+    elseif first_byte >= 0xE0 and first_byte <= 0xEF then
+        return 3
+    elseif first_byte >= 0xF0 and first_byte <= 0xF4 then
+        return 4
+    end
 
-    return x, y, width
+    return 1
 end
 
-function Layouts.get_prompt_region()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
-    local region_width = math.min(width * 0.9, 640)
-    local x = (width - region_width) * 0.5
-    local y = height - 64
-
-    return x, y, region_width
+local function is_utf8_continuation(byte)
+    return byte and byte >= 0x80 and byte <= 0xBF
 end
 
-function Layouts.get_sprite_size()
-    return SPRITE_SIZE
+function Text.chars(text)
+    local source = tostring(text or "")
+    local chars = {}
+    local index = 1
+
+    while index <= #source do
+        local size = utf8_char_size(source:byte(index))
+        local stop = index + size - 1
+        local valid = stop <= #source
+
+        for offset = 1, size - 1 do
+            if not is_utf8_continuation(source:byte(index + offset)) then
+                valid = false
+                break
+            end
+        end
+
+        if valid then
+            table.insert(chars, source:sub(index, stop))
+            index = stop + 1
+        else
+            table.insert(chars, source:sub(index, index))
+            index = index + 1
+        end
+    end
+
+    return chars
 end
 
-return Layouts
+function Text.width(text, options)
+    local font = current_font()
+    if not font then
+        return 0
+    end
+
+    local width = 0
+    local chars = Text.chars(text)
+    local tracking = tracking_for(options)
+    for index, char in ipairs(chars) do
+        local ok, char_width = pcall(font.getWidth, font, char)
+        if not ok then
+            ok, char_width = pcall(font.getWidth, font, "?")
+        end
+
+        width = width + (ok and char_width or 0)
+        if index < #chars then
+            width = width + tracking
+        end
+    end
+
+    return width
+end
+
+local function split_long_word(word, max_width, options)
+    local lines = {}
+    local current = ""
+
+    for _, char in ipairs(Text.chars(word)) do
+        local candidate = current .. char
+        if current ~= "" and Text.width(candidate, options) > max_width then
+            table.insert(lines, current)
+            current = char
+        else
+            current = candidate
+        end
+    end
+
+    if current ~= "" then
+        table.insert(lines, current)
+    end
+
+    return lines
+end
+
+function Text.wrap(text, max_width, options)
+    local width = max_width or 200
+    local lines = {}
+    local source = tostring(text or "")
+
+    for paragraph in (source .. "\n"):gmatch("(.-)\n") do
+        local current = ""
+        local saw_word = false
+
+        for word in paragraph:gmatch("%S+") do
+            saw_word = true
+            local candidate = current == "" and word or (current .. " " .. word)
+            if Text.width(candidate, options) <= width then
+                current = candidate
+            elseif current ~= "" then
+                table.insert(lines, current)
+                if Text.width(word, options) <= width then
+                    current = word
+                else
+                    local pieces = split_long_word(word, width, options)
+                    for index = 1, #pieces - 1 do
+                        table.insert(lines, pieces[index])
+                    end
+                    current = pieces[#pieces] or ""
+                end
+            else
+                local pieces = split_long_word(word, width, options)
+                for index = 1, #pieces - 1 do
+                    table.insert(lines, pieces[index])
+                end
+                current = pieces[#pieces] or ""
+            end
+        end
+
+        if saw_word or current ~= "" then
+            table.insert(lines, current)
+        elseif #lines == 0 then
+            table.insert(lines, "")
+        end
+    end
+
+    return lines
+end
+
+function Text.truncate(text, max_width, options)
+    local source = tostring(text or "")
+    if Text.width(source, options) <= max_width then
+        return source
+    end
+
+    local suffix = (options and options.suffix) or ".."
+    local available = math.max(0, (max_width or 0) - Text.width(suffix, options))
+    local result = ""
+
+    for _, char in ipairs(Text.chars(source)) do
+        local candidate = result .. char
+        if Text.width(candidate, options) > available then
+            break
+        end
+        result = candidate
+    end
+
+    return result .. suffix
+end
+
+function Text.height(text, max_width, options)
+    local font = current_font()
+    if not font then
+        return 12
+    end
+
+    return math.max(1, #Text.wrap(text, max_width or 200, options)) * font:getHeight()
+end
+
+function Text.line(text, x, y, color, options)
+    local font = current_font()
+    local print_fn = native_print()
+    if not (font and print_fn) then
+        return 0
+    end
+
+    local g = graphics()
+    if color and g and g.setColor then
+        g.setColor(color)
+    end
+
+    local cursor_x = x
+    local tracking = tracking_for(options)
+    local characters = Text.chars(text)
+    for index, char in ipairs(characters) do
+        local ok = pcall(print_fn, char, cursor_x, y)
+        local measured_char = char
+        if not ok then
+            measured_char = "?"
+            print_fn(measured_char, cursor_x, y)
+        end
+
+        local width_ok, char_width = pcall(font.getWidth, font, measured_char)
+        if not width_ok then
+            width_ok, char_width = pcall(font.getWidth, font, "?")
+        end
+
+        cursor_x = cursor_x + (width_ok and char_width or 0)
+        if index < #characters then
+            cursor_x = cursor_x + tracking
+        end
+    end
+
+    return cursor_x - x
+end
+
+function Text.draw_line(text, x, y, width, align, color, options)
+    local line_width = Text.width(text, options)
+    local line_x = x
+    local limit = width or 200
+
+    if align == "center" then
+        line_x = x + math.floor((limit - line_width) / 2)
+    elseif align == "right" then
+        line_x = x + limit - line_width
+    end
+
+    Text.line(text, line_x, y, color, options)
+    return line_width <= limit, line_width
+end
+
+function Text.draw(text, x, y, width, align, color, options)
+    local limit = width or 200
+    local font = current_font()
+    local line_height = font and font:getHeight() or 12
+    local lines = Text.wrap(text, limit, options)
+
+    for index, line in ipairs(lines) do
+        Text.draw_line(line, x, y + (index - 1) * line_height, limit, align, color, options)
+    end
+end
+
+function Text.print(text, x, y)
+    return Text.line(text, x, y)
+end
+
+function Text.printf(text, x, y, width, align)
+    return Text.draw(text, x, y, width, align or "left")
+end
+
+function Text.install(g)
+    g = g or graphics()
+    if installed or not g then
+        return
+    end
+
+    native.print = g.print
+    native.printf = g.printf
+    installed = true
+
+    g.print = function(text, x, y, ...)
+        if select("#", ...) > 0 or type(x) ~= "number" or type(y) ~= "number" then
+            return native.print(text, x, y, ...)
+        end
+
+        return Text.print(text, x, y)
+    end
+
+    g.printf = function(text, x, y, width, align, ...)
+        if select("#", ...) > 0
+            or type(x) ~= "number"
+            or type(y) ~= "number"
+            or type(width) ~= "number" then
+            return native.printf(text, x, y, width, align, ...)
+        end
+
+        return Text.printf(text, x, y, width, align)
+    end
+end
+
+return Text
 
 ```
 
