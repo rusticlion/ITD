@@ -1,6 +1,6 @@
 local Save = {}
 
-Save.VERSION = 1
+Save.VERSION = 3
 Save.DEFAULT_PATH = "saves/slot1.lua"
 
 local function copy_table(source)
@@ -133,8 +133,12 @@ function Save.deserialize(source)
     end
 
     data.save_version = data.save_version or 0
-    if data.save_version > Save.VERSION then
-        return nil, "save version " .. tostring(data.save_version) .. " is newer than runtime version " .. tostring(Save.VERSION)
+    if data.save_version ~= Save.VERSION then
+        return nil, string.format(
+            "unsupported save version %s; expected %s",
+            tostring(data.save_version),
+            tostring(Save.VERSION)
+        )
     end
 
     data.profile = data.profile or {}

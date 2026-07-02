@@ -48,6 +48,12 @@ function Overworld:resume(_, result)
     end
 end
 
+function Overworld:pause()
+    if self.world and self.world.player then
+        self.world.player:clear_direction_input()
+    end
+end
+
 function Overworld:update(dt)
     self.world:update(dt)
 end
@@ -75,6 +81,10 @@ function Overworld:actionpressed(action)
     end
 
     return self.world:actionpressed(action)
+end
+
+function Overworld:actionreleased(action)
+    return self.world:actionreleased(action)
 end
 
 function Overworld:keyreleased(key)

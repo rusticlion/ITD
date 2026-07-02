@@ -1,10 +1,12 @@
 local ActorRegistry = require("systems.actor_registry")
+local Actor = require("systems.actor")
 local Assets = require("core.assets")
 
 local Room = {}
 Room.__index = Room
 
 local DEFAULT_TILE_SIZE = 32
+local GRID_SNAP_TOLERANCE = 0.01
 local GID_FLIPPED_HORIZONTALLY = 2147483648
 local GID_FLIPPED_VERTICALLY = 1073741824
 local GID_FLIPPED_DIAGONALLY = 536870912
@@ -72,6 +74,16 @@ local function bool_value(value, default)
         return default
     end
     return value == true or value == "true" or value == 1
+end
+
+local function pixel_to_tile(value, tile_size)
+    local grid_position = (tonumber(value) or 0) / tile_size
+    local nearest_grid_line = math.floor(grid_position + 0.5)
+    if math.abs(grid_position - nearest_grid_line) <= GRID_SNAP_TOLERANCE then
+        grid_position = nearest_grid_line
+    end
+
+    return math.floor(grid_position) + 1
 end
 
 local function object_world_rect(object, tile_size)
@@ -248,8 +260,12 @@ end
 
 function Room.new(room_source, world)
     local data = normalize_legacy_room(require_if_needed(room_source))
+    local room_id = data.id
+        or data.name
+        or property_value(data.properties, "room_id")
+        or "room"
     local room = {
-        id = data.id or data.name or "room",
+        id = room_id,
         width = data.width or 0,
         height = data.height or 0,
         tile_size = data.tilewidth or data.tileheight or data.tile_size or DEFAULT_TILE_SIZE,
@@ -259,8 +275,9 @@ function Room.new(room_source, world)
         actors = {},
         actor_by_id = {},
         regions = {},
+        region_by_id = {},
         world = world,
-        state = world and world.room_states and world.room_states[data.id or data.name or "room"] or {}
+        state = world and world.room_states and world.room_states[room_id] or {}
     }
 
     setmetatable(room, Room)
@@ -397,7 +414,10 @@ function Room:is_blocked(x, y)
     end
 
     for _, actor in ipairs(self.actors or {}) do
-        if actor.solid and actor.x == x and actor.y == y and actor.visible ~= false then
+        if actor:blocks_movement(self.world)
+            and actor.x == x
+            and actor.y == y
+        then
             return true
         end
     end
@@ -418,14 +438,39 @@ end
 
 function Room:load_regions()
     self.regions = {}
+    self.region_by_id = {}
 
     for _, layer in ipairs(self.layers or {}) do
         if layer.type == "objectgroup" and layer.name == "regions" then
             for _, object in ipairs(layer.objects or {}) do
-                table.insert(self.regions, build_region(object, self.tile_size))
+                local region = build_region(object, self.tile_size)
+                table.insert(self.regions, region)
+                self.region_by_id[region.id] = region
             end
         end
     end
+end
+
+function Room:region(id)
+    return id and self.region_by_id and self.region_by_id[tostring(id)] or nil
+end
+
+function Room:region_center(id, expected_type)
+    local region = self:region(id)
+    if not region or (expected_type and region.type ~= expected_type) then
+        return nil, nil
+    end
+
+    return region.x + region.width / 2, region.y + region.height / 2
+end
+
+function Room:spawn_tile(id)
+    local spawn = self:region(id)
+    if not spawn or spawn.type ~= "spawn" then
+        return nil, nil
+    end
+
+    return pixel_to_tile(spawn.x, self.tile_size), pixel_to_tile(spawn.y, self.tile_size)
 end
 
 function Room:camera_zone_at(world_x, world_y)
@@ -451,7 +496,7 @@ function Room:validate_tilesets(result)
             add_message(result.warnings, string.format(
                 "Tileset '%s' has no image or asset_id; its tiles will use fallback rectangles.",
                 tileset.name or tostring(tileset.firstgid)))
-        elseif not Assets.images[tileset.image_id] then
+        elseif love and love.graphics and not Assets.images[tileset.image_id] then
             add_message(result.warnings, string.format(
                 "Tileset '%s' expects overworld asset '%s', but it is not loaded.",
                 tileset.name or tostring(tileset.firstgid),
@@ -553,6 +598,14 @@ function Room:validate_actors(result)
                 tostring(actor.type)))
         end
 
+
+        if not Actor.is_valid_collision_mode(actor.collision_mode) then
+            add_message(result.errors, string.format(
+                "Actor '%s' uses invalid collision mode '%s'.",
+                actor.id,
+                tostring(actor.collision_mode)))
+        end
+
         local explicit_sprite = actor.properties
             and (actor.properties.asset_id or actor.properties.sprite_id or actor.properties.sprite)
         if explicit_sprite and not Assets.images[explicit_sprite] then
@@ -588,7 +641,27 @@ function Room:validate()
             tostring(camera_mode)))
     end
 
+    local camera_lock_anchor = self:property("camera_lock_anchor")
+    if camera_lock_anchor then
+        local anchor = self:region(camera_lock_anchor)
+        if not anchor then
+            add_message(result.errors, string.format(
+                "Camera lock references missing anchor '%s'.",
+                tostring(camera_lock_anchor)))
+        elseif anchor.type ~= "camera_anchor" then
+            add_message(result.errors, string.format(
+                "Camera lock region '%s' must use type 'camera_anchor'.",
+                tostring(camera_lock_anchor)))
+        end
+    end
+
+    local seen_region_ids = {}
     for _, region in ipairs(self.regions or {}) do
+        if seen_region_ids[region.id] then
+            add_message(result.errors, string.format("Region id '%s' is duplicated.", region.id))
+        end
+        seen_region_ids[region.id] = true
+
         if region.type == "camera_zone" then
             local zone_mode = region:property("camera_zoom")
                 or region:property("camera_mode")
@@ -603,6 +676,15 @@ function Room:validate()
                 add_message(result.errors, string.format(
                     "Camera zone '%s' must have positive width and height.",
                     region.id))
+            end
+        elseif region.type == "spawn" then
+            local spawn_x, spawn_y = self:spawn_tile(region.id)
+            if self:is_tile_solid(spawn_x, spawn_y) then
+                add_message(result.errors, string.format(
+                    "Spawn '%s' is on solid tile %s,%s.",
+                    region.id,
+                    tostring(spawn_x),
+                    tostring(spawn_y)))
             end
         end
     end
@@ -797,7 +879,7 @@ function Room:draw_debug_overlay(world)
         end
     end
 
-    for _, region in ipairs(self.regions or {}) do
+    for index, region in ipairs(self.regions or {}) do
         love.graphics.setColor(0.26, 0.8, 1, 0.22)
         love.graphics.rectangle("fill", region.x, region.y, region.width, region.height)
         love.graphics.setColor(0.26, 0.8, 1, 0.9)

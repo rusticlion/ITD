@@ -120,6 +120,7 @@ local function action_result(actor, action, fallback_message)
             type = "passage",
             target_room = action.target_room or actor.properties.target_room,
             target_spawn = action.target_spawn or actor.properties.target_spawn,
+            flag = action.flag or actor.properties.flag,
             text = text
         }
     elseif action_type == "item" or action_type == "give_item" then
@@ -231,8 +232,8 @@ function Registry.apply(actor)
     actor.ambient_update_fn = definition.update_ambient or actor.ambient_update_fn
     actor.interact_fn = definition.interact or actor.interact_fn
 
-    if definition.solid ~= nil and actor.properties.solid == nil then
-        actor.solid = definition.solid
+    if definition.collision and not actor.collision_authored then
+        actor.collision_mode = definition.collision
     end
     if definition.interactable ~= nil and actor.properties.interactable == nil then
         actor.interactable = definition.interactable
@@ -247,6 +248,7 @@ function Registry.create(data, room)
 end
 
 Registry.register("pipe", {
+    collision = "always",
     interactable = true,
     draw = draw_pipe,
     interact = function(actor)
@@ -268,6 +270,7 @@ Registry.register("pipe", {
 })
 
 Registry.register("crack", {
+    collision = "until_resolved",
     interactable = true,
     draw = draw_crack,
     interact = function(actor, world, player)
@@ -282,6 +285,7 @@ Registry.register("crack", {
 })
 
 Registry.register("message", {
+    collision = "never",
     interactable = true,
     draw = draw_message,
     interact = function(actor)

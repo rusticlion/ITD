@@ -1,128 +1,325 @@
 return {
-    id = "basement_1",
-    width = 10,
-    height = 8,
-    tilewidth = 32,
-    tileheight = 32,
-    properties = {
-        dream = "basement",
-        camera_zoom = "close"
-    },
-    layers = {
-        {
-            name = "ground",
-            type = "tilelayer",
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "walls",
-            type = "tilelayer",
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "collision",
-            type = "tilelayer",
-            visible = false,
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "actors",
-            type = "objectgroup",
-            objects = {
-                {
-                    name = "crack_zombie",
-                    type = "crack",
-                    tile_x = 2,
-                    tile_y = 2,
-                    properties = {
-                        resolved_asset_id = "actor_crack_zombie_revealed",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "encounter",
-                            encounter_id = "zombie",
-                            message = "You dig through the wall. Something stirs in the dark."
-                        }
-                    }
-                },
-                {
-                    name = "crack_bone_demon",
-                    type = "crack",
-                    tile_x = 9,
-                    tile_y = 4,
-                    properties = {
-                        resolved_asset_id = "actor_crack_bone_demon_revealed",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "encounter",
-                            encounter_id = "bone_demon",
-                            message = "You dig into a hollow behind the wall. Bones click awake."
-                        }
-                    }
-                },
-                {
-                    name = "crack_passage",
-                    type = "crack",
-                    tile_x = 5,
-                    tile_y = 7,
-                    properties = {
-                        resolved_asset_id = "actor_crack_resolved",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "passage",
-                            target_room = "basement_ritual_room",
-                            message = "You dig through the wall. Cold air pours through the opening."
-                        }
-                    }
-                },
-                {
-                    name = "pipe_shovel",
-                    type = "pipe",
-                    tile_x = 3,
-                    tile_y = 2,
-                    properties = {
-                        item = "shovel",
-                        message = "Found: shovel!",
-                        empty_message = "An empty drainage pipe."
-                    }
-                },
-                {
-                    name = "whispering_wall",
-                    type = "message",
-                    tile_x = 7,
-                    tile_y = 2,
-                    properties = {
-                        dialog = "data.dialog.basement",
-                        dialog_id = "whispering_wall"
-                    }
-                }
-            }
-        }
+  version = "1.10",
+  luaversion = "5.1",
+  tiledversion = "1.12.1",
+  class = "",
+  orientation = "orthogonal",
+  renderorder = "right-down",
+  width = 22,
+  height = 17,
+  tilewidth = 32,
+  tileheight = 32,
+  nextlayerid = 5,
+  nextobjectid = 17,
+  properties = {
+    ["camera_lock_anchor"] = "camera_start",
+    ["camera_unlock_flag"] = "basement.passage_open",
+    ["camera_zoom"] = "close",
+    ["room_id"] = "basement_1"
+  },
+  tilesets = {
+    {
+      name = "BasementBackground",
+      firstgid = 1,
+      class = "",
+      tilewidth = 32,
+      tileheight = 32,
+      spacing = 0,
+      margin = 0,
+      columns = 63,
+      image = "../../assets/sprites/overworld/basement_background_32-sheet.png",
+      imagewidth = 2016,
+      imageheight = 32,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 32,
+        height = 32
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 63,
+      tiles = {}
     }
+  },
+  layers = {
+    {
+      type = "tilelayer",
+      x = 0,
+      y = 0,
+      width = 22,
+      height = 17,
+      id = 1,
+      name = "ground",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      encoding = "lua",
+      data = {
+        53, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 53,
+        53, 11, 12, 13, 14, 15, 16, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 20, 21, 22, 23, 24, 25, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 26, 27, 28, 29, 30, 31, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 33, 34, 35, 36, 37, 38, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 39, 40, 41, 42, 43, 44, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 39, 53, 53, 53, 53, 53, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 45, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 49, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 61, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 63, 53
+      }
+    },
+    {
+      type = "tilelayer",
+      x = 0,
+      y = 0,
+      width = 22,
+      height = 17,
+      id = 2,
+      name = "collision",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      encoding = "lua",
+      data = {
+        60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 0,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 60, 60, 60, 60, 60, 60, 60, 0, 60, 60, 0, 60, 60, 0, 60, 60, 60, 60, 60, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 0
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 3,
+      name = "actors",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "crack_passage",
+          type = "crack",
+          shape = "rectangle",
+          x = 255.993,
+          y = 224,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.flag"] = "basement.passage_open",
+            ["on_tool_use.message"] = "You dig through the wall. Cold air pours through the opening.",
+            ["on_tool_use.target_room"] = "basement_ritual_room",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "passage",
+            ["resolved_asset_id"] = "actor_crack_resolved"
+          }
+        },
+        {
+          id = 2,
+          name = "crack_bone_demon",
+          type = "crack",
+          shape = "rectangle",
+          x = 351.993,
+          y = 223.987,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.encounter_id"] = "basement.bone_demon",
+            ["on_tool_use.message"] = "You dig into a hollow behind the wall. Bones click awake.",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "encounter",
+            ["resolved_asset_id"] = "actor_crack_bone_demon_revealed"
+          }
+        },
+        {
+          id = 3,
+          name = "crack_zombie",
+          type = "crack",
+          shape = "rectangle",
+          x = 448.001,
+          y = 223.989,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.encounter_id"] = "basement.zombie",
+            ["on_tool_use.message"] = "You dig through the wall. Something stirs in the dark.",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "encounter",
+            ["resolved_asset_id"] = "actor_crack_zombie_revealed"
+          }
+        },
+        {
+          id = 5,
+          name = "whispering_wall",
+          type = "message",
+          shape = "rectangle",
+          x = 543.996,
+          y = 223.99,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["dialog"] = "data.dialog.basement",
+            ["dialog_id"] = "whispering_wall"
+          }
+        },
+        {
+          id = 6,
+          name = "pipe_shovel",
+          type = "pipe",
+          shape = "rectangle",
+          x = 608.008,
+          y = 288.001,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["empty_message"] = "An empty drainage pipe.",
+            ["item"] = "shovel",
+            ["message"] = "Found: shovel!"
+          }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 4,
+      name = "regions",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 7,
+          name = "start",
+          type = "spawn",
+          shape = "rectangle",
+          x = 512.146,
+          y = 320.144,
+          width = 31.7366,
+          height = 31.7708,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 8,
+          name = "tools",
+          type = "spawn",
+          shape = "rectangle",
+          x = 352.006,
+          y = 288.003,
+          width = 31.9682,
+          height = 31.9619,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 9,
+          name = "hidden_dark",
+          type = "spawn",
+          shape = "rectangle",
+          x = 288.022,
+          y = 320.013,
+          width = 31.9546,
+          height = 31.9506,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 10,
+          name = "boss_ready",
+          type = "spawn",
+          shape = "rectangle",
+          x = 384.002,
+          y = 128.002,
+          width = 31.9924,
+          height = 31.9911,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 11,
+          name = "camera_start",
+          type = "camera_anchor",
+          shape = "rectangle",
+          x = 336,
+          y = 352,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    }
+  }
 }

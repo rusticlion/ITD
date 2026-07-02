@@ -9,11 +9,21 @@
 - Orientation: orthogonal.
 - Map type: finite map. Infinite/chunked maps are not supported yet.
 - Runtime export: Lua map export.
+- Export rooms with embedded tileset metadata:
+
+```sh
+tools/export_tiled_room.sh assets/tiled_raw/basement_1.tmx data/rooms/basement_1.lua
+```
+
+- Keep the `.tmx` as the authored source; the `.lua` room module is generated.
 - Logical tile size: **32x32**.
 - Target game canvas: **960x540**.
 - Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
 - Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
 - Optional map property `camera_zoom`: `wide`, `standard`, or `close`. Basement uses `close`.
+- Optional `camera_lock_anchor` fixes the camera on the exact center of a named `camera_anchor` region until `camera_unlock_flag` becomes true.
+- Optional `camera_unlock_flag` names the world flag that releases a locked camera to follow the player.
+- Required map property `room_id`: stable save-state identity, e.g. `basement_1`.
 
 Camera viewport guides in Tiled world pixels:
 
@@ -71,7 +81,7 @@ Supported custom properties:
 - `asset_id`: optional sprite asset ID from `assets/sprites/overworld/`.
 - `sprite_id` / `sprite`: accepted aliases for `asset_id`.
 - `resolved_asset_id`: optional sprite shown after an actor's one-shot interaction resolves.
-- `solid`: boolean; blocks movement when true.
+- `collision`: `always`, `never`, `until_resolved`, or `scripted`. Registry defaults cover common actor types, so author this only to override them.
 - `interactable`: boolean; can be examined/used when true.
 - `item`: item ID granted by a pickup-like actor.
 - `flag`: flag key set or checked by the actor.
@@ -107,6 +117,7 @@ Tiled exports should use dotted property names if nested custom classes are inco
 - `on_tool_use.target_room`: room ID or module path for exits.
 - `on_tool_use.target_spawn`: spawn ID inside the target room.
 - `on_tool_use.item`: item ID granted by an item action.
+- `on_tool_use.flag`: world flag set when the action resolves.
 - `on_tool_use.once`: boolean; defaults to true for tool targets.
 
 Interim hand-authored Lua rooms may use `tile_x` and `tile_y` directly. Tiled imports should prefer pixel `x`/`y`.
@@ -125,6 +136,8 @@ Regions live on the `regions` object layer and should use stable `name` values w
 
 Common region types:
 
+- `spawn`: named player/checkpoint placement. Use a stable object name and snap its top-left corner to the map grid.
+- `camera_anchor`: exact authored camera target. Rectangle centers may sit between tiles, which is useful for even-width rooms.
 - `exit`: room transition.
 - `encounter_trigger`: launches combat on touch or confirm.
 - `camera_zone`: alters camera behavior.
@@ -177,8 +190,12 @@ Dialog supports:
 
 ## Current Runtime Actor Types
 
-- `pipe`: examine/pickup actor. If it has `item`, the first interaction grants that item and marks the actor removed.
-- `crack`: shovel-target presentation actor. Checks `on_tool_use.tool` when present, marks itself `resolved`, and resolves the generic `on_tool_use` action.
+- `pipe`: examine/pickup actor. Always collides. If it has `item`, the first interaction grants that item and marks the item removed while the pipe remains.
+- `crack`: shovel-target presentation actor. Collides until resolved, checks `on_tool_use.tool`, then resolves the generic `on_tool_use` action.
+- Unresolved `crack` actors are solid. Their tile becomes walkable after resolution, so place them in deliberate openings in the collision layer.
+- `message`: inspectable/dialog actor. Never collides by default, which supports invisible floor triggers and flavor-text hotspots.
+
+`scripted` collision defaults to non-colliding. Room behavior may call `actor:set_collision_enabled(true|false)`; the override lives in persistent actor state.
 - `message`: simple inspectable text actor.
 
 Add new actor types here when they become runtime-supported.

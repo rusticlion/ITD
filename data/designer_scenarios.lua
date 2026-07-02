@@ -30,8 +30,8 @@ return {
             combat_setup = {
                 player = {
                     statuses = {
-                        dreamer_right_arm = "wounded",
-                        dreamer_left_leg = "wounded"
+                        dreamer_fore_hand = "wounded",
+                        dreamer_back_foot = "wounded"
                     }
                 },
                 enemy = {
@@ -49,9 +49,8 @@ return {
             name = "Basement: Dark Start",
             description = "Fresh isolated run at the beginning of the dream.",
             room = "data.rooms.basement_1",
+            spawn = "start",
             player = {
-                x = 5,
-                y = 5,
                 facing = "up"
             }
         },
@@ -60,9 +59,8 @@ return {
             name = "Basement: Tools Found",
             description = "Flashlight and shovel acquired; flashlight equipped.",
             room = "data.rooms.basement_1",
+            spawn = "tools",
             player = {
-                x = 4,
-                y = 3,
                 facing = "up",
                 inventory = {
                     flashlight = true,
@@ -85,9 +83,8 @@ return {
             name = "Basement: Hidden Chamber",
             description = "All cracks resolved; hidden chamber entered before the lights come on.",
             room = "data.rooms.basement_1",
+            spawn = "hidden_dark",
             player = {
-                x = 5,
-                y = 6,
                 facing = "down",
                 inventory = {
                     flashlight = true,
@@ -101,8 +98,8 @@ return {
                 ["basement.passage_open"] = true
             },
             encounters = {
-                zombie = { resolved = true, last_outcome = "victory" },
-                bone_demon = { resolved = true, last_outcome = "victory" }
+                ["basement.zombie"] = { resolved = true, last_outcome = "victory" },
+                ["basement.bone_demon"] = { resolved = true, last_outcome = "victory" }
             },
             room_states = {
                 basement_1 = {
@@ -118,9 +115,8 @@ return {
             name = "Basement: Boss Door",
             description = "Murder basement lit, key acquired, and the exit ready for the Butcher beat.",
             room = "data.rooms.basement_1",
+            spawn = "boss_ready",
             player = {
-                x = 6,
-                y = 6,
                 facing = "down",
                 inventory = {
                     flashlight = true,
@@ -138,8 +134,8 @@ return {
                 ["basement.boss_door_unlocked"] = true
             },
             encounters = {
-                zombie = { resolved = true, last_outcome = "victory" },
-                bone_demon = { resolved = true, last_outcome = "victory" }
+                ["basement.zombie"] = { resolved = true, last_outcome = "victory" },
+                ["basement.bone_demon"] = { resolved = true, last_outcome = "victory" }
             },
             room_states = {
                 basement_1 = {

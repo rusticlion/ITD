@@ -151,7 +151,7 @@ local function run()
     local head = player:get_body_part_by_id("dreamer_head")
     local skull = enemy:get_body_part_by_id("bone_demon_skull")
     local head_die = die_for(engine, player, "dreamer_head")
-    local leg_die = die_for(engine, player, "dreamer_right_leg")
+    local leg_die = die_for(engine, player, "dreamer_front_foot")
 
     head_die.symbols = { Symbols.ESSENCE }
     leg_die.symbols = { Symbols.BLANK }
@@ -218,63 +218,63 @@ local function run()
     assert_true(engine3.winner == enemy3, "Bone Demon should win after a lethal Speak Doom")
 
     local hit_engine, hit_player, hit_enemy = start_engine()
-    local hit_right_arm = hit_player:get_body_part_by_id("dreamer_right_arm")
-    local hit_left_arm = hit_player:get_body_part_by_id("dreamer_left_arm")
+    local hit_fore_hand = hit_player:get_body_part_by_id("dreamer_fore_hand")
+    local hit_back_hand = hit_player:get_body_part_by_id("dreamer_back_hand")
     local hit_observations = {}
-    arm_reactive_slot(hit_engine, hit_player, hit_right_arm, "on_hit", "Right Riposte",
-        hit_observations, hit_left_arm)
-    arm_reactive_slot(hit_engine, hit_player, hit_left_arm, "on_hit", "Left Riposte",
-        hit_observations, hit_right_arm)
+    arm_reactive_slot(hit_engine, hit_player, hit_fore_hand, "on_hit", "Fore Riposte",
+        hit_observations, hit_back_hand)
+    arm_reactive_slot(hit_engine, hit_player, hit_back_hand, "on_hit", "Back Riposte",
+        hit_observations, hit_fore_hand)
 
     local first_hit_die = die_for(hit_engine, hit_enemy, "bone_demon_right_bare_bones")
     local second_hit_die = die_for(hit_engine, hit_enemy, "bone_demon_left_bare_bones")
     first_hit_die.symbols = { Symbols.STRIKE }
     second_hit_die.symbols = { Symbols.STRIKE }
-    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, first_hit_die.id, hit_right_arm)
+    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, first_hit_die.id, hit_fore_hand)
     assert_true(ok, "First On-Hit regression attack should assign: " .. tostring(reason))
-    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, second_hit_die.id, hit_left_arm)
+    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, second_hit_die.id, hit_back_hand)
     assert_true(ok, "Second On-Hit regression attack should assign: " .. tostring(reason))
     hit_engine:resolve_round()
 
     assert_true(#hit_observations == 2, "Each struck part should resolve exactly its own On-Hit entry")
-    assert_true(hit_observations[1].part == hit_right_arm and hit_observations[1].status == "wounded",
+    assert_true(hit_observations[1].part == hit_fore_hand and hit_observations[1].status == "wounded",
         "First On-Hit entry should resolve after its owning part takes damage")
     assert_true(hit_observations[1].other_status == "healthy",
         "First hit must not drain the second part's On-Hit entry")
-    assert_true(hit_observations[1].trigger_part == hit_right_arm
+    assert_true(hit_observations[1].trigger_part == hit_fore_hand
             and hit_observations[1].trigger_status == "wounded",
         "First On-Hit entry should receive its own completed hit context")
-    assert_true(hit_observations[2].part == hit_left_arm and hit_observations[2].status == "wounded",
+    assert_true(hit_observations[2].part == hit_back_hand and hit_observations[2].status == "wounded",
         "Second On-Hit entry should wait for the second part's damage")
-    assert_true(hit_observations[2].trigger_part == hit_left_arm,
+    assert_true(hit_observations[2].trigger_part == hit_back_hand,
         "Second On-Hit entry should receive the second part's trigger context")
 
     local wound_engine, wound_player, wound_enemy = start_engine()
-    local wound_right_arm = wound_player:get_body_part_by_id("dreamer_right_arm")
-    local wound_left_arm = wound_player:get_body_part_by_id("dreamer_left_arm")
+    local wound_fore_hand = wound_player:get_body_part_by_id("dreamer_fore_hand")
+    local wound_back_hand = wound_player:get_body_part_by_id("dreamer_back_hand")
     local wound_observations = {}
-    arm_reactive_slot(wound_engine, wound_player, wound_right_arm, "on_wound_maim", "Right Flinch",
-        wound_observations, wound_left_arm)
-    arm_reactive_slot(wound_engine, wound_player, wound_left_arm, "on_wound_maim", "Left Flinch",
-        wound_observations, wound_right_arm)
+    arm_reactive_slot(wound_engine, wound_player, wound_fore_hand, "on_wound_maim", "Fore Flinch",
+        wound_observations, wound_back_hand)
+    arm_reactive_slot(wound_engine, wound_player, wound_back_hand, "on_wound_maim", "Back Flinch",
+        wound_observations, wound_fore_hand)
 
     local first_wound_die = die_for(wound_engine, wound_enemy, "bone_demon_right_bare_bones")
     local second_wound_die = die_for(wound_engine, wound_enemy, "bone_demon_left_bare_bones")
     first_wound_die.symbols = { Symbols.STRIKE }
     second_wound_die.symbols = { Symbols.STRIKE }
-    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, first_wound_die.id, wound_right_arm)
+    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, first_wound_die.id, wound_fore_hand)
     assert_true(ok, "First On-Wound regression attack should assign: " .. tostring(reason))
-    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, second_wound_die.id, wound_left_arm)
+    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, second_wound_die.id, wound_back_hand)
     assert_true(ok, "Second On-Wound regression attack should assign: " .. tostring(reason))
     wound_engine:resolve_round()
 
     assert_true(#wound_observations == 2,
         "Each wounded part should resolve exactly its own On-Wound/Maim entry")
-    assert_true(wound_observations[1].part == wound_right_arm
+    assert_true(wound_observations[1].part == wound_fore_hand
             and wound_observations[1].other_status == "healthy",
         "First wound must not drain the second part's On-Wound/Maim entry")
-    assert_true(wound_observations[2].part == wound_left_arm
-            and wound_observations[2].trigger_part == wound_left_arm,
+    assert_true(wound_observations[2].part == wound_back_hand
+            and wound_observations[2].trigger_part == wound_back_hand,
         "Second On-Wound/Maim entry should wait for its own status change")
 
     local caster_engine, _, caster = start_encounter("basement.bone_demon")
@@ -436,7 +436,7 @@ local function run()
 
     local mark_feed = die_for(engine6, player6, "dreamer_head")
     local mark_die = die_for(engine6, player6, "dreamer_body")
-    local after_mark_die = die_for(engine6, player6, "dreamer_right_arm")
+    local after_mark_die = die_for(engine6, player6, "dreamer_fore_hand")
     mark_feed.symbols = { Symbols.ESSENCE }
     mark_die.symbols = { Symbols.ESSENCE }
     after_mark_die.symbols = { Symbols.ESSENCE }
@@ -474,8 +474,8 @@ local function run()
 
     local engine7, player7, enemy7 = start_engine()
     local armored_skull = enemy7:get_body_part_by_id("bone_demon_skull")
-    local light_strike_die = die_for(engine7, player7, "dreamer_right_leg")
-    local heavy_strike_die = die_for(engine7, player7, "dreamer_right_arm")
+    local light_strike_die = die_for(engine7, player7, "dreamer_front_foot")
+    local heavy_strike_die = die_for(engine7, player7, "dreamer_fore_hand")
     armored_skull.keywords = { "Armored" }
     light_strike_die.symbols = { Symbols.STRIKE }
     heavy_strike_die.symbols = { Symbols.STRIKE, Symbols.STRIKE }
@@ -489,7 +489,7 @@ local function run()
 
     local engine8, player8, enemy8 = start_engine()
     local brittle_rib = enemy8:get_body_part_by_id("bone_demon_right_bare_bones")
-    local brittle_attack = die_for(engine8, player8, "dreamer_right_leg")
+    local brittle_attack = die_for(engine8, player8, "dreamer_front_foot")
     brittle_rib.keywords = { "Brittle" }
     brittle_attack.symbols = { Symbols.STRIKE }
 
@@ -645,8 +645,8 @@ local function run()
             and editor_stitch_up.effect.target_type == "HEAD",
         "BP Editor should round-trip Stitch Up's targeted Head healing")
 
-    local wounded_player_arm = butcher_player:get_body_part_by_id("dreamer_right_arm")
-    local maimed_player_leg = butcher_player:get_body_part_by_id("dreamer_left_leg")
+    local wounded_player_arm = butcher_player:get_body_part_by_id("dreamer_fore_hand")
+    local maimed_player_leg = butcher_player:get_body_part_by_id("dreamer_back_foot")
     wounded_player_arm.status = "wounded"
     maimed_player_leg.status = "maimed"
     welding_mask.slot_charge[1] = true
@@ -736,7 +736,7 @@ local function run()
     assert_true(restraint_move and restraint_move.kind == "rim" and restraint_move.part ~= restraint_head,
         "Mad Butcher AI should not complete Sadism while no opposing Body Part is Wounded")
 
-    local pressure_target = restraint_player:get_body_part_by_id("dreamer_right_arm")
+    local pressure_target = restraint_player:get_body_part_by_id("dreamer_fore_hand")
     pressure_target.status = "wounded"
     restraint_head.slot_charge = {}
     for _, die in ipairs(restraint_engine:get_pool(restraint_butcher)) do

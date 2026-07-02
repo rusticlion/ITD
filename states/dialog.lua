@@ -6,6 +6,8 @@ local Dialog = require("systems.dialog")
 local DialogState = {}
 DialogState.__index = DialogState
 
+local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
+
 local COLORS = {
     box = { 0.045, 0.045, 0.075, 0.96 },
     box_line = { 0.72, 0.70, 0.84, 0.82 },
@@ -19,6 +21,19 @@ local COLORS = {
 
 local CONTINUE_PROMPT_SIZE = 12
 local CONTINUE_PROMPT_FPS = 4
+
+local function new_ui_font(size)
+    local ok, font = pcall(love.graphics.newFont, UI_FONT_PATH, size)
+    if not ok then
+        font = love.graphics.newFont(size)
+    end
+
+    if font and font.setFilter then
+        font:setFilter("nearest", "nearest")
+    end
+
+    return font
+end
 
 local function set_color(color)
     love.graphics.setColor(color)
@@ -77,6 +92,18 @@ local function draw_animated_image(base_id, r, time, max_frames)
     end
 
     return draw_image(asset_id, r)
+end
+
+function DialogState:ensure_fonts()
+    if self.fonts then
+        return
+    end
+
+    self.fonts = {
+        body = new_ui_font(15),
+        speaker = new_ui_font(13),
+        response = new_ui_font(13)
+    }
 end
 
 function DialogState:enter(context)
@@ -161,6 +188,9 @@ function DialogState:draw()
         return
     end
 
+    self:ensure_fonts()
+    local previous_font = love.graphics.getFont()
+
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
     local margin = 24
@@ -181,13 +211,16 @@ function DialogState:draw()
             draw_box(speaker_rect, COLORS.speaker, COLORS.speaker_line, 4)
         end
         set_color(COLORS.ink)
+        love.graphics.setFont(self.fonts.speaker)
         love.graphics.printf(node.speaker, box_x + 28, box_y - 11, speaker_w - 24, "left")
     end
 
     set_color(COLORS.ink)
+    love.graphics.setFont(self.fonts.body)
     love.graphics.printf(node.text or "", box_x + 24, box_y + 28, box_w - 48, "left")
 
     if node.responses then
+        love.graphics.setFont(self.fonts.response)
         local response_y = box_y + box_h - 42
         local response_w = math.min(112, (box_w - 64) / 2)
         local has_cursor = Assets.images and Assets.images.dialog_choice_cursor
@@ -216,6 +249,8 @@ function DialogState:draw()
             love.graphics.print("v", prompt.x, prompt.y)
         end
     end
+
+    love.graphics.setFont(previous_font)
 end
 
 return DialogState

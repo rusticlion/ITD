@@ -47,10 +47,10 @@ end
 local SLOT_LABELS = {
     head = "Head",
     body = "Body",
-    arm_l = "Left Arm",
-    arm_r = "Right Arm",
-    leg_l = "Left Leg",
-    leg_r = "Right Leg"
+    arm_l = "Fore Hand",
+    arm_r = "Back Hand",
+    leg_l = "Front Foot",
+    leg_r = "Back Foot"
 }
 
 function PostCombat:enter(summary)

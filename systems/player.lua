@@ -3,6 +3,9 @@ local Assets = require("core.assets")
 local Player = {}
 Player.__index = Player
 
+local TURN_HOLD_THRESHOLD = 0.10
+local STEP_POSE_PORTION = 0.72
+
 function Player.new(x, y)
     local self = setmetatable({}, Player)
     self.x = x or 1
@@ -17,32 +20,43 @@ function Player.new(x, y)
     self.move_to_x = self.x
     self.move_to_y = self.y
     self.moving = false
+    self.held_direction = nil
+    self.direction_hold_elapsed = 0
+    self.step_index = 0
     self.inventory = {}
     self.equipped = nil
     return self
 end
 
-function Player:update(dt)
+function Player:update(dt, room)
+    dt = dt or 0
     if not self.moving then
         self.render_x = self.x
         self.render_y = self.y
-        return
+    else
+        self.move_elapsed = math.min(self.move_duration, self.move_elapsed + dt)
+        local t = self.move_elapsed / self.move_duration
+        t = 1 - ((1 - t) * (1 - t))
+
+        self.render_x = self.move_from_x + (self.move_to_x - self.move_from_x) * t
+        self.render_y = self.move_from_y + (self.move_to_y - self.move_from_y) * t
+
+        if self.move_elapsed >= self.move_duration then
+            self.x = self.move_to_x
+            self.y = self.move_to_y
+            self.render_x = self.x
+            self.render_y = self.y
+            self.moving = false
+        end
     end
 
-    self.move_elapsed = math.min(self.move_duration, self.move_elapsed + (dt or 0))
-    local t = self.move_elapsed / self.move_duration
-    t = 1 - ((1 - t) * (1 - t))
-
-    self.render_x = self.move_from_x + (self.move_to_x - self.move_from_x) * t
-    self.render_y = self.move_from_y + (self.move_to_y - self.move_from_y) * t
-
-    if self.move_elapsed >= self.move_duration then
-        self.x = self.move_to_x
-        self.y = self.move_to_y
-        self.render_x = self.x
-        self.render_y = self.y
-        self.moving = false
+    if self.held_direction then
+        self.direction_hold_elapsed = self.direction_hold_elapsed + dt
+        if self.direction_hold_elapsed >= TURN_HOLD_THRESHOLD and not self.moving then
+            self:try_move(self.held_direction.dx, self.held_direction.dy, room)
+        end
     end
+
 end
 
 local function facing_for_delta(dx, dy)
@@ -78,8 +92,35 @@ function Player:try_move(dx, dy, room)
     self.move_to_x = new_x
     self.move_to_y = new_y
     self.move_elapsed = 0
+    self.step_index = self.step_index + 1
     self.moving = true
     return true
+end
+
+function Player:press_direction(action, dx, dy)
+    if not self.moving then
+        self.facing = facing_for_delta(dx, dy)
+    end
+    self.held_direction = {
+        action = action,
+        dx = dx,
+        dy = dy
+    }
+    self.direction_hold_elapsed = 0
+    return true
+end
+
+function Player:release_direction(action)
+    if self.held_direction and self.held_direction.action == action then
+        self.held_direction = nil
+        self.direction_hold_elapsed = 0
+    end
+    return true
+end
+
+function Player:clear_direction_input()
+    self.held_direction = nil
+    self.direction_hold_elapsed = 0
 end
 
 function Player:front_tile()
@@ -109,19 +150,30 @@ end
 
 function Player:keypressed(key, room)
     if key == "up" then
-        return self:try_move(0, -1, room)
+        return self:press_direction("move_up", 0, -1, room)
     elseif key == "down" then
-        return self:try_move(0, 1, room)
+        return self:press_direction("move_down", 0, 1, room)
     elseif key == "left" then
-        return self:try_move(-1, 0, room)
+        return self:press_direction("move_left", -1, 0, room)
     elseif key == "right" then
-        return self:try_move(1, 0, room)
+        return self:press_direction("move_right", 1, 0, room)
     end
 
     return false
 end
 
-function Player:keyreleased(_)
+function Player:keyreleased(key)
+    local actions = {
+        up = "move_up",
+        down = "move_down",
+        left = "move_left",
+        right = "move_right"
+    }
+    local action = actions[key]
+    if action then
+        return self:release_direction(action)
+    end
+    return false
 end
 
 function Player:addItem(item)
@@ -141,7 +193,21 @@ end
 
 function Player:draw(tile_size, camera)
     local size = tile_size or 32
-    local sprite_id = "player_idle_" .. tostring(self.facing or "down")
+    local direction = tostring(self.facing or "down")
+    local sprite_id
+    if self.moving then
+        local progress = self.move_duration > 0 and self.move_elapsed / self.move_duration or 1
+        local first_foot = self.step_index % 2 == 1
+        local frame
+        if progress < STEP_POSE_PORTION then
+            frame = first_foot and 2 or 4
+        else
+            frame = first_foot and 3 or 1
+        end
+        sprite_id = "player_walk_" .. direction .. tostring(frame)
+    else
+        sprite_id = "player_idle_" .. direction
+    end
     local image = Assets.images[sprite_id] or Assets.images.player_idle_down
     local draw_x = (self.render_x - 1) * size
     local draw_y = (self.render_y - 1) * size

@@ -1,7 +1,15 @@
 local Actor = {}
 Actor.__index = Actor
 
+Actor.COLLISION_MODES = {
+    always = true,
+    never = true,
+    until_resolved = true,
+    scripted = true
+}
+
 local DEFAULT_TILE_SIZE = 32
+local GRID_SNAP_TOLERANCE = 0.01
 
 local function copy_table(source)
     local copy = {}
@@ -64,6 +72,16 @@ local function uses_pixel_coordinates(data, properties, room)
     return false
 end
 
+local function pixel_to_tile(value, tile_size)
+    local grid_position = (tonumber(value) or 0) / tile_size
+    local nearest_grid_line = math.floor(grid_position + 0.5)
+    if math.abs(grid_position - nearest_grid_line) <= GRID_SNAP_TOLERANCE then
+        grid_position = nearest_grid_line
+    end
+
+    return math.floor(grid_position) + 1
+end
+
 local function object_tile_position(data, tile_size, room, properties)
     if data.tile_x and data.tile_y then
         return tonumber(data.tile_x) or 1, tonumber(data.tile_y) or 1
@@ -75,11 +93,19 @@ local function object_tile_position(data, tile_size, room, properties)
 
     local size = tile_size or DEFAULT_TILE_SIZE
     if uses_pixel_coordinates(data, properties, room) then
-        return math.floor((tonumber(data.x) or 0) / size) + 1,
-            math.floor((tonumber(data.y) or 0) / size) + 1
+        return pixel_to_tile(data.x, size), pixel_to_tile(data.y, size)
     end
 
     return tonumber(data.x) or 1, tonumber(data.y) or 1
+end
+
+local function authored_collision_mode(data, properties)
+    local mode = properties.collision or data.collision
+    if mode ~= nil then
+        return tostring(mode):lower(), true
+    end
+
+    return "never", false
 end
 
 function Actor.new(data, room)
@@ -88,6 +114,7 @@ function Actor.new(data, room)
     local actor_type = properties.actor_type or data.actor_type or data.type or "message"
     local x, y = object_tile_position(data, room and room.tile_size or DEFAULT_TILE_SIZE, room, properties)
     local id = tostring(properties.id or data.name or data.id or (actor_type .. "_" .. tostring(x) .. "_" .. tostring(y)))
+    local collision_mode, collision_authored = authored_collision_mode(data, properties)
 
     local actor = {
         id = id,
@@ -99,7 +126,8 @@ function Actor.new(data, room)
         height = data.height,
         layer = data.layer or properties.layer or "actors",
         visible = bool_value(data.visible, true),
-        solid = bool_value(properties.solid or data.solid, false),
+        collision_mode = collision_mode,
+        collision_authored = collision_authored,
         interactable = bool_value(properties.interactable or data.interactable, false),
         properties = properties,
         state = {},
@@ -107,6 +135,37 @@ function Actor.new(data, room)
     }
 
     return setmetatable(actor, Actor)
+end
+
+function Actor.is_valid_collision_mode(mode)
+    return Actor.COLLISION_MODES[tostring(mode or ""):lower()] == true
+end
+
+function Actor:set_collision_enabled(enabled)
+    self.state = self.state or {}
+    self.state.collision_enabled = enabled == true
+end
+
+function Actor:blocks_movement(world)
+    if self.visible == false then
+        return false
+    end
+
+    if self.collision_fn then
+        return self:collision_fn(world) == true
+    end
+
+    if self.state and self.state.collision_enabled ~= nil then
+        return self.state.collision_enabled == true
+    end
+
+    if self.collision_mode == "always" then
+        return true
+    elseif self.collision_mode == "until_resolved" then
+        return not (self.state and (self.state.resolved or self.state.removed))
+    end
+
+    return false
 end
 
 function Actor:tile_rect(tile_size)

@@ -54,7 +54,9 @@ Assets.images = {
     basement_tiles = fake_image(64, 32),
     actor_pipe = fake_image(32, 32),
     actor_pipe_shovel = fake_image(32, 32),
-    player_idle_down = fake_image(32, 32)
+    player_idle_down = fake_image(32, 32),
+    player_walk_right2 = fake_image(32, 32),
+    player_walk_right3 = fake_image(32, 32)
 }
 
 local Player = require("systems.player")
@@ -151,10 +153,24 @@ assert(actor, "expected named Tiled actor")
 assert(actor.x == 2 and actor.y == 2, "expected Tiled pixel coordinates to convert to tile coordinates")
 assert(actor:tile_rect(32) == 32, "expected actor world x")
 
+local near_grid_actor = require("systems.actor").new({
+    id = 9,
+    name = "near_grid",
+    type = "message",
+    x = 63.99,
+    y = 31.99,
+    width = 32,
+    height = 32
+}, room)
+assert(near_grid_actor.x == 3 and near_grid_actor.y == 2,
+    "expected near-grid Tiled coordinates to snap to the intended tile")
+
 local camera_zone = room:camera_zone_at(16, 16)
 assert(camera_zone and camera_zone.id == "close_room", "expected camera zone lookup")
 assert(camera_zone:property("camera_zoom") == "close", "expected camera zone mode")
 assert(camera_zone:property("camera_bounds") == true, "expected camera zone bounds flag")
+local region_x, region_y = room:region_center("close_room", "camera_zone")
+assert(region_x == 32 and region_y == 16, "expected exact region center lookup")
 
 room:draw_tile_layer(room:layer("ground"))
 assert(#draw_calls == 3, "expected three tile draw calls")
@@ -179,5 +195,26 @@ local player = Player.new(1, 1)
 player:draw(32)
 assert(#draw_calls == 1, "expected player sprite draw")
 assert(draw_calls[1].image == Assets.images.player_idle_down, "expected player idle sprite asset")
+
+draw_calls = {}
+player:press_direction("move_right", 1, 0)
+player:update(0.11, {
+    is_blocked = function()
+        return false
+    end
+})
+player:draw(32)
+assert(#draw_calls == 1, "expected moving player sprite draw")
+assert(draw_calls[1].image == Assets.images.player_walk_right2, "expected step pose before translation")
+
+draw_calls = {}
+player:update(0.11, {
+    is_blocked = function()
+        return false
+    end
+})
+player:draw(32)
+assert(draw_calls[1].image == Assets.images.player_walk_right3,
+    "expected still pose during the end of translation")
 
 print("tiled room smoke test passed.")

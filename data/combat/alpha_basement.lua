@@ -144,37 +144,37 @@ return {
             die = die(W, S, W, { W, S }, { W, W }, { S, S }),
             slot = "recuperation"
         },
-        dreamer_right_arm = {
-            id = "dreamer_right_arm",
-            name = "Dreamer's Right Arm",
-            flavor = "A plain hand for grabbing, guarding, and striking in the dark.",
+        dreamer_fore_hand = {
+            id = "dreamer_fore_hand",
+            name = "Fore Hand",
+            flavor = "The steady hand. The strong arm.",
             type = "ARM",
             hp_value = 1,
-            die = die(O, W, S, S, S, { S, E })
+            die = die(S, E, S, W, S, S)
         },
-        dreamer_left_arm = {
-            id = "dreamer_left_arm",
-            name = "Dreamer's Left Arm",
-            flavor = "A plain hand with a little more hesitation than force.",
+        dreamer_back_hand = {
+            id = "dreamer_back_hand",
+            name = "Back Hand",
+            flavor = "The sly hand. The casual motion.",
             type = "ARM",
             hp_value = 1,
-            die = die(O, W, W, S, { W, E }, S)
+            die = die(W, E, W, S, W, W)
         },
-        dreamer_right_leg = {
-            id = "dreamer_right_leg",
-            name = "Dreamer's Right Leg",
-            flavor = "A foot that has not yet learned where it is running.",
+        dreamer_front_foot = {
+            id = "dreamer_front_foot",
+            name = "Front Foot",
+            flavor = "You try to put your best foot forward. It works about half the time.",
             type = "LEG",
             hp_value = 1,
-            die = die(O, W, O, S, W, S)
+            die = die(S, S, S, S, W, W)
         },
-        dreamer_left_leg = {
-            id = "dreamer_left_leg",
-            name = "Dreamer's Left Leg",
-            flavor = "A foot that has not yet learned what follows behind.",
+        dreamer_back_foot = {
+            id = "dreamer_back_foot",
+            name = "Back Foot",
+            flavor = "",
             type = "LEG",
             hp_value = 1,
-            die = die(O, W, O, S, W, S)
+            die = die(S, S, W, W, W, W)
         },
 
         zombie_brain_pan = {
@@ -327,10 +327,10 @@ return {
             parts = {
                 "dreamer_head",
                 "dreamer_body",
-                "dreamer_right_arm",
-                "dreamer_left_arm",
-                "dreamer_right_leg",
-                "dreamer_left_leg"
+                "dreamer_fore_hand",
+                "dreamer_back_hand",
+                "dreamer_front_foot",
+                "dreamer_back_foot"
             }
         },
         bone_demon = {

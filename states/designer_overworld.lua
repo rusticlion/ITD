@@ -40,6 +40,7 @@ function DesignerOverworld:enter(context)
         room = self.scenario.room,
         player_x = player.x,
         player_y = player.y,
+        spawn = self.scenario.spawn,
         player = player,
         run = scenario_run(self.scenario),
         flags = self.scenario.flags,
@@ -72,6 +73,12 @@ function DesignerOverworld:resume(_, result)
         self.world:apply_combat_result(result)
     elseif result and result.type == "dialog_result" then
         self.world:apply_dialog_result(result)
+    end
+end
+
+function DesignerOverworld:pause()
+    if self.world and self.world.player then
+        self.world.player:clear_direction_input()
     end
 end
 
@@ -189,6 +196,10 @@ function DesignerOverworld:actionpressed(action)
         return true
     end
     return self.world:actionpressed(action)
+end
+
+function DesignerOverworld:actionreleased(action)
+    return self.world:actionreleased(action)
 end
 
 function DesignerOverworld:keyreleased(key)

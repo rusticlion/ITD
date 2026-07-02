@@ -34,6 +34,17 @@ local function assert_equal(actual, expected, label)
     end
 end
 
+local obsolete_version = Save.VERSION - 1
+local obsolete_save, obsolete_error = Save.deserialize(
+    "return { save_version = " .. tostring(obsolete_version) .. " }"
+)
+assert_equal(obsolete_save, nil, "obsolete save data")
+assert_equal(
+    obsolete_error,
+    "unsupported save version " .. tostring(obsolete_version) .. "; expected " .. tostring(Save.VERSION),
+    "obsolete save error"
+)
+
 local fs = memory_filesystem()
 local path = "saves/test_slot.lua"
 
@@ -106,6 +117,6 @@ assert_equal(combat_world.run.parts[claimed_arm_id].def_id, "bone_demon_right_ba
 assert_equal(combat_world.run.parts[claimed_arm_id].status, "healthy", "claimed wounded part gets post-combat recovery")
 assert_equal(combat_world.run.discovered_parts.bone_demon_right_bare_bones, true, "claimed arm discovered")
 assert_equal(summary.claim_summary.slot_id, "arm_r", "claim summary slot")
-assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_right_arm", "claim summary replaced part")
+assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_back_hand", "claim summary replaced part")
 
 print("save smoke test passed.")

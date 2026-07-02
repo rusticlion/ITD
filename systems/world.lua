@@ -12,18 +12,18 @@ local MESSAGE_DURATION = 4
 local DEFAULT_DREAMFORM = {
     head = "part_inst_dreamer_head",
     body = "part_inst_dreamer_body",
-    arm_l = "part_inst_dreamer_left_arm",
-    arm_r = "part_inst_dreamer_right_arm",
-    leg_l = "part_inst_dreamer_left_leg",
-    leg_r = "part_inst_dreamer_right_leg"
+    arm_l = "part_inst_dreamer_fore_hand",
+    arm_r = "part_inst_dreamer_back_hand",
+    leg_l = "part_inst_dreamer_front_foot",
+    leg_r = "part_inst_dreamer_back_foot"
 }
 local DEFAULT_PARTS = {
     part_inst_dreamer_head = { def_id = "dreamer_head", status = "healthy", source = "initial" },
     part_inst_dreamer_body = { def_id = "dreamer_body", status = "healthy", source = "initial" },
-    part_inst_dreamer_left_arm = { def_id = "dreamer_left_arm", status = "healthy", source = "initial" },
-    part_inst_dreamer_right_arm = { def_id = "dreamer_right_arm", status = "healthy", source = "initial" },
-    part_inst_dreamer_left_leg = { def_id = "dreamer_left_leg", status = "healthy", source = "initial" },
-    part_inst_dreamer_right_leg = { def_id = "dreamer_right_leg", status = "healthy", source = "initial" }
+    part_inst_dreamer_fore_hand = { def_id = "dreamer_fore_hand", status = "healthy", source = "initial" },
+    part_inst_dreamer_back_hand = { def_id = "dreamer_back_hand", status = "healthy", source = "initial" },
+    part_inst_dreamer_front_foot = { def_id = "dreamer_front_foot", status = "healthy", source = "initial" },
+    part_inst_dreamer_back_foot = { def_id = "dreamer_back_foot", status = "healthy", source = "initial" }
 }
 local DREAMFORM_SLOT_TYPES = {
     head = "HEAD",
@@ -34,6 +34,22 @@ local DREAMFORM_SLOT_TYPES = {
     leg_r = "LEG"
 }
 local DREAMFORM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
+local MOVE_ACTIONS = {
+    move_up = { 0, -1 },
+    move_down = { 0, 1 },
+    move_left = { -1, 0 },
+    move_right = { 1, 0 }
+}
+local MOVE_KEYS = {
+    up = "move_up",
+    w = "move_up",
+    down = "move_down",
+    s = "move_down",
+    left = "move_left",
+    a = "move_left",
+    right = "move_right",
+    d = "move_right"
+}
 
 local function copy_table(source)
     if type(source) ~= "table" then
@@ -133,9 +149,15 @@ function World.new(options)
         or (options.run and options.run.player)
         or saved_run.player
         or {})
+    local player_x = options.player_x or saved_player.x
+    local player_y = options.player_y or saved_player.y
+    local spawn_id = options.spawn
+    if not spawn_id and (player_x == nil or player_y == nil) then
+        spawn_id = "start"
+    end
     local world = {
         room_module = options.room or saved_run.current_room or DEFAULT_ROOM,
-        player = Player.new(options.player_x or saved_player.x or 5, options.player_y or saved_player.y or 5),
+        player = Player.new(player_x or 1, player_y or 1),
         inventory = {},
         profile = copy_table(save_data.profile or options.profile or {}),
         run = normalize_run_state(copy_table(options.run or saved_run)),
@@ -156,6 +178,9 @@ function World.new(options)
     setmetatable(world, World)
     world:apply_player_state(saved_player)
     world:load_room(world.room_module)
+    if spawn_id then
+        world:place_player_at_spawn(spawn_id)
+    end
     return world
 end
 
@@ -173,6 +198,45 @@ function World:load_room(room_module)
     self:update_camera()
 end
 
+function World:set_player_tile(x, y)
+    self.player:clear_direction_input()
+    self.player.x = x
+    self.player.y = y
+    self.player.render_x = x
+    self.player.render_y = y
+    self.player.move_from_x = x
+    self.player.move_from_y = y
+    self.player.move_to_x = x
+    self.player.move_to_y = y
+    self.player.moving = false
+    self:update_camera()
+end
+
+function World:place_player_at_spawn(spawn_id)
+    local x, y
+    if self.room then
+        x, y = self.room:spawn_tile(spawn_id)
+    end
+    if not (x and y) then
+        error(string.format(
+            "Room '%s' has no spawn named '%s'.",
+            tostring(self.room and self.room.id or self.room_module),
+            tostring(spawn_id)
+        ))
+    end
+    if self.room:is_blocked(x, y) then
+        error(string.format(
+            "Spawn '%s' in room '%s' is blocked at %s,%s.",
+            tostring(spawn_id),
+            tostring(self.room.id),
+            tostring(x),
+            tostring(y)
+        ))
+    end
+
+    self:set_player_tile(x, y)
+end
+
 function World:reload_room()
     local room_module = self.room_module
     local player_state = self:player_save_data()
@@ -181,17 +245,8 @@ function World:reload_room()
     end
 
     self:load_room(room_module)
-    self.player.x = player_state.x
-    self.player.y = player_state.y
-    self.player.render_x = player_state.x
-    self.player.render_y = player_state.y
-    self.player.move_from_x = player_state.x
-    self.player.move_from_y = player_state.y
-    self.player.move_to_x = player_state.x
-    self.player.move_to_y = player_state.y
-    self.player.moving = false
+    self:set_player_tile(player_state.x, player_state.y)
     self:apply_player_state(player_state)
-    self:update_camera()
 end
 
 function World:player_save_data()
@@ -265,6 +320,32 @@ function World:update_camera()
     end
 
     local px, py = self.player:pixel_position(self.room.tile_size)
+    local lock_anchor = self.room:property("camera_lock_anchor")
+    local unlock_flag = self.room:property("camera_unlock_flag")
+    local camera_locked = lock_anchor ~= nil
+        and (unlock_flag == nil or not self:get_flag(unlock_flag))
+
+    if camera_locked then
+        px, py = self.room:region_center(lock_anchor, "camera_anchor")
+        if not (px and py) then
+            error(string.format(
+                "Room '%s' camera lock references invalid anchor '%s'.",
+                tostring(self.room.id),
+                tostring(lock_anchor)
+            ))
+        end
+    end
+
+    if self.camera_tracking_locked ~= camera_locked then
+        if self.camera_tracking_locked == true and camera_locked == false then
+            local player_x, player_y = self.player:pixel_position(self.room.tile_size)
+            self.camera:adopt_follow_target(player_x, player_y)
+        else
+            self.camera:reset_follow_anchor()
+        end
+        self.camera_tracking_locked = camera_locked
+    end
+
     self.camera:update(
         self.room,
         px,
@@ -371,6 +452,9 @@ function World:handle_result(result)
     elseif result.type == "dialog" then
         self:start_dialog(result)
     elseif result.type == "passage" then
+        if result.flag then
+            self:set_flag(result.flag, true)
+        end
         self:set_message(result.text or "A passage opens.")
         self:autosave("passage")
     else
@@ -647,23 +731,24 @@ function World:interact()
 end
 
 function World:actionpressed(action)
-    if action == "confirm" then
-        self:interact()
-        return true
-    elseif action == "move_up" then
-        self.player:try_move(0, -1, self.room)
-        return true
-    elseif action == "move_down" then
-        self.player:try_move(0, 1, self.room)
-        return true
-    elseif action == "move_left" then
-        self.player:try_move(-1, 0, self.room)
-        return true
-    elseif action == "move_right" then
-        self.player:try_move(1, 0, self.room)
+    local move = MOVE_ACTIONS[action]
+    if move then
+        self.player:press_direction(action, move[1], move[2])
         return true
     end
 
+    if action == "confirm" then
+        self:interact()
+        return true
+    end
+
+    return false
+end
+
+function World:actionreleased(action)
+    if MOVE_ACTIONS[action] then
+        return self.player:release_direction(action)
+    end
     return false
 end
 
@@ -683,18 +768,19 @@ function World:keypressed(key)
         return
     end
 
-    if key == "up" then
-        self.player:try_move(0, -1, self.room)
-    elseif key == "down" then
-        self.player:try_move(0, 1, self.room)
-    elseif key == "left" then
-        self.player:try_move(-1, 0, self.room)
-    elseif key == "right" then
-        self.player:try_move(1, 0, self.room)
+    local action = MOVE_KEYS[key]
+    local move = action and MOVE_ACTIONS[action]
+    if move then
+        self.player:press_direction(action, move[1], move[2])
     end
 end
 
-function World:keyreleased(_)
+function World:keyreleased(key)
+    local action = MOVE_KEYS[key]
+    if action then
+        return self.player:release_direction(action)
+    end
+    return false
 end
 
 return World

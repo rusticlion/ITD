@@ -49,6 +49,23 @@ assert(GameState.size() == 1, "sidebar should close")
 
 local fs = memory_filesystem()
 local world = World.new({ save_backend = fs, save_path = "saves/menu_save.lua" })
+local start_x = world.player.x
+local start_y = world.player.y
+assert(world:actionpressed("move_left") == true, "movement press should be handled")
+assert(world.player.facing == "left", "movement press should turn immediately")
+world:update(0.05)
+assert(world.player.x == start_x and world.player.moving == false, "brief direction hold should not step")
+assert(world:actionreleased("move_left") == true, "movement release should be handled")
+world:update(0.20)
+assert(world.player.x == start_x and world.player.y == start_y, "released tap should remain in place")
+
+world:actionpressed("move_left")
+world:update(0.11)
+assert(world.player.moving == true, "held direction should begin a step")
+world:actionreleased("move_left")
+world:update(world.player.move_duration)
+assert(world.player.x == start_x - 1 and world.player.y == start_y, "held direction should complete one step")
+
 GameState.clear()
 GameState.push(MenuSidebar, { world = world })
 GameState.actionpressed("move_down")

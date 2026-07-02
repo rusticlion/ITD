@@ -57,9 +57,22 @@ function Camera.new(options)
         debug_override_index = 1,
         show_guides = false,
         active_zone = nil,
+        follow_offset_x = nil,
+        follow_offset_y = nil,
+        follow_context = nil,
         viewport_width = 960,
         viewport_height = 540
     }, Camera)
+end
+
+function Camera:reset_follow_anchor()
+    self.follow_offset_x = nil
+    self.follow_offset_y = nil
+end
+
+function Camera:adopt_follow_target(target_x, target_y)
+    self.follow_offset_x = target_x - self.x
+    self.follow_offset_y = target_y - self.y
 end
 
 function Camera.is_valid_mode(mode)
@@ -141,14 +154,70 @@ function Camera:frame_for_mode(room, target_x, target_y, mode)
     return x, y, view_width, view_height
 end
 
+local function followed_axis(target, view_size, bounds_start, bounds_size, offset)
+    if bounds_size <= view_size then
+        local position = bounds_start + (bounds_size - view_size) / 2
+        return position, target - position
+    end
+
+    local min_position = bounds_start
+    local max_position = bounds_start + bounds_size - view_size
+    local position
+    if offset == nil then
+        position = centered_axis(target, view_size, bounds_start, bounds_size)
+    else
+        position = clamp(target - offset, min_position, max_position)
+    end
+
+    if position <= min_position or position >= max_position then
+        offset = target - position
+    elseif offset == nil then
+        offset = target - position
+    end
+
+    return position, offset
+end
+
 function Camera:update(room, target_x, target_y, viewport_width, viewport_height)
     self.viewport_width = viewport_width or self.viewport_width
     self.viewport_height = viewport_height or self.viewport_height
 
     local authored_mode = self:mode_for_room(room, target_x, target_y)
     self.mode = self:debug_override() or authored_mode
+    local view_width, view_height = self:viewport_world_size(self.mode)
+    local bounds_x, bounds_y, bounds_width, bounds_height = self:bounds_for_room(room)
+    local context = table.concat({
+        tostring(room),
+        tostring(self.mode),
+        tostring(bounds_x),
+        tostring(bounds_y),
+        tostring(bounds_width),
+        tostring(bounds_height)
+    }, ":")
+    if context ~= self.follow_context then
+        self.follow_context = context
+        self:reset_follow_anchor()
+    end
 
-    self.x, self.y = self:frame_for_mode(room, target_x, target_y, self.mode)
+    local x, y
+    x, self.follow_offset_x = followed_axis(
+        target_x,
+        view_width,
+        bounds_x,
+        bounds_width,
+        self.follow_offset_x
+    )
+    y, self.follow_offset_y = followed_axis(
+        target_y,
+        view_height,
+        bounds_y,
+        bounds_height,
+        self.follow_offset_y
+    )
+
+    local scale = self:scale()
+    self.x = snapped(x, scale)
+    self.y = snapped(y, scale)
 end
 
 function Camera:snap_world(value)

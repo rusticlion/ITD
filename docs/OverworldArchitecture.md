@@ -10,6 +10,7 @@
 - Overworld maps use **32x32 logical tiles** for authoring, collision, movement, and interaction.
 - Most overworld art may be authored at **16x16 source resolution and upscaled 2x**, but direct 32x32 authoring is allowed when it reads better.
 - Player movement is **tile-stepped with smooth interpolation**: collision and interaction reason in tile coordinates; presentation eases between tiles.
+- Direction input turns immediately. Releasing within `0.10s` produces a turn-in-place; holding past the threshold commits the step and continues walking while held.
 - Level art flow is **Aseprite mockup -> Tiled composition -> Lua runtime import**.
 
 The overworld camera has three discrete render scales:
@@ -42,6 +43,8 @@ Runtime room loading should be designed around Tiled concepts even if early room
 - Custom properties for behavior data such as `actor_type`, `on_tool_use`, `target_room`, `encounter_id`, or `flag`.
 
 Current runtime support accepts finite Lua exports with embedded tileset metadata. Tileset images resolve through `assets/sprites/overworld/` by `asset_id`, `image_id`, or image filename, and room load prints validation warnings for missing assets, unsupported layer shapes, duplicate IDs, unknown actor types, and diagonal tile flips.
+
+The Basement source map is `assets/tiled_raw/basement_1.tmx`; `data/rooms/basement_1.lua` is its generated runtime export. Named `spawn` regions drive new-game and Designer Lab checkpoint placement so layout edits do not require duplicated tile coordinates in Lua.
 
 Do not couple game logic to Aseprite output details. Aseprite establishes the look; Tiled establishes the playable room.
 
@@ -82,6 +85,8 @@ Objects on the `regions` layer with `type = camera_zone` may override the room:
 
 Camera positions and moving actor positions are snapped so the final screen
 translation lands on integer pixels at all three scales.
+
+Rooms may fix the initial camera on a named `camera_anchor` region with `camera_lock_anchor` and release it through `camera_unlock_flag`. When following begins, the camera preserves the player's existing screen position instead of recentering immediately. This avoids a jump at the reveal and makes each subsequent tile-step pan by a full tile even when tracking begins at a map border.
 
 Debug authoring controls:
 
@@ -127,6 +132,8 @@ Use one general animation layer for overworld actors and animated props.
 - `SpriteDef`: image path, frame size, origin, and named animations.
 - `Animator`: current animation, frame timer, loop mode, and one-shot completion.
 - Common animation names: `idle_down`, `idle_up`, `idle_left`, `idle_right`, `walk_down`, `walk_up`, `walk_left`, `walk_right`, `open`, `closed`, `glow`, `use_tool`.
+
+The current player export uses four directional walk frames where frames 1 and 3 are still poses and frames 2 and 4 are alternating feet. Each tile step begins on the appropriate foot and returns to its paired still pose during the final portion of translation.
 
 Tile animations can be loaded from Tiled if they stay decorative. Interactive animated objects should be actors.
 
@@ -199,10 +206,10 @@ run = {
     dreamform = {
         head = "part_inst_dreamer_head",
         body = "part_inst_dreamer_body",
-        arm_l = "part_inst_dreamer_left_arm",
+        arm_l = "part_inst_dreamer_fore_hand",
         arm_r = "part_inst_bone_demon_claw",
-        leg_l = "part_inst_dreamer_left_leg",
-        leg_r = "part_inst_dreamer_right_leg"
+        leg_l = "part_inst_dreamer_front_foot",
+        leg_r = "part_inst_dreamer_back_foot"
     },
     parts = {
         part_inst_dreamer_head = { def_id = "dreamer_head" },
@@ -225,7 +232,7 @@ Combat entry should receive an `encounter_id` plus the current `dreamform`. Comb
     },
     claimed_part = { def_id = "bone_demon_right_bare_bones" }, -- nil if skipped
     claimed_slot = "arm_r",
-    replaced_part = { def_id = "dreamer_right_arm" }
+    replaced_part = { def_id = "dreamer_back_hand" }
 }
 ```
 

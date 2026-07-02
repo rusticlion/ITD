@@ -7,10 +7,10 @@ Catalog.MODULE_NAME = "data.combat.alpha_basement"
 Catalog.SLOT_ORDER = {
     { id = "head", label = "Head" },
     { id = "body", label = "Body" },
-    { id = "arm_l", label = "Left Arm" },
-    { id = "arm_r", label = "Right Arm" },
-    { id = "leg_l", label = "Left Leg" },
-    { id = "leg_r", label = "Right Leg" }
+    { id = "arm_l", label = "Fore Hand" },
+    { id = "arm_r", label = "Back Hand" },
+    { id = "leg_l", label = "Front Foot" },
+    { id = "leg_r", label = "Back Foot" }
 }
 
 local definitions_cache = {}

@@ -68,6 +68,27 @@ assert(close_enough(camera.y, -52), "expected short room to center vertically")
 assert(close_enough(camera.x * camera:scale(), math.floor(camera.x * camera:scale() + 0.5)),
     "expected camera translation to land on screen pixels")
 
+local tile_room = {
+    width = 30,
+    height = 17,
+    tile_size = 32,
+    property = function(_, key)
+        if key == "camera_zoom" then
+            return "close"
+        end
+    end,
+    camera_zone_at = function()
+        return nil
+    end
+}
+local tile_camera = Camera.new({ mode = "close" })
+tile_camera:update(tile_room, 656, 336, 960, 540)
+assert(tile_camera.x == 320, "expected initial camera clamp at the right map edge")
+tile_camera:update(tile_room, 624, 336, 960, 540)
+assert(tile_camera.x == 288, "expected first inward step to pan one full tile")
+tile_camera:update(tile_room, 592, 336, 960, 540)
+assert(tile_camera.x == 256, "expected subsequent tracking to remain tile-quantized")
+
 local close_zone = region({
     camera_zoom = "close",
     camera_bounds = true
@@ -93,5 +114,36 @@ assert(camera:cycle_debug_override() == "wide", "expected first override to be w
 assert(camera:cycle_debug_override() == "standard", "expected second override to be standard")
 assert(camera:cycle_debug_override() == "close", "expected third override to be close")
 assert(camera:cycle_debug_override() == nil, "expected override cycle to return to authored mode")
+
+local World = require("systems.world")
+local world = World.new({ spawn = "start", autosave = false })
+love = {
+    graphics = {
+        getWidth = function()
+            return 960
+        end,
+        getHeight = function()
+            return 540
+        end
+    }
+}
+world:update_camera()
+assert(world.camera_tracking_locked == true, "expected Basement camera to begin locked")
+assert(world.camera.x == 32 and world.camera.y == 184,
+    "expected Basement camera anchor to frame the bottom center")
+local locked_x = world.camera.x
+world.player.render_x = world.player.render_x - 1
+world.player.x = world.player.x - 1
+world:update_camera()
+assert(world.camera.x == locked_x, "expected locked camera to ignore player movement")
+
+world:set_flag("basement.passage_open", true)
+world:update_camera()
+assert(world.camera_tracking_locked == false, "expected hidden passage flag to free camera")
+assert(world.camera.x == locked_x, "expected camera unlock not to jump immediately")
+world.player.render_x = world.player.render_x - 1
+world.player.x = world.player.x - 1
+world:update_camera()
+assert(world.camera.x == locked_x - 32, "expected freed camera to follow by one full tile")
 
 print("overworld camera smoke test passed.")
