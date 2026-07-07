@@ -56,6 +56,7 @@ The cue vocabulary mirrors the shape grammar. Keep it stable as sounds improve.
 | Slot bookkeeping | `pip_lit` (pitch rises per pip), `burn_off` (slightly feel-bad on purpose), `slot_armed`, `slot_resolved` |
 | Damage tiers | `parry_tick`, `strike_parried`, `strike_hit`, `wound`, `maim`, `heart_loss`, `vent` |
 | Resources | `heal`, `crest_gain`, `crest_expend`, `latch_ejected` |
+| Madness | `madness_gain` (tritone; replaces the pleasant chime), `madness_whisper` (seizure: the hand moves on its own, with a desaturation pulse) |
 | UI / stings | `invalid`, `victory`, `defeat` |
 
 Big-beat pairings in `combat/juice.lua`:

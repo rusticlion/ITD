@@ -230,10 +230,11 @@ For the first v2 prototype, implement only enough crests to validate the pattern
 |---|---|
 | Valor | Add one 🗡️ to the next die you assign this Allocation. This may make a die rim-valid; if the die is assigned elsewhere, the added 🗡️ burns off like any irrelevant symbol. |
 | Shadow | Until the next Upkeep, whenever one of your Body Part slots activates, that Body Part becomes Untargetable. If an attack die is already latched to that part, the latch is ejected and the attack die is lost. |
+| Madness | **Detrimental — implemented.** Held: at 3+ Madness, the whispers move your hand — at the start of your Allocation one of your dice is committed to a random legal destination before you gain control (applies to either combatant). Expend ("pinch yourself"): wound a random **Healthy** Body Part you own to purge one Madness. The pinch cannot maim and is refused if no part is Healthy — you cannot pinch yourself awake when nothing is whole. Pinch wounds gunk your pool with 🩸, which feeds blood-cost slots: madness pays forward into desperation techniques. |
 | Knowledge, Cunning | Hold for later prototypes; likely initiative/allocation manipulation. |
-| Madness, Greed, Corruption | Detrimental set: expends function as costs paid to purge. TBD. |
+| Greed, Corruption | Detrimental set: expends function as costs paid to purge. TBD; Madness establishes the pattern. |
 
-Shadow is intentionally near the complexity ceiling for crest expends in the first implementation. If Shadow is readable and implementable, simpler expends should fit the model.
+Shadow is intentionally near the complexity ceiling for crest expends in the first implementation. Madness validates the detrimental pattern: the passive is a pressure the opponent inflicts, and the expend is a self-mutilating pressure valve. Primary infliction vector: enemy slots with `gain_crest` targeting the opponent (see the Whisperer, §9).
 
 ---
 
@@ -280,6 +281,10 @@ The intended routes are:
 
 Mad Butcher AI should repair a Wounded Head first, bank but not waste Sadism when no target is Wounded, attack Wounded parts with concentrated Arm dice, and use Regrowth only after Head survival is handled. He has little interest in Ward.
 
+The Basement Whisperer is the thing the whispering wall was holding in, and the roster's first **mind-attacker**: its clock is Madness accumulation, not Heart damage. It is also the keyword showcase — one keyword per part, each doing identity work. Its 2-Heart **Mouthless Face** is **Armored** (you cannot easily strike what has no face) and spends ⚡ on **Whisper** (opponent gains 1 Madness). Its 1-Heart **Plaster Husk** is **Absorbent** with the **Hungry** slot **Feed the Walls** — a successfully warding socketed die is devoured as wildcard pips, so your blocked violence literally becomes more whispers. Its **Brittle** **Scratcher** arm concentrates the creature's only real 🗡️ faces and shatters on any hit: the disarm is one strike away, but a maimed Scratcher is a destroyed claim. **Skitter Legs** spend 🩸🩸 on **Reknit Plaster** to patch whatever the player chips.
+
+The intended forks: the Armored face is rim-illegal for most starting dice, but Clarity (+🗡️ to the next die) manufactures a 🗡️🗡️ face — the player's own head is the counter-tool. Racing the body means feeding the walls; sparing the Scratcher for the claim means eating its concentrated dice. Madness itself is the fight's real price: by round 3 the player chooses each round between a hijacked die and a self-inflicted pinch wound. Simulated at the balanced-AI floor: ~4.3 rounds, face preserved as a claimable prize in ~44% of runs.
+
 ---
 
 ## 10. Open Questions — Paper Prototype Checklist
@@ -292,7 +297,7 @@ Testable with blank dice + stickers (or d6s + lookup cards), index cards per par
 4. **Allocation time.** Must stay under ~1 minute at the table with 6 dice + slots + crests. If it drags physically, no UI saves it.
 5. **Mixed faces.** Do the validity and burn-off affordances make whole-die travel read as "flexible hedge" rather than "wasteful trap"? Split's value depends on the answer.
 6. **Hidden-feed leakage.** Under contested initiative, the swallow animation reveals feed *counts* but not pips. Keep (bluffing layer) or fully hide? Current lean: keep.
-7. **Crest expansion.** After Valor and Shadow validate the pattern, which crests earn prototype slots next?
+7. **Crest expansion.** Madness now validates the detrimental pattern (inflicted pressure + purge-at-a-price expend). Greed and Corruption should follow it; Knowledge and Cunning still await initiative/allocation designs. Open sub-question from simulation: end-of-combat Madness is currently consequence-free (crests reset between fights), so "ignore the whispers and race" is viable against a lone Whisperer — does leftover Madness need a sting at combat exit (e.g., suppressing recovery steps), or is per-round seizure pressure enough once encounters chain?
 8. **Multi-slot parts / slotless parts.** How rare? Default: exactly one slot per part for the alpha.
 
 ## 11. Balance Targets (carried from v1, revised)
