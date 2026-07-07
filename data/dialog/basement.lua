@@ -45,7 +45,7 @@ return {
                     },
                     result = {
                         type = "encounter",
-                        encounter_id = "zombie",
+                        encounter_id = "basement.whisperer",
                         text = "The whisper pulls itself loose."
                     }
                 }

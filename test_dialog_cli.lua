@@ -28,7 +28,7 @@ world.on_encounter = function(encounter)
 end
 world:apply_dialog_result(result)
 assert(world:get_flag("basement.whispering_wall_heard") == true, "expected flag to be set")
-assert(triggered == "zombie", "expected zombie encounter")
+assert(triggered == "basement.whisperer", "expected whisperer encounter")
 
 local repeat_dialog = Dialog.new("data.dialog.basement", "whispering_wall", { world = world })
 assert(repeat_dialog:current_node().text == "The wall is quiet now, but it remembers the shape of your ear.")

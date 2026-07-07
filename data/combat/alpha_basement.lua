@@ -120,6 +120,42 @@ return {
                 target_type = "HEAD",
                 amount = 1
             }
+        },
+        whisper = {
+            id = "whisper",
+            name = "Whisper",
+            cost = { E },
+            timing = "spend",
+            effect = {
+                type = "gain_crest",
+                target = "opponent",
+                crest = "Madness",
+                amount = 1
+            }
+        },
+        feed_the_walls = {
+            id = "feed_the_walls",
+            name = "Feed the Walls",
+            cost = { E, E, E },
+            hungry = true,
+            timing = "spend",
+            effect = {
+                type = "gain_crest",
+                target = "opponent",
+                crest = "Madness",
+                amount = 1
+            }
+        },
+        reknit_plaster = {
+            id = "reknit_plaster",
+            name = "Reknit Plaster",
+            cost = { B, B },
+            timing = "spend",
+            effect = {
+                type = "heal_part",
+                target = "most_damaged",
+                amount = 1
+            }
         }
     },
 
@@ -315,6 +351,48 @@ return {
             type = "ARM",
             hp_value = 1,
             die = die(O, S, E, S, { S, S }, { S, S })
+        },
+
+        -- The Whisperer: what the whispering wall was holding in. It does not
+        -- want to break your body; it wants to move in. Wounding its face
+        -- burns off the blank and the ward — the whispers only get louder.
+        whisperer_mouthless_face = {
+            id = "whisperer_mouthless_face",
+            name = "Mouthless Face",
+            flavor = "It has no mouth, and the whispering never stops.",
+            type = "HEAD",
+            hp_value = 2,
+            die = die(O, W, E, { E, W }, E, { E, E }),
+            slot = "whisper",
+            keywords = { "Armored" }
+        },
+        whisperer_plaster_husk = {
+            id = "whisperer_plaster_husk",
+            name = "Plaster Husk",
+            flavor = "Strike the wall and the wall keeps what you gave it.",
+            type = "BODY",
+            hp_value = 1,
+            die = die(B, W, W, { W, E }, { W, W }, W),
+            slot = "feed_the_walls",
+            keywords = { "Absorbent" }
+        },
+        whisperer_scratcher = {
+            id = "whisperer_scratcher",
+            name = "Scratcher",
+            flavor = "The scratching you always told yourself was pipes.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, { S, S }, S, { S, S }, { S, S, S }, S),
+            keywords = { "Brittle" }
+        },
+        whisperer_skitter_legs = {
+            id = "whisperer_skitter_legs",
+            name = "Skitter Legs",
+            flavor = "Too many joints, all of them patient.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, E, W, E, { W, E }, E),
+            slot = "reknit_plaster"
         }
     },
 
@@ -386,6 +464,46 @@ return {
                 "butcher_cleaver_arm",
                 "zombie_right_leg",
                 "zombie_left_leg"
+            }
+        },
+        whisperer = {
+            id = "enemy",
+            name = "The Whisperer",
+            ai_personality = {
+                base = "balanced",
+                weights = {
+                    rim = 22,
+                    socket = 38,
+                    slot = 30
+                },
+                symbol_values = {
+                    strike = 9,
+                    ward = 9,
+                    slot = 10
+                },
+                fill_slot_bonus = 26,
+                charged_slot_bonus = 10,
+                preferred_slots = {
+                    whisper = 20,
+                    feed_the_walls = 8,
+                    reknit_plaster = 12
+                },
+                preferred_sockets = {
+                    whisperer_plaster_husk = 20,
+                    whisperer_skitter_legs = 14
+                },
+                defend_charged_slot_bonus = 14,
+                target_status_bonus = {
+                    wounded = 22,
+                    healthy = 0
+                },
+                heal_wounded_slot_bonus = 34
+            },
+            parts = {
+                "whisperer_mouthless_face",
+                "whisperer_plaster_husk",
+                "whisperer_scratcher",
+                "whisperer_skitter_legs"
             }
         },
         enemy_demo = {
