@@ -137,6 +137,55 @@ world.player.x = world.player.x - 1
 world:update_camera()
 assert(world.camera.x == locked_x, "expected locked camera to ignore player movement")
 
+-- Stale-save regression: a saved position outside the anchor-locked frame
+-- must release the lock and follow the player instead of framing an empty room.
+local stale_world = World.new({
+    autosave = false,
+    save = {
+        run = {
+            current_room = "data.rooms.basement_1",
+            player = { x = 22, y = 9 }
+        }
+    }
+})
+assert(stale_world.camera_lock_released == true,
+    "expected out-of-frame saved position to release the camera lock")
+assert(stale_world.player.x == 22 and stale_world.player.y == 9,
+    "expected valid saved position to be preserved")
+stale_world:update_camera()
+local frame_left = stale_world.camera.x
+local frame_right = frame_left + 640 -- close mode: 640 world px wide
+local player_px = (stale_world.player.x - 1) * 32
+assert(player_px >= frame_left and player_px + 32 <= frame_right,
+    "expected released camera to frame the player")
+
+-- A saved position that no longer exists in the reauthored room heals to the
+-- start spawn instead of booting the player out of bounds or inside a wall.
+local out_of_bounds_world = World.new({
+    autosave = false,
+    save = {
+        run = {
+            current_room = "data.rooms.basement_1",
+            player = { x = 99, y = 99 }
+        }
+    }
+})
+local spawn_x, spawn_y = out_of_bounds_world.room:spawn_tile("start")
+assert(out_of_bounds_world.player.x == spawn_x and out_of_bounds_world.player.y == spawn_y,
+    "expected out-of-bounds saved position to relocate to the start spawn")
+
+local blocked_world = World.new({
+    autosave = false,
+    save = {
+        run = {
+            current_room = "data.rooms.basement_1",
+            player = { x = 21, y = 9 }
+        }
+    }
+})
+assert(blocked_world.player.x == spawn_x and blocked_world.player.y == spawn_y,
+    "expected blocked saved position to relocate to the start spawn")
+
 world:set_flag("basement.passage_open", true)
 world:update_camera()
 assert(world.camera_tracking_locked == false, "expected hidden passage flag to free camera")

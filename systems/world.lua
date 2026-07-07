@@ -173,7 +173,8 @@ function World.new(options)
         last_save_error = nil,
         message = nil,
         message_timer = 0,
-        camera = OverworldCamera.new()
+        camera = OverworldCamera.new(),
+        camera_lock_released = false
     }
 
     setmetatable(world, World)
@@ -181,8 +182,29 @@ function World.new(options)
     world:load_room(world.room_module)
     if spawn_id then
         world:place_player_at_spawn(spawn_id)
+    else
+        world:validate_player_position()
     end
     return world
+end
+
+-- A saved position can go stale when a room is reauthored around it. Heal
+-- loudly rather than booting the player out of bounds or inside a wall.
+function World:validate_player_position()
+    if not self.room then
+        return
+    end
+
+    local x, y = self.player.x, self.player.y
+    local out_of_bounds = x < 1 or y < 1 or x > self.room.width or y > self.room.height
+    if out_of_bounds or self.room:is_blocked(x, y) then
+        print(string.format(
+            "[World] Saved player position %s,%s is invalid in room '%s'; using start spawn.",
+            tostring(x),
+            tostring(y),
+            tostring(self.room.id)))
+        self:place_player_at_spawn("start")
+    end
 end
 
 function World:apply_player_state(state)
@@ -196,6 +218,7 @@ function World:load_room(room_module)
     self.room_module = room_module
     self.run.current_room = room_module
     self.room = Room.new(room_module, self)
+    self.camera_lock_released = false
     self:update_camera()
 end
 
@@ -325,15 +348,40 @@ function World:update_camera()
     local unlock_flag = self.room:property("camera_unlock_flag")
     local camera_locked = lock_anchor ~= nil
         and (unlock_flag == nil or not self:get_flag(unlock_flag))
+        and not self.camera_lock_released
 
     if camera_locked then
-        px, py = self.room:region_center(lock_anchor, "camera_anchor")
-        if not (px and py) then
+        local anchor_x, anchor_y = self.room:region_center(lock_anchor, "camera_anchor")
+        if not (anchor_x and anchor_y) then
             error(string.format(
                 "Room '%s' camera lock references invalid anchor '%s'.",
                 tostring(self.room.id),
                 tostring(lock_anchor)
             ))
+        end
+
+        -- An anchor lock frames the space the player occupies. If the player
+        -- is outside that frame (a stale save, or they slipped past the
+        -- reveal without the unlock flag), the premise is void: release the
+        -- lock and follow the player instead of framing an empty room.
+        local mode = self.camera:mode_for_room(self.room, anchor_x, anchor_y)
+        local frame_x, frame_y, frame_w, frame_h =
+            self.camera:frame_for_mode(self.room, anchor_x, anchor_y, mode)
+        local tile = self.room.tile_size or 32
+        local player_in_frame = px + tile > frame_x and px < frame_x + frame_w
+            and py + tile > frame_y and py < frame_y + frame_h
+
+        if player_in_frame then
+            px, py = anchor_x, anchor_y
+        else
+            self.camera_lock_released = true
+            camera_locked = false
+            print(string.format(
+                "[World] Camera lock '%s' released in room '%s': player at %s,%s is outside the locked frame.",
+                tostring(lock_anchor),
+                tostring(self.room.id),
+                tostring(self.player.x),
+                tostring(self.player.y)))
         end
     end
 
