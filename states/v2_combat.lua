@@ -6,6 +6,7 @@ local Events = require("combat.events")
 local Keywords = require("combat.keywords")
 local Demo = require("combat.v2_demo")
 local CombatJuice = require("combat.juice")
+local Crests = require("combat.crests")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
 local V2AI = require("combat.v2_ai")
@@ -54,7 +55,7 @@ local CLAIM_ANIMATION_DURATION = 0.95
 local CLAIM_RETURN_DELAY = 0.28
 local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
 local OVERLAY_ANIMATION_FPS = 8
-local CREST_ORDER = { "Valor", "Shadow" }
+local CREST_ORDER = { "Valor", "Shadow", "Madness" }
 local CLAIM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
 local CLAIM_SLOT_TYPES = {
     head = "HEAD",
@@ -113,6 +114,12 @@ local CREST_VISUALS = {
         symbol = Symbols.WARD,
         fill = { 0.25, 0.25, 0.38, 1 },
         line = COLORS.defense
+    },
+    Madness = {
+        asset = "crest_madness_chip",
+        symbol = Symbols.ESSENCE,
+        fill = { 0.3, 0.38, 0.22, 1 },
+        line = { 0.64, 0.78, 0.34, 1 }
     }
 }
 
@@ -695,6 +702,10 @@ local function apply_combatant_setup(combatant, setup)
 
     if setup.heart_points then
         combatant.heart_points = setup.heart_points
+    end
+
+    for crest, amount in pairs(setup.crest_pool or {}) do
+        combatant.crest_pool[crest] = amount
     end
 
     for part_id, status in pairs(setup.statuses or {}) do
@@ -1967,6 +1978,22 @@ function V2Combat:is_input_locked()
         or not self.player_can_allocate
 end
 
+-- If the player sits at the Madness threshold, the whispers commit one die
+-- at random (animated like enemy allocation) before control unlocks.
+function V2Combat:apply_player_seizure(on_done)
+    if not Crests.is_seized(self.player) then
+        on_done()
+        return
+    end
+
+    self:start_auto_allocation(self.player, {
+        visibility = "visible",
+        move_limit = 1,
+        message = "The whispers move your hand.",
+        on_complete = on_done
+    })
+end
+
 function V2Combat:begin_allocation_phase()
     self.selected_die = nil
     self.drag = nil
@@ -1978,29 +2005,47 @@ function V2Combat:begin_allocation_phase()
         self:start_auto_allocation(self.enemy, {
             visibility = "visible",
             on_complete = function()
-                self.player_can_allocate = true
-                self.message = "Enemy allocation complete. Drag a die to respond."
+                self:apply_player_seizure(function()
+                    self.player_can_allocate = true
+                    self.message = "Enemy allocation complete. Drag a die to respond."
+                end)
             end
         })
     elseif initiative == "contested" then
         self:start_auto_allocation(self.enemy, {
             visibility = "hidden",
             on_complete = function()
-                self.player_can_allocate = true
-                self.message = "Enemy commitment hidden. Allocate your dice."
+                self:apply_player_seizure(function()
+                    self.player_can_allocate = true
+                    self.message = "Enemy commitment hidden. Allocate your dice."
+                end)
             end
         })
     elseif initiative == "enemy" then
-        self.player_can_allocate = true
-        self.enemy_response_pending = true
-        self.message = "Player commits first. Enemy will respond after confirm."
+        self:apply_player_seizure(function()
+            self.player_can_allocate = true
+            self.enemy_response_pending = true
+            self.message = "Player commits first. Enemy will respond after confirm."
+        end)
     else
         self.player_can_allocate = true
         self.message = "Allocate your dice."
     end
 end
 
-function V2Combat:find_next_auto_allocation_move(combatant)
+function V2Combat:find_next_auto_allocation_move(sequence)
+    local combatant = sequence.combatant
+
+    if (sequence.random_moves_remaining or 0) > 0 then
+        local move = V2AI.random_allocation(self.engine, combatant)
+        if move then
+            sequence.random_moves_remaining = sequence.random_moves_remaining - 1
+            move.seized = true
+            return move
+        end
+        sequence.random_moves_remaining = 0
+    end
+
     if V2AI.choose_next_allocation then
         return V2AI.choose_next_allocation(self.engine, combatant)
     end
@@ -2050,6 +2095,9 @@ end
 function V2Combat:start_auto_allocation(combatant, options)
     options = options or {}
     self:layout()
+    -- At the Madness threshold the whispers place one die at random before
+    -- deliberate allocation begins — for either combatant.
+    local seized_moves = Crests.is_seized(combatant) and 1 or 0
     self.auto_allocation = {
         combatant = combatant,
         visibility = options.visibility or "visible",
@@ -2057,10 +2105,15 @@ function V2Combat:start_auto_allocation(combatant, options)
         current = nil,
         phase = "idle",
         timer = 0,
-        move_count = 0
+        move_count = 0,
+        move_limit = options.move_limit,
+        random_moves_remaining = seized_moves
     }
     self.player_can_allocate = false
-    self.message = (combatant.name or "Enemy") .. " is allocating."
+    self.message = options.message or ((combatant.name or "Enemy") .. " is allocating.")
+    if seized_moves > 0 and self.juice then
+        self.juice:madness_seizure()
+    end
     self:start_next_auto_allocation_move()
 end
 
@@ -2081,8 +2134,13 @@ function V2Combat:start_next_auto_allocation_move()
         return
     end
 
+    if sequence.move_limit and sequence.move_count >= sequence.move_limit then
+        self:finish_auto_allocation()
+        return
+    end
+
     self:layout()
-    local move = self:find_next_auto_allocation_move(sequence.combatant)
+    local move = self:find_next_auto_allocation_move(sequence)
     if not move then
         self:finish_auto_allocation()
         return

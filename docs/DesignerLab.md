@@ -34,7 +34,23 @@ love . --encounter=basement.zombie --seed=1101
 - `P` copies the summary to the clipboard.
 - `Esc` returns to the lab.
 
-Combat presets may declare initial Body Part statuses and banked Slot charge in `data/designer_scenarios.lua`.
+Combat presets may declare initial Body Part statuses, banked Slot charge, and starting crest pools in `data/designer_scenarios.lua`.
+
+## Batch Simulation
+
+`tools/simulate_combat.lua` runs headless AI-vs-AI combats to answer pacing
+and balance questions with data (round counts, win rates, heart margins,
+slot activation rates, and how often each enemy part survives as a claimable
+prize):
+
+```sh
+lua tools/simulate_combat.lua                          # all basement.* encounters
+lua tools/simulate_combat.lua basement.whisperer       # one encounter
+lua tools/simulate_combat.lua --runs=500 --seed=99 --player=aggressive
+```
+
+Treat player win rates as a floor: the scripted allocator plays worse than a
+human with full enemy visibility, and it never expends crests.
 
 ## Basement Iteration
 

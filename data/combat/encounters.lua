@@ -41,6 +41,13 @@ return {
         enemy_loadout = "mad_butcher"
     },
 
+    ["basement.whisperer"] = {
+        name = "The Whisperer",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "whisperer"
+    },
+
     ["basement.mad_butcher"] = {
         name = "Mad Butcher",
         module = "data.combat.alpha_basement",

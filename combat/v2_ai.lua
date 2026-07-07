@@ -493,6 +493,40 @@ function AI.choose_next_allocation(engine, combatant)
     return best
 end
 
+-- Every legal move for every pool die, unscored. The madness seizure picks
+-- from this uniformly: the whispers are not strategists.
+function AI.enumerate_moves(engine, combatant)
+    local moves = {}
+    if not (engine and combatant) then
+        return moves
+    end
+
+    for _, die in ipairs(engine:get_pool(combatant)) do
+        local destinations = engine:get_valid_destinations(combatant, die)
+        for _, part in ipairs(destinations.slots or {}) do
+            table.insert(moves, { kind = "slot", die = die, part = part })
+        end
+        for _, part in ipairs(destinations.rims or {}) do
+            table.insert(moves, { kind = "rim", die = die, part = part })
+        end
+        for _, part in ipairs(destinations.sockets or {}) do
+            table.insert(moves, { kind = "socket", die = die, part = part })
+        end
+    end
+
+    return moves
+end
+
+function AI.random_allocation(engine, combatant, rng)
+    local moves = AI.enumerate_moves(engine, combatant)
+    if #moves == 0 then
+        return nil
+    end
+
+    local roll = rng or (engine and engine.rng) or math.random
+    return moves[roll(1, #moves)]
+end
+
 function AI.auto_allocate(engine, combatant)
     if not (engine and combatant) then
         return

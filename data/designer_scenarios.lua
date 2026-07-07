@@ -40,6 +40,27 @@ return {
                     }
                 }
             }
+        },
+        {
+            id = "combat.whisperer",
+            name = "The Whisperer",
+            description = "Madness-inflicting wall dweller; Brittle arm, Absorbent husk, Hungry slot.",
+            encounter_id = "basement.whisperer",
+            seed = 4401
+        },
+        {
+            id = "combat.whisperer_seized",
+            name = "Whisperer: Seized",
+            description = "Player starts at the 3-Madness seizure threshold; the whispers move a die each round.",
+            encounter_id = "basement.whisperer",
+            seed = 4402,
+            combat_setup = {
+                player = {
+                    crest_pool = {
+                        Madness = 3
+                    }
+                }
+            }
         }
     },
 

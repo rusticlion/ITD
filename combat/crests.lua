@@ -4,14 +4,35 @@ local Crests = {}
 
 Crests.ORDER = {
     "Valor",
-    "Shadow"
+    "Shadow",
+    "Madness"
 }
+
+-- Holding this many Madness surrenders one die to the whispers each round.
+Crests.MADNESS_SEIZE_THRESHOLD = 3
 
 local ALIASES = {
     valor = "Valor",
     valour = "Valor",
-    shadow = "Shadow"
+    shadow = "Shadow",
+    madness = "Madness"
 }
+
+local function random_healthy_part(engine, combatant)
+    local healthy = {}
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "healthy" then
+            table.insert(healthy, part)
+        end
+    end
+
+    if #healthy == 0 then
+        return nil
+    end
+
+    local roll = (engine and engine.rng) or math.random
+    return healthy[roll(1, #healthy)]
+end
 
 Crests.DEFINITIONS = {
     Valor = {
@@ -43,6 +64,37 @@ Crests.DEFINITIONS = {
                 type = "shadow"
             }
         end
+    },
+
+    -- The first detrimental crest: expending is a cost paid to purge.
+    Madness = {
+        id = "Madness",
+        name = "Madness",
+        detrimental = true,
+        description = "At 3+, the whispers move your hand: one die each round is placed for you. "
+            .. "Spend: pinch yourself — wound a random Healthy Body Part to purge this.",
+        can_expend = function(engine, combatant)
+            if not random_healthy_part(engine, combatant) then
+                -- You cannot pinch yourself awake when nothing is whole.
+                return false, "no_healthy_part"
+            end
+            return true
+        end,
+        expend = function(engine, combatant)
+            local part = random_healthy_part(engine, combatant)
+            if part and engine and engine.apply_damage then
+                engine:apply_damage(nil, combatant, part, {
+                    source = "crest",
+                    crest = "Madness",
+                    pinch = true
+                })
+            end
+
+            return {
+                type = "madness",
+                part = part
+            }
+        end
     }
 }
 
@@ -72,6 +124,20 @@ function Crests.describe(crest)
     return definition.description
 end
 
+function Crests.is_detrimental(crest)
+    local definition = Crests.definition(crest)
+    return definition ~= nil and definition.detrimental == true
+end
+
+-- True when a combatant holds enough Madness for the whispers to take a die.
+function Crests.is_seized(combatant)
+    if not (combatant and combatant.get_crest_count) then
+        return false
+    end
+
+    return combatant:get_crest_count("Madness") >= Crests.MADNESS_SEIZE_THRESHOLD
+end
+
 function Crests.validate_name(errors, path, crest)
     if not Crests.is_known(crest) then
         table.insert(errors, tostring(path) .. " references unknown crest " .. tostring(crest))
@@ -92,6 +158,13 @@ function Crests.expend(engine, combatant, crest)
 
     if not combatant.get_crest_count or combatant:get_crest_count(canonical) <= 0 then
         return false, "crest_empty"
+    end
+
+    if definition.can_expend then
+        local allowed, reason = definition.can_expend(engine, combatant)
+        if not allowed then
+            return false, reason or "cannot_expend"
+        end
     end
 
     combatant:remove_crest(canonical, 1)
