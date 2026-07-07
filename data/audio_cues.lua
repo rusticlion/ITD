@@ -179,6 +179,25 @@ return {
         }
     },
 
+    -- Madness (detrimental crest: dissonant on gain, no chime on purge)
+    madness_gain = { -- a tritone settling behind the eyes
+        volume = 0.4,
+        pitch_variance = 0.03,
+        layers = {
+            { wave = "sine", freq = 440, duration = 0.3, volume = 0.5, curve = 1.2 },
+            { wave = "sine", freq = 622, freq_end = 616, duration = 0.34, volume = 0.45, curve = 1.2 }
+        }
+    },
+    madness_whisper = { -- the hand moves on its own
+        volume = 0.45,
+        pitch_variance = 0.04,
+        layers = {
+            { wave = "noise", duration = 0.42, volume = 0.22, curve = 1 },
+            { wave = "sine", freq = 933, freq_end = 880, duration = 0.4, volume = 0.3, curve = 1.1 },
+            { wave = "sine", freq = 1244, freq_end = 1175, duration = 0.32, volume = 0.18, curve = 1.4 }
+        }
+    },
+
     -- UI
     invalid = {
         volume = 0.3,

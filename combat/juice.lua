@@ -106,12 +106,20 @@ function CombatJuice:subscribe()
         Audio.play("slot_resolved")
     end)
 
-    engine:on(Events.CREST_GAINED, function()
-        Audio.play("crest_gain")
+    engine:on(Events.CREST_GAINED, function(data)
+        if data and data.crest == "Madness" then
+            Audio.play("madness_gain")
+        else
+            Audio.play("crest_gain")
+        end
     end)
 
-    engine:on(Events.CREST_EXPENDED, function()
-        Audio.play("crest_expend")
+    engine:on(Events.CREST_EXPENDED, function(data)
+        -- Purging Madness is a pinch, not a purchase: the wound it inflicts
+        -- provides the feedback, so the pleasant chime stays silent.
+        if not (data and data.crest == "Madness") then
+            Audio.play("crest_expend")
+        end
     end)
 
     engine:on(Events.LATCH_EJECTED, function()
@@ -191,6 +199,12 @@ function CombatJuice:reveal_resolution(entry)
     if damage then
         self:damage_feedback(damage.status_after, damage.heart_point_loss, entry.vented)
     end
+end
+
+-- The whispers take a die: an uneasy swell and the color briefly drains.
+function CombatJuice:madness_seizure()
+    Audio.play("madness_whisper")
+    ScreenFX.desaturate(0.45, 0.6)
 end
 
 function CombatJuice:die_picked()

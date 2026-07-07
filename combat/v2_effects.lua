@@ -195,25 +195,37 @@ DEFINITIONS.none = {
     end
 }
 
+local function crest_target_is_opponent(effect)
+    local target = tostring(effect.target or effect.target_side or "self"):lower()
+    return target == "opponent" or target == "enemy"
+end
+
 DEFINITIONS.gain_crest = {
     describe = function(effect)
         local amount = amount_or_default(effect.amount, 1)
         local crest = Crests.normalize(effect.crest or "Valor")
-        return "Gain " .. tostring(amount) .. " " .. tostring(crest) .. " crest" .. (amount == 1 and "." or "s.")
+        local subject = crest_target_is_opponent(effect) and "Opponent gains " or "Gain "
+        return subject .. tostring(amount) .. " " .. tostring(crest) .. " crest" .. (amount == 1 and "." or "s.")
     end,
     validate = function(effect, path, errors)
         Crests.validate_name(errors, path .. ".crest", effect.crest or "Valor")
+        validate_target_side(errors, path .. ".target", effect.target or effect.target_side)
         validate_amount(errors, path, effect.amount)
     end,
     execute = function(engine, entry, effect)
         local amount = amount_or_default(effect.amount, 1)
         local crest = Crests.normalize(effect.crest or "Valor")
-        engine:grant_crest(entry.combatant, crest, amount, { source = "slot", slot = entry.slot })
+        local recipient = entry.combatant
+        if crest_target_is_opponent(effect) then
+            recipient = engine:get_opponent(entry.combatant) or recipient
+        end
+        engine:grant_crest(recipient, crest, amount, { source = "slot", slot = entry.slot })
 
         return {
             type = "gain_crest",
             crest = crest,
-            amount = amount
+            amount = amount,
+            recipient = recipient
         }
     end
 }
