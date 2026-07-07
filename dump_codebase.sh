@@ -215,6 +215,9 @@ for p in "${files[@]}"; do
   if [[ "$base" == ".DS_Store" ]]; then
     continue
   fi
+  if [[ "$rel" == __pycache__/* || "$rel" == */__pycache__/* ]]; then
+    continue
+  fi
   filtered+=("$rel")
 done
 
@@ -247,5 +250,4 @@ for file in "${sorted[@]}"; do
 done
 
 echo "Wrote markdown dump to: $OUTPUT"
-
 

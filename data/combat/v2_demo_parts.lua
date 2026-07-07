@@ -220,7 +220,7 @@ return {
                 name = "Vengeance",
                 cost = { Symbols.BLOOD },
                 timing = "spend",
-                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1, duration = "allocation" }
+                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1 }
             }
         },
         ["gaunt_cloak"] = {

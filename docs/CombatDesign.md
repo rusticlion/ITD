@@ -196,11 +196,11 @@ effect = {
 Current structured effect types:
 
 - `add_next_symbol` — add one or more symbols to the next die assigned this Allocation.
-- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`.
+- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`. Allocation modifiers all share this lifetime rather than carrying per-effect duration metadata.
 - `assign_symbol_to_each_part` — create virtual assignments on every open matching destination, e.g. a Force Field that assigns one 🛡️ to each unwarded friendly socket.
 - `open_spellmark` — temporarily alters existing rims or sockets to accept Essence; the first matching Essence assignment marks that part and resolves an `on_mark` payload.
 - `heal_part` — heal the Slot's `source_part`, the combatant's `most_damaged` part, or an allied `part_type`.
-- `add_symbol_against_status` — dice showing `match` gain `symbol` when assigned to a destination on a Healthy or Wounded target. The target is part of symbol evaluation, so previews, validity, AI scoring, and resolution all see the same effective face.
+- `add_symbol_against_status` — until the next Upkeep, dice showing `match` gain `symbol` when assigned to a destination on a Healthy or Wounded target. The target is part of symbol evaluation, so previews, validity, AI scoring, and resolution all see the same effective face.
 - `damage_opponent_part`, `gain_crest` — early prototype utility effects.
 
 This vocabulary intentionally models magical conversion as visible added symbols rather than hidden “counts as” state. Essence remains Essence; a Slot can temporarily make Essence dice carry extra tactical weight.

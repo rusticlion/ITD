@@ -1,4 +1,5 @@
 local GameState = require("core.gamestate")
+local Display = require("core.display")
 local Input = require("core.input")
 
 local PostCombat = {}
@@ -63,8 +64,8 @@ function PostCombat:update(dt)
 end
 
 function PostCombat:draw()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     local panel_w = math.min(620, width - 48)
     local panel_h = math.min(310, height - 48)
     local x = math.floor((width - panel_w) / 2)

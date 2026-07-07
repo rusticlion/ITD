@@ -1,6 +1,6 @@
 # Codebase Dump: ITD
 
-_Generated on 2026-06-25 18:21 UTC_
+_Generated on 2026-07-02 02:19 UTC_
 
 ## AGENTS.md
 
@@ -18,15 +18,45 @@ For tooling-adjacent infrastructure such as asset loading, editors, input handli
 Have fun and feel free to stop to chat through something. It's a game.
 ```
 
-## assets/aseprite_raw/blood_symbol_outline.png
+## assets/README.md
 
-Binary file; contents omitted.
+```markdown
+# Sprite Asset Guidelines
+
+The combat prototype currently relies on programmer-art placeholders while the final pipeline is under construction.
+All placeholder sprites should be authored as square PNGs with a resolution of **128x128 pixels** so they align with the
+mocked UI layout used throughout the S4 UI Foundation sprint.
+
+## Directory Overview
+
+- `assets/sprites/bodyparts/`
+  - State-specific placeholders such as `placeholder_healthy.png`, `placeholder_wounded.png`, and `placeholder_maimed.png`.
+- `assets/sprites/icons/`
+  - Generic UI glyphs, including the `placeholder_default.png` fallback used by the asset manager.
+- `assets/sprites/overworld/`
+  - Tiled tileset sheets, overworld actor sprites, and player sprites. See `docs/OverworldAssetManifest.md` and `docs/TiledCheatsheet.md`.
+- `assets/sprites/ui/`
+  - Dialog and menu presentation assets. See `docs/OverworldAssetManifest.md` for canvas sizes and IDs.
+- `assets/fonts/dotgothic16/`
+  - DotGothic16 Regular and its bundled SIL Open Font License text. Used by the v2 combat UI.
+
+Each file is addressed by its filename (without the `.png` extension) through `core/assets.lua`. Avoid embedding
+state or directory information in code outside of the asset manager—always request sprites by ID via
+`Assets:get("asset_id")`.
+
+See `docs/CombatAssetManifest.md` for the v2 combat layout measurements and the next facade-pass sprite ID list.
+
+```
 
 ## assets/aseprite_raw/blood_symbol.aseprite
 
 Binary file; contents omitted.
 
 ## assets/aseprite_raw/blood_symbol.png
+
+Binary file; contents omitted.
+
+## assets/aseprite_raw/blood_symbol_outline.png
 
 Binary file; contents omitted.
 
@@ -50,15 +80,15 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
+## assets/aseprite_raw/die-hatch.aseprite
+
+Binary file; contents omitted.
+
 ## assets/aseprite_raw/die_rim.aseprite
 
 Binary file; contents omitted.
 
 ## assets/aseprite_raw/die_socket.aseprite
-
-Binary file; contents omitted.
-
-## assets/aseprite_raw/die-hatch.aseprite
 
 Binary file; contents omitted.
 
@@ -71,10 +101,6 @@ Binary file; contents omitted.
 Binary file; contents omitted.
 
 ## assets/aseprite_raw/shield_symbol.aseprite
-
-Binary file; contents omitted.
-
-## assets/aseprite_raw/Sprite-0001.aseprite
 
 Binary file; contents omitted.
 
@@ -185,35 +211,645 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ```
 
-## assets/README.md
-
-```markdown
-# Sprite Asset Guidelines
-
-The combat prototype currently relies on programmer-art placeholders while the final pipeline is under construction.
-All placeholder sprites should be authored as square PNGs with a resolution of **128x128 pixels** so they align with the
-mocked UI layout used throughout the S4 UI Foundation sprint.
-
-## Directory Overview
-
-- `assets/sprites/bodyparts/`
-  - State-specific placeholders such as `placeholder_healthy.png`, `placeholder_wounded.png`, and `placeholder_maimed.png`.
-- `assets/sprites/icons/`
-  - Generic UI glyphs, including the `placeholder_default.png` fallback used by the asset manager.
-- `assets/sprites/overworld/`
-  - Tiled tileset sheets, overworld actor sprites, and player sprites. See `docs/OverworldAssetManifest.md` and `docs/TiledCheatsheet.md`.
-- `assets/sprites/ui/`
-  - Dialog and menu presentation assets. See `docs/OverworldAssetManifest.md` for canvas sizes and IDs.
-- `assets/fonts/dotgothic16/`
-  - DotGothic16 Regular and its bundled SIL Open Font License text. Used by the v2 combat UI.
-
-Each file is addressed by its filename (without the `.png` extension) through `core/assets.lua`. Avoid embedding
-state or directory information in code outside of the asset manager—always request sprites by ID via
-`Assets:get("asset_id")`.
-
-See `docs/CombatAssetManifest.md` for the v2 combat layout measurements and the next facade-pass sprite ID list.
+## assets/legacy/IntoTheDreamlands-LICENSE.txt
 
 ```
+MIT License
+
+Copyright (c) 2023 Russell L Bates
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+```
+
+## assets/legacy/README.md
+
+````markdown
+# Legacy Asset Provenance
+
+Selected overworld assets are imported from the original GameMaker prototype:
+
+- Repository: `https://github.com/rusticlion/IntoTheDreamlands`
+- Pinned commit: `b8e4a35aa143728084ed97c8c1f7ab6d8b012f89`
+- Original project license: MIT, copied beside this file after import.
+
+The legacy project includes custom work by Russell L. Bates and visual vocabulary
+derived from Kenney's CC0 1-Bit Pack. Imported runtime PNGs are palette-converted
+for the current project's indigo, pale-ink, and blood-red presentation.
+
+`tools/legacy_assets.json` is the curated selection and naming manifest.
+`tools/import_legacy_assets.py` clones or reads the pinned source repository,
+resolves GameMaker frame order, validates dimensions, imports the PNGs, and writes
+`imported_assets.json` with source frame IDs and output hashes.
+
+The importer requires Python 3 and Pillow:
+
+```sh
+python3 -m pip install -r tools/requirements.txt
+python3 tools/import_legacy_assets.py
+```
+
+Use `--source /path/to/IntoTheDreamlands` to reuse an existing checkout and
+`--dry-run` to validate the manifest without changing files.
+
+````
+
+## assets/legacy/imported_assets.json
+
+```json
+{
+  "source": {
+    "repository": "https://github.com/rusticlion/IntoTheDreamlands.git",
+    "commit": "b8e4a35aa143728084ed97c8c1f7ab6d8b012f89"
+  },
+  "palette_applied": true,
+  "assets": [
+    {
+      "asset_id": "player_walk_down1",
+      "destination": "assets/sprites/overworld/player_walk_down1.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_walk_down2",
+      "destination": "assets/sprites/overworld/player_walk_down2.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 2,
+      "source_frame_id": "e8110338-257f-4877-a366-741b1a349df0",
+      "width": 16,
+      "height": 16,
+      "sha256": "e6bfaa0332f02a6c974685ce3fa6a5c66f4316a96479cd53fd7574b8ffec91fa"
+    },
+    {
+      "asset_id": "player_walk_down3",
+      "destination": "assets/sprites/overworld/player_walk_down3.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 3,
+      "source_frame_id": "d1578672-19fd-4828-ad44-c24a13340055",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_walk_down4",
+      "destination": "assets/sprites/overworld/player_walk_down4.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 4,
+      "source_frame_id": "0947033f-8980-4918-b9ed-35fe8fe686ca",
+      "width": 16,
+      "height": 16,
+      "sha256": "0d1119aafa248a40347f5dcf421bac617c40fb3ef2eea6a09ae2959b4cd6e691"
+    },
+    {
+      "asset_id": "player_walk_up1",
+      "destination": "assets/sprites/overworld/player_walk_up1.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 1,
+      "source_frame_id": "eac4b0a1-b386-4de8-bff4-d76be11b4927",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_walk_up2",
+      "destination": "assets/sprites/overworld/player_walk_up2.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 2,
+      "source_frame_id": "cc0db691-45b3-4084-a2b4-ac5ea638c77f",
+      "width": 16,
+      "height": 16,
+      "sha256": "92111c59eae8351315116f11df175bd8aab797e69330dfbd8af2066a0ea200d1"
+    },
+    {
+      "asset_id": "player_walk_up3",
+      "destination": "assets/sprites/overworld/player_walk_up3.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 3,
+      "source_frame_id": "add23c0e-885b-48c0-8b62-04a85cb1badc",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_walk_up4",
+      "destination": "assets/sprites/overworld/player_walk_up4.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 4,
+      "source_frame_id": "b7efd0bd-6af4-4e5a-81fd-93d4e8dcb786",
+      "width": 16,
+      "height": 16,
+      "sha256": "6e1271bb1786cf58062990a7a03a22daeb4340f983e67d1104190bbb5c99b6c2"
+    },
+    {
+      "asset_id": "player_walk_left1",
+      "destination": "assets/sprites/overworld/player_walk_left1.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 1,
+      "source_frame_id": "ac4f3fa1-ea9d-478a-b2cf-1094a5328e75",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_walk_left2",
+      "destination": "assets/sprites/overworld/player_walk_left2.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 2,
+      "source_frame_id": "f9aa19d5-46c3-475a-9c85-e998c592cb2b",
+      "width": 16,
+      "height": 16,
+      "sha256": "68473ef22b8b63849ac3f13f333f1d51e5040c730577bc4c973fe0259c549381"
+    },
+    {
+      "asset_id": "player_walk_left3",
+      "destination": "assets/sprites/overworld/player_walk_left3.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 3,
+      "source_frame_id": "25d73f01-0d9a-4cfe-a365-b6c621e2f016",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_walk_left4",
+      "destination": "assets/sprites/overworld/player_walk_left4.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 4,
+      "source_frame_id": "bfb27aac-3c19-44d6-8558-bf714320c66e",
+      "width": 16,
+      "height": 16,
+      "sha256": "d6baf71b080d087d45108cb7b084ae8e59da561989203915579e2225351d1d6f"
+    },
+    {
+      "asset_id": "player_walk_right1",
+      "destination": "assets/sprites/overworld/player_walk_right1.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 1,
+      "source_frame_id": "fab1e3f2-34de-4fa6-8a4a-7a389c1ce19b",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "player_walk_right2",
+      "destination": "assets/sprites/overworld/player_walk_right2.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 2,
+      "source_frame_id": "ac4f2882-514a-4c69-ad59-bfd058becaf5",
+      "width": 16,
+      "height": 16,
+      "sha256": "402021405d1c6fb6cc1e9924b7138e8372e92580d2e33c45ada74eac20701233"
+    },
+    {
+      "asset_id": "player_walk_right3",
+      "destination": "assets/sprites/overworld/player_walk_right3.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 3,
+      "source_frame_id": "e2b4b821-3f7b-47b9-beda-b1204d30989d",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "player_walk_right4",
+      "destination": "assets/sprites/overworld/player_walk_right4.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 4,
+      "source_frame_id": "0c543b3b-18f2-4aa4-8338-05ef4f5109df",
+      "width": 16,
+      "height": 16,
+      "sha256": "89f0b31b0524ff62cc6a911b849527f781a3ef9e9aceffb8901bfa6872783abd"
+    },
+    {
+      "asset_id": "player_idle_down",
+      "destination": "assets/sprites/overworld/player_idle_down.png",
+      "source_sprite": "spr_player_walkdown",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6d7b5a9ba32129fc64c4c50f3c4cdbce2416ff714ccc8522a6e413960c46c190"
+    },
+    {
+      "asset_id": "player_idle_up",
+      "destination": "assets/sprites/overworld/player_idle_up.png",
+      "source_sprite": "spr_player_walkup",
+      "source_frame": 1,
+      "source_frame_id": "eac4b0a1-b386-4de8-bff4-d76be11b4927",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c87b0d9f247401bbd42fa10a31c9c89d781537de55a09e53adbad3cf79bf185"
+    },
+    {
+      "asset_id": "player_idle_left",
+      "destination": "assets/sprites/overworld/player_idle_left.png",
+      "source_sprite": "spr_player_walkleft",
+      "source_frame": 1,
+      "source_frame_id": "ac4f3fa1-ea9d-478a-b2cf-1094a5328e75",
+      "width": 16,
+      "height": 16,
+      "sha256": "a7b0540723822c3895491e0c2f59f8d9e0863b89b3a6230c956d521e760f83c5"
+    },
+    {
+      "asset_id": "player_idle_right",
+      "destination": "assets/sprites/overworld/player_idle_right.png",
+      "source_sprite": "spr_player_walkright",
+      "source_frame": 1,
+      "source_frame_id": "fab1e3f2-34de-4fa6-8a4a-7a389c1ce19b",
+      "width": 16,
+      "height": 16,
+      "sha256": "6b14a788a6b117dc745349642f00786eecf49d2afffb02d9c556a92dbffed1a6"
+    },
+    {
+      "asset_id": "cat_idle1",
+      "destination": "assets/sprites/overworld/cat_idle1.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 1,
+      "source_frame_id": "bcc90c75-3a30-4cae-a178-7437523a1a6a",
+      "width": 16,
+      "height": 16,
+      "sha256": "38aff71d3ec76593c5bd97ccbd8c5d249132c3b81c391e28d4c28aa722b6ce90"
+    },
+    {
+      "asset_id": "cat_idle2",
+      "destination": "assets/sprites/overworld/cat_idle2.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 2,
+      "source_frame_id": "94fcbefe-e797-4fb0-b2e8-e104814800b9",
+      "width": 16,
+      "height": 16,
+      "sha256": "c567cbfc88fb7e371e2f21e3d9fa05e3eb28b014531e6150ac941c0bf6f5b9cc"
+    },
+    {
+      "asset_id": "cat_idle3",
+      "destination": "assets/sprites/overworld/cat_idle3.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 3,
+      "source_frame_id": "c95b0ff0-5361-4ff5-8e15-507c4f251507",
+      "width": 16,
+      "height": 16,
+      "sha256": "99c1b55d7830dc2393b593e1247e2e884dd0c4d4284ef35e4a7eb5d59aa2c6f5"
+    },
+    {
+      "asset_id": "cat_idle4",
+      "destination": "assets/sprites/overworld/cat_idle4.png",
+      "source_sprite": "spr_cat_idle",
+      "source_frame": 4,
+      "source_frame_id": "78c803d8-2b7a-4004-a7d2-9d597399b028",
+      "width": 16,
+      "height": 16,
+      "sha256": "5cb811c9463e0e633677b7be8f50d8b6529fa712ba8046abdf98340450f05cba"
+    },
+    {
+      "asset_id": "cat_walk_down1",
+      "destination": "assets/sprites/overworld/cat_walk_down1.png",
+      "source_sprite": "spr_cat_walk_down",
+      "source_frame": 1,
+      "source_frame_id": "4b6c0351-312f-4a07-a594-c48846c80a95",
+      "width": 16,
+      "height": 16,
+      "sha256": "7e72d22f607d0dceae03dbb3e11a5079588340d543c497095956f0668042923b"
+    },
+    {
+      "asset_id": "cat_walk_down2",
+      "destination": "assets/sprites/overworld/cat_walk_down2.png",
+      "source_sprite": "spr_cat_walk_down",
+      "source_frame": 2,
+      "source_frame_id": "f6e82952-29af-49e9-8cc7-abdf9f80cc6a",
+      "width": 16,
+      "height": 16,
+      "sha256": "99a5ccb81f4cb6cd39fe96cee639a4121feff881272d8cd61edd3ac7cbab8b1a"
+    },
+    {
+      "asset_id": "cat_walk_up1",
+      "destination": "assets/sprites/overworld/cat_walk_up1.png",
+      "source_sprite": "spr_cat_walk_up",
+      "source_frame": 1,
+      "source_frame_id": "126d2412-0bf8-46d6-a48d-37da8e5759bf",
+      "width": 16,
+      "height": 16,
+      "sha256": "75004bb65016a9d85e7995fe3f4c7520fa9c5d741bdb19fca954f34b3b4ad095"
+    },
+    {
+      "asset_id": "cat_walk_up2",
+      "destination": "assets/sprites/overworld/cat_walk_up2.png",
+      "source_sprite": "spr_cat_walk_up",
+      "source_frame": 2,
+      "source_frame_id": "b53d7d85-c942-4924-b970-022f77b76d23",
+      "width": 16,
+      "height": 16,
+      "sha256": "c7268483b2f5bd3b12808b92754e3a12e5b07a569fc18f3da8ea66fa4844dfba"
+    },
+    {
+      "asset_id": "cat_walk_left1",
+      "destination": "assets/sprites/overworld/cat_walk_left1.png",
+      "source_sprite": "spr_cat_walk_left",
+      "source_frame": 1,
+      "source_frame_id": "5887d3c4-c24f-4637-aadf-ebccbfc46db9",
+      "width": 16,
+      "height": 16,
+      "sha256": "f6436a3b7a04a90be2ca6903b608acc771716999d21ad676f06f27405e26a6a5"
+    },
+    {
+      "asset_id": "cat_walk_left2",
+      "destination": "assets/sprites/overworld/cat_walk_left2.png",
+      "source_sprite": "spr_cat_walk_left",
+      "source_frame": 2,
+      "source_frame_id": "4415ccba-569f-4812-a891-eb4121c128b6",
+      "width": 16,
+      "height": 16,
+      "sha256": "fe6b124252efdffd3d83448aab7c1abc0893010624fb4b9eb6690762743cc88a"
+    },
+    {
+      "asset_id": "cat_walk_right1",
+      "destination": "assets/sprites/overworld/cat_walk_right1.png",
+      "source_sprite": "spr_cat_walk_right",
+      "source_frame": 1,
+      "source_frame_id": "a8ea53ce-150b-49ae-a2a6-3cc648b8a344",
+      "width": 16,
+      "height": 16,
+      "sha256": "31b1494bb4c203e924a33ca3e7c9c28ccf8812250cad6d07010ff0e1bf198c47"
+    },
+    {
+      "asset_id": "cat_walk_right2",
+      "destination": "assets/sprites/overworld/cat_walk_right2.png",
+      "source_sprite": "spr_cat_walk_right",
+      "source_frame": 2,
+      "source_frame_id": "68cd8cb9-deda-471b-a9d3-2c7d0f8aef30",
+      "width": 16,
+      "height": 16,
+      "sha256": "8c4b13eaf94edffaadf1091cd0b6f7647b2fc9b4786a693f677071f32e42b55c"
+    },
+    {
+      "asset_id": "actor_crack",
+      "destination": "assets/sprites/overworld/actor_crack.png",
+      "source_sprite": "spr_wall_crack_opening",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "73809c3dd24b97454eb0cf59ce4d9f73b61b389ad35dfca0c947454d4f87b37c"
+    },
+    {
+      "asset_id": "actor_crack_resolved",
+      "destination": "assets/sprites/overworld/actor_crack_resolved.png",
+      "source_sprite": "spr_wall_crack_opening",
+      "source_frame": 2,
+      "source_frame_id": "657fa8d3-c318-4296-81db-a502272716a1",
+      "width": 16,
+      "height": 16,
+      "sha256": "3372502e4809b664777839ea424b06225b9921050f22656549ada966545298a3"
+    },
+    {
+      "asset_id": "actor_crack_bone_demon_revealed",
+      "destination": "assets/sprites/overworld/actor_crack_bone_demon_revealed.png",
+      "source_sprite": "spr_wall_crack_skeleton",
+      "source_frame": 3,
+      "source_frame_id": "04c4e64c-b553-4fba-87b3-36fd7ca18cdd",
+      "width": 16,
+      "height": 16,
+      "sha256": "226c3c94e7c46f9a2abe8216330193dfd1e5e6a4368ef13ea019df803af963b0"
+    },
+    {
+      "asset_id": "actor_crack_zombie_revealed",
+      "destination": "assets/sprites/overworld/actor_crack_zombie_revealed.png",
+      "source_sprite": "spr_wall_crack_zombie",
+      "source_frame": 3,
+      "source_frame_id": "11a3ecde-75a7-42cb-9578-52ea510ab005",
+      "width": 16,
+      "height": 16,
+      "sha256": "3c32ad41117fbc7f485c96a64ea1d574c56f787c85ab1bbd9c4a936d3c0d7153"
+    },
+    {
+      "asset_id": "actor_pipe",
+      "destination": "assets/sprites/overworld/actor_pipe.png",
+      "source_sprite": "spr_wall_pipe_porthole",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "2672ce43089c8c810b5e0461debef33afda7dd45791d47b95912eaad99dc1c89"
+    },
+    {
+      "asset_id": "actor_pipe_shovel",
+      "destination": "assets/sprites/overworld/actor_pipe_shovel.png",
+      "source_sprite": "spr_wall_pipe_porthole_shovel",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "bb9c762d4426bc1b7b06d2553c3c8794d0bc8aa980390530b9cad57eee5aa2f7"
+    },
+    {
+      "asset_id": "actor_surgery_table",
+      "destination": "assets/sprites/overworld/actor_surgery_table.png",
+      "source_sprite": "spr_surgery_table",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 32,
+      "height": 48,
+      "sha256": "98b2b9c4d21bc111ee451902c9aa971bc179b3683b43e9668e0eea5e7a904a47"
+    },
+    {
+      "asset_id": "actor_bloody_table",
+      "destination": "assets/sprites/overworld/actor_bloody_table.png",
+      "source_sprite": "spr_bloody_table",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 32,
+      "height": 32,
+      "sha256": "b866c0938f57d583925741325851a45283d61539bdff27951dacc6545166d3f2"
+    },
+    {
+      "asset_id": "actor_blood_buckets",
+      "destination": "assets/sprites/overworld/actor_blood_buckets.png",
+      "source_sprite": "spr_blood_buckets",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "c87d394220ab3e0d59859d2ea21014b60d80feecfaddfec4c0791bd075f2b2f9"
+    },
+    {
+      "asset_id": "actor_st_andrews_cross",
+      "destination": "assets/sprites/overworld/actor_st_andrews_cross.png",
+      "source_sprite": "spr_st_andrews_cross",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "f1127c292474e382ab72fcc6bd25221adce8dd262bf86c3fa662d921d95a4c62"
+    },
+    {
+      "asset_id": "actor_basement_door",
+      "destination": "assets/sprites/overworld/actor_basement_door.png",
+      "source_sprite": "spr_basement_door",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "93bf90e450c8562ef6160f1caff3fc01134b6adcee217f4d877b499be6e106db"
+    },
+    {
+      "asset_id": "item_shovel",
+      "destination": "assets/sprites/overworld/item_shovel.png",
+      "source_sprite": "spr_shovel",
+      "source_frame": 1,
+      "source_frame_id": "06051060-6823-4ba6-99a8-df875d903f98",
+      "width": 17,
+      "height": 16,
+      "sha256": "68122c17d92c7b1ec2e22557ab417acf5441c7775c1dbf666cf0442628261bc7"
+    },
+    {
+      "asset_id": "item_rusty_key",
+      "destination": "assets/sprites/overworld/item_rusty_key.png",
+      "source_sprite": "spr_key",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "4c4b7f5e83c064abde7b95e8fb0a5c4ff9f37668d65fc337a6c5f19f37fc2bec"
+    },
+    {
+      "asset_id": "item_wrench",
+      "destination": "assets/sprites/overworld/item_wrench.png",
+      "source_sprite": "spr_wrench",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "9f2d709692c7ce281376aa435a9c5fe1999ee0544f3602a2c1710378b2d152ca"
+    },
+    {
+      "asset_id": "item_bolt_cutters",
+      "destination": "assets/sprites/overworld/item_bolt_cutters.png",
+      "source_sprite": "spr_bolt_cutters",
+      "source_frame": 1,
+      "source_frame_id": "65c17068-4804-4f49-91c0-4a14e4e849f2",
+      "width": 16,
+      "height": 16,
+      "sha256": "14c427f2a41429a4f11646405fb0f18f95aa1be31071111a20c44cce61b38ab7"
+    },
+    {
+      "asset_id": "item_blindfold",
+      "destination": "assets/sprites/overworld/item_blindfold.png",
+      "source_sprite": "spr_blindfold",
+      "source_frame": 1,
+      "source_frame_id": "c301a952-0e2e-48f4-8052-229920e1ecf4",
+      "width": 16,
+      "height": 16,
+      "sha256": "a20ec1123bcc178b26bd41ee943b315f93db98e08935a7a0c034c9a0b6347c04"
+    },
+    {
+      "asset_id": "item_devils_brush",
+      "destination": "assets/sprites/overworld/item_devils_brush.png",
+      "source_sprite": "spr_devils_brush",
+      "source_frame": 1,
+      "source_frame_id": "870cc0da-026f-4f1a-aaea-2ca714f6ee3a",
+      "width": 16,
+      "height": 16,
+      "sha256": "07d02128819aeca2a5204dd78fbdaf8fbefb8d7c26b1caab45b23ff27006ff88"
+    },
+    {
+      "asset_id": "actor_mad_butcher",
+      "destination": "assets/sprites/overworld/actor_mad_butcher.png",
+      "source_sprite": "spr_murderer",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "6112ca6157d8763dacb85db3820dfe8ea250e6ae3c43c81966f03d32fa2e5a29"
+    },
+    {
+      "asset_id": "actor_bone_demon",
+      "destination": "assets/sprites/overworld/actor_bone_demon.png",
+      "source_sprite": "spr_demon_skull",
+      "source_frame": 1,
+      "source_frame_id": "f712404d-899c-441d-b88b-43c4b2b32c29",
+      "width": 16,
+      "height": 16,
+      "sha256": "546220f444c94fa6b79b01f45bef8992d796c7b924efc9e807d2cefebf4a934a"
+    },
+    {
+      "asset_id": "actor_blood_demon",
+      "destination": "assets/sprites/overworld/actor_blood_demon.png",
+      "source_sprite": "spr_blood_demon",
+      "source_frame": 1,
+      "source_frame_id": "dbd0b8b1-853b-4287-a33c-9e88a0fa378f",
+      "width": 16,
+      "height": 16,
+      "sha256": "d0068a20d5d24af63df45ab04b075692a7ee0febc2e3c9336453a5ae300982c3"
+    },
+    {
+      "asset_id": "basement_background",
+      "destination": "assets/reference/legacy/basement_background.png",
+      "source_sprite": "spr_demon_basement_bg",
+      "source_frame": 1,
+      "source_frame_id": "b9d8c80e-779a-4400-a783-ba27fba08037",
+      "width": 304,
+      "height": 384,
+      "sha256": "65d85fd2c6bc867ec88778b78ec6fdadbc9b1532d66c9bda952a333eceff33d9"
+    },
+    {
+      "asset_id": "basement_actor_layout",
+      "destination": "assets/reference/legacy/basement_actor_layout.png",
+      "source_sprite": "spr_demon_basement_actors",
+      "source_frame": 1,
+      "source_frame_id": "8d8943e9-87bb-462e-850d-e1d3ebf13de2",
+      "width": 304,
+      "height": 384,
+      "sha256": "0aa198dee14722c00133343d7123ee77cd5b841f359186794595aaeeebce37a0"
+    },
+    {
+      "asset_id": "basement_mockup",
+      "destination": "assets/reference/legacy/basement_mockup.png",
+      "source_sprite": "spr_demon_basement_mockup",
+      "source_frame": 1,
+      "source_frame_id": "5a9021c9-9ef6-45dd-8e48-d91e1b4523f0",
+      "width": 304,
+      "height": 384,
+      "sha256": "461b6ed8534d49c3b8362a0c0b59c4f7255a564d721ba8d6a7203b634afdc88a"
+    }
+  ]
+}
+
+```
+
+## assets/reference/legacy/basement_actor_layout.png
+
+Binary file; contents omitted.
+
+## assets/reference/legacy/basement_background.png
+
+Binary file; contents omitted.
+
+## assets/reference/legacy/basement_background_32.png
+
+Binary file; contents omitted.
+
+## assets/reference/legacy/basement_mockup.png
+
+Binary file; contents omitted.
 
 ## assets/sprites/bodyparts/placeholder_healthy.png
 
@@ -227,11 +863,15 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
+## assets/sprites/combat/blood_symbol.png
+
+Binary file; contents omitted.
+
 ## assets/sprites/combat/blood_symbol_outline.png
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/blood_symbol.png
+## assets/sprites/combat/bp_card.png
 
 Binary file; contents omitted.
 
@@ -260,10 +900,6 @@ Binary file; contents omitted.
 Binary file; contents omitted.
 
 ## assets/sprites/combat/bp_card_wounded.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/bp_card.png
 
 Binary file; contents omitted.
 
@@ -315,19 +951,19 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/combat_confirm_chit_hover.aseprite
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/combat_confirm_chit_hover.png
-
-Binary file; contents omitted.
-
 ## assets/sprites/combat/combat_confirm_chit.aseprite
 
 Binary file; contents omitted.
 
 ## assets/sprites/combat/combat_confirm_chit.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit_hover.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/combat_confirm_chit_hover.png
 
 Binary file; contents omitted.
 
@@ -399,6 +1035,26 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
+## assets/sprites/combat/die-hatch1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die-hatch4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/die_rim.png
+
+Binary file; contents omitted.
+
 ## assets/sprites/combat/die_rim_locked1.png
 
 Binary file; contents omitted.
@@ -435,7 +1091,7 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/die_rim.png
+## assets/sprites/combat/die_row_guideline.aseprite
 
 Binary file; contents omitted.
 
@@ -447,7 +1103,7 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/die_row_guideline.aseprite
+## assets/sprites/combat/die_socket.png
 
 Binary file; contents omitted.
 
@@ -487,31 +1143,7 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/die_socket.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/die-hatch1.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/die-hatch2.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/die-hatch3.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/die-hatch4.png
-
-Binary file; contents omitted.
-
 ## assets/sprites/combat/empty_die.png
-
-Binary file; contents omitted.
-
-## assets/sprites/combat/heart_point_depleted.png
 
 Binary file; contents omitted.
 
@@ -523,7 +1155,7 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/lightning_symbol_outline.png
+## assets/sprites/combat/heart_point_depleted.png
 
 Binary file; contents omitted.
 
@@ -531,11 +1163,15 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/shield_symbol_outline.png
+## assets/sprites/combat/lightning_symbol_outline.png
 
 Binary file; contents omitted.
 
 ## assets/sprites/combat/shield_symbol.png
+
+Binary file; contents omitted.
+
+## assets/sprites/combat/shield_symbol_outline.png
 
 Binary file; contents omitted.
 
@@ -547,11 +1183,11 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/sword_symbol_outline.png
+## assets/sprites/combat/sword_symbol.png
 
 Binary file; contents omitted.
 
-## assets/sprites/combat/sword_symbol.png
+## assets/sprites/combat/sword_symbol_outline.png
 
 Binary file; contents omitted.
 
@@ -560,18 +1196,6 @@ Binary file; contents omitted.
 Binary file; contents omitted.
 
 ## assets/sprites/icons/sword_symbol.png
-
-Binary file; contents omitted.
-
-## assets/sprites/overworld/basement_mock_1-Sheet.aseprite
-
-Binary file; contents omitted.
-
-## assets/sprites/overworld/basement_mock_1-Sheet.png
-
-Binary file; contents omitted.
-
-## assets/sprites/overworld/basement_mock_1.aseprite
 
 Binary file; contents omitted.
 
@@ -590,6 +1214,230 @@ selection or stable asset IDs; do not copy GameMaker's UUID-named PNGs manually.
 Import provenance and hashes live in `assets/legacy/`.
 
 ```
+
+## assets/sprites/overworld/actor_basement_door.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_blood_buckets.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_blood_demon.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_bloody_table.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_bone_demon.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_crack.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_crack_bone_demon_revealed.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_crack_resolved.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_crack_zombie_revealed.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_mad_butcher.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_pipe.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_pipe_shovel.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_st_andrews_cross.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/actor_surgery_table.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_background_32-sheet.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_mock_1-Sheet.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_mock_1-Sheet.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/basement_mock_1.aseprite
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_idle1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_idle2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_idle3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_idle4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_down1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_down2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_left1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_left2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_right1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_right2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_up1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/cat_walk_up2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_blindfold.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_bolt_cutters.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_devils_brush.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_rusty_key.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_shovel.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/item_wrench.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_idle_down.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_idle_left.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_idle_right.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_idle_up.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_down1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_down2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_down3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_down4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_left1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_left2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_left3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_left4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_right1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_right2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_right3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_right4.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_up1.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_up2.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_up3.png
+
+Binary file; contents omitted.
+
+## assets/sprites/overworld/player_walk_up4.png
+
+Binary file; contents omitted.
 
 ## assets/sprites/ui/dialog_box_frame.aseprite
 
@@ -647,6 +1495,16 @@ Binary file; contents omitted.
 
 Binary file; contents omitted.
 
+## assets/tiled_raw/BasementBackground.tsx
+
+```tsx
+<?xml version="1.0" encoding="UTF-8"?>
+<tileset version="1.10" tiledversion="1.12.1" name="BasementBackground" tilewidth="32" tileheight="32" tilecount="63" columns="63">
+ <image source="../sprites/overworld/basement_background_32-sheet.png" width="2016" height="32"/>
+</tileset>
+
+```
+
 ## assets/tiled_raw/Basement_1.tsx
 
 ```tsx
@@ -681,25 +1539,33 @@ Binary file; contents omitted.
 
 ```
 {
-    "activeFile": "untitled.tmx",
+    "activeFile": "basement_1.tmx",
     "expandedProjectPaths": [
         "."
     ],
     "fileStates": {
         "BasementBackground.tsx": {
-            "scaleInDock": 1,
+            "scaleInDock": 0.9631,
             "scaleInEditor": 0.5
         },
         "Basement_1.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 1.54
         },
+        "basement_1.tmx": {
+            "scale": 8.9155,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 375.918344456284,
+                "y": 249.1727889630419
+            }
+        },
         "untitled.tmx": {
-            "scale": 1.0603,
+            "scale": 1.2953,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 228.2372913326417,
-                "y": 141.94096010563044
+                "x": 470.93337450783605,
+                "y": 248.20504902339235
             }
         }
     },
@@ -708,15 +1574,714 @@ Binary file; contents omitted.
     "map.lastUsedFormat": "tmx",
     "openFiles": [
         "BasementBackground.tsx",
-        "untitled.tmx"
+        "basement_1.tmx"
     ],
     "project": "ITD.tiled-project",
     "recentFiles": [
         "BasementBackground.tsx",
+        "basement_1.tmx",
         "untitled.tmx",
         "Basement_1.tsx"
     ],
     "tileset.lastUsedFormat": "tsx"
+}
+
+```
+
+## assets/tiled_raw/basement_1.tmx
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="22" height="17" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="17">
+ <properties>
+  <property name="camera_lock_anchor" value="camera_start"/>
+  <property name="camera_unlock_flag" value="basement.passage_open"/>
+  <property name="camera_zoom" value="close"/>
+  <property name="room_id" value="basement_1"/>
+ </properties>
+ <tileset firstgid="1" source="BasementBackground.tsx"/>
+ <layer id="1" name="ground" width="22" height="17">
+  <data encoding="csv">
+53,2,3,4,5,6,7,8,9,9,9,9,9,9,9,9,9,9,9,9,10,53,
+53,11,12,13,14,15,16,18,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,20,21,22,23,24,25,18,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,26,27,28,29,30,31,18,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,33,34,35,36,37,38,18,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,39,40,41,42,43,44,18,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,39,53,53,53,53,53,17,18,18,18,18,18,18,18,18,18,18,18,18,19,53,
+53,45,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,46,49,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,50,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,53,56,53,
+53,61,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,62,63,53
+</data>
+ </layer>
+ <layer id="2" name="collision" width="22" height="17">
+  <data encoding="csv">
+60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,0,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,51,
+60,60,60,60,60,60,60,60,0,60,60,0,60,60,0,60,60,60,60,60,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,60,0,
+60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,60,0
+</data>
+ </layer>
+ <objectgroup id="3" name="actors">
+  <object id="1" name="crack_passage" type="crack" x="255.993" y="224" width="32" height="32">
+   <properties>
+    <property name="on_tool_use.flag" value="basement.passage_open"/>
+    <property name="on_tool_use.message" value="You dig through the wall. Cold air pours through the opening."/>
+    <property name="on_tool_use.target_room" value="basement_ritual_room"/>
+    <property name="on_tool_use.tool" value="shovel"/>
+    <property name="on_tool_use.type" value="passage"/>
+    <property name="resolved_asset_id" value="actor_crack_resolved"/>
+   </properties>
+  </object>
+  <object id="2" name="crack_bone_demon" type="crack" x="351.993" y="223.987" width="32" height="32">
+   <properties>
+    <property name="on_tool_use.encounter_id" value="basement.bone_demon"/>
+    <property name="on_tool_use.message" value="You dig into a hollow behind the wall. Bones click awake."/>
+    <property name="on_tool_use.tool" value="shovel"/>
+    <property name="on_tool_use.type" value="encounter"/>
+    <property name="resolved_asset_id" value="actor_crack_bone_demon_revealed"/>
+   </properties>
+  </object>
+  <object id="3" name="crack_zombie" type="crack" x="448.001" y="223.989" width="32" height="32">
+   <properties>
+    <property name="on_tool_use.encounter_id" value="basement.zombie"/>
+    <property name="on_tool_use.message" value="You dig through the wall. Something stirs in the dark."/>
+    <property name="on_tool_use.tool" value="shovel"/>
+    <property name="on_tool_use.type" value="encounter"/>
+    <property name="resolved_asset_id" value="actor_crack_zombie_revealed"/>
+   </properties>
+  </object>
+  <object id="5" name="whispering_wall" type="message" x="543.996" y="223.99" width="32" height="32">
+   <properties>
+    <property name="dialog" value="data.dialog.basement"/>
+    <property name="dialog_id" value="whispering_wall"/>
+   </properties>
+  </object>
+  <object id="6" name="pipe_shovel" type="pipe" x="608.008" y="288.001" width="32" height="32">
+   <properties>
+    <property name="empty_message" value="An empty drainage pipe."/>
+    <property name="item" value="shovel"/>
+    <property name="message" value="Found: shovel!"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="4" name="regions">
+  <object id="7" name="start" type="spawn" x="512.146" y="320.144" width="31.7366" height="31.7708"/>
+  <object id="8" name="tools" type="spawn" x="352.006" y="288.003" width="31.9682" height="31.9619"/>
+  <object id="9" name="hidden_dark" type="spawn" x="288.022" y="320.013" width="31.9546" height="31.9506"/>
+  <object id="10" name="boss_ready" type="spawn" x="384.002" y="128.002" width="31.9924" height="31.9911"/>
+  <object id="11" name="camera_start" type="camera_anchor" x="336" y="352" width="32" height="32"/>
+ </objectgroup>
+</map>
+
+```
+
+## assets/tiled_raw/basement_background_32.json
+
+```json
+{ "frames": [
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 128, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 160, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 192, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 224, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 256, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 288, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 320, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 352, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 384, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 416, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 448, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 480, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 512, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 544, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 576, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 608, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 640, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 672, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 704, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 736, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 768, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 800, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 832, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 864, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 896, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 928, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 960, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 992, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1024, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1056, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1088, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1120, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1152, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1184, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1216, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1248, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1280, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1312, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1344, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1376, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1408, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1440, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1472, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1504, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1536, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1568, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1600, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1632, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1664, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1696, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1728, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1760, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1792, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1824, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1856, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1888, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1920, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1952, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   },
+   {
+    "filename": "basement_background_32.png",
+    "frame": { "x": 1984, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.15.4-arm64",
+  "image": "basement_background_32-sheet.png",
+  "format": "RGBA8888",
+  "size": { "w": 2016, "h": 32 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+  ],
+  "slices": [
+  ]
+ }
 }
 
 ```
@@ -1011,6 +2576,117 @@ return Combatant
 
 ```
 
+## combat/crests.lua
+
+```lua
+local Symbols = require("core.symbols")
+
+local Crests = {}
+
+Crests.ORDER = {
+    "Valor",
+    "Shadow"
+}
+
+local ALIASES = {
+    valor = "Valor",
+    valour = "Valor",
+    shadow = "Shadow"
+}
+
+Crests.DEFINITIONS = {
+    Valor = {
+        id = "Valor",
+        name = "Valor",
+        description = "Spend to add ATK to the next die you assign.",
+        expend = function(_, combatant)
+            if combatant and combatant.add_next_symbol then
+                combatant:add_next_symbol(Symbols.STRIKE)
+            end
+
+            return {
+                type = "valor",
+                symbol = Symbols.STRIKE
+            }
+        end
+    },
+
+    Shadow = {
+        id = "Shadow",
+        name = "Shadow",
+        description = "Spend to make slots you open this round shroud their source Body Part.",
+        expend = function(_, combatant)
+            if combatant then
+                combatant.shadow_slot_shroud = true
+            end
+
+            return {
+                type = "shadow"
+            }
+        end
+    }
+}
+
+function Crests.normalize(crest)
+    if crest == nil then
+        return nil
+    end
+
+    local text = tostring(crest)
+    return ALIASES[text:lower()] or text
+end
+
+function Crests.definition(crest)
+    return Crests.DEFINITIONS[Crests.normalize(crest)]
+end
+
+function Crests.is_known(crest)
+    return Crests.definition(crest) ~= nil
+end
+
+function Crests.describe(crest)
+    local definition = Crests.definition(crest)
+    if not definition then
+        return "Unknown crest: " .. tostring(crest)
+    end
+
+    return definition.description
+end
+
+function Crests.validate_name(errors, path, crest)
+    if not Crests.is_known(crest) then
+        table.insert(errors, tostring(path) .. " references unknown crest " .. tostring(crest))
+    end
+end
+
+function Crests.expend(engine, combatant, crest)
+    local canonical = Crests.normalize(crest)
+    local definition = Crests.DEFINITIONS[canonical]
+
+    if not combatant or not canonical then
+        return false, "invalid_crest"
+    end
+
+    if not definition then
+        return false, "crest_not_implemented"
+    end
+
+    if not combatant.get_crest_count or combatant:get_crest_count(canonical) <= 0 then
+        return false, "crest_empty"
+    end
+
+    combatant:remove_crest(canonical, 1)
+
+    local effect = definition.expend and definition.expend(engine, combatant) or { type = canonical:lower() }
+    effect.crest = canonical
+
+    return true, canonical, effect
+end
+
+return Crests
+
+```
+
 ## combat/events.lua
 
 ```lua
@@ -1032,6 +2708,7 @@ local Events = {
     SLOT_TRIGGERED = "slot_triggered",
     SLOT_RESOLVED = "slot_resolved",
     SLOT_CHARGE_VENTED = "slot_charge_vented",
+    SLOT_COST_CHANGED = "slot_cost_changed",
     SPELLMARK_OPENED = "spellmark_opened",
     SPELLMARK_RESOLVED = "spellmark_resolved",
     KEYWORD_TRIGGERED = "keyword_triggered",
@@ -1298,9 +2975,7 @@ local PROFILES = {
         charged_slot_bonus = 12,
         preferred_slots = {
             speak_doom = 24,
-            ["Speak Doom"] = 24,
-            bonestorm = 24,
-            Bonestorm = 24
+            bonestorm = 24
         },
         preferred_sockets = {
             bone_demon_skull = 28,
@@ -1315,6 +2990,38 @@ local PROFILES = {
             healthy = 0
         },
         defend_charged_slot_bonus = 16
+    },
+
+    mad_butcher = {
+        base = "aggressive",
+        weights = {
+            rim = 46,
+            socket = 4,
+            slot = 38
+        },
+        symbol_values = {
+            strike = 13,
+            ward = 4,
+            slot = 10
+        },
+        fill_slot_bonus = 20,
+        charged_slot_bonus = 8,
+        preferred_slots = {
+            sadism = 10,
+            stitch_up = 26,
+            regenerate = 4
+        },
+        target_status_bonus = {
+            wounded = 34,
+            healthy = 0
+        },
+        defend_status_bonus = {
+            wounded = 0,
+            healthy = 0
+        },
+        complete_idle_effect_penalty = -120,
+        matching_status_slot_bonus = 18,
+        heal_wounded_slot_bonus = 40
     }
 }
 
@@ -1429,7 +3136,7 @@ local function preferred_slot_bonus(profile, slot)
     end
 
     local preferred = profile.preferred_slots or {}
-    return preferred[slot.id] or preferred[slot.name] or 0
+    return preferred[slot.id] or 0
 end
 
 local function preferred_socket_bonus(profile, part)
@@ -1459,13 +3166,28 @@ local function most_damaged_part(combatant)
     return wounded or maimed
 end
 
-local function healing_effect_bonus(profile, combatant, source_part, effect)
+local function healing_target(combatant, source_part, effect)
+    local target_mode = effect.target or "most_damaged"
+    if target_mode == "source_part" then
+        return source_part
+    elseif target_mode == "part_type" then
+        local wanted = tostring(effect.target_type or ""):upper()
+        for _, part in ipairs(combatant and combatant.body_parts or {}) do
+            if tostring(part.type or ""):upper() == wanted and part.status ~= "maimed" then
+                return part
+            end
+        end
+        return nil
+    end
+    return most_damaged_part(combatant)
+end
+
+local function healing_effect_bonus(profile, combatant, source_part, effect, will_fill)
     if Effects.normalize_type(effect) ~= "heal_part" then
         return 0
     end
 
-    local target_mode = effect.target or "most_damaged"
-    local target_part = target_mode == "source_part" and source_part or most_damaged_part(combatant)
+    local target_part = healing_target(combatant, source_part, effect)
     local status = target_part and target_part.status or "healthy"
 
     if status == "maimed" then
@@ -1474,13 +3196,37 @@ local function healing_effect_bonus(profile, combatant, source_part, effect)
         return profile.heal_wounded_slot_bonus or 0
     end
 
-    return profile.heal_healthy_slot_penalty or 0
+    if will_fill then
+        return profile.complete_idle_effect_penalty or profile.heal_healthy_slot_penalty or 0
+    end
+    return 0
 end
 
-local function slot_effect_bonus(profile, combatant, part)
+local function status_effect_bonus(engine, profile, combatant, effect, will_fill)
+    if Effects.normalize_type(effect) ~= "add_symbol_against_status" then
+        return 0
+    end
+
+    local opponent = engine and engine:get_opponent(combatant)
+    local wanted = tostring(effect.target_status or "wounded"):lower()
+    local matches = 0
+    for _, part in ipairs(opponent and opponent.body_parts or {}) do
+        if tostring(part.status or ""):lower() == wanted then
+            matches = matches + 1
+        end
+    end
+
+    if matches == 0 and will_fill then
+        return profile.complete_idle_effect_penalty or 0
+    end
+    return matches * (profile.matching_status_slot_bonus or 0)
+end
+
+local function slot_effect_bonus(engine, profile, combatant, part, will_fill)
     local total = 0
     for _, effect in ipairs(Effects.actions(part and part.slot and part.slot.effect or {})) do
-        total = total + healing_effect_bonus(profile, combatant, part, effect)
+        total = total + healing_effect_bonus(profile, combatant, part, effect, will_fill)
+        total = total + status_effect_bonus(engine, profile, combatant, effect, will_fill)
     end
     return total
 end
@@ -1514,7 +3260,7 @@ local function score_socket(profile, symbols, part)
         + preferred_socket_bonus(profile, part)
 end
 
-local function score_slot(profile, combatant, symbols, part)
+local function score_slot(engine, profile, combatant, symbols, part)
     local lit_count, remaining_before = slot_feed_match_count(part, symbols)
     if lit_count <= 0 then
         return nil
@@ -1522,13 +3268,14 @@ local function score_slot(profile, combatant, symbols, part)
 
     local weights = profile.weights or {}
     local values = profile.symbol_values or {}
+    local will_fill = remaining_before > 0 and lit_count >= remaining_before
     local score = (weights.slot or 0)
         + lit_count * (values.slot or 0)
         + slot_charge_count(part) * (profile.charged_slot_bonus or 0)
         + preferred_slot_bonus(profile, part and part.slot)
-        + slot_effect_bonus(profile, combatant, part)
+        + slot_effect_bonus(engine, profile, combatant, part, will_fill)
 
-    if remaining_before > 0 and lit_count >= remaining_before then
+    if will_fill then
         score = score + (profile.fill_slot_bonus or 0)
     end
 
@@ -1550,8 +3297,6 @@ end
 local function score_die_moves(engine, combatant, die, profile)
     local destinations = engine:get_valid_destinations(combatant, die)
     local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
-    local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
-    local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
     local best = nil
 
     for _, part in ipairs(destinations.slots or {}) do
@@ -1559,11 +3304,12 @@ local function score_die_moves(engine, combatant, die, profile)
             kind = "slot",
             die = die,
             part = part,
-            score = score_slot(profile, combatant, slot_symbols, part)
+            score = score_slot(engine, profile, combatant, slot_symbols, part)
         })
     end
 
     for _, part in ipairs(destinations.rims or {}) do
+        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim", part)
         best = consider(best, {
             kind = "rim",
             die = die,
@@ -1573,6 +3319,7 @@ local function score_die_moves(engine, combatant, die, profile)
     end
 
     for _, part in ipairs(destinations.sockets or {}) do
+        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket", part)
         best = consider(best, {
             kind = "socket",
             die = die,
@@ -1612,19 +3359,18 @@ function AI.choose_next_allocation(engine, combatant)
     for _, die in ipairs(engine:get_pool(combatant)) do
         local destinations = engine:get_valid_destinations(combatant, die)
         local slot_symbols = engine:get_effective_symbols(combatant, die, "slot")
-        local rim_symbols = engine:get_effective_symbols(combatant, die, "rim")
-        local socket_symbols = engine:get_effective_symbols(combatant, die, "socket")
 
         for _, part in ipairs(destinations.slots or {}) do
             best = consider(best, {
                 kind = "slot",
                 die = die,
                 part = part,
-                score = score_slot(profile, combatant, slot_symbols, part)
+                score = score_slot(engine, profile, combatant, slot_symbols, part)
             })
         end
 
         for _, part in ipairs(destinations.rims or {}) do
+            local rim_symbols = engine:get_effective_symbols(combatant, die, "rim", part)
             best = consider(best, {
                 kind = "rim",
                 die = die,
@@ -1634,6 +3380,7 @@ function AI.choose_next_allocation(engine, combatant)
         end
 
         for _, part in ipairs(destinations.sockets or {}) do
+            local socket_symbols = engine:get_effective_symbols(combatant, die, "socket", part)
             best = consider(best, {
                 kind = "socket",
                 die = die,
@@ -1697,6 +3444,10 @@ local VALID_TIMINGS = {
     upkeep = true
 }
 
+local VALID_DYNAMIC_COSTS = {
+    opponent_damaged_parts = true
+}
+
 local PART_KEYWORDS = {
     Armored = true,
     Brittle = true,
@@ -1755,6 +3506,7 @@ local function normalize_slot(slot)
     for _, symbol in ipairs(slot.cost or {}) do
         table.insert(normalized.cost, Symbols.normalize(symbol))
     end
+    normalized.base_cost = copy_table(normalized.cost)
 
     if Keywords.collection_has(normalized.keywords, "Hungry") or normalized.keyword == "Hungry" then
         normalized.hungry = true
@@ -1762,6 +3514,34 @@ local function normalize_slot(slot)
 
     normalized.timing = (normalized.timing or "spend"):lower()
     return normalized
+end
+
+local function validate_dynamic_cost(errors, slot_id, slot)
+    local rule = slot.dynamic_cost
+    if rule == nil then
+        return
+    end
+
+    if type(rule) ~= "table" then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost must be a table")
+        return
+    end
+
+    if not VALID_DYNAMIC_COSTS[rule.type] then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost has invalid type " .. tostring(rule.type))
+    end
+
+    local minimum = tonumber(rule.minimum or 1)
+    if not minimum or minimum < 1 or math.floor(minimum) ~= minimum then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.minimum must be a positive integer")
+    elseif type(slot.cost) == "table" and minimum > #slot.cost then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.minimum cannot exceed base cost")
+    end
+
+    local per_part = tonumber(rule.per_part or 1)
+    if not per_part or per_part < 1 or math.floor(per_part) ~= per_part then
+        add_error(errors, "slot " .. tostring(slot_id) .. ".dynamic_cost.per_part must be a positive integer")
+    end
 end
 
 local function validate_keywords(errors, owner_id, source, allowed)
@@ -1842,6 +3622,7 @@ local function validate_slot(errors, slot_id, slot)
 
     validate_keywords(errors, "slot " .. tostring(slot_id), slot.keyword, SLOT_KEYWORDS)
     validate_keywords(errors, "slot " .. tostring(slot_id), slot.keywords, SLOT_KEYWORDS)
+    validate_dynamic_cost(errors, slot_id, slot)
     Effects.validate(slot.effect or { type = "none" }, "slot " .. tostring(slot_id) .. ".effect", errors)
 end
 
@@ -1982,6 +3763,783 @@ return Demo
 
 ```
 
+## combat/v2_effects.lua
+
+```lua
+local Crests = require("combat.crests")
+local Symbols = require("core.symbols")
+
+local Effects = {}
+
+local PART_TYPES = {
+    HEAD = true,
+    BODY = true,
+    ARM = true,
+    LEG = true
+}
+
+local VALID_SYMBOLS = {
+    [Symbols.STRIKE] = true,
+    [Symbols.WARD] = true,
+    [Symbols.ESSENCE] = true,
+    [Symbols.BLOOD] = true,
+    [Symbols.BLANK] = true
+}
+
+local DESTINATIONS = {
+    any = true,
+    socket = true,
+    rim = true,
+    slot = true
+}
+
+local ASSIGN_DESTINATIONS = {
+    socket = true,
+    rim = true
+}
+
+local TARGET_SIDES = {
+    self = true,
+    opponent = true,
+    enemy = true
+}
+
+local HEAL_TARGETS = {
+    source_part = true,
+    most_damaged = true,
+    part_type = true
+}
+
+local ALIASES = {
+    channel_symbol = "add_symbol_to_matching_dice",
+    auto_assign_symbol = "assign_symbol_to_each_part",
+    spellmark = "open_spellmark",
+    damage_target_part = "damage_marked_part",
+    damage_assigned_part = "damage_marked_part"
+}
+
+Effects.EDITOR_ORDER = {
+    "none",
+    "add_next_symbol",
+    "channel_symbol",
+    "assign_symbol_to_each_part",
+    "open_spellmark",
+    "heal_part",
+    "add_symbol_against_status",
+    "damage_opponent_part",
+    "gain_crest"
+}
+
+Effects.EDITOR_LABELS = {
+    none = "none",
+    add_next_symbol = "next",
+    channel_symbol = "channel",
+    assign_symbol_to_each_part = "auto assign",
+    open_spellmark = "spellmark",
+    heal_part = "heal",
+    add_symbol_against_status = "status +",
+    damage_opponent_part = "damage BP",
+    gain_crest = "crest"
+}
+
+local function amount_or_default(value, default)
+    local numeric = tonumber(value)
+    if not numeric or numeric < 1 then
+        return default or 1
+    end
+    return math.floor(numeric)
+end
+
+local function normalize_destination(destination)
+    local value = destination and tostring(destination):lower()
+    if value == "sockets" then
+        return "socket"
+    elseif value == "rims" then
+        return "rim"
+    elseif value == "slots" then
+        return "slot"
+    end
+    return value
+end
+
+local function display_symbol(symbol, fallback)
+    local normalized = Symbols.normalize(symbol or fallback)
+    return normalized and Symbols.display(normalized) or "symbol"
+end
+
+local function step_word(amount)
+    return amount_or_default(amount, 1) == 1 and "step" or "steps"
+end
+
+local function target_text(target)
+    local value = tostring(target or "self")
+    if value == "self" then
+        return "allied"
+    elseif value == "opponent" or value == "enemy" then
+        return "opposing"
+    end
+    return value
+end
+
+local function validate_amount(errors, path, value)
+    local numeric = tonumber(value)
+    if value ~= nil and (not numeric or numeric < 1 or math.floor(numeric) ~= numeric) then
+        table.insert(errors, tostring(path) .. ".amount must be a positive integer")
+    end
+end
+
+local function validate_symbol(errors, path, value, required)
+    if value == nil then
+        if required then
+            table.insert(errors, tostring(path) .. " is missing a symbol")
+        end
+        return
+    end
+
+    local normalized = Symbols.normalize(value)
+    if not normalized or not VALID_SYMBOLS[normalized] then
+        table.insert(errors, tostring(path) .. " has invalid symbol " .. tostring(value))
+    end
+end
+
+local function validate_destination(errors, path, value, allowed)
+    if value == nil then
+        return
+    end
+
+    local normalized = normalize_destination(value)
+    local valid = allowed or DESTINATIONS
+    if not valid[normalized] then
+        table.insert(errors, tostring(path) .. " has invalid destination " .. tostring(value))
+    end
+end
+
+local function validate_target_side(errors, path, value)
+    if value == nil then
+        return
+    end
+
+    local normalized = tostring(value):lower()
+    if not TARGET_SIDES[normalized] then
+        table.insert(errors, tostring(path) .. " has invalid target " .. tostring(value))
+    end
+end
+
+local function validate_part_type(errors, path, value)
+    if value == nil then
+        return
+    end
+
+    local normalized = tostring(value):upper()
+    if not PART_TYPES[normalized] then
+        table.insert(errors, tostring(path) .. " has invalid Body Part type " .. tostring(value))
+    end
+end
+
+local function normalize_heal_target(target)
+    return target and tostring(target):lower() or "most_damaged"
+end
+
+local function validate_heal_target(errors, path, value)
+    local normalized = normalize_heal_target(value)
+    if not HEAL_TARGETS[normalized] then
+        table.insert(errors, tostring(path) .. " has invalid healing target " .. tostring(value))
+    end
+end
+
+local function is_action_container(effect)
+    return type(effect) == "table"
+        and (type(effect.actions) == "table" or type(effect.sequence) == "table" or (type(effect[1]) == "table" and effect.type == nil))
+end
+
+local DEFINITIONS = {}
+
+DEFINITIONS.none = {
+    describe = function()
+        return "No effect."
+    end,
+    execute = function(_, _, effect)
+        return { type = effect.type or "none" }
+    end
+}
+
+DEFINITIONS.gain_crest = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        local crest = Crests.normalize(effect.crest or "Valor")
+        return "Gain " .. tostring(amount) .. " " .. tostring(crest) .. " crest" .. (amount == 1 and "." or "s.")
+    end,
+    validate = function(effect, path, errors)
+        Crests.validate_name(errors, path .. ".crest", effect.crest or "Valor")
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(engine, entry, effect)
+        local amount = amount_or_default(effect.amount, 1)
+        local crest = Crests.normalize(effect.crest or "Valor")
+        engine:grant_crest(entry.combatant, crest, amount, { source = "slot", slot = entry.slot })
+
+        return {
+            type = "gain_crest",
+            crest = crest,
+            amount = amount
+        }
+    end
+}
+
+DEFINITIONS.heal_part = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        local target = normalize_heal_target(effect.target)
+        local target_text = target == "source_part" and "this Body Part"
+            or target == "part_type" and ("the allied " .. tostring(effect.target_type or "Body Part"):upper())
+            or "the most damaged allied Body Part"
+        return "Heal " .. target_text .. " " .. tostring(amount) .. " " .. step_word(amount) .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_heal_target(errors, path .. ".target", effect.target)
+        if normalize_heal_target(effect.target) == "part_type" then
+            validate_part_type(errors, path .. ".target_type", effect.target_type)
+            if effect.target_type == nil then
+                table.insert(errors, tostring(path) .. ".target_type is required for part_type healing")
+            end
+        end
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(engine, entry, effect)
+        local amount = amount_or_default(effect.amount, 1)
+        local target = normalize_heal_target(effect.target)
+        local target_part = target == "source_part"
+            and entry.part
+            or target == "part_type" and engine:find_part_by_type(entry.combatant, effect.target_type)
+            or engine:find_most_damaged_part(entry.combatant)
+
+        return {
+            type = "heal_part",
+            target = target,
+            target_part = target_part,
+            amount = amount,
+            healed = engine:apply_healing(entry.combatant, entry.combatant, target_part, amount, {
+                source = "slot",
+                slot = entry.slot
+            })
+        }
+    end
+}
+
+DEFINITIONS.add_symbol_against_status = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        return "Dice showing "
+            .. display_symbol(effect.match or effect.match_symbol, Symbols.STRIKE)
+            .. " gain "
+            .. tostring(amount)
+            .. " "
+            .. display_symbol(effect.symbol, Symbols.STRIKE)
+            .. " against "
+            .. tostring(effect.target_status or "wounded")
+            .. " Body Parts."
+    end,
+    validate = function(effect, path, errors)
+        validate_symbol(errors, path .. ".match", effect.match or effect.match_symbol or Symbols.STRIKE)
+        validate_symbol(errors, path .. ".symbol", effect.symbol or Symbols.STRIKE)
+        validate_destination(errors, path .. ".destination", effect.destination or "rim", ASSIGN_DESTINATIONS)
+        validate_amount(errors, path, effect.amount)
+        local status = tostring(effect.target_status or "wounded"):lower()
+        if status ~= "healthy" and status ~= "wounded" then
+            table.insert(errors, tostring(path) .. ".target_status must be healthy or wounded")
+        end
+    end,
+    execute = function(_, entry, effect)
+        local symbol = Symbols.normalize(effect.symbol or Symbols.STRIKE)
+        local match = Symbols.normalize(effect.match or effect.match_symbol or Symbols.STRIKE)
+        local amount = amount_or_default(effect.amount, 1)
+        local target_status = tostring(effect.target_status or "wounded"):lower()
+
+        entry.combatant:add_allocation_symbol_modifier({
+            match = match,
+            symbol = symbol,
+            amount = amount,
+            destination = effect.destination or "rim",
+            target_status = target_status,
+            source = {
+                type = "slot",
+                slot = entry.slot,
+                part = entry.part
+            }
+        })
+
+        return {
+            type = "add_symbol_against_status",
+            match = match,
+            symbol = symbol,
+            amount = amount,
+            destination = normalize_destination(effect.destination or "rim"),
+            target_status = target_status
+        }
+    end
+}
+
+DEFINITIONS.add_next_symbol = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        return "Next die gains " .. tostring(amount) .. " " .. display_symbol(effect.symbol, Symbols.STRIKE) .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_symbol(errors, path .. ".symbol", effect.symbol or Symbols.STRIKE)
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(_, entry, effect)
+        local symbol = Symbols.normalize(effect.symbol or Symbols.STRIKE)
+        local amount = amount_or_default(effect.amount, 1)
+
+        if entry.combatant and entry.combatant.add_next_symbol then
+            for _ = 1, amount do
+                entry.combatant:add_next_symbol(symbol)
+            end
+        end
+
+        return {
+            type = "add_next_symbol",
+            symbol = symbol,
+            amount = amount
+        }
+    end
+}
+
+DEFINITIONS.add_symbol_to_matching_dice = {
+    describe = function(effect)
+        local destination = effect.destination and (" on " .. tostring(normalize_destination(effect.destination))) or ""
+        return "Dice showing "
+            .. display_symbol(effect.match or effect.match_symbol or effect.source_symbol, Symbols.ESSENCE)
+            .. " gain "
+            .. display_symbol(effect.symbol or effect.add_symbol, Symbols.STRIKE)
+            .. destination
+            .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_symbol(errors, path .. ".match", effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE)
+        validate_symbol(errors, path .. ".symbol", effect.symbol or effect.add_symbol or Symbols.STRIKE)
+        validate_destination(errors, path .. ".destination", effect.destination)
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(_, entry, effect)
+        local symbol = Symbols.normalize(effect.symbol or effect.add_symbol or Symbols.STRIKE)
+        local match = Symbols.normalize(effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE)
+        local amount = amount_or_default(effect.amount, 1)
+
+        if entry.combatant and entry.combatant.add_allocation_symbol_modifier and symbol then
+            entry.combatant:add_allocation_symbol_modifier({
+                match = match,
+                symbol = symbol,
+                amount = amount,
+                destination = effect.destination,
+                source = {
+                    type = "slot",
+                    slot = entry.slot,
+                    part = entry.part
+                }
+            })
+        end
+
+        return {
+            type = "add_symbol_to_matching_dice",
+            match = match,
+            symbol = symbol,
+            amount = amount,
+            destination = normalize_destination(effect.destination)
+        }
+    end
+}
+
+DEFINITIONS.assign_symbol_to_each_part = {
+    describe = function(effect)
+        local destination = normalize_destination(effect.destination) or "socket"
+        return "Assign "
+            .. display_symbol(effect.symbol, destination == "rim" and Symbols.STRIKE or Symbols.WARD)
+            .. " to each open "
+            .. target_text(effect.target or effect.target_side)
+            .. " "
+            .. destination
+            .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_destination(errors, path .. ".destination", effect.destination or "socket", ASSIGN_DESTINATIONS)
+        validate_target_side(errors, path .. ".target", effect.target or effect.target_side)
+        validate_symbol(errors, path .. ".symbol", effect.symbol)
+        validate_part_type(errors, path .. ".part_type", effect.part_type)
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(engine, entry, effect)
+        return engine:auto_assign_symbols(entry, effect)
+    end
+}
+
+DEFINITIONS.open_spellmark = {
+    describe = function(effect)
+        local destination = normalize_destination(effect.destination) or "rim"
+        local symbol = display_symbol(effect.symbol or effect.accept_symbol, Symbols.ESSENCE)
+        local target_type = effect.target_type or effect.part_type
+        local target_text = target_type and (" " .. tostring(target_type):upper()) or ""
+        local payload = effect.on_mark or effect.payload or effect.effect
+        local payload_text = payload and Effects.describe(payload) or "No payload."
+        return "Open a " .. destination .. target_text .. " spellmark accepting " .. symbol .. "; " .. payload_text
+    end,
+    validate = function(effect, path, errors)
+        validate_destination(errors, path .. ".destination", effect.destination or "rim", ASSIGN_DESTINATIONS)
+        validate_target_side(errors, path .. ".target", effect.target or effect.target_side)
+        validate_symbol(errors, path .. ".symbol", effect.symbol or effect.accept_symbol or Symbols.ESSENCE)
+        validate_part_type(errors, path .. ".target_type", effect.target_type or effect.part_type)
+        Effects.validate(effect.on_mark or effect.payload or effect.effect or { type = "none" }, path .. ".on_mark", errors)
+    end,
+    execute = function(engine, entry, effect)
+        return engine:open_spellmark(entry, effect)
+    end
+}
+
+DEFINITIONS.damage_opponent_part = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        local target = effect.target_type and tostring(effect.target_type):upper() or "Body Part"
+        return "Damage opponent " .. target .. " " .. tostring(amount) .. " " .. step_word(amount) .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_part_type(errors, path .. ".target_type", effect.target_type)
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function(engine, entry, effect)
+        local opponent = engine:get_opponent(entry.combatant)
+        local target_part = nil
+        local target_type = effect.target_type
+
+        if effect.target_part_id and opponent then
+            target_part = opponent:get_body_part_by_id(effect.target_part_id)
+        end
+
+        if not target_type and effect.target == "head" then
+            target_type = "HEAD"
+        end
+
+        if not target_part then
+            for _, part in ipairs(opponent and opponent.body_parts or {}) do
+                if not target_type or tostring(part.type or ""):upper() == tostring(target_type):upper() then
+                    target_part = part
+                    break
+                end
+            end
+        end
+
+        local result = {
+            type = "damage_opponent_part",
+            target_part = target_part,
+            amount = amount_or_default(effect.amount, 1),
+            damaged = false
+        }
+
+        for _ = 1, result.amount do
+            if target_part and target_part.status ~= "maimed" then
+                result.damaged = engine:apply_damage(entry.combatant, opponent, target_part, {
+                    source = "slot",
+                    slot = entry.slot,
+                    effect = effect
+                }) or result.damaged
+            end
+        end
+
+        return result
+    end
+}
+
+DEFINITIONS.damage_marked_part = {
+    describe = function(effect)
+        local amount = amount_or_default(effect.amount, 1)
+        return "Damage the marked Body Part " .. tostring(amount) .. " " .. step_word(amount) .. "."
+    end,
+    validate = function(effect, path, errors)
+        validate_amount(errors, path, effect.amount)
+    end,
+    execute = function()
+        return {
+            type = "damage_marked_part",
+            damaged = false
+        }
+    end
+}
+
+Effects.DEFINITIONS = DEFINITIONS
+
+function Effects.normalize_type(effect_or_type)
+    local raw = type(effect_or_type) == "table" and effect_or_type.type or effect_or_type
+    if raw == nil then
+        return "none"
+    end
+
+    local text = tostring(raw):lower()
+    return ALIASES[text] or text
+end
+
+function Effects.editor_type(effect_or_type)
+    local normalized = Effects.normalize_type(effect_or_type)
+    if normalized == "add_symbol_to_matching_dice" then
+        return "channel_symbol"
+    end
+    return normalized
+end
+
+function Effects.is_known(effect_or_type)
+    return DEFINITIONS[Effects.normalize_type(effect_or_type)] ~= nil
+end
+
+function Effects.actions(effect)
+    if type(effect) ~= "table" then
+        return {}
+    end
+
+    if type(effect.actions) == "table" then
+        return effect.actions
+    elseif type(effect.sequence) == "table" then
+        return effect.sequence
+    elseif type(effect[1]) == "table" and effect.type == nil then
+        return effect
+    end
+
+    return { effect }
+end
+
+function Effects.describe(effect)
+    if type(effect) ~= "table" then
+        return "No effect."
+    end
+
+    local actions = Effects.actions(effect)
+    if is_action_container(effect) then
+        if #actions == 0 then
+            return "No effect."
+        elseif #actions == 1 then
+            return Effects.describe(actions[1])
+        end
+
+        local descriptions = {}
+        for _, action in ipairs(actions) do
+            table.insert(descriptions, Effects.describe(action))
+        end
+        return "Sequence: " .. table.concat(descriptions, " ")
+    end
+
+    local effect_type = Effects.normalize_type(effect)
+    local definition = DEFINITIONS[effect_type]
+    if definition and definition.describe then
+        return definition.describe(effect)
+    end
+
+    return "Unknown effect: " .. tostring(effect.type or "unknown") .. "."
+end
+
+function Effects.validate(effect, path, errors)
+    errors = errors or {}
+    path = path or "effect"
+
+    if effect == nil then
+        return errors
+    end
+
+    if type(effect) == "function" then
+        return errors
+    end
+
+    if type(effect) ~= "table" then
+        table.insert(errors, tostring(path) .. " must be a table")
+        return errors
+    end
+
+    local actions = Effects.actions(effect)
+    if is_action_container(effect) then
+        for index, action in ipairs(actions) do
+            Effects.validate(action, path .. ".actions[" .. tostring(index) .. "]", errors)
+        end
+        return errors
+    end
+
+    local effect_type = Effects.normalize_type(effect)
+    local definition = DEFINITIONS[effect_type]
+    if not definition then
+        table.insert(errors, tostring(path) .. " has unknown effect type " .. tostring(effect.type))
+        return errors
+    end
+
+    if definition.validate then
+        definition.validate(effect, path, errors)
+    end
+
+    return errors
+end
+
+function Effects.execute(engine, entry, effect)
+    effect = effect or {}
+    local effect_type = Effects.normalize_type(effect)
+    local definition = DEFINITIONS[effect_type] or DEFINITIONS.none
+    return definition.execute(engine, entry, effect)
+end
+
+return Effects
+
+```
+
+## combat/v2_encounters.lua
+
+```lua
+local Combatant = require("combat.combatant")
+local Content = require("combat.v2_content")
+
+local Encounters = {}
+
+Encounters.DEFAULT_ID = "debug.demo"
+Encounters.DEFAULT_MODULE = "data.combat.alpha_basement"
+
+local DREAMFORM_SLOT_ORDER = {
+    "head",
+    "body",
+    "arm_l",
+    "arm_r",
+    "leg_l",
+    "leg_r"
+}
+
+local FALLBACK_ENCOUNTER = {
+    id = Encounters.DEFAULT_ID,
+    name = "Debug Bone Demon",
+    module = Encounters.DEFAULT_MODULE,
+    player_loadout = "player_demo",
+    enemy_loadout = "bone_demon"
+}
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
+
+local function encounter_registry()
+    local ok, registry = pcall(require, "data.combat.encounters")
+    if ok and type(registry) == "table" then
+        return registry
+    end
+
+    return {}
+end
+
+local function normalize_encounter(raw, id)
+    local encounter = copy_table(raw or FALLBACK_ENCOUNTER)
+    encounter.id = encounter.id or id or Encounters.DEFAULT_ID
+    encounter.encounter_id = encounter.encounter_id or encounter.id
+    encounter.module = encounter.module or Encounters.DEFAULT_MODULE
+    encounter.player_loadout = encounter.player_loadout or "player_demo"
+    encounter.enemy_loadout = encounter.enemy_loadout or "enemy_demo"
+    return encounter
+end
+
+local function build_player_from_run(definitions, run, fallback_loadout)
+    if not (run and run.dreamform and run.parts) then
+        return Content.build_combatant(definitions, fallback_loadout or "player_demo")
+    end
+
+    local combatant = Combatant:new({
+        id = "player",
+        name = "Dreamer",
+        is_player = true,
+        crest_pool = copy_table(run.crest_pool or {}),
+        heart_points = run.heart_points or 3
+    })
+
+    for _, slot in ipairs(DREAMFORM_SLOT_ORDER) do
+        local instance_id = run.dreamform[slot]
+        local instance = instance_id and run.parts[instance_id]
+        if instance and instance.def_id and definitions.parts and definitions.parts[instance.def_id] then
+            local part = Content.build_part(definitions, instance.def_id)
+            part.instance_id = instance_id
+            part.dreamform_slot = slot
+            part.status = instance.status or "healthy"
+            combatant:add_body_part(part)
+        end
+    end
+
+    if #combatant.body_parts == 0 then
+        return Content.build_combatant(definitions, fallback_loadout or "player_demo")
+    end
+
+    return combatant
+end
+
+function Encounters.resolve(encounter_id)
+    local registry = encounter_registry()
+    local id = encounter_id or Encounters.DEFAULT_ID
+    local raw = registry[id]
+    if not raw and encounter_id ~= nil then
+        error("Unknown v2 combat encounter: " .. tostring(encounter_id))
+    end
+
+    raw = raw or registry[Encounters.DEFAULT_ID] or FALLBACK_ENCOUNTER
+    return normalize_encounter(raw, id)
+end
+
+function Encounters.load_definitions(encounter)
+    return Content.load_module((encounter and encounter.module) or Encounters.DEFAULT_MODULE)
+end
+
+function Encounters.create_combatants(context)
+    context = context or {}
+    local encounter_id = context.encounter_id or (context.encounter and context.encounter.encounter_id)
+    local encounter = Encounters.resolve(encounter_id)
+    local definitions = Encounters.load_definitions(encounter)
+
+    context.encounter = encounter
+
+    return
+        build_player_from_run(definitions, context.run, encounter.player_loadout),
+        Content.build_combatant(definitions, encounter.enemy_loadout)
+end
+
+function Encounters.validate()
+    local errors = {}
+
+    for encounter_id, encounter in pairs(encounter_registry()) do
+        if type(encounter) ~= "table" then
+            table.insert(errors, "encounter " .. tostring(encounter_id) .. " must be a table")
+        else
+            local module_name = encounter.module or Encounters.DEFAULT_MODULE
+            local ok, definitions_or_error = pcall(Content.load_module, module_name)
+            if not ok then
+                table.insert(errors, "encounter " .. tostring(encounter_id) .. " has invalid module " .. tostring(module_name)
+                    .. ": " .. tostring(definitions_or_error))
+            else
+                local definitions = definitions_or_error
+                local player_loadout = encounter.player_loadout or "player_demo"
+                local enemy_loadout = encounter.enemy_loadout or "enemy_demo"
+
+                if not (definitions.loadouts and definitions.loadouts[player_loadout]) then
+                    table.insert(errors, "encounter " .. tostring(encounter_id)
+                        .. " references unknown player loadout " .. tostring(player_loadout))
+                end
+                if not (definitions.loadouts and definitions.loadouts[enemy_loadout]) then
+                    table.insert(errors, "encounter " .. tostring(encounter_id)
+                        .. " references unknown enemy loadout " .. tostring(enemy_loadout))
+                end
+            end
+        end
+    end
+
+    return errors
+end
+
+return Encounters
+
+```
+
 ## combat/v2_engine.lua
 
 ```lua
@@ -2014,6 +4572,14 @@ local function copy_result_fields(target, source)
             target[key] = value
         end
     end
+end
+
+local function copy_fields(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do
+        copy[key] = value
+    end
+    return copy
 end
 
 local function amount_or_default(value, default)
@@ -2075,6 +4641,15 @@ local function modifier_matches_symbols(modifier, symbols)
     return Symbols.has(symbols, match)
 end
 
+local function modifier_matches_target(modifier, target_part)
+    local wanted = modifier and (modifier.target_status or modifier.part_status)
+    if not wanted then
+        return true
+    end
+
+    return target_part ~= nil and tostring(target_part.status or ""):lower() == tostring(wanted):lower()
+end
+
 local function default_spellmark_target(destination)
     return normalize_destination(destination) == "rim" and "opponent" or "self"
 end
@@ -2133,6 +4708,12 @@ local function rim_accepts_symbols(part, symbols)
     end
 
     return true
+end
+
+local function count_contest_symbol(assignment, symbol)
+    -- Resolution counts the full effective face. used/burned symbols describe
+    -- destination relevance for presentation and spellmarks, not a second tally.
+    return assignment and Symbols.count(assignment.symbols or {}, symbol) or 0
 end
 
 local function match_slot_feed(part, slot, symbols)
@@ -2241,7 +4822,8 @@ local function is_slot_filled(part, slot)
     return true
 end
 
-function Engine:new()
+function Engine:new(options)
+    options = options or {}
     local instance = {
         state = "WAITING",
         combatants = {},
@@ -2259,7 +4841,8 @@ function Engine:new()
         token_counter = 0,
         queue_counter = 0,
         spellmark_counter = 0,
-        untargetable_parts = setmetatable({}, { __mode = "k" })
+        untargetable_parts = setmetatable({}, { __mode = "k" }),
+        rng = options.rng
     }
 
     return setmetatable(instance, Engine)
@@ -2359,7 +4942,58 @@ end
 function Engine:perform_upkeep()
     self:clear_round_state()
     self:emit(Events.UPKEEP_PHASE, { round = self.current_round })
+    self:refresh_dynamic_slot_costs()
     self:resolve_slot_window(TIMING_UPKEEP)
+end
+
+function Engine:count_damaged_parts(combatant)
+    local count = 0
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == "wounded" or part.status == "maimed" then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+function Engine:refresh_dynamic_slot_costs()
+    for _, combatant in ipairs(self.combatants or {}) do
+        local opponent = self:get_opponent(combatant)
+        for _, part in ipairs(combatant.body_parts or {}) do
+            local slot = part.slot
+            local rule = slot and slot.dynamic_cost
+            if rule and rule.type == "opponent_damaged_parts" then
+                local base_cost = slot.base_cost or slot.cost or {}
+                slot.base_cost = slot.base_cost or copy_list(base_cost)
+
+                local minimum = math.max(1, math.floor(tonumber(rule.minimum) or 1))
+                local per_part = math.max(1, math.floor(tonumber(rule.per_part) or 1))
+                local damaged = self:count_damaged_parts(opponent)
+                local next_length = math.max(minimum, #slot.base_cost - damaged * per_part)
+                local previous_length = #(slot.cost or {})
+                local next_cost = {}
+                for index = 1, next_length do
+                    next_cost[index] = slot.base_cost[index]
+                end
+                slot.cost = next_cost
+
+                if previous_length ~= next_length then
+                    self:emit(Events.SLOT_COST_CHANGED, {
+                        combatant = combatant,
+                        part = part,
+                        slot = slot,
+                        previous_length = previous_length,
+                        current_length = next_length,
+                        damaged_parts = damaged
+                    })
+                end
+
+                if part:is_slot_online() and is_slot_filled(part, slot) then
+                    self:trigger_slot(combatant, part, slot)
+                end
+            end
+        end
+    end
 end
 
 function Engine:next_token_id()
@@ -2380,7 +5014,7 @@ function Engine:roll_all_dice()
         self.dice_pools[combatant] = {}
 
         for _, part in ipairs(combatant.body_parts or {}) do
-            local result = SymbolDie.roll(part)
+            local result = SymbolDie.roll(part, self.rng)
             local token = {
                 id = self:next_token_id(),
                 owner = combatant,
@@ -2434,14 +5068,16 @@ function Engine:remove_die_from_pool(combatant, die)
     return false
 end
 
-function Engine:get_effective_symbols(combatant, die, destination)
+function Engine:get_effective_symbols(combatant, die, destination, target_part)
     local base = die and die.symbols or {}
     local pending = combatant and combatant.get_pending_next_symbols and combatant:get_pending_next_symbols() or {}
     local added = copy_list(pending)
     local modifiers = combatant and combatant.get_allocation_symbol_modifiers and combatant:get_allocation_symbol_modifiers() or {}
 
     for _, modifier in ipairs(modifiers) do
-        if modifier_applies_to_destination(modifier, destination) and modifier_matches_symbols(modifier, base) then
+        if modifier_applies_to_destination(modifier, destination)
+            and modifier_matches_symbols(modifier, base)
+            and modifier_matches_target(modifier, target_part) then
             local symbol = modifier.symbol or modifier.add_symbol
             local amount = amount_or_default(modifier.amount, 1)
             for _, added_symbol in ipairs(repeated_symbol(symbol, amount)) do
@@ -2536,7 +5172,7 @@ function Engine:assign_die_to_socket(combatant, die_or_id, part_or_id)
         return false, "socket_full"
     end
 
-    local effective, added = self:get_effective_symbols(combatant, die, "socket")
+    local effective, added = self:get_effective_symbols(combatant, die, "socket", part)
     local used, burned, spellmark = self:classify_destination_symbols(combatant, "socket", part, effective)
     if not Symbols.has(effective, Symbols.WARD) and not spellmark then
         return false, "no_ward"
@@ -2590,7 +5226,7 @@ function Engine:assign_die_to_rim(attacker, die_or_id, target_part_or_id)
         return false, "rim_full"
     end
 
-    local effective, added = self:get_effective_symbols(attacker, die, "rim")
+    local effective, added = self:get_effective_symbols(attacker, die, "rim", target_part)
     local used, burned, spellmark = self:classify_destination_symbols(attacker, "rim", target_part, effective)
     if not Symbols.has(effective, Symbols.STRIKE) and not spellmark then
         return false, "no_strike"
@@ -2782,12 +5418,13 @@ function Engine:remove_slot_entry(entry)
     end
 end
 
-function Engine:resolve_slot_window(timing)
+function Engine:resolve_slot_window(timing, trigger_context)
     local normalized = timing and timing:lower()
     local pending = {}
+    local trigger_part = trigger_context and trigger_context.part
 
     for _, entry in ipairs(self.slot_queue or {}) do
-        if entry.timing == normalized then
+        if entry.timing == normalized and (not trigger_part or entry.part == trigger_part) then
             table.insert(pending, entry)
         end
     end
@@ -2795,6 +5432,7 @@ function Engine:resolve_slot_window(timing)
     table.sort(pending, function(a, b) return (a.order or 0) < (b.order or 0) end)
 
     for _, entry in ipairs(pending) do
+        entry.trigger_context = trigger_context
         self:resolve_slot_entry(entry)
     end
 end
@@ -3021,7 +5659,7 @@ function Engine:resolve_slot_entry(entry)
 
     local effect = entry.effect or {}
     local result = {
-        type = effect.type or "none"
+        type = type(effect) == "table" and (effect.type or "none") or "custom"
     }
 
     if type(effect) == "function" then
@@ -3047,7 +5685,8 @@ function Engine:resolve_slot_entry(entry)
         combatant = entry.combatant,
         part = entry.part,
         slot = entry.slot,
-        effect = result
+        effect = result,
+        trigger_context = entry.trigger_context
     })
 
     if self.state ~= "COMPLETE" and self:check_combat_end() then
@@ -3126,6 +5765,10 @@ function Engine:find_most_damaged_part(combatant)
     end
 
     return wounded or maimed
+end
+
+function Engine:find_part_by_type(combatant, part_type)
+    return find_first_part_by_type(combatant, part_type)
 end
 
 function Engine:apply_healing(healer, target, part, amount, context)
@@ -3212,7 +5855,18 @@ function Engine:apply_damage(attacker, target, part, context)
         context = context
     })
 
-    self:resolve_slot_window(TIMING_ON_WOUND_MAIM)
+    local trigger_context = copy_fields(context)
+    trigger_context.attacker = attacker
+    trigger_context.target = target
+    trigger_context.part = part
+    trigger_context.status_before = before
+    trigger_context.status_after = after
+    trigger_context.heart_point_loss = heart_loss
+
+    if trigger_context.hit then
+        self:resolve_slot_window(TIMING_ON_HIT, trigger_context)
+    end
+    self:resolve_slot_window(TIMING_ON_WOUND_MAIM, trigger_context)
     return true
 end
 
@@ -3224,8 +5878,8 @@ function Engine:resolve_round()
         for _, part in ipairs(defender.body_parts or {}) do
             local attack = self.assignments.rims[part]
             local defense = self.assignments.sockets[part]
-            local strike_count = attack and Symbols.count(attack.symbols, Symbols.STRIKE) or 0
-            local ward_count = defense and Symbols.count(defense.symbols, Symbols.WARD) or 0
+            local strike_count = count_contest_symbol(attack, Symbols.STRIKE)
+            local ward_count = count_contest_symbol(defense, Symbols.WARD)
 
             if attack or defense then
                 self:emit(Events.PART_RESOLVED, {
@@ -3240,8 +5894,8 @@ function Engine:resolve_round()
             end
 
             if attack and strike_count > ward_count then
-                self:resolve_slot_window(TIMING_ON_HIT)
                 self:apply_damage(attack.attacker, defender, part, {
+                    hit = true,
                     attack = attack,
                     defense = defense,
                     strike_count = strike_count,
@@ -3302,12 +5956,11 @@ function Engine:get_valid_destinations(combatant, die_or_id)
         return destinations
     end
 
-    local socket_symbols = self:get_effective_symbols(combatant, die, "socket")
-    local rim_symbols = self:get_effective_symbols(combatant, die, "rim")
     local slot_symbols = self:get_effective_symbols(combatant, die, "slot")
     local opponent = self:get_opponent(combatant)
 
     for _, part in ipairs(combatant.body_parts or {}) do
+        local socket_symbols = self:get_effective_symbols(combatant, die, "socket", part)
         if part.status ~= "maimed" and not self.assignments.sockets[part] then
             local spellmark = self:get_assignment_spellmark(combatant, "socket", part, socket_symbols)
             if Symbols.has(socket_symbols, Symbols.WARD) or spellmark then
@@ -3318,6 +5971,7 @@ function Engine:get_valid_destinations(combatant, die_or_id)
 
     if opponent then
         for _, part in ipairs(opponent.body_parts or {}) do
+            local rim_symbols = self:get_effective_symbols(combatant, die, "rim", part)
             local spellmark = self:get_assignment_spellmark(combatant, "rim", part, rim_symbols)
             if is_part_targetable(self, part)
                 and not self.assignments.rims[part]
@@ -3750,7 +6404,7 @@ return Input
 ```lua
 local Save = {}
 
-Save.VERSION = 1
+Save.VERSION = 3
 Save.DEFAULT_PATH = "saves/slot1.lua"
 
 local function copy_table(source)
@@ -3883,8 +6537,12 @@ function Save.deserialize(source)
     end
 
     data.save_version = data.save_version or 0
-    if data.save_version > Save.VERSION then
-        return nil, "save version " .. tostring(data.save_version) .. " is newer than runtime version " .. tostring(Save.VERSION)
+    if data.save_version ~= Save.VERSION then
+        return nil, string.format(
+            "unsupported save version %s; expected %s",
+            tostring(data.save_version),
+            tostring(Save.VERSION)
+        )
     end
 
     data.profile = data.profile or {}
@@ -4169,6 +6827,488 @@ return Symbols
 
 ```
 
+## data/combat/alpha_basement.lua
+
+```lua
+local Symbols = require("core.symbols")
+
+local S = Symbols.STRIKE
+local W = Symbols.WARD
+local E = Symbols.ESSENCE
+local B = Symbols.BLOOD
+local O = Symbols.BLANK
+
+local function die(wound_a, wound_b, maim_a, maim_b, durable_a, durable_b)
+    return {
+        faces = {
+            wound_a,
+            wound_b,
+            maim_a,
+            maim_b,
+            durable_a,
+            durable_b
+        },
+        wound_faces = { 1, 2 },
+        maim_faces = { 3, 4 }
+    }
+end
+
+return {
+    slots = {
+        clarity = {
+            id = "clarity",
+            name = "Clarity",
+            cost = { E },
+            timing = "spend",
+            effect = {
+                type = "add_next_symbol",
+                symbol = S
+            }
+        },
+        recuperation = {
+            id = "recuperation",
+            name = "Recuperation",
+            cost = { B, B, B },
+            timing = "spend",
+            effect = {
+                type = "heal_part",
+                target = "most_damaged",
+                amount = 1
+            }
+        },
+        regenerate = {
+            id = "regenerate",
+            name = "Regrowth",
+            cost = { B },
+            timing = "spend",
+            effect = {
+                type = "heal_part",
+                target = "source_part",
+                amount = 1
+            }
+        },
+        bite = {
+            id = "bite",
+            name = "Bite",
+            cost = { B, B },
+            timing = "spend",
+            effect = {
+                type = "add_next_symbol",
+                symbol = S,
+                amount = 2
+            }
+        },
+        speak_doom = {
+            id = "speak_doom",
+            name = "Speak Doom",
+            cost = { E, E, E, E },
+            timing = "spend",
+            effect = {
+                type = "damage_opponent_part",
+                target_type = "HEAD",
+                amount = 1
+            }
+        },
+        bonestorm = {
+            id = "bonestorm",
+            name = "Bonestorm",
+            cost = { S, S, S, S },
+            timing = "spend",
+            effect = {
+                type = "assign_symbol_to_each_part",
+                destination = "rim",
+                target = "opponent",
+                symbol = S,
+                amount = 1
+            }
+        },
+        sadism = {
+            id = "sadism",
+            name = "Sadism",
+            cost = { S, S, S, S },
+            dynamic_cost = {
+                type = "opponent_damaged_parts",
+                minimum = 1,
+                per_part = 1
+            },
+            timing = "spend",
+            effect = {
+                type = "add_symbol_against_status",
+                match = S,
+                symbol = S,
+                amount = 1,
+                destination = "rim",
+                target_status = "wounded"
+            }
+        },
+        stitch_up = {
+            id = "stitch_up",
+            name = "Stitch Up",
+            cost = { B, B },
+            timing = "spend",
+            effect = {
+                type = "heal_part",
+                target = "part_type",
+                target_type = "HEAD",
+                amount = 1
+            }
+        }
+    },
+
+    parts = {
+        dreamer_head = {
+            id = "dreamer_head",
+            name = "Dreamer's Head",
+            flavor = "The part of you that knows this is a dream, however dimly.",
+            type = "HEAD",
+            hp_value = 3,
+            die = die(O, W, S, E, E, { E, E }),
+            slot = "clarity",
+            tags = { "LUCID" }
+        },
+        dreamer_body = {
+            id = "dreamer_body",
+            name = "Dreamer's Body",
+            flavor = "A sleeping shape that still remembers how to keep breathing.",
+            type = "BODY",
+            hp_value = 2,
+            die = die(W, S, W, { W, S }, { W, W }, { S, S }),
+            slot = "recuperation"
+        },
+        dreamer_fore_hand = {
+            id = "dreamer_fore_hand",
+            name = "Fore Hand",
+            flavor = "The steady hand. The strong arm.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(S, E, S, W, S, S)
+        },
+        dreamer_back_hand = {
+            id = "dreamer_back_hand",
+            name = "Back Hand",
+            flavor = "The sly hand. The casual motion.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(W, E, W, S, W, W)
+        },
+        dreamer_front_foot = {
+            id = "dreamer_front_foot",
+            name = "Front Foot",
+            flavor = "You try to put your best foot forward. It works about half the time.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(S, S, S, S, W, W)
+        },
+        dreamer_back_foot = {
+            id = "dreamer_back_foot",
+            name = "Back Foot",
+            flavor = "",
+            type = "LEG",
+            hp_value = 1,
+            die = die(S, S, W, W, W, W)
+        },
+
+        zombie_brain_pan = {
+            id = "zombie_brain_pan",
+            name = "Brain Pan",
+            flavor = "The dead thing behind its eyes has learned to bite.",
+            type = "HEAD",
+            hp_value = 3,
+            die = die(O, W, S, S, { S, W }, { S, S }),
+            slot = "bite"
+        },
+        zombie_rotting_ribcage = {
+            id = "zombie_rotting_ribcage",
+            name = "Rotting Ribcage",
+            flavor = "Its ruined chest closes around every fresh wound.",
+            type = "BODY",
+            hp_value = 2,
+            die = die(O, W, S, W, { W, W }, S),
+            slot = "regenerate"
+        },
+        zombie_right_arm = {
+            id = "zombie_right_arm",
+            name = "Dead Right Arm",
+            flavor = "A heavy arm that keeps remembering how to swing.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, W, S, S, S, { S, S }),
+            slot = "regenerate"
+        },
+        zombie_left_arm = {
+            id = "zombie_left_arm",
+            name = "Dead Left Arm",
+            flavor = "The fingers grope toward warmth.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, W, S, W, S, { S, W }),
+            slot = "regenerate"
+        },
+        zombie_right_leg = {
+            id = "zombie_right_leg",
+            name = "Stiff Right Leg",
+            flavor = "It drags, catches, and lurches forward again.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, W, O, S, W, S),
+            slot = "regenerate"
+        },
+        zombie_left_leg = {
+            id = "zombie_left_leg",
+            name = "Stiff Left Leg",
+            flavor = "The knee bends in several remembered directions.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, W, O, S, W, S),
+            slot = "regenerate"
+        },
+
+        bone_demon_skull = {
+            id = "bone_demon_skull",
+            name = "Demon Skull",
+            flavor = "It speaks with no tongue, and the words still arrive.",
+            type = "HEAD",
+            hp_value = 1,
+            die = die(E, E, W, E, { E, W }, E),
+            slot = "speak_doom"
+        },
+        bone_demon_rib_cage = {
+            id = "bone_demon_rib_cage",
+            name = "Hollow Ribcage",
+            flavor = "A dry cage around the storm waiting inside.",
+            type = "BODY",
+            hp_value = 2,
+            die = die(S, S, W, S, { S, W }, S),
+            slot = "bonestorm"
+        },
+        bone_demon_right_bare_bones = {
+            id = "bone_demon_right_bare_bones",
+            name = "Bare Bones",
+            flavor = "The fingers click together, counting toward the storm.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, S, W, S, { S, W }, S)
+        },
+        bone_demon_left_bare_bones = {
+            id = "bone_demon_left_bare_bones",
+            name = "Bare Bones",
+            flavor = "It points toward each place the bones will strike.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, S, W, S, { S, W }, S)
+        },
+        bone_demon_right_tentacle = {
+            id = "bone_demon_right_tentacle",
+            name = "Right Tentacle",
+            flavor = "A pale cord draws the words up from somewhere below.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, E, W, E, { E, W }, E)
+        },
+        bone_demon_left_tentacle = {
+            id = "bone_demon_left_tentacle",
+            name = "Left Tentacle",
+            flavor = "It knots itself around an invisible syllable.",
+            type = "LEG",
+            hp_value = 1,
+            die = die(O, E, W, E, { E, W }, E)
+        },
+
+        butcher_welding_mask = {
+            id = "butcher_welding_mask",
+            name = "Welding Mask",
+            flavor = "A blind iron grin, warm from somebody else's fear.",
+            type = "HEAD",
+            hp_value = 3,
+            die = die(O, S, S, B, { S, E }, S),
+            slot = "sadism"
+        },
+        butcher_broad_shoulders = {
+            id = "butcher_broad_shoulders",
+            name = "Broad Shoulders",
+            flavor = "The whole body stoops to keep the masked head upright.",
+            type = "BODY",
+            hp_value = 1,
+            die = die(O, B, E, B, { B, E }, W),
+            slot = "stitch_up"
+        },
+        butcher_hook_hand = {
+            id = "butcher_hook_hand",
+            name = "Hook Hand",
+            flavor = "It catches first. The pulling comes after.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, S, S, E, { S, S, S }, { S, S })
+        },
+        butcher_cleaver_arm = {
+            id = "butcher_cleaver_arm",
+            name = "Cleaver Arm",
+            flavor = "A practiced weight falls without hesitation.",
+            type = "ARM",
+            hp_value = 1,
+            die = die(O, S, E, S, { S, S }, { S, S })
+        }
+    },
+
+    loadouts = {
+        player_demo = {
+            id = "player",
+            name = "Dreamer",
+            is_player = true,
+            parts = {
+                "dreamer_head",
+                "dreamer_body",
+                "dreamer_fore_hand",
+                "dreamer_back_hand",
+                "dreamer_front_foot",
+                "dreamer_back_foot"
+            }
+        },
+        bone_demon = {
+            id = "enemy",
+            name = "Bone Demon",
+            ai_personality = "bone_caster",
+            parts = {
+                "bone_demon_skull",
+                "bone_demon_rib_cage",
+                "bone_demon_right_bare_bones",
+                "bone_demon_left_bare_bones",
+                "bone_demon_right_tentacle",
+                "bone_demon_left_tentacle"
+            }
+        },
+        zombie = {
+            id = "enemy",
+            name = "Zombie",
+            ai_personality = {
+                base = "balanced",
+                weights = {
+                    rim = 27,
+                    socket = 18,
+                    slot = 20
+                },
+                symbol_values = {
+                    strike = 9,
+                    ward = 7,
+                    slot = 9
+                },
+                fill_slot_bonus = 22,
+                preferred_slots = {
+                    regenerate = 8,
+                    bite = 14
+                }
+            },
+            parts = {
+                "zombie_brain_pan",
+                "zombie_rotting_ribcage",
+                "zombie_right_arm",
+                "zombie_left_arm",
+                "zombie_right_leg",
+                "zombie_left_leg"
+            }
+        },
+        mad_butcher = {
+            id = "enemy",
+            name = "Mad Butcher",
+            ai_personality = "mad_butcher",
+            parts = {
+                "butcher_welding_mask",
+                "butcher_broad_shoulders",
+                "butcher_hook_hand",
+                "butcher_cleaver_arm",
+                "zombie_right_leg",
+                "zombie_left_leg"
+            }
+        },
+        enemy_demo = {
+            id = "enemy",
+            name = "Bone Demon",
+            ai_personality = "bone_caster",
+            parts = {
+                "bone_demon_skull",
+                "bone_demon_rib_cage",
+                "bone_demon_right_bare_bones",
+                "bone_demon_left_bare_bones",
+                "bone_demon_right_tentacle",
+                "bone_demon_left_tentacle"
+            }
+        }
+    }
+}
+
+```
+
+## data/combat/content_index.lua
+
+```lua
+return {
+    modules = {
+        "data.combat.alpha_basement"
+    },
+
+    fixtures = {
+        "data.combat.v2_demo_parts"
+    }
+}
+
+```
+
+## data/combat/encounters.lua
+
+```lua
+return {
+    ["debug.demo"] = {
+        name = "Debug Bone Demon",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "bone_demon"
+    },
+
+    zombie = {
+        name = "Basement Corpse",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "zombie"
+    },
+
+    ["basement.zombie"] = {
+        name = "Basement Corpse",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "zombie"
+    },
+
+    bone_demon = {
+        name = "Bone Demon",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "bone_demon"
+    },
+
+    ["basement.bone_demon"] = {
+        name = "Bone Demon",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "bone_demon"
+    },
+
+    butcher = {
+        name = "Mad Butcher",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "mad_butcher"
+    },
+
+    ["basement.mad_butcher"] = {
+        name = "Mad Butcher",
+        module = "data.combat.alpha_basement",
+        player_loadout = "player_demo",
+        enemy_loadout = "mad_butcher"
+    }
+}
+
+```
+
 ## data/combat/v2_demo_parts.lua
 
 ```lua
@@ -4394,7 +7534,7 @@ return {
                 name = "Vengeance",
                 cost = { Symbols.BLOOD },
                 timing = "spend",
-                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1, duration = "allocation" }
+                effect = { type = "add_symbol_to_matching_dice", match = Symbols.ESSENCE, symbol = Symbols.STRIKE, amount = 1 }
             }
         },
         ["gaunt_cloak"] = {
@@ -4450,6 +7590,162 @@ return {
                 "bone_demon_rib_cage",
                 "bone_demon_right_claw",
                 "bone_demon_left_claw"
+            }
+        }
+    }
+}
+
+```
+
+## data/designer_scenarios.lua
+
+```lua
+return {
+    combat = {
+        {
+            id = "combat.zombie",
+            name = "Zombie",
+            description = "Baseline Regrowth and headshot-route encounter.",
+            encounter_id = "basement.zombie",
+            seed = 1101
+        },
+        {
+            id = "combat.bone_demon",
+            name = "Bone Demon",
+            description = "Baseline caster encounter with Speak Doom and Bonestorm.",
+            encounter_id = "basement.bone_demon",
+            seed = 2201
+        },
+        {
+            id = "combat.mad_butcher",
+            name = "Mad Butcher",
+            description = "Baseline boss route puzzle.",
+            encounter_id = "basement.mad_butcher",
+            seed = 3301
+        },
+        {
+            id = "combat.butcher_pressure",
+            name = "Butcher: Pressure",
+            description = "Two player wounds and two banked Sadism pips; Upkeep triggers Sadism.",
+            encounter_id = "basement.mad_butcher",
+            seed = 3302,
+            combat_setup = {
+                player = {
+                    statuses = {
+                        dreamer_fore_hand = "wounded",
+                        dreamer_back_foot = "wounded"
+                    }
+                },
+                enemy = {
+                    slot_charge = {
+                        butcher_welding_mask = { 1, 2 }
+                    }
+                }
+            }
+        }
+    },
+
+    overworld = {
+        {
+            id = "basement.start",
+            name = "Basement: Dark Start",
+            description = "Fresh isolated run at the beginning of the dream.",
+            room = "data.rooms.basement_1",
+            spawn = "start",
+            player = {
+                facing = "up"
+            }
+        },
+        {
+            id = "basement.tools",
+            name = "Basement: Tools Found",
+            description = "Flashlight and shovel acquired; flashlight equipped.",
+            room = "data.rooms.basement_1",
+            spawn = "tools",
+            player = {
+                facing = "up",
+                inventory = {
+                    flashlight = true,
+                    shovel = true
+                },
+                equipped = "flashlight"
+            },
+            flags = {
+                ["basement.flashlight_found"] = true,
+                ["basement.shovel_found"] = true
+            },
+            room_states = {
+                basement_1 = {
+                    pipe_shovel = { removed = true }
+                }
+            }
+        },
+        {
+            id = "basement.hidden_dark",
+            name = "Basement: Hidden Chamber",
+            description = "All cracks resolved; hidden chamber entered before the lights come on.",
+            room = "data.rooms.basement_1",
+            spawn = "hidden_dark",
+            player = {
+                facing = "down",
+                inventory = {
+                    flashlight = true,
+                    shovel = true
+                },
+                equipped = "flashlight"
+            },
+            flags = {
+                ["basement.flashlight_found"] = true,
+                ["basement.shovel_found"] = true,
+                ["basement.passage_open"] = true
+            },
+            encounters = {
+                ["basement.zombie"] = { resolved = true, last_outcome = "victory" },
+                ["basement.bone_demon"] = { resolved = true, last_outcome = "victory" }
+            },
+            room_states = {
+                basement_1 = {
+                    pipe_shovel = { removed = true },
+                    crack_zombie = { resolved = true },
+                    crack_bone_demon = { resolved = true },
+                    crack_passage = { resolved = true }
+                }
+            }
+        },
+        {
+            id = "basement.boss_ready",
+            name = "Basement: Boss Door",
+            description = "Murder basement lit, key acquired, and the exit ready for the Butcher beat.",
+            room = "data.rooms.basement_1",
+            spawn = "boss_ready",
+            player = {
+                facing = "down",
+                inventory = {
+                    flashlight = true,
+                    shovel = true,
+                    rusty_key = true
+                },
+                equipped = "rusty_key"
+            },
+            flags = {
+                ["basement.flashlight_found"] = true,
+                ["basement.shovel_found"] = true,
+                ["basement.passage_open"] = true,
+                ["basement.lights_on"] = true,
+                ["basement.key_found"] = true,
+                ["basement.boss_door_unlocked"] = true
+            },
+            encounters = {
+                ["basement.zombie"] = { resolved = true, last_outcome = "victory" },
+                ["basement.bone_demon"] = { resolved = true, last_outcome = "victory" }
+            },
+            room_states = {
+                basement_1 = {
+                    pipe_shovel = { removed = true },
+                    crack_zombie = { resolved = true },
+                    crack_bone_demon = { resolved = true },
+                    crack_passage = { resolved = true }
+                }
             }
         }
     }
@@ -4531,132 +7827,329 @@ return {
 
 ```lua
 return {
-    id = "basement_1",
-    width = 10,
-    height = 8,
-    tilewidth = 32,
-    tileheight = 32,
-    properties = {
-        dream = "basement",
-        camera_zoom = "close"
-    },
-    layers = {
-        {
-            name = "ground",
-            type = "tilelayer",
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "walls",
-            type = "tilelayer",
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "collision",
-            type = "tilelayer",
-            visible = false,
-            data = {
-                {1,1,1,1,1,1,1,1,1,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,0,0,0,0,0,0,0,0,1},
-                {1,1,1,1,1,1,1,1,1,1}
-            }
-        },
-        {
-            name = "actors",
-            type = "objectgroup",
-            objects = {
-                {
-                    name = "crack_zombie",
-                    type = "crack",
-                    tile_x = 2,
-                    tile_y = 2,
-                    properties = {
-                        resolved_asset_id = "actor_crack_zombie_revealed",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "encounter",
-                            encounter_id = "zombie",
-                            message = "You dig through the wall. Something stirs in the dark."
-                        }
-                    }
-                },
-                {
-                    name = "crack_bone_demon",
-                    type = "crack",
-                    tile_x = 9,
-                    tile_y = 4,
-                    properties = {
-                        resolved_asset_id = "actor_crack_bone_demon_revealed",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "encounter",
-                            encounter_id = "bone_demon",
-                            message = "You dig into a hollow behind the wall. Bones click awake."
-                        }
-                    }
-                },
-                {
-                    name = "crack_passage",
-                    type = "crack",
-                    tile_x = 5,
-                    tile_y = 7,
-                    properties = {
-                        resolved_asset_id = "actor_crack_resolved",
-                        on_tool_use = {
-                            tool = "shovel",
-                            type = "passage",
-                            target_room = "basement_ritual_room",
-                            message = "You dig through the wall. Cold air pours through the opening."
-                        }
-                    }
-                },
-                {
-                    name = "pipe_shovel",
-                    type = "pipe",
-                    tile_x = 3,
-                    tile_y = 2,
-                    properties = {
-                        item = "shovel",
-                        message = "Found: shovel!",
-                        empty_message = "An empty drainage pipe."
-                    }
-                },
-                {
-                    name = "whispering_wall",
-                    type = "message",
-                    tile_x = 7,
-                    tile_y = 2,
-                    properties = {
-                        dialog = "data.dialog.basement",
-                        dialog_id = "whispering_wall"
-                    }
-                }
-            }
-        }
+  version = "1.10",
+  luaversion = "5.1",
+  tiledversion = "1.12.1",
+  class = "",
+  orientation = "orthogonal",
+  renderorder = "right-down",
+  width = 22,
+  height = 17,
+  tilewidth = 32,
+  tileheight = 32,
+  nextlayerid = 5,
+  nextobjectid = 17,
+  properties = {
+    ["camera_lock_anchor"] = "camera_start",
+    ["camera_unlock_flag"] = "basement.passage_open",
+    ["camera_zoom"] = "close",
+    ["room_id"] = "basement_1"
+  },
+  tilesets = {
+    {
+      name = "BasementBackground",
+      firstgid = 1,
+      class = "",
+      tilewidth = 32,
+      tileheight = 32,
+      spacing = 0,
+      margin = 0,
+      columns = 63,
+      image = "../../assets/sprites/overworld/basement_background_32-sheet.png",
+      imagewidth = 2016,
+      imageheight = 32,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 32,
+        height = 32
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 63,
+      tiles = {}
     }
+  },
+  layers = {
+    {
+      type = "tilelayer",
+      x = 0,
+      y = 0,
+      width = 22,
+      height = 17,
+      id = 1,
+      name = "ground",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      encoding = "lua",
+      data = {
+        53, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10, 53,
+        53, 11, 12, 13, 14, 15, 16, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 20, 21, 22, 23, 24, 25, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 26, 27, 28, 29, 30, 31, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 33, 34, 35, 36, 37, 38, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 39, 40, 41, 42, 43, 44, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 39, 53, 53, 53, 53, 53, 17, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 19, 53,
+        53, 45, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 49, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 50, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 53, 56, 53,
+        53, 61, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 62, 63, 53
+      }
+    },
+    {
+      type = "tilelayer",
+      x = 0,
+      y = 0,
+      width = 22,
+      height = 17,
+      id = 2,
+      name = "collision",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      encoding = "lua",
+      data = {
+        60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 0,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 51,
+        60, 60, 60, 60, 60, 60, 60, 60, 0, 60, 60, 0, 60, 60, 0, 60, 60, 60, 60, 60, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 0,
+        60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 0
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 3,
+      name = "actors",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "crack_passage",
+          type = "crack",
+          shape = "rectangle",
+          x = 255.993,
+          y = 224,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.flag"] = "basement.passage_open",
+            ["on_tool_use.message"] = "You dig through the wall. Cold air pours through the opening.",
+            ["on_tool_use.target_room"] = "basement_ritual_room",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "passage",
+            ["resolved_asset_id"] = "actor_crack_resolved"
+          }
+        },
+        {
+          id = 2,
+          name = "crack_bone_demon",
+          type = "crack",
+          shape = "rectangle",
+          x = 351.993,
+          y = 223.987,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.encounter_id"] = "basement.bone_demon",
+            ["on_tool_use.message"] = "You dig into a hollow behind the wall. Bones click awake.",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "encounter",
+            ["resolved_asset_id"] = "actor_crack_bone_demon_revealed"
+          }
+        },
+        {
+          id = 3,
+          name = "crack_zombie",
+          type = "crack",
+          shape = "rectangle",
+          x = 448.001,
+          y = 223.989,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["on_tool_use.encounter_id"] = "basement.zombie",
+            ["on_tool_use.message"] = "You dig through the wall. Something stirs in the dark.",
+            ["on_tool_use.tool"] = "shovel",
+            ["on_tool_use.type"] = "encounter",
+            ["resolved_asset_id"] = "actor_crack_zombie_revealed"
+          }
+        },
+        {
+          id = 5,
+          name = "whispering_wall",
+          type = "message",
+          shape = "rectangle",
+          x = 543.996,
+          y = 223.99,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["dialog"] = "data.dialog.basement",
+            ["dialog_id"] = "whispering_wall"
+          }
+        },
+        {
+          id = 6,
+          name = "pipe_shovel",
+          type = "pipe",
+          shape = "rectangle",
+          x = 608.008,
+          y = 288.001,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["empty_message"] = "An empty drainage pipe.",
+            ["item"] = "shovel",
+            ["message"] = "Found: shovel!"
+          }
+        }
+      }
+    },
+    {
+      type = "objectgroup",
+      draworder = "topdown",
+      id = 4,
+      name = "regions",
+      class = "",
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      parallaxx = 1,
+      parallaxy = 1,
+      properties = {},
+      objects = {
+        {
+          id = 7,
+          name = "start",
+          type = "spawn",
+          shape = "rectangle",
+          x = 512.146,
+          y = 320.144,
+          width = 31.7366,
+          height = 31.7708,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 8,
+          name = "tools",
+          type = "spawn",
+          shape = "rectangle",
+          x = 352.006,
+          y = 288.003,
+          width = 31.9682,
+          height = 31.9619,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 9,
+          name = "hidden_dark",
+          type = "spawn",
+          shape = "rectangle",
+          x = 288.022,
+          y = 320.013,
+          width = 31.9546,
+          height = 31.9506,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 10,
+          name = "boss_ready",
+          type = "spawn",
+          shape = "rectangle",
+          x = 384.002,
+          y = 128.002,
+          width = 31.9924,
+          height = 31.9911,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        },
+        {
+          id = 11,
+          name = "camera_start",
+          type = "camera_anchor",
+          shape = "rectangle",
+          x = 336,
+          y = 352,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {}
+        }
+      }
+    }
+  }
 }
 
 ```
@@ -4684,10 +8177,12 @@ Current flow:
 
 Slot effect guidance:
 
-- The editor supports common templates: no effect, add next symbol, channel symbol, auto assign, spellmark, heal part, damage opponent part, and gain crest.
+- The editor supports common templates: no effect, add next symbol, channel symbol, auto assign, spellmark, heal part, status-conditioned symbol bonuses, damage opponent part, and gain crest.
 - Channel symbol exports `add_symbol_to_matching_dice`: dice showing one symbol gain another for the current Allocation, optionally limited to sockets, rims, or slots.
 - Auto assign exports `assign_symbol_to_each_part`: create virtual Ward/Strike assignments on open sockets or rims, useful for effects like Force Field.
-- Heal part can target either the Slot's own Body Part or the combatant's most damaged Body Part.
+- Heal part can target the Slot's own Body Part, the combatant's most damaged Body Part, or a named allied Body Part type.
+- Status-conditioned bonuses author effects such as Sadism: matching dice gain a chosen symbol only against Body Parts in the selected state.
+- Slot costs can be fixed or contract by one pip per damaged opposing Body Part. The current control authors the shared `opponent_damaged_parts` rule with a minimum cost of one.
 - Spellmark opens an existing rim or socket to Essence and authors a damage payload for the marked Body Part.
 - Composed `actions` sequences are preserved when loaded and exported, but editing the sequence itself is still a Lua-side task.
 - Bespoke effects should stay code-authored for now. The content schema can still hold them, but the editor should not become a general-purpose scripting language.
@@ -5048,6 +8543,7 @@ Launch a catalog encounter directly while iterating with:
 
 ```sh
 love . --encounter=basement.zombie
+love . --encounter=basement.mad_butcher
 ```
 
 ---
@@ -5062,6 +8558,8 @@ love . --encounter=basement.zombie
 
 ### 4.1 Damage
 A part is **hit** when assigned 🗡️ > assigned 🛡️ on that part. A hit advances status one step. Margin of overkill has no additional effect (open question — see §10).
+
+Resolution counts 🗡️/🛡️ from an assignment's full effective face (`assignment.symbols`). `used_symbols` and `burned_symbols` classify destination relevance for affordances, animation, and spellmarks; they are not a second combat tally. Thus an Essence-only die accepted by a rim spellmark is visibly used by the mark but contributes zero 🗡️ pressure.
 
 ---
 
@@ -5095,14 +8593,17 @@ A slot is: **a name + a cost track of symbol pips + an effect + a timing window.
 - **Venting:** wounding a part shatters all charge on its slot (slot remains operational).
 - **Offline:** maiming a part disables its slot entirely. Wound *robs*; maim *disables*.
 - All charge resets between combats.
+- A slot may declare a structured `dynamic_cost`. The first prototype rule, `opponent_damaged_parts`, shortens the active track at Upkeep for each Wounded or Maimed opposing part, down to its authored minimum. Banked charge persists. If contraction completes the active track, mandatory trigger fires immediately.
 
 Banked charge is self-balancing: it paints a target (the battery demands a socket every round) while the attacker allocates with that knowledge. Turtling taxes itself.
 
 ### 6.3 Timing Windows
 Every slot declares exactly one: **Spend** (fires immediately during Allocation), **On Hit**, **On Wound/Maim**, **Upkeep**. The engine exposes exactly these four hooks. Allocation is a sequence of committed moves, not a draft to be rewound; immediate Spend effects are allowed to modify the remaining allocation state (rerolls, symbol changes, next-die bonuses, sealed destinations, etc.).
 
+Reactive timing is local to the Slot's Body Part. A filled On-Hit Slot arms during Allocation and resolves only after that part suffers a contested hit. Its On-Wound/Maim entries then resolve against the same completed damage event. Other parts' armed entries remain queued. Trigger context includes the attack, defense, symbol counts, attacker/target, and resulting status change.
+
 ### 6.4 Queue
-Filled slots enqueue in fill order and resolve FIFO within their window. Deliberately untutorialized — discoverable through the queue ticker.
+Filled slots enqueue in fill order and resolve FIFO within their window. Part-scoped reactive windows preserve FIFO among entries armed on that part without draining matching entries elsewhere. Deliberately untutorialized — discoverable through the queue ticker.
 
 ### 6.5 Example Slots
 - **Bloodlust** — 🗡️🗡️🗡️ · Spend · This round's attacks from this combatant gain Brutal.
@@ -5133,10 +8634,11 @@ effect = {
 Current structured effect types:
 
 - `add_next_symbol` — add one or more symbols to the next die assigned this Allocation.
-- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`.
+- `add_symbol_to_matching_dice` — until the next Upkeep, dice showing `match` gain `symbol`; optional `destination` can limit the bonus to `socket`, `rim`, or `slot`. Allocation modifiers all share this lifetime rather than carrying per-effect duration metadata.
 - `assign_symbol_to_each_part` — create virtual assignments on every open matching destination, e.g. a Force Field that assigns one 🛡️ to each unwarded friendly socket.
 - `open_spellmark` — temporarily alters existing rims or sockets to accept Essence; the first matching Essence assignment marks that part and resolves an `on_mark` payload.
-- `heal_part` — heal either the Slot's `source_part` or the combatant's `most_damaged` part.
+- `heal_part` — heal the Slot's `source_part`, the combatant's `most_damaged` part, or an allied `part_type`.
+- `add_symbol_against_status` — until the next Upkeep, dice showing `match` gain `symbol` when assigned to a destination on a Healthy or Wounded target. The target is part of symbol evaluation, so previews, validity, AI scoring, and resolution all see the same effective face.
 - `damage_opponent_part`, `gain_crest` — early prototype utility effects.
 
 This vocabulary intentionally models magical conversion as visible added symbols rather than hidden “counts as” state. Essence remains Essence; a Slot can temporarily make Essence dice carry extra tactical weight.
@@ -5203,6 +8705,18 @@ AI contract for this encounter:
 2. Feed ⚡ to Speak Doom.
 3. Feed 🗡️ to Bonestorm.
 4. Use remaining legal dice for direct attacks or broader defense.
+
+The Basement Mad Butcher is a boss-shaped route puzzle built around persistent Head pressure. His 3-Heart **Welding Mask** is both the immediate victory target and the prize the player gives up by taking that route. His 1-Heart **Broad Shoulders** spend 🩸🩸 on **Stitch Up**, healing the allied Head rather than the Body carrying the Slot. The two 1-Heart arms carry concentrated multi-🗡️ faces, while his legs literally reuse the Zombie's Regrowth parts.
+
+**Sadism** begins as a four-🗡️ track. At each Upkeep it costs one fewer pip per damaged opposing Body Part, minimum one. When it fires, dice already showing 🗡️ gain another 🗡️ against Wounded opposing parts for that round. This makes the player's accumulating wounds both the timer and the payoff: spreading damage accelerates the threat, while focused arm attacks convert existing wounds into maims.
+
+The intended routes are:
+
+1. Maim Broad Shoulders, then the Welding Mask for the fast kill; the Head prize is destroyed.
+2. Maim Broad Shoulders and two 1-Heart limbs for the slower hard kill; the Welding Mask remains claimable.
+3. Pressure the Head without disabling Broad Shoulders and risk watching that progress repaired.
+
+Mad Butcher AI should repair a Wounded Head first, bank but not waste Sadism when no target is Wounded, attack Wounded parts with concentrated Arm dice, and use Regrowth only after Head survival is handled. He has little interest in Ward.
 
 ---
 
@@ -5469,6 +8983,63 @@ The card pipeline converts part art from anatomy to tabletop object:
 - Crest gain: chip flies slot to crest strip (teaches the source).
 - Queue resolution: chips consume left-to-right off the ticker (teaches FIFO by observation).
 - Keep the full allocation→resolution loop snappy; resolution animations must be batch-accelerable or skippable from the first build, or 3–5 round fights will drag by round two of playtesting.
+
+````
+
+## docs/DesignerLab.md
+
+````markdown
+# Designer Lab
+
+Launch the workbench with:
+
+```sh
+love . --designer-lab
+```
+
+The lab runs entirely in memory. Basement checkpoints disable autosave and never read or overwrite the normal save slot.
+
+## Scenario Launcher
+
+- `Tab` switches between combat scenarios and Basement checkpoints.
+- Arrow keys select; `Enter` launches.
+- `/` focuses search.
+- Combat scenarios display their deterministic seed.
+- Completed designer combats return a compact summary to the launcher.
+
+Direct launch shortcuts:
+
+```sh
+love . --scenario=combat.mad_butcher
+love . --scenario=combat.butcher_pressure
+love . --checkpoint=basement.hidden_dark
+love . --room=basement_1 --spawn=5,5
+love . --encounter=basement.zombie --seed=1101
+```
+
+## Combat Iteration
+
+- `R` restarts the encounter with the same seed.
+- `Shift+R` restarts with a new seed.
+- The designer end screen reports rounds, final Hearts, damage and healing events, Slot activations, maimed parts, and preserved enemy parts.
+- `P` copies the summary to the clipboard.
+- `Esc` returns to the lab.
+
+Combat presets may declare initial Body Part statuses and banked Slot charge in `data/designer_scenarios.lua`.
+
+## Basement Iteration
+
+- `F4` toggles the room overlay: tile grid, collision, actors, regions, IDs, types, and player tile.
+- `F5` reloads the room module while preserving player position, facing, inventory, held tool, flags, and actor state.
+- `1`, `2`, `3` grant and equip FLASHLIGHT, SHOVEL, or RUSTY KEY.
+- `0` empties the player's hands.
+- `4` toggles `basement.passage_open`.
+- `5` toggles `basement.lights_on`.
+- `6` toggles `basement.key_found`.
+- `7` toggles `basement.boss_door_unlocked`.
+- `Esc` returns to the lab.
+
+Checkpoint flags intentionally include planned Basement beats that are not all rendered yet. Tiled actors and runtime behavior can adopt these stable names as the room is authored.
 
 ````
 
@@ -6951,6 +10522,7 @@ Ready to start coding? The first milestone is just getting that player square mo
 - Overworld maps use **32x32 logical tiles** for authoring, collision, movement, and interaction.
 - Most overworld art may be authored at **16x16 source resolution and upscaled 2x**, but direct 32x32 authoring is allowed when it reads better.
 - Player movement is **tile-stepped with smooth interpolation**: collision and interaction reason in tile coordinates; presentation eases between tiles.
+- Direction input turns immediately. Releasing within `0.10s` produces a turn-in-place; holding past the threshold commits the step and continues walking while held.
 - Level art flow is **Aseprite mockup -> Tiled composition -> Lua runtime import**.
 
 The overworld camera has three discrete render scales:
@@ -6983,6 +10555,8 @@ Runtime room loading should be designed around Tiled concepts even if early room
 - Custom properties for behavior data such as `actor_type`, `on_tool_use`, `target_room`, `encounter_id`, or `flag`.
 
 Current runtime support accepts finite Lua exports with embedded tileset metadata. Tileset images resolve through `assets/sprites/overworld/` by `asset_id`, `image_id`, or image filename, and room load prints validation warnings for missing assets, unsupported layer shapes, duplicate IDs, unknown actor types, and diagonal tile flips.
+
+The Basement source map is `assets/tiled_raw/basement_1.tmx`; `data/rooms/basement_1.lua` is its generated runtime export. Named `spawn` regions drive new-game and Designer Lab checkpoint placement so layout edits do not require duplicated tile coordinates in Lua.
 
 Do not couple game logic to Aseprite output details. Aseprite establishes the look; Tiled establishes the playable room.
 
@@ -7023,6 +10597,8 @@ Objects on the `regions` layer with `type = camera_zone` may override the room:
 
 Camera positions and moving actor positions are snapped so the final screen
 translation lands on integer pixels at all three scales.
+
+Rooms may fix the initial camera on a named `camera_anchor` region with `camera_lock_anchor` and release it through `camera_unlock_flag`. When following begins, the camera preserves the player's existing screen position instead of recentering immediately. This avoids a jump at the reveal and makes each subsequent tile-step pan by a full tile even when tracking begins at a map border.
 
 Debug authoring controls:
 
@@ -7068,6 +10644,8 @@ Use one general animation layer for overworld actors and animated props.
 - `SpriteDef`: image path, frame size, origin, and named animations.
 - `Animator`: current animation, frame timer, loop mode, and one-shot completion.
 - Common animation names: `idle_down`, `idle_up`, `idle_left`, `idle_right`, `walk_down`, `walk_up`, `walk_left`, `walk_right`, `open`, `closed`, `glow`, `use_tool`.
+
+The current player export uses four directional walk frames where frames 1 and 3 are still poses and frames 2 and 4 are alternating feet. Each tile step begins on the appropriate foot and returns to its paired still pose during the final portion of translation.
 
 Tile animations can be loaded from Tiled if they stay decorative. Interactive animated objects should be actors.
 
@@ -7140,10 +10718,10 @@ run = {
     dreamform = {
         head = "part_inst_dreamer_head",
         body = "part_inst_dreamer_body",
-        arm_l = "part_inst_dreamer_left_arm",
+        arm_l = "part_inst_dreamer_fore_hand",
         arm_r = "part_inst_bone_demon_claw",
-        leg_l = "part_inst_dreamer_left_leg",
-        leg_r = "part_inst_dreamer_right_leg"
+        leg_l = "part_inst_dreamer_front_foot",
+        leg_r = "part_inst_dreamer_back_foot"
     },
     parts = {
         part_inst_dreamer_head = { def_id = "dreamer_head" },
@@ -7166,7 +10744,7 @@ Combat entry should receive an `encounter_id` plus the current `dreamform`. Comb
     },
     claimed_part = { def_id = "bone_demon_right_bare_bones" }, -- nil if skipped
     claimed_slot = "arm_r",
-    replaced_part = { def_id = "dreamer_right_arm" }
+    replaced_part = { def_id = "dreamer_back_hand" }
 }
 ```
 
@@ -7357,6 +10935,232 @@ Needed first: a compact Basement floor/wall tileset and `actor_hidden_wall_marke
 - Combat bridge transition flourish from overworld into the tabletop combat scene.
 
 ```
+
+## docs/TiledCheatsheet.md
+
+````markdown
+# Tiled Cheatsheet
+
+*Working reference for authoring Into the Dreamlands overworld rooms in Tiled. Keep this file current whenever runtime expectations change.*
+
+---
+
+## Map Settings
+
+- Orientation: orthogonal.
+- Map type: finite map. Infinite/chunked maps are not supported yet.
+- Runtime export: Lua map export.
+- Export rooms with embedded tileset metadata:
+
+```sh
+tools/export_tiled_room.sh assets/tiled_raw/basement_1.tmx data/rooms/basement_1.lua
+```
+
+- Keep the `.tmx` as the authored source; the `.lua` room module is generated.
+- Logical tile size: **32x32**.
+- Target game canvas: **960x540**.
+- Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
+- Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
+- Optional map property `camera_zoom`: `wide`, `standard`, or `close`. Basement uses `close`.
+- Optional `camera_lock_anchor` fixes the camera on the exact center of a named `camera_anchor` region until `camera_unlock_flag` becomes true.
+- Optional `camera_unlock_flag` names the world flag that releases a locked camera to follow the player.
+- Required map property `room_id`: stable save-state identity, e.g. `basement_1`.
+
+Camera viewport guides in Tiled world pixels:
+
+- `wide`: `1920x1080` (`60x33.75` logical tiles).
+- `standard`: `960x540` (`30x16.875` logical tiles).
+- `close`: `640x360` (`20x11.25` logical tiles).
+
+The fractional vertical tile counts are intentional: the camera uses the full
+16:9 canvas rather than letterboxing to a whole-tile height.
+
+---
+
+## Tilesets And Sprite Assets
+
+- Overworld art lives in `assets/sprites/overworld/`. The folder is scanned by `core/assets.lua`.
+- Asset IDs are filenames without `.png`.
+- Embedded Tiled tilesets are supported when they provide `firstgid`, `image`, `imagewidth`, `imageheight`, `tilewidth`, `tileheight`, and `columns`/`tilecount`.
+- Tileset images resolve to runtime assets by `asset_id` custom property first, then `image_id`, then the image filename. For example, `../overworld/basement_tiles.png` resolves to `basement_tiles`.
+- External `.tsx` tilesets are fine for authoring, but exported Lua maps must either embed enough tileset data or set an `asset_id` the runtime can resolve.
+- Horizontal and vertical tile flips render. Avoid diagonal tile flips for now; the validator reports them because diagonal rendering is not implemented.
+- If a tile has a nonzero GID but its tileset/image cannot be resolved, the runtime draws the old colored rectangle fallback and prints a room validation warning.
+
+---
+
+## Required Layer Names
+
+Use these names exactly:
+
+- `ground`: base floor tiles.
+- `ground_detail`: optional non-colliding floor decoration.
+- `walls`: visible wall/solid structure tiles.
+- `objects_low`: optional tile props drawn before actors.
+- `actors`: object layer for interactive/runtime actors.
+- `objects_high`: optional foreground/overhead tile props drawn after actors.
+- `effects`: optional decorative animated/effect layer.
+- `regions`: object layer for invisible triggers, exits, compass spots, and camera zones.
+- `collision`: optional tile layer for explicit collision. If present, nonzero tiles are solid. If absent, nonzero `walls` tiles are solid.
+
+Unknown layers are allowed while experimenting, but they should not drive gameplay until documented here.
+
+---
+
+## Actor Objects
+
+Actors live on the `actors` object layer.
+
+Required:
+
+- `name`: stable actor ID. Required for anything persistent or save-relevant.
+- `type`: actor type, such as `pipe`, `crack`, `door`, or `pickup`.
+
+Supported custom properties:
+
+- `actor_type`: optional override if Tiled's built-in `type` field is inconvenient.
+- `asset_id`: optional sprite asset ID from `assets/sprites/overworld/`.
+- `sprite_id` / `sprite`: accepted aliases for `asset_id`.
+- `resolved_asset_id`: optional sprite shown after an actor's one-shot interaction resolves.
+- `collision`: `always`, `never`, `until_resolved`, or `scripted`. Registry defaults cover common actor types, so author this only to override them.
+- `interactable`: boolean; can be examined/used when true.
+- `item`: item ID granted by a pickup-like actor.
+- `flag`: flag key set or checked by the actor.
+- `message`: default examine text.
+- `empty_message`: text after an item has been removed.
+- `missing_tool_message`: text shown when the player lacks the needed tool.
+- `resolved_message`: text shown after a one-shot interaction has already resolved.
+- `on_tool_use`: action payload for actors activated by an equipped/owned tool.
+- `dialog`: dialog module path, e.g. `data.dialog.basement`.
+- `dialog_id`: dialog tree ID inside the dialog module.
+
+`type` should describe presentation and default behavior, not the full gameplay outcome. For example, `crack` means "draw and behave like a shovel-target crack"; the encounter or passage it opens belongs in `on_tool_use`.
+
+Hand-authored Lua rooms may use nested payloads:
+
+```lua
+properties = {
+    on_tool_use = {
+        tool = "shovel",
+        type = "encounter",
+        encounter_id = "basement.zombie",
+        message = "You dig through the wall. Something stirs in the dark."
+    }
+}
+```
+
+Tiled exports should use dotted property names if nested custom classes are inconvenient:
+
+- `on_tool_use.tool`: equipped/owned tool ID required to activate the actor.
+- `on_tool_use.type`: `message`, `encounter`, `passage`, or `item`.
+- `on_tool_use.message`: text shown when the action resolves.
+- `on_tool_use.encounter_id`: combat encounter/content ID to launch.
+- `on_tool_use.target_room`: room ID or module path for exits.
+- `on_tool_use.target_spawn`: spawn ID inside the target room.
+- `on_tool_use.item`: item ID granted by an item action.
+- `on_tool_use.flag`: world flag set when the action resolves.
+- `on_tool_use.once`: boolean; defaults to true for tool targets.
+
+Interim hand-authored Lua rooms may use `tile_x` and `tile_y` directly. Tiled imports should prefer pixel `x`/`y`.
+
+Default actor sprite IDs:
+
+- `pipe`: `actor_pipe`.
+- `crack`: `actor_crack`.
+- `message`: `actor_hidden_wall_marker`.
+
+---
+
+## Region Objects
+
+Regions live on the `regions` object layer and should use stable `name` values when they affect save state or routing.
+
+Common region types:
+
+- `spawn`: named player/checkpoint placement. Use a stable object name and snap its top-left corner to the map grid.
+- `camera_anchor`: exact authored camera target. Rectangle centers may sit between tiles, which is useful for even-width rooms.
+- `exit`: room transition.
+- `encounter_trigger`: launches combat on touch or confirm.
+- `camera_zone`: alters camera behavior.
+- `hidden_poi`: hidden point of interest for the Compass/Shovel/Puzzle Box chain.
+- `cutscene`: one-shot story trigger.
+
+Supported custom properties overlap with actor objects: `target_room`, `target_spawn`, `encounter_id`, `flag`, and `message`. Hidden POIs should use generic reveal/discovery properties such as `hidden_poi`, `reveal_tool`, `reveal_flag`, and `reveals_actor` rather than tool-specific region names.
+
+Camera-zone properties:
+
+- `camera_zoom`: `wide`, `standard`, or `close`.
+- `priority`: numeric; resolves overlapping camera zones.
+- `camera_bounds`: boolean; use the region rectangle as camera bounds.
+
+Runtime debug controls: `F2` cycles a temporary camera-mode override and `F3`
+shows all three viewport footprints centered on the player.
+
+---
+
+## Dialog Objects
+
+Early dialog actors can use `type = "message"` plus `dialog` and `dialog_id` properties. Dialog trees live in Lua modules for now:
+
+```lua
+properties = {
+    dialog = "data.dialog.basement",
+    dialog_id = "whispering_wall"
+}
+```
+
+Dialog supports:
+
+- Branches based on flags, inventory, equipped item, or equipped Body Part tags.
+- Two short player responses.
+- End-of-tree effects such as `set_flag`, `clear_flag`, `give_item`, and result hooks such as `encounter`.
+- Ambient-only overworld updates while dialog is open; actor movement and state-changing world updates are locked.
+
+---
+
+## Save-State Invariants
+
+- Persistent objects need stable `name` values.
+- Renaming a persistent object is a save migration.
+- Runtime state is saved by `room_id.actor_name`, not by Tiled numeric object ID.
+- The room validator warns when an actor falls back to Tiled's numeric object ID.
+- One-shot actor interactions should save generic `resolved = true` state. Presentation may render that as dug, opened, drained, or exhausted.
+- Prefer explicit flags for cross-room logic, e.g. `basement.shovel_found`, `basement.mad_butcher_defeated`.
+
+---
+
+## Current Runtime Actor Types
+
+- `pipe`: examine/pickup actor. Always collides. If it has `item`, the first interaction grants that item and marks the item removed while the pipe remains.
+- `crack`: shovel-target presentation actor. Collides until resolved, checks `on_tool_use.tool`, then resolves the generic `on_tool_use` action.
+- Unresolved `crack` actors are solid. Their tile becomes walkable after resolution, so place them in deliberate openings in the collision layer.
+- `message`: inspectable/dialog actor. Never collides by default, which supports invisible floor triggers and flavor-text hotspots.
+
+`scripted` collision defaults to non-colliding. Room behavior may call `actor:set_collision_enabled(true|false)`; the override lives in persistent actor state.
+- `message`: simple inspectable text actor.
+
+Add new actor types here when they become runtime-supported.
+
+---
+
+## Current Runtime Validation
+
+Room load prints validation warnings/errors for:
+
+- duplicate layer names.
+- unknown layer names.
+- missing `ground` or `actors` layers.
+- tile layers with missing Lua `data`.
+- layer dimensions that disagree with the map dimensions.
+- missing tileset image assets.
+- nonzero GIDs that no tileset owns.
+- diagonal tile flips.
+- duplicate actor IDs.
+- actor objects that lack stable names and fall back to numeric Tiled IDs.
+- unknown actor types.
+- explicit missing actor sprite assets.
+
+````
 
 ## docs/tickets/S1_CombatCore/T1_1_DiceRollingAndResolution.md
 
@@ -7708,215 +11512,6 @@ Design Notes/Pitfalls:
 Data-Driven Text: Do not hardcode tooltip text in your UI code. Create a separate data file (e.g., data/ui_text.lua) that maps IDs (tooltips.brutal, tooltips.valor_crest) to strings. This makes editing, proofreading, and future localization much, much easier.
 ```
 
-## docs/TiledCheatsheet.md
-
-````markdown
-# Tiled Cheatsheet
-
-*Working reference for authoring Into the Dreamlands overworld rooms in Tiled. Keep this file current whenever runtime expectations change.*
-
----
-
-## Map Settings
-
-- Orientation: orthogonal.
-- Map type: finite map. Infinite/chunked maps are not supported yet.
-- Runtime export: Lua map export.
-- Logical tile size: **32x32**.
-- Target game canvas: **960x540**.
-- Art may be authored at 16x16 and upscaled 2x before or during tileset preparation, but Tiled maps should compose against the 32x32 logical grid.
-- Object positions are interpreted as top-left pixel coordinates in Tiled exports, then converted to 1-based tile coordinates by the runtime.
-- Optional map property `camera_zoom`: `wide`, `standard`, or `close`. Basement uses `close`.
-
-Camera viewport guides in Tiled world pixels:
-
-- `wide`: `1920x1080` (`60x33.75` logical tiles).
-- `standard`: `960x540` (`30x16.875` logical tiles).
-- `close`: `640x360` (`20x11.25` logical tiles).
-
-The fractional vertical tile counts are intentional: the camera uses the full
-16:9 canvas rather than letterboxing to a whole-tile height.
-
----
-
-## Tilesets And Sprite Assets
-
-- Overworld art lives in `assets/sprites/overworld/`. The folder is scanned by `core/assets.lua`.
-- Asset IDs are filenames without `.png`.
-- Embedded Tiled tilesets are supported when they provide `firstgid`, `image`, `imagewidth`, `imageheight`, `tilewidth`, `tileheight`, and `columns`/`tilecount`.
-- Tileset images resolve to runtime assets by `asset_id` custom property first, then `image_id`, then the image filename. For example, `../overworld/basement_tiles.png` resolves to `basement_tiles`.
-- External `.tsx` tilesets are fine for authoring, but exported Lua maps must either embed enough tileset data or set an `asset_id` the runtime can resolve.
-- Horizontal and vertical tile flips render. Avoid diagonal tile flips for now; the validator reports them because diagonal rendering is not implemented.
-- If a tile has a nonzero GID but its tileset/image cannot be resolved, the runtime draws the old colored rectangle fallback and prints a room validation warning.
-
----
-
-## Required Layer Names
-
-Use these names exactly:
-
-- `ground`: base floor tiles.
-- `ground_detail`: optional non-colliding floor decoration.
-- `walls`: visible wall/solid structure tiles.
-- `objects_low`: optional tile props drawn before actors.
-- `actors`: object layer for interactive/runtime actors.
-- `objects_high`: optional foreground/overhead tile props drawn after actors.
-- `effects`: optional decorative animated/effect layer.
-- `regions`: object layer for invisible triggers, exits, compass spots, and camera zones.
-- `collision`: optional tile layer for explicit collision. If present, nonzero tiles are solid. If absent, nonzero `walls` tiles are solid.
-
-Unknown layers are allowed while experimenting, but they should not drive gameplay until documented here.
-
----
-
-## Actor Objects
-
-Actors live on the `actors` object layer.
-
-Required:
-
-- `name`: stable actor ID. Required for anything persistent or save-relevant.
-- `type`: actor type, such as `pipe`, `crack`, `door`, or `pickup`.
-
-Supported custom properties:
-
-- `actor_type`: optional override if Tiled's built-in `type` field is inconvenient.
-- `asset_id`: optional sprite asset ID from `assets/sprites/overworld/`.
-- `sprite_id` / `sprite`: accepted aliases for `asset_id`.
-- `resolved_asset_id`: optional sprite shown after an actor's one-shot interaction resolves.
-- `solid`: boolean; blocks movement when true.
-- `interactable`: boolean; can be examined/used when true.
-- `item`: item ID granted by a pickup-like actor.
-- `flag`: flag key set or checked by the actor.
-- `message`: default examine text.
-- `empty_message`: text after an item has been removed.
-- `missing_tool_message`: text shown when the player lacks the needed tool.
-- `resolved_message`: text shown after a one-shot interaction has already resolved.
-- `on_tool_use`: action payload for actors activated by an equipped/owned tool.
-- `dialog`: dialog module path, e.g. `data.dialog.basement`.
-- `dialog_id`: dialog tree ID inside the dialog module.
-
-`type` should describe presentation and default behavior, not the full gameplay outcome. For example, `crack` means "draw and behave like a shovel-target crack"; the encounter or passage it opens belongs in `on_tool_use`.
-
-Hand-authored Lua rooms may use nested payloads:
-
-```lua
-properties = {
-    on_tool_use = {
-        tool = "shovel",
-        type = "encounter",
-        encounter_id = "basement.zombie",
-        message = "You dig through the wall. Something stirs in the dark."
-    }
-}
-```
-
-Tiled exports should use dotted property names if nested custom classes are inconvenient:
-
-- `on_tool_use.tool`: equipped/owned tool ID required to activate the actor.
-- `on_tool_use.type`: `message`, `encounter`, `passage`, or `item`.
-- `on_tool_use.message`: text shown when the action resolves.
-- `on_tool_use.encounter_id`: combat encounter/content ID to launch.
-- `on_tool_use.target_room`: room ID or module path for exits.
-- `on_tool_use.target_spawn`: spawn ID inside the target room.
-- `on_tool_use.item`: item ID granted by an item action.
-- `on_tool_use.once`: boolean; defaults to true for tool targets.
-
-Interim hand-authored Lua rooms may use `tile_x` and `tile_y` directly. Tiled imports should prefer pixel `x`/`y`.
-
-Default actor sprite IDs:
-
-- `pipe`: `actor_pipe`.
-- `crack`: `actor_crack`.
-- `message`: `actor_hidden_wall_marker`.
-
----
-
-## Region Objects
-
-Regions live on the `regions` object layer and should use stable `name` values when they affect save state or routing.
-
-Common region types:
-
-- `exit`: room transition.
-- `encounter_trigger`: launches combat on touch or confirm.
-- `camera_zone`: alters camera behavior.
-- `hidden_poi`: hidden point of interest for the Compass/Shovel/Puzzle Box chain.
-- `cutscene`: one-shot story trigger.
-
-Supported custom properties overlap with actor objects: `target_room`, `target_spawn`, `encounter_id`, `flag`, and `message`. Hidden POIs should use generic reveal/discovery properties such as `hidden_poi`, `reveal_tool`, `reveal_flag`, and `reveals_actor` rather than tool-specific region names.
-
-Camera-zone properties:
-
-- `camera_zoom`: `wide`, `standard`, or `close`.
-- `priority`: numeric; resolves overlapping camera zones.
-- `camera_bounds`: boolean; use the region rectangle as camera bounds.
-
-Runtime debug controls: `F2` cycles a temporary camera-mode override and `F3`
-shows all three viewport footprints centered on the player.
-
----
-
-## Dialog Objects
-
-Early dialog actors can use `type = "message"` plus `dialog` and `dialog_id` properties. Dialog trees live in Lua modules for now:
-
-```lua
-properties = {
-    dialog = "data.dialog.basement",
-    dialog_id = "whispering_wall"
-}
-```
-
-Dialog supports:
-
-- Branches based on flags, inventory, equipped item, or equipped Body Part tags.
-- Two short player responses.
-- End-of-tree effects such as `set_flag`, `clear_flag`, `give_item`, and result hooks such as `encounter`.
-- Ambient-only overworld updates while dialog is open; actor movement and state-changing world updates are locked.
-
----
-
-## Save-State Invariants
-
-- Persistent objects need stable `name` values.
-- Renaming a persistent object is a save migration.
-- Runtime state is saved by `room_id.actor_name`, not by Tiled numeric object ID.
-- The room validator warns when an actor falls back to Tiled's numeric object ID.
-- One-shot actor interactions should save generic `resolved = true` state. Presentation may render that as dug, opened, drained, or exhausted.
-- Prefer explicit flags for cross-room logic, e.g. `basement.shovel_found`, `basement.mad_butcher_defeated`.
-
----
-
-## Current Runtime Actor Types
-
-- `pipe`: examine/pickup actor. If it has `item`, the first interaction grants that item and marks the actor removed.
-- `crack`: shovel-target presentation actor. Checks `on_tool_use.tool` when present, marks itself `resolved`, and resolves the generic `on_tool_use` action.
-- `message`: simple inspectable text actor.
-
-Add new actor types here when they become runtime-supported.
-
----
-
-## Current Runtime Validation
-
-Room load prints validation warnings/errors for:
-
-- duplicate layer names.
-- unknown layer names.
-- missing `ground` or `actors` layers.
-- tile layers with missing Lua `data`.
-- layer dimensions that disagree with the map dimensions.
-- missing tileset image assets.
-- nonzero GIDs that no tileset owns.
-- diagonal tile flips.
-- duplicate actor IDs.
-- actor objects that lack stable names and fall back to numeric Tiled IDs.
-- unknown actor types.
-- explicit missing actor sprite assets.
-
-````
-
 ## main.lua
 
 ```lua
@@ -7945,6 +11540,41 @@ local function launch_arg_value(prefix)
     return nil
 end
 
+local function find_designer_scenario(scenario_id)
+    if not scenario_id then
+        return nil
+    end
+
+    local catalog = require("data.designer_scenarios")
+    for _, group in ipairs({ "combat", "overworld" }) do
+        for _, scenario in ipairs(catalog[group] or {}) do
+            if scenario.id == scenario_id then
+                return scenario, group
+            end
+        end
+    end
+    return nil
+end
+
+local function room_module_name(value)
+    if not value or value:find(".", 1, true) then
+        return value
+    end
+    return "data.rooms." .. value
+end
+
+local function spawn_player(value)
+    local x, y = tostring(value or ""):match("^(%-?%d+),(%-?%d+)$")
+    if x and y then
+        return {
+            x = tonumber(x),
+            y = tonumber(y),
+            facing = "down"
+        }
+    end
+    return nil
+end
+
 local function dispatch_actionpressed(actions, source)
     local handled = false
     for _, action in ipairs(actions or {}) do
@@ -7966,11 +11596,46 @@ function love.load()
     Text.install(love.graphics)
     Assets:load()
     local encounter_id = launch_arg_value("--encounter")
-    if has_launch_arg("--bp-editor") then
+    local seed = tonumber(launch_arg_value("--seed"))
+    local scenario_id = launch_arg_value("--scenario") or launch_arg_value("--checkpoint")
+    local scenario, scenario_group = find_designer_scenario(scenario_id)
+    local room = launch_arg_value("--room")
+    if scenario_id and not scenario then
+        error("Unknown designer scenario: " .. tostring(scenario_id))
+    elseif scenario and scenario_group == "combat" then
+        GameState.switch(require("states.v2_combat"), {
+            encounter_id = scenario.encounter_id,
+            seed = seed or scenario.seed,
+            combat_setup = scenario.combat_setup,
+            designer_mode = true,
+            designer_scenario_id = scenario.id,
+            designer_scenario_name = scenario.name
+        })
+    elseif scenario and scenario_group == "overworld" then
+        GameState.switch(require("states.designer_overworld"), {
+            scenario = scenario
+        })
+    elseif room then
+        GameState.switch(require("states.designer_overworld"), {
+            scenario = {
+                id = "room.direct",
+                name = "Direct Room",
+                room = room_module_name(room),
+                player = spawn_player(launch_arg_value("--spawn")) or {
+                    x = 5,
+                    y = 5,
+                    facing = "down"
+                }
+            }
+        })
+    elseif has_launch_arg("--designer-lab") then
+        GameState.switch(require("states.designer_lab"))
+    elseif has_launch_arg("--bp-editor") then
         GameState.switch(require("states.bp_editor"))
     elseif encounter_id or has_launch_arg("--v2-combat") then
         GameState.switch(require("states.v2_combat"), {
-            encounter_id = encounter_id or "debug.demo"
+            encounter_id = encounter_id or "debug.demo",
+            seed = seed
         })
     else
         GameState.switch(Overworld)
@@ -8041,7 +11706,8 @@ local EFFECT_LABELS = Effects.EDITOR_LABELS
 local DESTINATIONS = { "any", "socket", "rim", "slot" }
 local ASSIGN_DESTINATIONS = { "socket", "rim" }
 local TARGET_SIDES = { "self", "opponent" }
-local HEAL_TARGETS = { "most_damaged", "source_part" }
+local HEAL_TARGETS = { "most_damaged", "source_part", "part_type" }
+local TARGET_STATUSES = { "healthy", "wounded" }
 local SPELLMARK_TARGET_TYPES = { "ANY", "HEAD", "BODY", "ARM", "LEG" }
 local SYMBOLS = {
     { id = Symbols.STRIKE, label = "ATK" },
@@ -8383,6 +12049,7 @@ function BPEditor:part_to_form(part, slots)
         slot_id = slot and (slot.id or "") or "",
         slot_name = slot and (slot.name or "") or "",
         slot_cost = clone(slot and slot.cost or {}),
+        slot_dynamic_cost = clone(slot and slot.dynamic_cost),
         slot_timing = slot and (slot.timing or "spend") or "spend",
         effect_type = effect_type,
         raw_effect = clone(effect),
@@ -8392,6 +12059,7 @@ function BPEditor:part_to_form(part, slots)
         effect_assign_destination = effect.destination or (effect_type == "open_spellmark" and "rim" or "socket"),
         effect_target_side = target_side or "self",
         effect_heal_target = effect.target or "most_damaged",
+        effect_target_status = effect.target_status or "wounded",
         effect_crest = effect.crest or "Valor",
         effect_target_type = effect_type == "open_spellmark" and (effect.target_type or effect.part_type or "ANY")
             or (effect.target_type or "HEAD"),
@@ -8703,6 +12371,28 @@ function BPEditor:draw_slot_panel()
     end)
     self:draw_button("cost_clear")
 
+    self:register_button("cost_fixed", "fixed", rect(704, 294, 50, 24), function()
+        self.current.slot_dynamic_cost = nil
+    end, self.current.slot_dynamic_cost == nil)
+    self:register_button("cost_damaged", "foe dmg", rect(760, 294, 64, 24), function()
+        self.current.slot_dynamic_cost = self.current.slot_dynamic_cost or {
+            type = "opponent_damaged_parts",
+            minimum = 1,
+            per_part = 1
+        }
+    end, self.current.slot_dynamic_cost ~= nil)
+    self:draw_button("cost_fixed")
+    self:draw_button("cost_damaged")
+
+    if self.current.slot_dynamic_cost then
+        local dynamic = self.current.slot_dynamic_cost
+        set_color(COLORS.muted)
+        love.graphics.print(string.format(
+            "Cost -%d per damaged opposing BP (min %d).",
+            tonumber(dynamic.per_part) or 1,
+            tonumber(dynamic.minimum) or 1), 640, 322)
+    end
+
     set_color(COLORS.muted)
     love.graphics.print("Effect Template", 640, 340)
     x = 640
@@ -8710,9 +12400,15 @@ function BPEditor:draw_slot_panel()
     for index, effect_type in ipairs(EFFECT_TYPES) do
         local button_id = "effect_" .. effect_type
         local label = EFFECT_LABELS[effect_type] or effect_type
-        local w = effect_type == "assign_symbol_to_each_part" and 92
-            or effect_type == "damage_opponent_part" and 82
-            or 58
+        local w = effect_type == "none" and 42
+            or effect_type == "add_next_symbol" and 42
+            or effect_type == "channel_symbol" and 54
+            or effect_type == "assign_symbol_to_each_part" and 70
+            or effect_type == "open_spellmark" and 58
+            or effect_type == "heal_part" and 42
+            or effect_type == "add_symbol_against_status" and 50
+            or effect_type == "damage_opponent_part" and 64
+            or 42
         if x + w > 930 then
             x = 640
             y = y + 30
@@ -8736,7 +12432,7 @@ function BPEditor:draw_slot_panel()
         x = x + w + 6
     end
 
-    self:draw_effect_details(640, 426)
+    self:draw_effect_details(640, 416)
 end
 
 function BPEditor:draw_effect_details(x, y)
@@ -8873,19 +12569,70 @@ function BPEditor:draw_effect_details(x, y)
         text = "Custom effect preserved from source. Edit in Lua for now."
     elseif effect_type == "heal_part" then
         text = self.current.effect_heal_target == "source_part"
-            and "Heals the Body Part carrying this Slot."
+                and "Heals the Body Part carrying this Slot."
+            or self.current.effect_heal_target == "part_type"
+                and ("Heals the allied " .. tostring(self.current.effect_target_type or "HEAD") .. ".")
             or "Heals this combatant's most damaged Body Part."
         local bx = x
         for _, target in ipairs(HEAL_TARGETS) do
             local button_id = "effect_heal_target_" .. target
-            local label = target == "source_part" and "this BP" or "most hurt"
-            self:register_button(button_id, label, rect(bx, y + 28, 76, 24), function()
+            local label = target == "source_part" and "this BP"
+                or target == "part_type" and "BP type"
+                or "most hurt"
+            self:register_button(button_id, label, rect(bx, y + 28, 70, 24), function()
                 self.current.effect_heal_target = target
             end, (self.current.effect_heal_target or "most_damaged") == target)
             self:draw_button(button_id)
-            bx = bx + 82
+            bx = bx + 76
         end
-        self:draw_field("Amount", "effect_amount", rect(x + 170, y + 28, 66, 24))
+        if self.current.effect_heal_target == "part_type" then
+            bx = x
+            for _, part_type in ipairs(TYPES) do
+                local button_id = "effect_heal_type_" .. part_type
+                self:register_button(button_id, part_type, rect(bx, y + 58, 50, 22), function()
+                    self.current.effect_target_type = part_type
+                end, self.current.effect_target_type == part_type)
+                self:draw_button(button_id)
+                bx = bx + 56
+            end
+        end
+        self:draw_field("Amt", "effect_amount", rect(x + 232, y + 28, 54, 24))
+    elseif effect_type == "add_symbol_against_status" then
+        text = "Matching dice gain a symbol against Body Parts in the chosen state."
+        local bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_status_match_" .. symbol.id
+                self:register_button(button_id, symbol.label, rect(bx, y + 28, 52, 22), function()
+                    self.current.effect_match_symbol = symbol.id
+                end, self.current.effect_match_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, symbol in ipairs(SYMBOLS) do
+            if symbol.id ~= Symbols.BLANK then
+                local button_id = "effect_status_add_" .. symbol.id
+                self:register_button(button_id, "+" .. symbol.label, rect(bx, y + 54, 52, 22), function()
+                    self.current.effect_symbol = symbol.id
+                end, self.current.effect_symbol == symbol.id)
+                self:draw_button(button_id)
+                bx = bx + 58
+            end
+        end
+
+        bx = x
+        for _, status in ipairs(TARGET_STATUSES) do
+            local button_id = "effect_target_status_" .. status
+            self:register_button(button_id, status, rect(bx, y + 80, 64, 22), function()
+                self.current.effect_target_status = status
+            end, self.current.effect_target_status == status)
+            self:draw_button(button_id)
+            bx = bx + 70
+        end
+        self:draw_field("Amt", "effect_amount", rect(x + 224, y + 80, 54, 22))
     elseif effect_type == "damage_opponent_part" then
         text = "Damages opponent " .. tostring(self.current.effect_target_type or "HEAD") .. " one step."
         local bx = x
@@ -8983,8 +12730,7 @@ function BPEditor:build_slot()
             type = "add_symbol_to_matching_dice",
             match = self.current.effect_match_symbol or Symbols.ESSENCE,
             symbol = self.current.effect_symbol or Symbols.STRIKE,
-            amount = tonumber(self.current.effect_amount) or 1,
-            duration = "allocation"
+            amount = tonumber(self.current.effect_amount) or 1
         }
         if self.current.effect_destination and self.current.effect_destination ~= "any" then
             effect.destination = self.current.effect_destination
@@ -9017,7 +12763,19 @@ function BPEditor:build_slot()
         effect = clone(self.current.raw_effect or { type = "none" })
     elseif effect_type == "heal_part" then
         effect.target = self.current.effect_heal_target or "most_damaged"
+        if effect.target == "part_type" then
+            effect.target_type = self.current.effect_target_type or "HEAD"
+        end
         effect.amount = tonumber(self.current.effect_amount) or 1
+    elseif effect_type == "add_symbol_against_status" then
+        effect = {
+            type = "add_symbol_against_status",
+            match = self.current.effect_match_symbol or Symbols.STRIKE,
+            symbol = self.current.effect_symbol or Symbols.STRIKE,
+            amount = tonumber(self.current.effect_amount) or 1,
+            destination = "rim",
+            target_status = self.current.effect_target_status or "wounded"
+        }
     elseif effect_type == "damage_opponent_part" then
         effect.target_type = self.current.effect_target_type or "HEAD"
         effect.amount = tonumber(self.current.effect_amount) or 1
@@ -9028,13 +12786,17 @@ function BPEditor:build_slot()
         effect = { type = "none" }
     end
 
-    return {
+    local slot = {
         id = trim(self.current.slot_id),
         name = trim(self.current.slot_name),
         cost = clone(self.current.slot_cost or {}),
         timing = self.current.slot_timing or "spend",
         effect = effect
     }
+    if self.current.slot_dynamic_cost then
+        slot.dynamic_cost = clone(self.current.slot_dynamic_cost)
+    end
+    return slot
 end
 
 function BPEditor:form_to_part()
@@ -9104,8 +12866,7 @@ function BPEditor:lua_effect(effect)
             "type = \"add_symbol_to_matching_dice\"",
             "match = " .. lua_symbol(effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE),
             "symbol = " .. lua_symbol(effect.symbol or effect.add_symbol or Symbols.STRIKE),
-            "amount = " .. tostring(effect.amount or 1),
-            "duration = " .. lua_string(effect.duration or "allocation")
+            "amount = " .. tostring(effect.amount or 1)
         }
         if effect.destination and effect.destination ~= "any" then
             table.insert(pieces, "destination = " .. lua_string(effect.destination))
@@ -9142,8 +12903,23 @@ function BPEditor:lua_effect(effect)
     elseif effect.type == "damage_marked_part" or effect.type == "damage_target_part" or effect.type == "damage_assigned_part" then
         return "{ type = \"damage_marked_part\", amount = " .. tostring(effect.amount or 1) .. " }"
     elseif effect.type == "heal_part" then
-        return "{ type = \"heal_part\", target = " .. lua_string(effect.target or "most_damaged")
-            .. ", amount = " .. tostring(effect.amount or 1) .. " }"
+        local pieces = {
+            "type = \"heal_part\"",
+            "target = " .. lua_string(effect.target or "most_damaged")
+        }
+        if effect.target == "part_type" then
+            table.insert(pieces, "target_type = " .. lua_string(effect.target_type or "HEAD"))
+        end
+        table.insert(pieces, "amount = " .. tostring(effect.amount or 1))
+        return "{ " .. table.concat(pieces, ", ") .. " }"
+    elseif effect.type == "add_symbol_against_status" then
+        return "{ type = \"add_symbol_against_status\", match = "
+            .. lua_symbol(effect.match or effect.match_symbol or Symbols.STRIKE)
+            .. ", symbol = " .. lua_symbol(effect.symbol or Symbols.STRIKE)
+            .. ", amount = " .. tostring(effect.amount or 1)
+            .. ", destination = " .. lua_string(effect.destination or "rim")
+            .. ", target_status = " .. lua_string(effect.target_status or "wounded")
+            .. " }"
     elseif effect.type == "damage_opponent_part" then
         return "{ type = \"damage_opponent_part\", target_type = " .. lua_string(effect.target_type or "HEAD") .. ", amount = " .. tostring(effect.amount or 1) .. " }"
     elseif effect.type == "gain_crest" then
@@ -9162,11 +12938,17 @@ function BPEditor:lua_slot(slot, indent)
         "{",
         i .. "    id = " .. lua_string(slot.id) .. ",",
         i .. "    name = " .. lua_string(slot.name) .. ",",
-        i .. "    cost = " .. lua_symbol_list(slot.cost) .. ",",
-        i .. "    timing = " .. lua_string(slot.timing or "spend") .. ",",
-        i .. "    effect = " .. self:lua_effect(slot.effect),
-        i .. "}"
+        i .. "    cost = " .. lua_symbol_list(slot.cost) .. ","
     }
+    if slot.dynamic_cost then
+        table.insert(lines, i .. "    dynamic_cost = { type = "
+            .. lua_string(slot.dynamic_cost.type or "opponent_damaged_parts")
+            .. ", minimum = " .. tostring(slot.dynamic_cost.minimum or 1)
+            .. ", per_part = " .. tostring(slot.dynamic_cost.per_part or 1) .. " },")
+    end
+    table.insert(lines, i .. "    timing = " .. lua_string(slot.timing or "spend") .. ",")
+    table.insert(lines, i .. "    effect = " .. self:lua_effect(slot.effect))
+    table.insert(lines, i .. "}")
     return table.concat(lines, "\n")
 end
 
@@ -9245,6 +13027,12 @@ function BPEditor:part_note()
             table.insert(cost_parts, note_face({ symbol }))
         end
         table.insert(lines, "Cost: " .. table.concat(cost_parts, " "))
+        if slot.dynamic_cost then
+            table.insert(lines, string.format(
+                "Dynamic Cost: -%d pip(s) per damaged opposing BP, minimum %d",
+                tonumber(slot.dynamic_cost.per_part) or 1,
+                tonumber(slot.dynamic_cost.minimum) or 1))
+        end
         table.insert(lines, "Timing: " .. tostring(slot.timing or "spend"))
         table.insert(lines, "Effect: " .. self:effect_note(slot.effect))
     else
@@ -9378,6 +13166,494 @@ return BPEditor
 
 ```
 
+## states/designer_lab.lua
+
+```lua
+local GameState = require("core.gamestate")
+
+local DesignerLab = {}
+DesignerLab.__index = DesignerLab
+DesignerLab.opaque = true
+
+local COLORS = {
+    bg = { 0.055, 0.06, 0.08, 1 },
+    panel = { 0.085, 0.09, 0.12, 1 },
+    surface = { 0.12, 0.125, 0.16, 1 },
+    line = { 0.42, 0.44, 0.52, 1 },
+    ink = { 0.95, 0.95, 0.98, 1 },
+    muted = { 0.62, 0.63, 0.7, 1 },
+    accent = { 0.26, 0.76, 0.62, 1 },
+    combat = { 0.96, 0.38, 0.31, 1 },
+    overworld = { 0.34, 0.64, 0.98, 1 }
+}
+
+local function rect(x, y, w, h)
+    return { x = x, y = y, w = w, h = h }
+end
+
+local function point_in_rect(x, y, r)
+    return x >= r.x and x <= r.x + r.w and y >= r.y and y <= r.y + r.h
+end
+
+local function set_color(color)
+    love.graphics.setColor(color)
+end
+
+local function draw_box(r, fill, line)
+    set_color(fill)
+    love.graphics.rectangle("fill", r.x, r.y, r.w, r.h, 5, 5)
+    set_color(line)
+    love.graphics.rectangle("line", r.x, r.y, r.w, r.h, 5, 5)
+end
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
+
+local function summary_text(summary)
+    if not summary then
+        return "No playtest completed in this lab session."
+    end
+
+    return string.format(
+        "%s | seed %s | %s rounds | Hearts %s-%s | Slots %s",
+        tostring(summary.encounter_id or "encounter"),
+        tostring(summary.seed or "?"),
+        tostring(summary.rounds or "?"),
+        tostring(summary.player_hearts or "?"),
+        tostring(summary.enemy_hearts or "?"),
+        tostring(summary.slot_activation_count or 0))
+end
+
+function DesignerLab:enter()
+    self.catalog = require("data.designer_scenarios")
+    self.tab = self.tab or "combat"
+    self.selected_index = 1
+    self.search = ""
+    self.search_active = false
+    self.rows = {}
+    self.tabs = {}
+    self.fonts = {
+        title = love.graphics.newFont(22),
+        heading = love.graphics.newFont(15),
+        body = love.graphics.newFont(12),
+        small = love.graphics.newFont(10)
+    }
+end
+
+function DesignerLab:scenarios()
+    local query = self.search:lower()
+    local filtered = {}
+    for _, scenario in ipairs(self.catalog[self.tab] or {}) do
+        local haystack = table.concat({
+            scenario.id or "",
+            scenario.name or "",
+            scenario.description or "",
+            scenario.encounter_id or "",
+            scenario.room or ""
+        }, " "):lower()
+        if query == "" or haystack:find(query, 1, true) then
+            table.insert(filtered, scenario)
+        end
+    end
+    return filtered
+end
+
+function DesignerLab:clamp_selection()
+    local count = #self:scenarios()
+    self.selected_index = math.max(1, math.min(self.selected_index or 1, math.max(1, count)))
+end
+
+function DesignerLab:set_tab(tab)
+    if self.catalog[tab] then
+        self.tab = tab
+        self.selected_index = 1
+    end
+end
+
+function DesignerLab:launch(scenario)
+    scenario = scenario or self:scenarios()[self.selected_index]
+    if not scenario then
+        return
+    end
+
+    if self.tab == "combat" then
+        GameState.push(require("states.v2_combat"), {
+            encounter_id = scenario.encounter_id,
+            seed = scenario.seed,
+            combat_setup = copy_table(scenario.combat_setup),
+            designer_mode = true,
+            designer_scenario_id = scenario.id,
+            designer_scenario_name = scenario.name
+        })
+    else
+        GameState.push(require("states.designer_overworld"), {
+            scenario = copy_table(scenario)
+        })
+    end
+end
+
+function DesignerLab:resume(_, result)
+    if result and result.playtest_summary then
+        self.last_summary = result.playtest_summary
+    end
+end
+
+function DesignerLab:keypressed(key)
+    if self.search_active then
+        if key == "escape" or key == "return" then
+            self.search_active = false
+        elseif key == "backspace" then
+            self.search = self.search:sub(1, -2)
+            self.selected_index = 1
+        elseif key == "delete" then
+            self.search = ""
+            self.selected_index = 1
+        end
+        return
+    end
+
+    if key == "/" then
+        self.search_active = true
+    elseif key == "tab" or key == "left" or key == "right" then
+        self:set_tab(self.tab == "combat" and "overworld" or "combat")
+    elseif key == "up" or key == "w" then
+        self.selected_index = self.selected_index - 1
+        self:clamp_selection()
+    elseif key == "down" or key == "s" then
+        self.selected_index = self.selected_index + 1
+        self:clamp_selection()
+    elseif key == "return" or key == "space" then
+        self:launch()
+    elseif key == "escape" then
+        GameState.switch(require("states.overworld"))
+    end
+end
+
+function DesignerLab:textinput(text)
+    if self.search_active then
+        self.search = self.search .. text
+        self.selected_index = 1
+    end
+end
+
+function DesignerLab:mousepressed(x, y, button)
+    if button ~= 1 then
+        return
+    end
+
+    for tab, tab_rect in pairs(self.tabs or {}) do
+        if point_in_rect(x, y, tab_rect) then
+            self:set_tab(tab)
+            return
+        end
+    end
+
+    if self.search_rect and point_in_rect(x, y, self.search_rect) then
+        self.search_active = true
+        return
+    end
+
+    for index, row in ipairs(self.rows or {}) do
+        if point_in_rect(x, y, row.rect) then
+            self.selected_index = index
+            self:launch(row.scenario)
+            return
+        end
+    end
+end
+
+function DesignerLab:draw()
+    local width = love.graphics.getWidth()
+    local height = love.graphics.getHeight()
+    love.graphics.clear(COLORS.bg)
+
+    love.graphics.setFont(self.fonts.title)
+    set_color(COLORS.ink)
+    love.graphics.print("Designer Lab", 28, 22)
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Isolated combat and Basement checkpoints. Nothing here autosaves.", 28, 52)
+
+    self.tabs = {
+        combat = rect(28, 82, 126, 30),
+        overworld = rect(162, 82, 126, 30)
+    }
+    for _, tab in ipairs({ "combat", "overworld" }) do
+        local selected = self.tab == tab
+        local accent = tab == "combat" and COLORS.combat or COLORS.overworld
+        draw_box(self.tabs[tab], selected and COLORS.surface or COLORS.panel, selected and accent or COLORS.line)
+        love.graphics.setFont(self.fonts.body)
+        set_color(selected and accent or COLORS.muted)
+        love.graphics.printf(tab == "combat" and "Combat" or "Basement", self.tabs[tab].x, self.tabs[tab].y + 8, self.tabs[tab].w, "center")
+    end
+
+    self.search_rect = rect(width - 282, 82, 254, 30)
+    draw_box(self.search_rect, COLORS.panel, self.search_active and COLORS.accent or COLORS.line)
+    love.graphics.setFont(self.fonts.body)
+    set_color(self.search == "" and COLORS.muted or COLORS.ink)
+    love.graphics.print(self.search == "" and "Search  /" or self.search, self.search_rect.x + 10, self.search_rect.y + 8)
+
+    local scenarios = self:scenarios()
+    self:clamp_selection()
+    self.rows = {}
+    local list = rect(28, 126, width - 56, height - 216)
+    draw_box(list, COLORS.panel, COLORS.line)
+    local row_y = list.y + 10
+    for index, scenario in ipairs(scenarios) do
+        local row = rect(list.x + 10, row_y, list.w - 20, 54)
+        local selected = index == self.selected_index
+        local accent = self.tab == "combat" and COLORS.combat or COLORS.overworld
+        draw_box(row, selected and COLORS.surface or COLORS.panel, selected and accent or COLORS.line)
+
+        love.graphics.setFont(self.fonts.heading)
+        set_color(selected and COLORS.ink or COLORS.muted)
+        love.graphics.print(scenario.name or scenario.id, row.x + 12, row.y + 8)
+        love.graphics.setFont(self.fonts.small)
+        set_color(COLORS.muted)
+        love.graphics.print(scenario.description or "", row.x + 12, row.y + 31)
+        love.graphics.printf(scenario.encounter_id or scenario.room or "", row.x + row.w - 280, row.y + 20, 266, "right")
+
+        self.rows[index] = {
+            rect = row,
+            scenario = scenario
+        }
+        row_y = row_y + 62
+    end
+
+    love.graphics.setFont(self.fonts.small)
+    set_color(COLORS.muted)
+    love.graphics.print("Enter: launch   Tab: switch view   /: search   Esc: game", 28, height - 72)
+    love.graphics.printf(summary_text(self.last_summary), 28, height - 46, width - 56, "left")
+end
+
+return DesignerLab
+
+```
+
+## states/designer_overworld.lua
+
+```lua
+local GameState = require("core.gamestate")
+local World = require("systems.world")
+
+local DesignerOverworld = {}
+DesignerOverworld.__index = DesignerOverworld
+DesignerOverworld.opaque = true
+
+local FLAG_KEYS = {
+    [4] = "basement.passage_open",
+    [5] = "basement.lights_on",
+    [6] = "basement.key_found",
+    [7] = "basement.boss_door_unlocked"
+}
+
+local function copy_table(source)
+    if type(source) ~= "table" then
+        return source
+    end
+
+    local copy = {}
+    for key, value in pairs(source) do
+        copy[key] = copy_table(value)
+    end
+    return copy
+end
+
+local function scenario_run(scenario)
+    return {
+        current_room = scenario.room,
+        flags = copy_table(scenario.flags or {}),
+        encounters = copy_table(scenario.encounters or {}),
+        player = copy_table(scenario.player or {})
+    }
+end
+
+function DesignerOverworld:enter(context)
+    self.scenario = context and context.scenario or {}
+    local player = self.scenario.player or {}
+    self.world = World.new({
+        room = self.scenario.room,
+        player_x = player.x,
+        player_y = player.y,
+        spawn = self.scenario.spawn,
+        player = player,
+        run = scenario_run(self.scenario),
+        flags = self.scenario.flags,
+        room_states = self.scenario.room_states,
+        autosave = false
+    })
+    self.world.debug_overlay = true
+    self.world.on_encounter = function(encounter)
+        GameState.push(require("states.v2_combat"), {
+            encounter_id = encounter and encounter.encounter_id,
+            encounter = encounter,
+            run = self.world.run,
+            designer_mode = true,
+            seed = self.seed or 4401
+        })
+    end
+    self.world.on_dialog = function(dialog)
+        GameState.push(require("states.dialog"), {
+            world = self.world,
+            dialog = dialog and dialog.dialog,
+            dialog_id = dialog and dialog.dialog_id,
+            actor = dialog and self.world.room and self.world.room.actor_by_id[dialog.actor_id]
+        })
+    end
+end
+
+function DesignerOverworld:resume(_, result)
+    if result and result.type == "combat_result" then
+        self.last_summary = result.playtest_summary
+        self.world:apply_combat_result(result)
+    elseif result and result.type == "dialog_result" then
+        self.world:apply_dialog_result(result)
+    end
+end
+
+function DesignerOverworld:pause()
+    if self.world and self.world.player then
+        self.world.player:clear_direction_input()
+    end
+end
+
+function DesignerOverworld:update(dt)
+    self.world:update(dt)
+end
+
+function DesignerOverworld:draw()
+    self.world:draw()
+
+    local width = love.graphics.getWidth()
+    local actor_count = math.min(8, #(self.world.room and self.world.room.actors or {}))
+    local region_count = math.min(4, #(self.world.room and self.world.room.regions or {}))
+    local panel_w = 334
+    local panel_h = 154 + actor_count * 15 + region_count * 15
+    local x = width - panel_w - 12
+    local y = 12
+    love.graphics.setColor(0.035, 0.04, 0.06, 0.92)
+    love.graphics.rectangle("fill", x, y, panel_w, panel_h, 4, 4)
+    love.graphics.setColor(0.66, 0.68, 0.78, 0.8)
+    love.graphics.rectangle("line", x, y, panel_w, panel_h, 4, 4)
+    love.graphics.setColor(0.96, 0.95, 1, 1)
+    love.graphics.print(self.scenario.name or "Designer Checkpoint", x + 10, y + 9)
+    love.graphics.setColor(0.72, 0.71, 0.8, 1)
+    love.graphics.print("F4 overlay   F5 reload export", x + 10, y + 31)
+    love.graphics.print("1 flashlight   2 shovel   3 key   0 empty hands", x + 10, y + 49)
+    love.graphics.print("4 passage   5 lights   6 key flag   7 boss door", x + 10, y + 67)
+    love.graphics.print("Esc return to lab", x + 10, y + 85)
+
+    local equipped = self.world.player.equipped or "nothing"
+    love.graphics.setColor(0.3, 0.86, 0.7, 1)
+    love.graphics.print("Held: " .. equipped, x + 10, y + 109)
+
+    local legend_y = y + 132
+    love.graphics.setColor(0.96, 0.78, 0.25, 1)
+    for index = 1, actor_count do
+        local actor = self.world.room.actors[index]
+        love.graphics.print(string.format(
+            "#%d %s [%s] @ %d,%d",
+            index,
+            tostring(actor.id),
+            tostring(actor.type),
+            actor.x,
+            actor.y), x + 10, legend_y)
+        legend_y = legend_y + 15
+    end
+
+    love.graphics.setColor(0.3, 0.8, 1, 1)
+    for index = 1, region_count do
+        local region = self.world.room.regions[index]
+        love.graphics.print(string.format(
+            "R%d %s [%s]",
+            index,
+            tostring(region.id),
+            tostring(region.type)), x + 10, legend_y)
+        legend_y = legend_y + 15
+    end
+end
+
+function DesignerOverworld:grant_and_equip(item)
+    self.world.player:addItem(item)
+    self.world.player.equipped = item
+    self.world:set_message("Designer tool: " .. item)
+end
+
+function DesignerOverworld:close()
+    if GameState.size and GameState.size() > 1 then
+        GameState.pop()
+    else
+        GameState.switch(require("states.designer_lab"))
+    end
+end
+
+function DesignerOverworld:keypressed(key)
+    if key == "escape" then
+        self:close()
+        return
+    elseif key == "f4" then
+        self.world.debug_overlay = not self.world.debug_overlay
+        return
+    elseif key == "f5" then
+        self.world:reload_room()
+        self.world:set_message("Reloaded " .. tostring(self.world.room_module))
+        return
+    elseif key == "1" then
+        self:grant_and_equip("flashlight")
+        return
+    elseif key == "2" then
+        self:grant_and_equip("shovel")
+        return
+    elseif key == "3" then
+        self:grant_and_equip("rusty_key")
+        return
+    elseif key == "0" then
+        self.world.player.equipped = nil
+        self.world:set_message("Hands empty.")
+        return
+    end
+
+    local number = tonumber(key)
+    local flag = number and FLAG_KEYS[number]
+    if flag then
+        local value = not self.world:get_flag(flag)
+        self.world:set_flag(flag, value)
+        self.world:set_message(flag .. ": " .. tostring(value))
+        return
+    end
+
+    self.world:keypressed(key)
+end
+
+function DesignerOverworld:actionpressed(action)
+    if action == "cancel" or action == "menu" then
+        self:close()
+        return true
+    end
+    return self.world:actionpressed(action)
+end
+
+function DesignerOverworld:actionreleased(action)
+    return self.world:actionreleased(action)
+end
+
+function DesignerOverworld:keyreleased(key)
+    self.world:keyreleased(key)
+end
+
+return DesignerOverworld
+
+```
+
 ## states/dialog.lua
 
 ```lua
@@ -9388,6 +13664,8 @@ local Dialog = require("systems.dialog")
 
 local DialogState = {}
 DialogState.__index = DialogState
+
+local UI_FONT_PATH = "assets/fonts/dotgothic16/DotGothic16-Regular.ttf"
 
 local COLORS = {
     box = { 0.045, 0.045, 0.075, 0.96 },
@@ -9402,6 +13680,19 @@ local COLORS = {
 
 local CONTINUE_PROMPT_SIZE = 12
 local CONTINUE_PROMPT_FPS = 4
+
+local function new_ui_font(size)
+    local ok, font = pcall(love.graphics.newFont, UI_FONT_PATH, size)
+    if not ok then
+        font = love.graphics.newFont(size)
+    end
+
+    if font and font.setFilter then
+        font:setFilter("nearest", "nearest")
+    end
+
+    return font
+end
 
 local function set_color(color)
     love.graphics.setColor(color)
@@ -9460,6 +13751,18 @@ local function draw_animated_image(base_id, r, time, max_frames)
     end
 
     return draw_image(asset_id, r)
+end
+
+function DialogState:ensure_fonts()
+    if self.fonts then
+        return
+    end
+
+    self.fonts = {
+        body = new_ui_font(15),
+        speaker = new_ui_font(13),
+        response = new_ui_font(13)
+    }
 end
 
 function DialogState:enter(context)
@@ -9544,6 +13847,9 @@ function DialogState:draw()
         return
     end
 
+    self:ensure_fonts()
+    local previous_font = love.graphics.getFont()
+
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
     local margin = 24
@@ -9564,13 +13870,16 @@ function DialogState:draw()
             draw_box(speaker_rect, COLORS.speaker, COLORS.speaker_line, 4)
         end
         set_color(COLORS.ink)
+        love.graphics.setFont(self.fonts.speaker)
         love.graphics.printf(node.speaker, box_x + 28, box_y - 11, speaker_w - 24, "left")
     end
 
     set_color(COLORS.ink)
+    love.graphics.setFont(self.fonts.body)
     love.graphics.printf(node.text or "", box_x + 24, box_y + 28, box_w - 48, "left")
 
     if node.responses then
+        love.graphics.setFont(self.fonts.response)
         local response_y = box_y + box_h - 42
         local response_w = math.min(112, (box_w - 64) / 2)
         local has_cursor = Assets.images and Assets.images.dialog_choice_cursor
@@ -9599,6 +13908,8 @@ function DialogState:draw()
             love.graphics.print("v", prompt.x, prompt.y)
         end
     end
+
+    love.graphics.setFont(previous_font)
 end
 
 return DialogState
@@ -10376,6 +14687,12 @@ function Overworld:resume(_, result)
     end
 end
 
+function Overworld:pause()
+    if self.world and self.world.player then
+        self.world.player:clear_direction_input()
+    end
+end
+
 function Overworld:update(dt)
     self.world:update(dt)
 end
@@ -10403,6 +14720,10 @@ function Overworld:actionpressed(action)
     end
 
     return self.world:actionpressed(action)
+end
+
+function Overworld:actionreleased(action)
+    return self.world:actionreleased(action)
 end
 
 function Overworld:keyreleased(key)
@@ -10472,10 +14793,10 @@ end
 local SLOT_LABELS = {
     head = "Head",
     body = "Body",
-    arm_l = "Left Arm",
-    arm_r = "Right Arm",
-    leg_l = "Left Leg",
-    leg_r = "Right Leg"
+    arm_l = "Fore Hand",
+    arm_r = "Back Hand",
+    leg_l = "Front Foot",
+    leg_r = "Back Foot"
 }
 
 function PostCombat:enter(summary)
@@ -10657,10 +14978,10 @@ local CLAIM_SLOT_TYPES = {
 local CLAIM_SLOT_LABELS = {
     head = "Head",
     body = "Body",
-    arm_l = "Left Arm",
-    arm_r = "Right Arm",
-    leg_l = "Left Leg",
-    leg_r = "Right Leg"
+    arm_l = "Fore Hand",
+    arm_r = "Back Hand",
+    leg_l = "Front Foot",
+    leg_r = "Back Foot"
 }
 
 local COLORS = {
@@ -11233,6 +15554,13 @@ local function make_log_line(event, data)
         return string.format("%s feeds %s.", data.combatant.name, data.slot.name)
     elseif event == Events.SLOT_RESOLVED then
         return string.format("%s resolves %s.", data.combatant.name, data.slot.name)
+    elseif event == Events.SLOT_COST_CHANGED then
+        local verb = data.current_length < data.previous_length and "contracts" or "expands"
+        return string.format("%s %s to %d pip%s.",
+            data.slot.name,
+            verb,
+            data.current_length,
+            data.current_length == 1 and "" or "s")
     elseif event == Events.SPELLMARK_OPENED then
         return string.format("%s opens %s.", data.combatant.name, data.spellmark.name or "a spellmark")
     elseif event == Events.SPELLMARK_RESOLVED then
@@ -11247,14 +15575,72 @@ local function make_log_line(event, data)
     return nil
 end
 
+local function generated_seed()
+    local timer = love and love.timer and love.timer.getTime and love.timer.getTime() or 0
+    return math.floor((os.time() + timer * 100000) % 2147483647)
+end
+
+local function seeded_roller(seed)
+    if love and love.math and love.math.newRandomGenerator then
+        local generator = love.math.newRandomGenerator(seed)
+        return function(minimum, maximum)
+            return generator:random(minimum, maximum)
+        end
+    end
+
+    local state = seed % 2147483647
+    if state <= 0 then
+        state = 1
+    end
+    return function(minimum, maximum)
+        state = (state * 48271) % 2147483647
+        local span = maximum - minimum + 1
+        return minimum + (state % span)
+    end
+end
+
+local function apply_combatant_setup(combatant, setup)
+    if not (combatant and setup) then
+        return
+    end
+
+    if setup.heart_points then
+        combatant.heart_points = setup.heart_points
+    end
+
+    for part_id, status in pairs(setup.statuses or {}) do
+        local part = combatant:get_body_part_by_id(part_id)
+        if part then
+            part:set_status(status)
+        end
+    end
+
+    for part_id, indexes in pairs(setup.slot_charge or {}) do
+        local part = combatant:get_body_part_by_id(part_id)
+        if part then
+            part.slot_charge = {}
+            for _, index in ipairs(indexes or {}) do
+                part.slot_charge[tonumber(index) or index] = true
+            end
+        end
+    end
+end
+
 function V2Combat:enter(context)
     self.context = context or {}
     self.encounter_id = self.context.encounter_id
         or (self.context.encounter and self.context.encounter.encounter_id)
         or "debug.demo"
     self.context.encounter_id = self.encounter_id
-    self.engine = Engine:new()
+    self.seed = tonumber(self.context.seed) or generated_seed()
+    self.context.seed = self.seed
+    self.engine = Engine:new({
+        rng = seeded_roller(self.seed)
+    })
     self.player, self.enemy = Demo.create_combatants(self.context)
+    local setup = self.context.combat_setup or {}
+    apply_combatant_setup(self.player, setup.player)
+    apply_combatant_setup(self.enemy, setup.enemy)
     self.engine:add_combatant(self.player)
     self.engine:add_combatant(self.enemy)
 
@@ -11279,6 +15665,12 @@ function V2Combat:enter(context)
     self.event_visibility_context = nil
     self.returned_to_overworld = false
     self.log = {}
+    self.playtest_stats = {
+        slot_activation_count = 0,
+        slot_activations = {},
+        damage_events = 0,
+        healing_events = 0
+    }
     self.message = "Drag a die to a rim, socket, or hatch. C confirms."
     self.fonts = {
         title = new_ui_font(24),
@@ -11297,6 +15689,7 @@ function V2Combat:register_events()
         Events.CREST_EXPENDED,
         Events.SLOT_FED,
         Events.SLOT_RESOLVED,
+        Events.SLOT_COST_CHANGED,
         Events.SPELLMARK_OPENED,
         Events.SPELLMARK_RESOLVED,
         Events.LATCH_EJECTED,
@@ -11321,8 +15714,22 @@ function V2Combat:register_events()
     end
 
     self.engine:on(Events.SLOT_RESOLVED, function(data)
+        local slot_name = data.slot and (data.slot.name or data.slot.id) or "Slot"
+        self.playtest_stats.slot_activation_count = self.playtest_stats.slot_activation_count + 1
+        self.playtest_stats.slot_activations[slot_name] =
+            (self.playtest_stats.slot_activations[slot_name] or 0) + 1
         if self:should_log_event(Events.SLOT_RESOLVED, data) then
             self:show_slot_activation(data)
+        end
+    end)
+
+    self.engine:on(Events.DAMAGE_DEALT, function()
+        self.playtest_stats.damage_events = self.playtest_stats.damage_events + 1
+    end)
+
+    self.engine:on(Events.HEAL_APPLIED, function(data)
+        if not data.no_effect then
+            self.playtest_stats.healing_events = self.playtest_stats.healing_events + 1
         end
     end)
 end
@@ -11989,6 +16396,22 @@ function V2Combat:begin_combat_end()
         title = "You Lose"
     end
 
+    if self.context.designer_mode then
+        self.combat_end = {
+            result = result,
+            title = title,
+            elapsed = 0,
+            designer = true
+        }
+        self.playtest_summary = self:build_playtest_summary()
+        self.player_can_allocate = false
+        self.enemy_response_pending = false
+        self.selected_die = nil
+        self.drag = nil
+        self.message = "Playtest complete. R repeats this seed; Shift+R rolls a new seed."
+        return
+    end
+
     if result == "win" then
         self:begin_claim_ceremony(title)
         return
@@ -12009,6 +16432,9 @@ end
 
 function V2Combat:update_combat_end(dt)
     self.combat_end.elapsed = (self.combat_end.elapsed or 0) + (dt or 0)
+    if self.combat_end.designer then
+        return
+    end
     if self.combat_end.elapsed >= (self.combat_end.delay or COMBAT_END_RETURN_DELAY) then
         self:return_to_overworld()
     end
@@ -12033,6 +16459,86 @@ local function snapshot_parts(combatant)
         table.insert(parts, snapshot_part(part))
     end
     return parts
+end
+
+local function status_names(combatant, status)
+    local names = {}
+    for _, part in ipairs(combatant and combatant.body_parts or {}) do
+        if part.status == status then
+            table.insert(names, part.name or part.id)
+        end
+    end
+    return names
+end
+
+function V2Combat:build_playtest_summary()
+    local stats = self.playtest_stats or {}
+    local slot_activations = {}
+    for name, count in pairs(stats.slot_activations or {}) do
+        table.insert(slot_activations, {
+            name = name,
+            count = count
+        })
+    end
+    table.sort(slot_activations, function(left, right)
+        return left.name < right.name
+    end)
+
+    local preserved = {}
+    for _, part in ipairs(self.enemy and self.enemy.body_parts or {}) do
+        if part.status ~= "maimed" then
+            table.insert(preserved, part.name or part.id)
+        end
+    end
+
+    return {
+        encounter_id = self.encounter_id,
+        scenario_id = self.context.designer_scenario_id,
+        seed = self.seed,
+        outcome = self:outcome(),
+        rounds = self.engine and self.engine.current_round or 0,
+        player_hearts = self.player and self.player.heart_points or 0,
+        enemy_hearts = self.enemy and self.enemy.heart_points or 0,
+        damage_events = stats.damage_events or 0,
+        healing_events = stats.healing_events or 0,
+        slot_activation_count = stats.slot_activation_count or 0,
+        slot_activations = slot_activations,
+        player_wounded = status_names(self.player, "wounded"),
+        player_maimed = status_names(self.player, "maimed"),
+        enemy_wounded = status_names(self.enemy, "wounded"),
+        enemy_maimed = status_names(self.enemy, "maimed"),
+        preserved_enemy_parts = preserved
+    }
+end
+
+function V2Combat:playtest_summary_text()
+    local summary = self.playtest_summary or self:build_playtest_summary()
+    local lines = {
+        string.format("%s | seed %s | %s", summary.encounter_id, summary.seed, summary.outcome),
+        string.format("Rounds %d | Hearts player %d / enemy %d",
+            summary.rounds,
+            summary.player_hearts,
+            summary.enemy_hearts),
+        string.format("Damage %d | Healing %d | Slot activations %d",
+            summary.damage_events,
+            summary.healing_events,
+            summary.slot_activation_count),
+        "Player maimed: " .. (#summary.player_maimed > 0 and table.concat(summary.player_maimed, ", ") or "none"),
+        "Enemy maimed: " .. (#summary.enemy_maimed > 0 and table.concat(summary.enemy_maimed, ", ") or "none"),
+        "Preserved prizes: " .. (#summary.preserved_enemy_parts > 0
+            and table.concat(summary.preserved_enemy_parts, ", ")
+            or "none")
+    }
+
+    if #summary.slot_activations > 0 then
+        local activations = {}
+        for _, entry in ipairs(summary.slot_activations) do
+            table.insert(activations, entry.name .. " x" .. tostring(entry.count))
+        end
+        table.insert(lines, "Slots: " .. table.concat(activations, ", "))
+    end
+
+    return table.concat(lines, "\n")
 end
 
 function V2Combat:outcome()
@@ -12081,6 +16587,8 @@ function V2Combat:build_combat_result(forced_outcome)
         type = "combat_result",
         outcome = outcome,
         encounter_id = self.encounter_id,
+        seed = self.seed,
+        playtest_summary = self.playtest_summary,
         player_parts = snapshot_parts(self.player),
         enemy_parts = snapshot_parts(self.enemy),
         claimable_parts = claimable_parts,
@@ -12099,6 +16607,8 @@ function V2Combat:return_to_overworld(forced_outcome)
     local result = self:build_combat_result(forced_outcome)
     if GameState.size and GameState.size() > 1 then
         GameState.pop(result)
+    elseif self.context.designer_mode then
+        GameState.switch(require("states.designer_lab"))
     else
         GameState.switch(require("states.overworld"))
     end
@@ -12244,7 +16754,11 @@ function V2Combat:active_die_preview_lines()
 
     local hover = self.hover
     local preview_destination = hover and is_destination_kind(hover.kind) and hover.kind or nil
-    local effective = self.engine:get_effective_symbols(self.player, die, preview_destination)
+    local effective = self.engine:get_effective_symbols(
+        self.player,
+        die,
+        preview_destination,
+        hover and hover.part)
     table.insert(lines, (self.drag and "Held: " or "Selected: ") .. Symbols.format_face(effective))
     table.insert(lines, "From: " .. (die.source_part and die.source_part.name or "?"))
 
@@ -12842,6 +17356,16 @@ function V2Combat:keypressed(key)
         elseif key == "space" or key == "return" then
             self:claim_actionpressed("confirm")
         end
+    elseif self.combat_end and self.combat_end.designer and key == "r" then
+        if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then
+            self.context.seed = generated_seed()
+        end
+        self:enter(self.context)
+    elseif self.combat_end and self.combat_end.designer and key == "p" then
+        if love.system and love.system.setClipboardText then
+            love.system.setClipboardText(self:playtest_summary_text())
+            self.message = "Copied playtest summary."
+        end
     elseif self.combat_end and (key == "space" or key == "c" or key == "return" or key == "escape") then
         self:return_to_overworld()
     elseif key == "escape" then
@@ -12851,6 +17375,9 @@ function V2Combat:keypressed(key)
     elseif key == "c" or key == "return" then
         self:confirm_round()
     elseif key == "r" then
+        if love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift") then
+            self.context.seed = generated_seed()
+        end
         self:enter(self.context)
     end
 end
@@ -12885,7 +17412,7 @@ function V2Combat:destination_preview(kind, part)
     end
 
     local valid = self:is_valid_destination(kind, part)
-    local effective = self.engine:get_effective_symbols(self.player, die, kind)
+    local effective = self.engine:get_effective_symbols(self.player, die, kind, part)
 
     if kind == "socket" then
         local used, burned, spellmark = self.engine:classify_destination_symbols(self.player, "socket", part, effective)
@@ -13481,7 +18008,11 @@ function V2Combat:draw_auto_allocation_ghost()
     if sequence.visibility == "hidden" then
         draw_die_back(r, COLORS.enemy)
     else
-        local effective = self.engine:get_effective_symbols(sequence.combatant, current.die, current.kind)
+        local effective = self.engine:get_effective_symbols(
+            sequence.combatant,
+            current.die,
+            current.kind,
+            current.part)
         draw_die_face(effective, r, true)
     end
 end
@@ -13911,8 +18442,9 @@ function V2Combat:draw_combat_end_overlay()
 
     local width = love.graphics.getWidth()
     local height = love.graphics.getHeight()
-    local panel_w = 236
-    local panel_h = 94
+    local designer = self.combat_end.designer
+    local panel_w = designer and 470 or 236
+    local panel_h = designer and 252 or 94
     local panel = rect((width - panel_w) / 2, (height - panel_h) / 2, panel_w, panel_h)
     local color = COLORS.muted
 
@@ -13929,12 +18461,66 @@ function V2Combat:draw_combat_end_overlay()
     love.graphics.setFont(self.fonts.title)
     draw_text(self.combat_end.title, panel.x + 14, panel.y + 18, panel.w - 28, "center", color)
 
+    if designer then
+        love.graphics.setFont(self.fonts.small)
+        local summary = self.playtest_summary or self:build_playtest_summary()
+        local y = panel.y + 58
+        local lines = {
+            string.format("Seed %s  |  %d rounds  |  Hearts %d / %d",
+                tostring(summary.seed),
+                summary.rounds,
+                summary.player_hearts,
+                summary.enemy_hearts),
+            string.format("Damage %d  |  Healing %d  |  Slots %d",
+                summary.damage_events,
+                summary.healing_events,
+                summary.slot_activation_count),
+            "Player maimed: " .. (#summary.player_maimed > 0
+                and table.concat(summary.player_maimed, ", ")
+                or "none"),
+            "Enemy maimed: " .. (#summary.enemy_maimed > 0
+                and table.concat(summary.enemy_maimed, ", ")
+                or "none"),
+            "Preserved: " .. (#summary.preserved_enemy_parts > 0
+                and table.concat(summary.preserved_enemy_parts, ", ")
+                or "none")
+        }
+        for _, line in ipairs(lines) do
+            draw_text(line, panel.x + 22, y, panel.w - 44, "left", COLORS.ink)
+            y = y + 27
+        end
+        love.graphics.setFont(self.fonts.tiny)
+        draw_text("R same seed   Shift+R new seed   P copy summary   Esc return",
+            panel.x + 16, panel.y + panel.h - 30, panel.w - 32, "center", COLORS.muted)
+        return
+    end
+
     local remaining = math.max(0, (self.combat_end.delay or COMBAT_END_RETURN_DELAY) - (self.combat_end.elapsed or 0))
     local dots = string.rep(".", math.floor((self.combat_end.elapsed or 0) * 3) % 4)
     love.graphics.setFont(self.fonts.small)
     draw_text("Returning" .. dots, panel.x + 14, panel.y + 58, panel.w - 28, "center", COLORS.ink)
     love.graphics.setFont(self.fonts.tiny)
     draw_text(string.format("%.1fs", remaining), panel.x + 14, panel.y + 76, panel.w - 28, "center", COLORS.muted)
+end
+
+function V2Combat:draw_designer_hud()
+    if not self.context.designer_mode then
+        return
+    end
+
+    local width = love.graphics.getWidth()
+    local panel = rect(width - RAIL_WIDTH + 8, 8, RAIL_WIDTH - 16, 44)
+    draw_box(panel, { 0.02, 0.025, 0.04, 0.94 }, COLORS.selected, 4)
+    love.graphics.setFont(self.fonts.tiny)
+    draw_text(
+        string.format("%s\nseed %s | R replay",
+            self.context.designer_scenario_name or self.encounter_id,
+            tostring(self.seed)),
+        panel.x + 6,
+        panel.y + 6,
+        panel.w - 12,
+        "center",
+        COLORS.ink)
 end
 
 function V2Combat:draw()
@@ -13978,10 +18564,236 @@ function V2Combat:draw()
 
     self:draw_global_spine()
     self:draw_inspector()
+    self:draw_designer_hud()
     self:draw_combat_end_overlay()
 end
 
 return V2Combat
+
+```
+
+## systems/actor.lua
+
+```lua
+local Actor = {}
+Actor.__index = Actor
+
+Actor.COLLISION_MODES = {
+    always = true,
+    never = true,
+    until_resolved = true,
+    scripted = true
+}
+
+local DEFAULT_TILE_SIZE = 32
+local GRID_SNAP_TOLERANCE = 0.01
+
+local function copy_table(source)
+    local copy = {}
+    for key, value in pairs(source or {}) do
+        if type(value) == "table" then
+            copy[key] = copy_table(value)
+        else
+            copy[key] = value
+        end
+    end
+    return copy
+end
+
+local function normalize_properties(source)
+    local properties = {}
+
+    for key, value in pairs(source or {}) do
+        if type(key) == "number" and type(value) == "table" and value.name then
+            properties[value.name] = value.value
+        elseif type(value) == "table" then
+            properties[key] = copy_table(value)
+        else
+            properties[key] = value
+        end
+    end
+
+    return properties
+end
+
+local function bool_value(value, default)
+    if value == nil then
+        return default
+    end
+    return value == true or value == "true" or value == 1
+end
+
+local function uses_pixel_coordinates(data, properties, room)
+    if data.tile_x or data.tile_y or properties.tile_x or properties.tile_y then
+        return false
+    end
+
+    if data.units == "pixels" or data.pixel_coordinates or properties.pixel_coordinates then
+        return true
+    end
+
+    if data.gid or data.rotation or data.shape or data.polygon or data.polyline then
+        return true
+    end
+
+    if type(data.id) == "number" and (data.x ~= nil or data.y ~= nil) then
+        return true
+    end
+
+    local x = tonumber(data.x)
+    local y = tonumber(data.y)
+    if room and x and y and (x > (room.width or 0) or y > (room.height or 0)) then
+        return true
+    end
+
+    return false
+end
+
+local function pixel_to_tile(value, tile_size)
+    local grid_position = (tonumber(value) or 0) / tile_size
+    local nearest_grid_line = math.floor(grid_position + 0.5)
+    if math.abs(grid_position - nearest_grid_line) <= GRID_SNAP_TOLERANCE then
+        grid_position = nearest_grid_line
+    end
+
+    return math.floor(grid_position) + 1
+end
+
+local function object_tile_position(data, tile_size, room, properties)
+    if data.tile_x and data.tile_y then
+        return tonumber(data.tile_x) or 1, tonumber(data.tile_y) or 1
+    end
+
+    if properties.tile_x and properties.tile_y then
+        return tonumber(properties.tile_x) or 1, tonumber(properties.tile_y) or 1
+    end
+
+    local size = tile_size or DEFAULT_TILE_SIZE
+    if uses_pixel_coordinates(data, properties, room) then
+        return pixel_to_tile(data.x, size), pixel_to_tile(data.y, size)
+    end
+
+    return tonumber(data.x) or 1, tonumber(data.y) or 1
+end
+
+local function authored_collision_mode(data, properties)
+    local mode = properties.collision or data.collision
+    if mode ~= nil then
+        return tostring(mode):lower(), true
+    end
+
+    return "never", false
+end
+
+function Actor.new(data, room)
+    data = data or {}
+    local properties = normalize_properties(data.properties or {})
+    local actor_type = properties.actor_type or data.actor_type or data.type or "message"
+    local x, y = object_tile_position(data, room and room.tile_size or DEFAULT_TILE_SIZE, room, properties)
+    local id = tostring(properties.id or data.name or data.id or (actor_type .. "_" .. tostring(x) .. "_" .. tostring(y)))
+    local collision_mode, collision_authored = authored_collision_mode(data, properties)
+
+    local actor = {
+        id = id,
+        name = data.name or id,
+        type = actor_type,
+        x = x,
+        y = y,
+        width = data.width,
+        height = data.height,
+        layer = data.layer or properties.layer or "actors",
+        visible = bool_value(data.visible, true),
+        collision_mode = collision_mode,
+        collision_authored = collision_authored,
+        interactable = bool_value(properties.interactable or data.interactable, false),
+        properties = properties,
+        state = {},
+        room = room
+    }
+
+    return setmetatable(actor, Actor)
+end
+
+function Actor.is_valid_collision_mode(mode)
+    return Actor.COLLISION_MODES[tostring(mode or ""):lower()] == true
+end
+
+function Actor:set_collision_enabled(enabled)
+    self.state = self.state or {}
+    self.state.collision_enabled = enabled == true
+end
+
+function Actor:blocks_movement(world)
+    if self.visible == false then
+        return false
+    end
+
+    if self.collision_fn then
+        return self:collision_fn(world) == true
+    end
+
+    if self.state and self.state.collision_enabled ~= nil then
+        return self.state.collision_enabled == true
+    end
+
+    if self.collision_mode == "always" then
+        return true
+    elseif self.collision_mode == "until_resolved" then
+        return not (self.state and (self.state.resolved or self.state.removed))
+    end
+
+    return false
+end
+
+function Actor:tile_rect(tile_size)
+    local size = tile_size or DEFAULT_TILE_SIZE
+    return (self.x - 1) * size,
+        (self.y - 1) * size,
+        tonumber(self.width) or size,
+        tonumber(self.height) or size
+end
+
+function Actor:sort_y(tile_size)
+    local _, y, _, height = self:tile_rect(tile_size)
+    return y + height
+end
+
+function Actor:update(world, dt)
+    if self.update_fn then
+        self:update_fn(world, dt)
+    end
+end
+
+function Actor:update_ambient(world, dt)
+    if self.ambient_update_fn then
+        self:ambient_update_fn(world, dt)
+    end
+end
+
+function Actor:draw(world)
+    if self.visible == false then
+        return
+    end
+
+    if self.draw_fn then
+        self:draw_fn(world)
+    end
+end
+
+function Actor:interact(world, player)
+    if self.interact_fn then
+        return self:interact_fn(world, player)
+    end
+
+    local message = self.properties and self.properties.message
+    if message then
+        return { type = "message", text = message }
+    end
+
+    return nil
+end
+
+return Actor
 
 ```
 
@@ -14110,6 +18922,7 @@ local function action_result(actor, action, fallback_message)
             type = "passage",
             target_room = action.target_room or actor.properties.target_room,
             target_spawn = action.target_spawn or actor.properties.target_spawn,
+            flag = action.flag or actor.properties.flag,
             text = text
         }
     elseif action_type == "item" or action_type == "give_item" then
@@ -14221,8 +19034,8 @@ function Registry.apply(actor)
     actor.ambient_update_fn = definition.update_ambient or actor.ambient_update_fn
     actor.interact_fn = definition.interact or actor.interact_fn
 
-    if definition.solid ~= nil and actor.properties.solid == nil then
-        actor.solid = definition.solid
+    if definition.collision and not actor.collision_authored then
+        actor.collision_mode = definition.collision
     end
     if definition.interactable ~= nil and actor.properties.interactable == nil then
         actor.interactable = definition.interactable
@@ -14237,6 +19050,7 @@ function Registry.create(data, room)
 end
 
 Registry.register("pipe", {
+    collision = "always",
     interactable = true,
     draw = draw_pipe,
     interact = function(actor)
@@ -14258,6 +19072,7 @@ Registry.register("pipe", {
 })
 
 Registry.register("crack", {
+    collision = "until_resolved",
     interactable = true,
     draw = draw_crack,
     interact = function(actor, world, player)
@@ -14272,6 +19087,7 @@ Registry.register("crack", {
 })
 
 Registry.register("message", {
+    collision = "never",
     interactable = true,
     draw = draw_message,
     interact = function(actor)
@@ -14295,172 +19111,6 @@ return Registry
 
 ```
 
-## systems/actor.lua
-
-```lua
-local Actor = {}
-Actor.__index = Actor
-
-local DEFAULT_TILE_SIZE = 32
-
-local function copy_table(source)
-    local copy = {}
-    for key, value in pairs(source or {}) do
-        if type(value) == "table" then
-            copy[key] = copy_table(value)
-        else
-            copy[key] = value
-        end
-    end
-    return copy
-end
-
-local function normalize_properties(source)
-    local properties = {}
-
-    for key, value in pairs(source or {}) do
-        if type(key) == "number" and type(value) == "table" and value.name then
-            properties[value.name] = value.value
-        elseif type(value) == "table" then
-            properties[key] = copy_table(value)
-        else
-            properties[key] = value
-        end
-    end
-
-    return properties
-end
-
-local function bool_value(value, default)
-    if value == nil then
-        return default
-    end
-    return value == true or value == "true" or value == 1
-end
-
-local function uses_pixel_coordinates(data, properties, room)
-    if data.tile_x or data.tile_y or properties.tile_x or properties.tile_y then
-        return false
-    end
-
-    if data.units == "pixels" or data.pixel_coordinates or properties.pixel_coordinates then
-        return true
-    end
-
-    if data.gid or data.rotation or data.shape or data.polygon or data.polyline then
-        return true
-    end
-
-    if type(data.id) == "number" and (data.x ~= nil or data.y ~= nil) then
-        return true
-    end
-
-    local x = tonumber(data.x)
-    local y = tonumber(data.y)
-    if room and x and y and (x > (room.width or 0) or y > (room.height or 0)) then
-        return true
-    end
-
-    return false
-end
-
-local function object_tile_position(data, tile_size, room, properties)
-    if data.tile_x and data.tile_y then
-        return tonumber(data.tile_x) or 1, tonumber(data.tile_y) or 1
-    end
-
-    if properties.tile_x and properties.tile_y then
-        return tonumber(properties.tile_x) or 1, tonumber(properties.tile_y) or 1
-    end
-
-    local size = tile_size or DEFAULT_TILE_SIZE
-    if uses_pixel_coordinates(data, properties, room) then
-        return math.floor((tonumber(data.x) or 0) / size) + 1,
-            math.floor((tonumber(data.y) or 0) / size) + 1
-    end
-
-    return tonumber(data.x) or 1, tonumber(data.y) or 1
-end
-
-function Actor.new(data, room)
-    data = data or {}
-    local properties = normalize_properties(data.properties or {})
-    local actor_type = properties.actor_type or data.actor_type or data.type or "message"
-    local x, y = object_tile_position(data, room and room.tile_size or DEFAULT_TILE_SIZE, room, properties)
-    local id = tostring(properties.id or data.name or data.id or (actor_type .. "_" .. tostring(x) .. "_" .. tostring(y)))
-
-    local actor = {
-        id = id,
-        name = data.name or id,
-        type = actor_type,
-        x = x,
-        y = y,
-        width = data.width,
-        height = data.height,
-        layer = data.layer or properties.layer or "actors",
-        visible = bool_value(data.visible, true),
-        solid = bool_value(properties.solid or data.solid, false),
-        interactable = bool_value(properties.interactable or data.interactable, false),
-        properties = properties,
-        state = {},
-        room = room
-    }
-
-    return setmetatable(actor, Actor)
-end
-
-function Actor:tile_rect(tile_size)
-    local size = tile_size or DEFAULT_TILE_SIZE
-    return (self.x - 1) * size,
-        (self.y - 1) * size,
-        tonumber(self.width) or size,
-        tonumber(self.height) or size
-end
-
-function Actor:sort_y(tile_size)
-    local _, y, _, height = self:tile_rect(tile_size)
-    return y + height
-end
-
-function Actor:update(world, dt)
-    if self.update_fn then
-        self:update_fn(world, dt)
-    end
-end
-
-function Actor:update_ambient(world, dt)
-    if self.ambient_update_fn then
-        self:ambient_update_fn(world, dt)
-    end
-end
-
-function Actor:draw(world)
-    if self.visible == false then
-        return
-    end
-
-    if self.draw_fn then
-        self:draw_fn(world)
-    end
-end
-
-function Actor:interact(world, player)
-    if self.interact_fn then
-        return self:interact_fn(world, player)
-    end
-
-    local message = self.properties and self.properties.message
-    if message then
-        return { type = "message", text = message }
-    end
-
-    return nil
-end
-
-return Actor
-
-```
-
 ## systems/bodypart_catalog.lua
 
 ```lua
@@ -14473,10 +19123,10 @@ Catalog.MODULE_NAME = "data.combat.alpha_basement"
 Catalog.SLOT_ORDER = {
     { id = "head", label = "Head" },
     { id = "body", label = "Body" },
-    { id = "arm_l", label = "Left Arm" },
-    { id = "arm_r", label = "Right Arm" },
-    { id = "leg_l", label = "Left Leg" },
-    { id = "leg_r", label = "Right Leg" }
+    { id = "arm_l", label = "Fore Hand" },
+    { id = "arm_r", label = "Back Hand" },
+    { id = "leg_l", label = "Front Foot" },
+    { id = "leg_r", label = "Back Foot" }
 }
 
 local definitions_cache = {}
@@ -14908,6 +19558,293 @@ return Dialog
 
 ```
 
+## systems/overworld_camera.lua
+
+```lua
+local Camera = {}
+Camera.__index = Camera
+
+Camera.DEFAULT_MODE = "standard"
+Camera.MODE_ORDER = { "wide", "standard", "close" }
+Camera.MODES = {
+    wide = {
+        scale = 0.5,
+        tile_pixels = 16,
+        color = { 0.35, 0.63, 1, 0.9 }
+    },
+    standard = {
+        scale = 1,
+        tile_pixels = 32,
+        color = { 0.25, 0.88, 0.68, 0.9 }
+    },
+    close = {
+        scale = 1.5,
+        tile_pixels = 48,
+        color = { 0.98, 0.39, 0.32, 0.9 }
+    }
+}
+
+local function clamp(value, min_value, max_value)
+    return math.max(min_value, math.min(max_value, value))
+end
+
+local function valid_mode(mode)
+    return Camera.MODES[mode] ~= nil
+end
+
+local function snapped(value, scale)
+    return math.floor(value * scale + 0.5) / scale
+end
+
+local function centered_axis(target, view_size, bounds_start, bounds_size)
+    if bounds_size <= view_size then
+        return bounds_start + (bounds_size - view_size) / 2
+    end
+
+    return clamp(
+        target - view_size / 2,
+        bounds_start,
+        bounds_start + bounds_size - view_size)
+end
+
+function Camera.new(options)
+    options = options or {}
+    local mode = options.mode or Camera.DEFAULT_MODE
+    assert(valid_mode(mode), "Unknown overworld camera mode: " .. tostring(mode))
+
+    return setmetatable({
+        x = 0,
+        y = 0,
+        mode = mode,
+        room_mode = mode,
+        debug_override_index = 1,
+        show_guides = false,
+        active_zone = nil,
+        follow_offset_x = nil,
+        follow_offset_y = nil,
+        follow_context = nil,
+        viewport_width = 960,
+        viewport_height = 540
+    }, Camera)
+end
+
+function Camera:reset_follow_anchor()
+    self.follow_offset_x = nil
+    self.follow_offset_y = nil
+end
+
+function Camera:adopt_follow_target(target_x, target_y)
+    self.follow_offset_x = target_x - self.x
+    self.follow_offset_y = target_y - self.y
+end
+
+function Camera.is_valid_mode(mode)
+    return valid_mode(mode)
+end
+
+function Camera:scale(mode)
+    local definition = Camera.MODES[mode or self.mode] or Camera.MODES[Camera.DEFAULT_MODE]
+    return definition.scale
+end
+
+function Camera:tile_pixels(mode)
+    local definition = Camera.MODES[mode or self.mode] or Camera.MODES[Camera.DEFAULT_MODE]
+    return definition.tile_pixels
+end
+
+function Camera:viewport_world_size(mode, width, height)
+    local scale = self:scale(mode)
+    return (width or self.viewport_width) / scale,
+        (height or self.viewport_height) / scale
+end
+
+function Camera:mode_for_room(room, target_x, target_y)
+    local room_mode = room and room.property and room:property("camera_zoom")
+        or room and room.property and room:property("camera_mode")
+        or Camera.DEFAULT_MODE
+    if not valid_mode(room_mode) then
+        room_mode = Camera.DEFAULT_MODE
+    end
+
+    self.room_mode = room_mode
+    self.active_zone = room and room.camera_zone_at and room:camera_zone_at(target_x, target_y) or nil
+
+    local zone_mode = self.active_zone and (
+        self.active_zone:property("camera_zoom")
+        or self.active_zone:property("camera_mode")
+        or self.active_zone:property("zoom"))
+    if valid_mode(zone_mode) then
+        return zone_mode
+    end
+
+    return room_mode
+end
+
+function Camera:debug_override()
+    return self.debug_override_index > 1
+        and Camera.MODE_ORDER[self.debug_override_index - 1]
+        or nil
+end
+
+function Camera:cycle_debug_override()
+    self.debug_override_index = (self.debug_override_index % (#Camera.MODE_ORDER + 1)) + 1
+    return self:debug_override()
+end
+
+function Camera:toggle_guides()
+    self.show_guides = not self.show_guides
+    return self.show_guides
+end
+
+function Camera:bounds_for_room(room)
+    local map_width = (room and room.width or 0) * (room and room.tile_size or 32)
+    local map_height = (room and room.height or 0) * (room and room.tile_size or 32)
+    local zone = self.active_zone
+
+    if zone and zone:property("camera_bounds") == true then
+        return zone.x, zone.y, zone.width, zone.height
+    end
+
+    return 0, 0, map_width, map_height
+end
+
+function Camera:frame_for_mode(room, target_x, target_y, mode)
+    local view_width, view_height = self:viewport_world_size(mode)
+    local bounds_x, bounds_y, bounds_width, bounds_height = self:bounds_for_room(room)
+    local scale = self:scale(mode)
+    local x = snapped(centered_axis(target_x, view_width, bounds_x, bounds_width), scale)
+    local y = snapped(centered_axis(target_y, view_height, bounds_y, bounds_height), scale)
+    return x, y, view_width, view_height
+end
+
+local function followed_axis(target, view_size, bounds_start, bounds_size, offset)
+    if bounds_size <= view_size then
+        local position = bounds_start + (bounds_size - view_size) / 2
+        return position, target - position
+    end
+
+    local min_position = bounds_start
+    local max_position = bounds_start + bounds_size - view_size
+    local position
+    if offset == nil then
+        position = centered_axis(target, view_size, bounds_start, bounds_size)
+    else
+        position = clamp(target - offset, min_position, max_position)
+    end
+
+    if position <= min_position or position >= max_position then
+        offset = target - position
+    elseif offset == nil then
+        offset = target - position
+    end
+
+    return position, offset
+end
+
+function Camera:update(room, target_x, target_y, viewport_width, viewport_height)
+    self.viewport_width = viewport_width or self.viewport_width
+    self.viewport_height = viewport_height or self.viewport_height
+
+    local authored_mode = self:mode_for_room(room, target_x, target_y)
+    self.mode = self:debug_override() or authored_mode
+    local view_width, view_height = self:viewport_world_size(self.mode)
+    local bounds_x, bounds_y, bounds_width, bounds_height = self:bounds_for_room(room)
+    local context = table.concat({
+        tostring(room),
+        tostring(self.mode),
+        tostring(bounds_x),
+        tostring(bounds_y),
+        tostring(bounds_width),
+        tostring(bounds_height)
+    }, ":")
+    if context ~= self.follow_context then
+        self.follow_context = context
+        self:reset_follow_anchor()
+    end
+
+    local x, y
+    x, self.follow_offset_x = followed_axis(
+        target_x,
+        view_width,
+        bounds_x,
+        bounds_width,
+        self.follow_offset_x
+    )
+    y, self.follow_offset_y = followed_axis(
+        target_y,
+        view_height,
+        bounds_y,
+        bounds_height,
+        self.follow_offset_y
+    )
+
+    local scale = self:scale()
+    self.x = snapped(x, scale)
+    self.y = snapped(y, scale)
+end
+
+function Camera:snap_world(value)
+    return snapped(value, self:scale())
+end
+
+function Camera:world_to_screen(x, y)
+    local scale = self:scale()
+    return (x - self.x) * scale, (y - self.y) * scale
+end
+
+function Camera:screen_to_world(x, y)
+    local scale = self:scale()
+    return x / scale + self.x, y / scale + self.y
+end
+
+function Camera:attach()
+    love.graphics.push()
+    love.graphics.scale(self:scale(), self:scale())
+    love.graphics.translate(-self.x, -self.y)
+end
+
+function Camera:detach()
+    love.graphics.pop()
+end
+
+function Camera:draw_world_guides(room, target_x, target_y)
+    if not self.show_guides then
+        return
+    end
+
+    local current_scale = self:scale()
+    love.graphics.setLineWidth(1 / current_scale)
+
+    for _, mode in ipairs(Camera.MODE_ORDER) do
+        local x, y, width, height = self:frame_for_mode(room, target_x, target_y, mode)
+        local color = Camera.MODES[mode].color
+        love.graphics.setColor(color)
+        love.graphics.rectangle("line", x, y, width, height)
+    end
+
+    love.graphics.setLineWidth(1)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
+function Camera:debug_label()
+    local override = self:debug_override()
+    if override then
+        return string.format(
+            "CAMERA %s (%dpx) [override]",
+            override:upper(),
+            self:tile_pixels(override))
+    end
+
+    return string.format(
+        "CAMERA %s (%dpx)",
+        tostring(self.mode):upper(),
+        self:tile_pixels())
+end
+
+return Camera
+
+```
+
 ## systems/player.lua
 
 ```lua
@@ -14915,6 +19852,9 @@ local Assets = require("core.assets")
 
 local Player = {}
 Player.__index = Player
+
+local TURN_HOLD_THRESHOLD = 0.10
+local STEP_POSE_PORTION = 0.72
 
 function Player.new(x, y)
     local self = setmetatable({}, Player)
@@ -14930,32 +19870,43 @@ function Player.new(x, y)
     self.move_to_x = self.x
     self.move_to_y = self.y
     self.moving = false
+    self.held_direction = nil
+    self.direction_hold_elapsed = 0
+    self.step_index = 0
     self.inventory = {}
     self.equipped = nil
     return self
 end
 
-function Player:update(dt)
+function Player:update(dt, room)
+    dt = dt or 0
     if not self.moving then
         self.render_x = self.x
         self.render_y = self.y
-        return
+    else
+        self.move_elapsed = math.min(self.move_duration, self.move_elapsed + dt)
+        local t = self.move_elapsed / self.move_duration
+        t = 1 - ((1 - t) * (1 - t))
+
+        self.render_x = self.move_from_x + (self.move_to_x - self.move_from_x) * t
+        self.render_y = self.move_from_y + (self.move_to_y - self.move_from_y) * t
+
+        if self.move_elapsed >= self.move_duration then
+            self.x = self.move_to_x
+            self.y = self.move_to_y
+            self.render_x = self.x
+            self.render_y = self.y
+            self.moving = false
+        end
     end
 
-    self.move_elapsed = math.min(self.move_duration, self.move_elapsed + (dt or 0))
-    local t = self.move_elapsed / self.move_duration
-    t = 1 - ((1 - t) * (1 - t))
-
-    self.render_x = self.move_from_x + (self.move_to_x - self.move_from_x) * t
-    self.render_y = self.move_from_y + (self.move_to_y - self.move_from_y) * t
-
-    if self.move_elapsed >= self.move_duration then
-        self.x = self.move_to_x
-        self.y = self.move_to_y
-        self.render_x = self.x
-        self.render_y = self.y
-        self.moving = false
+    if self.held_direction then
+        self.direction_hold_elapsed = self.direction_hold_elapsed + dt
+        if self.direction_hold_elapsed >= TURN_HOLD_THRESHOLD and not self.moving then
+            self:try_move(self.held_direction.dx, self.held_direction.dy, room)
+        end
     end
+
 end
 
 local function facing_for_delta(dx, dy)
@@ -14991,8 +19942,35 @@ function Player:try_move(dx, dy, room)
     self.move_to_x = new_x
     self.move_to_y = new_y
     self.move_elapsed = 0
+    self.step_index = self.step_index + 1
     self.moving = true
     return true
+end
+
+function Player:press_direction(action, dx, dy)
+    if not self.moving then
+        self.facing = facing_for_delta(dx, dy)
+    end
+    self.held_direction = {
+        action = action,
+        dx = dx,
+        dy = dy
+    }
+    self.direction_hold_elapsed = 0
+    return true
+end
+
+function Player:release_direction(action)
+    if self.held_direction and self.held_direction.action == action then
+        self.held_direction = nil
+        self.direction_hold_elapsed = 0
+    end
+    return true
+end
+
+function Player:clear_direction_input()
+    self.held_direction = nil
+    self.direction_hold_elapsed = 0
 end
 
 function Player:front_tile()
@@ -15022,19 +20000,30 @@ end
 
 function Player:keypressed(key, room)
     if key == "up" then
-        return self:try_move(0, -1, room)
+        return self:press_direction("move_up", 0, -1, room)
     elseif key == "down" then
-        return self:try_move(0, 1, room)
+        return self:press_direction("move_down", 0, 1, room)
     elseif key == "left" then
-        return self:try_move(-1, 0, room)
+        return self:press_direction("move_left", -1, 0, room)
     elseif key == "right" then
-        return self:try_move(1, 0, room)
+        return self:press_direction("move_right", 1, 0, room)
     end
 
     return false
 end
 
-function Player:keyreleased(_)
+function Player:keyreleased(key)
+    local actions = {
+        up = "move_up",
+        down = "move_down",
+        left = "move_left",
+        right = "move_right"
+    }
+    local action = actions[key]
+    if action then
+        return self:release_direction(action)
+    end
+    return false
 end
 
 function Player:addItem(item)
@@ -15054,7 +20043,21 @@ end
 
 function Player:draw(tile_size, camera)
     local size = tile_size or 32
-    local sprite_id = "player_idle_" .. tostring(self.facing or "down")
+    local direction = tostring(self.facing or "down")
+    local sprite_id
+    if self.moving then
+        local progress = self.move_duration > 0 and self.move_elapsed / self.move_duration or 1
+        local first_foot = self.step_index % 2 == 1
+        local frame
+        if progress < STEP_POSE_PORTION then
+            frame = first_foot and 2 or 4
+        else
+            frame = first_foot and 3 or 1
+        end
+        sprite_id = "player_walk_" .. direction .. tostring(frame)
+    else
+        sprite_id = "player_idle_" .. direction
+    end
     local image = Assets.images[sprite_id] or Assets.images.player_idle_down
     local draw_x = (self.render_x - 1) * size
     local draw_y = (self.render_y - 1) * size
@@ -15095,12 +20098,14 @@ return Player
 
 ```lua
 local ActorRegistry = require("systems.actor_registry")
+local Actor = require("systems.actor")
 local Assets = require("core.assets")
 
 local Room = {}
 Room.__index = Room
 
 local DEFAULT_TILE_SIZE = 32
+local GRID_SNAP_TOLERANCE = 0.01
 local GID_FLIPPED_HORIZONTALLY = 2147483648
 local GID_FLIPPED_VERTICALLY = 1073741824
 local GID_FLIPPED_DIAGONALLY = 536870912
@@ -15168,6 +20173,16 @@ local function bool_value(value, default)
         return default
     end
     return value == true or value == "true" or value == 1
+end
+
+local function pixel_to_tile(value, tile_size)
+    local grid_position = (tonumber(value) or 0) / tile_size
+    local nearest_grid_line = math.floor(grid_position + 0.5)
+    if math.abs(grid_position - nearest_grid_line) <= GRID_SNAP_TOLERANCE then
+        grid_position = nearest_grid_line
+    end
+
+    return math.floor(grid_position) + 1
 end
 
 local function object_world_rect(object, tile_size)
@@ -15344,8 +20359,12 @@ end
 
 function Room.new(room_source, world)
     local data = normalize_legacy_room(require_if_needed(room_source))
+    local room_id = data.id
+        or data.name
+        or property_value(data.properties, "room_id")
+        or "room"
     local room = {
-        id = data.id or data.name or "room",
+        id = room_id,
         width = data.width or 0,
         height = data.height or 0,
         tile_size = data.tilewidth or data.tileheight or data.tile_size or DEFAULT_TILE_SIZE,
@@ -15355,8 +20374,9 @@ function Room.new(room_source, world)
         actors = {},
         actor_by_id = {},
         regions = {},
+        region_by_id = {},
         world = world,
-        state = world and world.room_states and world.room_states[data.id or data.name or "room"] or {}
+        state = world and world.room_states and world.room_states[room_id] or {}
     }
 
     setmetatable(room, Room)
@@ -15493,7 +20513,10 @@ function Room:is_blocked(x, y)
     end
 
     for _, actor in ipairs(self.actors or {}) do
-        if actor.solid and actor.x == x and actor.y == y and actor.visible ~= false then
+        if actor:blocks_movement(self.world)
+            and actor.x == x
+            and actor.y == y
+        then
             return true
         end
     end
@@ -15514,21 +20537,46 @@ end
 
 function Room:load_regions()
     self.regions = {}
+    self.region_by_id = {}
 
     for _, layer in ipairs(self.layers or {}) do
         if layer.type == "objectgroup" and layer.name == "regions" then
             for _, object in ipairs(layer.objects or {}) do
-                table.insert(self.regions, build_region(object, self.tile_size))
+                local region = build_region(object, self.tile_size)
+                table.insert(self.regions, region)
+                self.region_by_id[region.id] = region
             end
         end
     end
+end
+
+function Room:region(id)
+    return id and self.region_by_id and self.region_by_id[tostring(id)] or nil
+end
+
+function Room:region_center(id, expected_type)
+    local region = self:region(id)
+    if not region or (expected_type and region.type ~= expected_type) then
+        return nil, nil
+    end
+
+    return region.x + region.width / 2, region.y + region.height / 2
+end
+
+function Room:spawn_tile(id)
+    local spawn = self:region(id)
+    if not spawn or spawn.type ~= "spawn" then
+        return nil, nil
+    end
+
+    return pixel_to_tile(spawn.x, self.tile_size), pixel_to_tile(spawn.y, self.tile_size)
 end
 
 function Room:camera_zone_at(world_x, world_y)
     local match
     local match_priority = -math.huge
 
-    for _, region in ipairs(self.regions or {}) do
+    for index, region in ipairs(self.regions or {}) do
         if region.type == "camera_zone" and region:contains(world_x, world_y) then
             local priority = tonumber(region:property("priority", 0)) or 0
             if not match or priority >= match_priority then
@@ -15547,7 +20595,7 @@ function Room:validate_tilesets(result)
             add_message(result.warnings, string.format(
                 "Tileset '%s' has no image or asset_id; its tiles will use fallback rectangles.",
                 tileset.name or tostring(tileset.firstgid)))
-        elseif not Assets.images[tileset.image_id] then
+        elseif love and love.graphics and not Assets.images[tileset.image_id] then
             add_message(result.warnings, string.format(
                 "Tileset '%s' expects overworld asset '%s', but it is not loaded.",
                 tileset.name or tostring(tileset.firstgid),
@@ -15649,6 +20697,14 @@ function Room:validate_actors(result)
                 tostring(actor.type)))
         end
 
+
+        if not Actor.is_valid_collision_mode(actor.collision_mode) then
+            add_message(result.errors, string.format(
+                "Actor '%s' uses invalid collision mode '%s'.",
+                actor.id,
+                tostring(actor.collision_mode)))
+        end
+
         local explicit_sprite = actor.properties
             and (actor.properties.asset_id or actor.properties.sprite_id or actor.properties.sprite)
         if explicit_sprite and not Assets.images[explicit_sprite] then
@@ -15684,7 +20740,27 @@ function Room:validate()
             tostring(camera_mode)))
     end
 
+    local camera_lock_anchor = self:property("camera_lock_anchor")
+    if camera_lock_anchor then
+        local anchor = self:region(camera_lock_anchor)
+        if not anchor then
+            add_message(result.errors, string.format(
+                "Camera lock references missing anchor '%s'.",
+                tostring(camera_lock_anchor)))
+        elseif anchor.type ~= "camera_anchor" then
+            add_message(result.errors, string.format(
+                "Camera lock region '%s' must use type 'camera_anchor'.",
+                tostring(camera_lock_anchor)))
+        end
+    end
+
+    local seen_region_ids = {}
     for _, region in ipairs(self.regions or {}) do
+        if seen_region_ids[region.id] then
+            add_message(result.errors, string.format("Region id '%s' is duplicated.", region.id))
+        end
+        seen_region_ids[region.id] = true
+
         if region.type == "camera_zone" then
             local zone_mode = region:property("camera_zoom")
                 or region:property("camera_mode")
@@ -15699,6 +20775,15 @@ function Room:validate()
                 add_message(result.errors, string.format(
                     "Camera zone '%s' must have positive width and height.",
                     region.id))
+            end
+        elseif region.type == "spawn" then
+            local spawn_x, spawn_y = self:spawn_tile(region.id)
+            if self:is_tile_solid(spawn_x, spawn_y) then
+                add_message(result.errors, string.format(
+                    "Spawn '%s' is on solid tile %s,%s.",
+                    region.id,
+                    tostring(spawn_x),
+                    tostring(spawn_y)))
             end
         end
     end
@@ -15871,6 +20956,56 @@ function Room:draw(world)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
+function Room:draw_debug_overlay(world)
+    local size = self.tile_size
+    local scale = world and world.camera and world.camera:scale() or 1
+    love.graphics.setLineWidth(1 / scale)
+
+    love.graphics.setColor(0.78, 0.8, 0.9, 0.16)
+    for x = 0, self.width do
+        love.graphics.line(x * size, 0, x * size, self.height * size)
+    end
+    for y = 0, self.height do
+        love.graphics.line(0, y * size, self.width * size, y * size)
+    end
+
+    love.graphics.setColor(1, 0.2, 0.24, 0.26)
+    for y = 1, self.height do
+        for x = 1, self.width do
+            if self:is_tile_solid(x, y) then
+                love.graphics.rectangle("fill", (x - 1) * size, (y - 1) * size, size, size)
+            end
+        end
+    end
+
+    for index, region in ipairs(self.regions or {}) do
+        love.graphics.setColor(0.26, 0.8, 1, 0.22)
+        love.graphics.rectangle("fill", region.x, region.y, region.width, region.height)
+        love.graphics.setColor(0.26, 0.8, 1, 0.9)
+        love.graphics.rectangle("line", region.x, region.y, region.width, region.height)
+        love.graphics.print("R" .. tostring(index), region.x + 3, region.y + 3)
+    end
+
+    for index, actor in ipairs(self.actors or {}) do
+        local x, y, width, height = actor:tile_rect(size)
+        love.graphics.setColor(1, 0.78, 0.2, 0.18)
+        love.graphics.rectangle("fill", x, y, width, height)
+        love.graphics.setColor(1, 0.78, 0.2, 0.95)
+        love.graphics.rectangle("line", x, y, width, height)
+        love.graphics.print("#" .. tostring(index), x + 3, y + 3)
+    end
+
+    if world and world.player then
+        local x = (world.player.x - 1) * size
+        local y = (world.player.y - 1) * size
+        love.graphics.setColor(0.28, 1, 0.66, 0.95)
+        love.graphics.rectangle("line", x + 2 / scale, y + 2 / scale, size - 4 / scale, size - 4 / scale)
+    end
+
+    love.graphics.setLineWidth(1)
+    love.graphics.setColor(1, 1, 1, 1)
+end
+
 return Room
 
 ```
@@ -15892,18 +21027,18 @@ local MESSAGE_DURATION = 4
 local DEFAULT_DREAMFORM = {
     head = "part_inst_dreamer_head",
     body = "part_inst_dreamer_body",
-    arm_l = "part_inst_dreamer_left_arm",
-    arm_r = "part_inst_dreamer_right_arm",
-    leg_l = "part_inst_dreamer_left_leg",
-    leg_r = "part_inst_dreamer_right_leg"
+    arm_l = "part_inst_dreamer_fore_hand",
+    arm_r = "part_inst_dreamer_back_hand",
+    leg_l = "part_inst_dreamer_front_foot",
+    leg_r = "part_inst_dreamer_back_foot"
 }
 local DEFAULT_PARTS = {
     part_inst_dreamer_head = { def_id = "dreamer_head", status = "healthy", source = "initial" },
     part_inst_dreamer_body = { def_id = "dreamer_body", status = "healthy", source = "initial" },
-    part_inst_dreamer_left_arm = { def_id = "dreamer_left_arm", status = "healthy", source = "initial" },
-    part_inst_dreamer_right_arm = { def_id = "dreamer_right_arm", status = "healthy", source = "initial" },
-    part_inst_dreamer_left_leg = { def_id = "dreamer_left_leg", status = "healthy", source = "initial" },
-    part_inst_dreamer_right_leg = { def_id = "dreamer_right_leg", status = "healthy", source = "initial" }
+    part_inst_dreamer_fore_hand = { def_id = "dreamer_fore_hand", status = "healthy", source = "initial" },
+    part_inst_dreamer_back_hand = { def_id = "dreamer_back_hand", status = "healthy", source = "initial" },
+    part_inst_dreamer_front_foot = { def_id = "dreamer_front_foot", status = "healthy", source = "initial" },
+    part_inst_dreamer_back_foot = { def_id = "dreamer_back_foot", status = "healthy", source = "initial" }
 }
 local DREAMFORM_SLOT_TYPES = {
     head = "HEAD",
@@ -15914,6 +21049,22 @@ local DREAMFORM_SLOT_TYPES = {
     leg_r = "LEG"
 }
 local DREAMFORM_SLOT_ORDER = { "head", "body", "arm_l", "arm_r", "leg_l", "leg_r" }
+local MOVE_ACTIONS = {
+    move_up = { 0, -1 },
+    move_down = { 0, 1 },
+    move_left = { -1, 0 },
+    move_right = { 1, 0 }
+}
+local MOVE_KEYS = {
+    up = "move_up",
+    w = "move_up",
+    down = "move_down",
+    s = "move_down",
+    left = "move_left",
+    a = "move_left",
+    right = "move_right",
+    d = "move_right"
+}
 
 local function copy_table(source)
     if type(source) ~= "table" then
@@ -16009,10 +21160,19 @@ function World.new(options)
     options = options or {}
     local save_data = copy_table(options.save or {})
     local saved_run = copy_table(save_data.run or {})
-    local saved_player = saved_run.player or {}
+    local saved_player = copy_table(options.player
+        or (options.run and options.run.player)
+        or saved_run.player
+        or {})
+    local player_x = options.player_x or saved_player.x
+    local player_y = options.player_y or saved_player.y
+    local spawn_id = options.spawn
+    if not spawn_id and (player_x == nil or player_y == nil) then
+        spawn_id = "start"
+    end
     local world = {
         room_module = options.room or saved_run.current_room or DEFAULT_ROOM,
-        player = Player.new(options.player_x or saved_player.x or 5, options.player_y or saved_player.y or 5),
+        player = Player.new(player_x or 1, player_y or 1),
         inventory = {},
         profile = copy_table(save_data.profile or options.profile or {}),
         run = normalize_run_state(copy_table(options.run or saved_run)),
@@ -16033,6 +21193,9 @@ function World.new(options)
     setmetatable(world, World)
     world:apply_player_state(saved_player)
     world:load_room(world.room_module)
+    if spawn_id then
+        world:place_player_at_spawn(spawn_id)
+    end
     return world
 end
 
@@ -16048,6 +21211,57 @@ function World:load_room(room_module)
     self.run.current_room = room_module
     self.room = Room.new(room_module, self)
     self:update_camera()
+end
+
+function World:set_player_tile(x, y)
+    self.player:clear_direction_input()
+    self.player.x = x
+    self.player.y = y
+    self.player.render_x = x
+    self.player.render_y = y
+    self.player.move_from_x = x
+    self.player.move_from_y = y
+    self.player.move_to_x = x
+    self.player.move_to_y = y
+    self.player.moving = false
+    self:update_camera()
+end
+
+function World:place_player_at_spawn(spawn_id)
+    local x, y
+    if self.room then
+        x, y = self.room:spawn_tile(spawn_id)
+    end
+    if not (x and y) then
+        error(string.format(
+            "Room '%s' has no spawn named '%s'.",
+            tostring(self.room and self.room.id or self.room_module),
+            tostring(spawn_id)
+        ))
+    end
+    if self.room:is_blocked(x, y) then
+        error(string.format(
+            "Spawn '%s' in room '%s' is blocked at %s,%s.",
+            tostring(spawn_id),
+            tostring(self.room.id),
+            tostring(x),
+            tostring(y)
+        ))
+    end
+
+    self:set_player_tile(x, y)
+end
+
+function World:reload_room()
+    local room_module = self.room_module
+    local player_state = self:player_save_data()
+    if type(room_module) == "string" then
+        package.loaded[room_module] = nil
+    end
+
+    self:load_room(room_module)
+    self:set_player_tile(player_state.x, player_state.y)
+    self:apply_player_state(player_state)
 end
 
 function World:player_save_data()
@@ -16121,6 +21335,32 @@ function World:update_camera()
     end
 
     local px, py = self.player:pixel_position(self.room.tile_size)
+    local lock_anchor = self.room:property("camera_lock_anchor")
+    local unlock_flag = self.room:property("camera_unlock_flag")
+    local camera_locked = lock_anchor ~= nil
+        and (unlock_flag == nil or not self:get_flag(unlock_flag))
+
+    if camera_locked then
+        px, py = self.room:region_center(lock_anchor, "camera_anchor")
+        if not (px and py) then
+            error(string.format(
+                "Room '%s' camera lock references invalid anchor '%s'.",
+                tostring(self.room.id),
+                tostring(lock_anchor)
+            ))
+        end
+    end
+
+    if self.camera_tracking_locked ~= camera_locked then
+        if self.camera_tracking_locked == true and camera_locked == false then
+            local player_x, player_y = self.player:pixel_position(self.room.tile_size)
+            self.camera:adopt_follow_target(player_x, player_y)
+        else
+            self.camera:reset_follow_anchor()
+        end
+        self.camera_tracking_locked = camera_locked
+    end
+
     self.camera:update(
         self.room,
         px,
@@ -16136,6 +21376,9 @@ function World:draw()
     end
     local px, py = self.player:pixel_position(self.room and self.room.tile_size or 32)
     self.camera:draw_world_guides(self.room, px, py)
+    if self.debug_overlay and self.room and self.room.draw_debug_overlay then
+        self.room:draw_debug_overlay(self)
+    end
     self.camera:detach()
 
     self:draw_hud()
@@ -16224,6 +21467,9 @@ function World:handle_result(result)
     elseif result.type == "dialog" then
         self:start_dialog(result)
     elseif result.type == "passage" then
+        if result.flag then
+            self:set_flag(result.flag, true)
+        end
         self:set_message(result.text or "A passage opens.")
         self:autosave("passage")
     else
@@ -16500,23 +21746,24 @@ function World:interact()
 end
 
 function World:actionpressed(action)
-    if action == "confirm" then
-        self:interact()
-        return true
-    elseif action == "move_up" then
-        self.player:try_move(0, -1, self.room)
-        return true
-    elseif action == "move_down" then
-        self.player:try_move(0, 1, self.room)
-        return true
-    elseif action == "move_left" then
-        self.player:try_move(-1, 0, self.room)
-        return true
-    elseif action == "move_right" then
-        self.player:try_move(1, 0, self.room)
+    local move = MOVE_ACTIONS[action]
+    if move then
+        self.player:press_direction(action, move[1], move[2])
         return true
     end
 
+    if action == "confirm" then
+        self:interact()
+        return true
+    end
+
+    return false
+end
+
+function World:actionreleased(action)
+    if MOVE_ACTIONS[action] then
+        return self.player:release_direction(action)
+    end
     return false
 end
 
@@ -16536,21 +21783,143 @@ function World:keypressed(key)
         return
     end
 
-    if key == "up" then
-        self.player:try_move(0, -1, self.room)
-    elseif key == "down" then
-        self.player:try_move(0, 1, self.room)
-    elseif key == "left" then
-        self.player:try_move(-1, 0, self.room)
-    elseif key == "right" then
-        self.player:try_move(1, 0, self.room)
+    local action = MOVE_KEYS[key]
+    local move = action and MOVE_ACTIONS[action]
+    if move then
+        self.player:press_direction(action, move[1], move[2])
     end
 end
 
-function World:keyreleased(_)
+function World:keyreleased(key)
+    local action = MOVE_KEYS[key]
+    if action then
+        return self.player:release_direction(action)
+    end
+    return false
 end
 
 return World
+
+```
+
+## test_designer_scenarios_cli.lua
+
+```lua
+local V2Encounters = require("combat.v2_encounters")
+local Actor = require("systems.actor")
+local World = require("systems.world")
+
+local scenarios = require("data.designer_scenarios")
+
+local function assert_true(condition, message)
+    if not condition then
+        error(message or "assertion failed", 2)
+    end
+end
+
+for _, scenario in ipairs(scenarios.combat or {}) do
+    local player, enemy = V2Encounters.create_combatants({
+        encounter_id = scenario.encounter_id
+    })
+    assert_true(player and #player.body_parts > 0, scenario.id .. " should build a player")
+    assert_true(enemy and #enemy.body_parts > 0, scenario.id .. " should build an enemy")
+    assert_true(type(scenario.seed) == "number", scenario.id .. " should declare a repeatable seed")
+end
+
+for _, scenario in ipairs(scenarios.overworld or {}) do
+    local world = World.new({
+        room = scenario.room,
+        spawn = scenario.spawn,
+        player = scenario.player,
+        run = {
+            current_room = scenario.room,
+            player = scenario.player,
+            flags = scenario.flags,
+            encounters = scenario.encounters
+        },
+        flags = scenario.flags,
+        room_states = scenario.room_states,
+        autosave = false
+    })
+
+    assert_true(world.autosave_enabled == false, scenario.id .. " must not autosave")
+    assert_true(world.room_module == scenario.room, scenario.id .. " should load its room")
+    local spawn_x, spawn_y = world.room:spawn_tile(scenario.spawn)
+    assert_true(world.player.x == spawn_x and world.player.y == spawn_y,
+        scenario.id .. " should apply its named spawn")
+
+    local before_x = world.player.x
+    local before_y = world.player.y
+    local before_equipped = world.player.equipped
+    world:reload_room()
+    assert_true(world.player.x == before_x and world.player.y == before_y,
+        scenario.id .. " should preserve position across room reload")
+    assert_true(world.player.equipped == before_equipped,
+        scenario.id .. " should preserve the held tool across room reload")
+end
+
+local basement = World.new({
+    room = "data.rooms.basement_1",
+    spawn = "start",
+    autosave = false
+})
+assert_true(basement.room.id == "basement_1", "Tiled room should expose its stable room id")
+assert_true(#basement.room.validation.errors == 0, "Tiled Basement should have no validation errors")
+assert_true(#basement.room.validation.warnings == 0, "Tiled Basement should have no validation warnings")
+
+local bone_crack = basement.room.actor_by_id.crack_bone_demon
+assert_true(bone_crack and not basement.room:is_tile_solid(bone_crack.x, bone_crack.y),
+    "Tiled cracks should occupy deliberate openings in tile collision")
+assert_true(basement.room:is_blocked(bone_crack.x, bone_crack.y),
+    "unresolved cracks should block their passage tile")
+
+basement.player:addItem("shovel")
+local crack_result = bone_crack:interact(basement, basement.player)
+assert_true(crack_result.type == "encounter" and crack_result.encounter_id == "basement.bone_demon",
+    "Tiled crack properties should produce the authored encounter")
+assert_true(not basement.room:is_blocked(bone_crack.x, bone_crack.y),
+    "resolved cracks should open their passage tile")
+
+local passage_crack = basement.room.actor_by_id.crack_passage
+local passage_result = passage_crack:interact(basement, basement.player)
+assert_true(passage_result.type == "passage" and passage_result.flag == "basement.passage_open",
+    "hidden passage should return its camera-unlock flag")
+basement:handle_result(passage_result)
+assert_true(basement:get_flag("basement.passage_open"),
+    "resolving the hidden passage should release its world flag")
+
+local shovel_pipe = basement.room.actor_by_id.pipe_shovel
+assert_true(shovel_pipe and shovel_pipe.properties.item == "shovel",
+    "Tiled pipe properties should preserve its item behavior")
+assert_true(basement.room:is_blocked(shovel_pipe.x, shovel_pipe.y),
+    "pipes should always block movement")
+shovel_pipe.state.removed = true
+assert_true(basement.room:is_blocked(shovel_pipe.x, shovel_pipe.y),
+    "an emptied pipe should remain solid")
+
+local invisible_trigger = Actor.new({
+    name = "pentagram_trigger",
+    type = "message",
+    collision = "never"
+})
+assert_true(not invisible_trigger:blocks_movement(basement),
+    "never-colliding actors should not block movement")
+
+local scripted_actor = Actor.new({
+    name = "scripted_door",
+    type = "message",
+    collision = "scripted"
+})
+assert_true(not scripted_actor:blocks_movement(basement),
+    "scripted collision should default to open")
+scripted_actor:set_collision_enabled(true)
+assert_true(scripted_actor:blocks_movement(basement),
+    "scripts should be able to enable collision persistently")
+scripted_actor:set_collision_enabled(false)
+assert_true(not scripted_actor:blocks_movement(basement),
+    "scripts should be able to disable collision persistently")
+
+print("designer scenario smoke test passed.")
 
 ```
 
@@ -16672,6 +22041,23 @@ assert(GameState.size() == 1, "sidebar should close")
 
 local fs = memory_filesystem()
 local world = World.new({ save_backend = fs, save_path = "saves/menu_save.lua" })
+local start_x = world.player.x
+local start_y = world.player.y
+assert(world:actionpressed("move_left") == true, "movement press should be handled")
+assert(world.player.facing == "left", "movement press should turn immediately")
+world:update(0.05)
+assert(world.player.x == start_x and world.player.moving == false, "brief direction hold should not step")
+assert(world:actionreleased("move_left") == true, "movement release should be handled")
+world:update(0.20)
+assert(world.player.x == start_x and world.player.y == start_y, "released tap should remain in place")
+
+world:actionpressed("move_left")
+world:update(0.11)
+assert(world.player.moving == true, "held direction should begin a step")
+world:actionreleased("move_left")
+world:update(world.player.move_duration)
+assert(world.player.x == start_x - 1 and world.player.y == start_y, "held direction should complete one step")
+
 GameState.clear()
 GameState.push(MenuSidebar, { world = world })
 GameState.actionpressed("move_down")
@@ -16700,6 +22086,161 @@ assert(GameState.actionpressed("move_right") == true, "dreamform should handle m
 assert(GameState.current.selected_index == 2, "dreamform selection should move right")
 
 print("input/menu smoke test passed.")
+
+```
+
+## test_overworld_camera_cli.lua
+
+```lua
+local Camera = require("systems.overworld_camera")
+
+local function close_enough(left, right)
+    return math.abs(left - right) < 0.0001
+end
+
+local function region(properties, x, y, width, height)
+    return {
+        x = x,
+        y = y,
+        width = width,
+        height = height,
+        property = function(_, key, default)
+            local value = properties[key]
+            return value == nil and default or value
+        end
+    }
+end
+
+local room = {
+    width = 100,
+    height = 60,
+    tile_size = 32,
+    property = function(_, key)
+        if key == "camera_zoom" then
+            return "standard"
+        end
+    end,
+    camera_zone_at = function()
+        return nil
+    end
+}
+
+local camera = Camera.new()
+local wide_w, wide_h = camera:viewport_world_size("wide", 960, 540)
+local standard_w, standard_h = camera:viewport_world_size("standard", 960, 540)
+local close_w, close_h = camera:viewport_world_size("close", 960, 540)
+
+assert(wide_w == 1920 and wide_h == 1080, "expected wide viewport footprint")
+assert(standard_w == 960 and standard_h == 540, "expected standard viewport footprint")
+assert(close_w == 640 and close_h == 360, "expected close viewport footprint")
+
+camera:update(room, 1600, 960, 960, 540)
+assert(camera.mode == "standard", "expected room camera mode")
+assert(camera.x == 1120 and camera.y == 690, "expected centered standard camera")
+
+camera:update(room, 16, 16, 960, 540)
+assert(camera.x == 0 and camera.y == 0, "expected camera clamp at room origin")
+
+local small_room = {
+    width = 10,
+    height = 8,
+    tile_size = 32,
+    property = function(_, key)
+        if key == "camera_zoom" then
+            return "close"
+        end
+    end,
+    camera_zone_at = function()
+        return nil
+    end
+}
+
+camera:update(small_room, 160, 128, 960, 540)
+assert(camera.mode == "close", "expected close room mode")
+assert(close_enough(camera.x, -160), "expected narrow room to center horizontally")
+assert(close_enough(camera.y, -52), "expected short room to center vertically")
+assert(close_enough(camera.x * camera:scale(), math.floor(camera.x * camera:scale() + 0.5)),
+    "expected camera translation to land on screen pixels")
+
+local tile_room = {
+    width = 30,
+    height = 17,
+    tile_size = 32,
+    property = function(_, key)
+        if key == "camera_zoom" then
+            return "close"
+        end
+    end,
+    camera_zone_at = function()
+        return nil
+    end
+}
+local tile_camera = Camera.new({ mode = "close" })
+tile_camera:update(tile_room, 656, 336, 960, 540)
+assert(tile_camera.x == 320, "expected initial camera clamp at the right map edge")
+tile_camera:update(tile_room, 624, 336, 960, 540)
+assert(tile_camera.x == 288, "expected first inward step to pan one full tile")
+tile_camera:update(tile_room, 592, 336, 960, 540)
+assert(tile_camera.x == 256, "expected subsequent tracking to remain tile-quantized")
+
+local close_zone = region({
+    camera_zoom = "close",
+    camera_bounds = true
+}, 640, 320, 640, 360)
+
+room.camera_zone_at = function(_, x, y)
+    if x >= 640 and x < 1280 and y >= 320 and y < 680 then
+        return close_zone
+    end
+end
+
+camera:update(room, 800, 500, 960, 540)
+assert(camera.mode == "close", "expected camera zone mode")
+assert(camera.x == 640 and camera.y == 320, "expected zone to provide camera bounds")
+
+local screen_x, screen_y = camera:world_to_screen(800, 500)
+local world_x, world_y = camera:screen_to_world(screen_x, screen_y)
+assert(close_enough(world_x, 800) and close_enough(world_y, 500),
+    "expected screen/world coordinate round trip")
+
+assert(camera:debug_override() == nil, "expected no initial debug override")
+assert(camera:cycle_debug_override() == "wide", "expected first override to be wide")
+assert(camera:cycle_debug_override() == "standard", "expected second override to be standard")
+assert(camera:cycle_debug_override() == "close", "expected third override to be close")
+assert(camera:cycle_debug_override() == nil, "expected override cycle to return to authored mode")
+
+local World = require("systems.world")
+local world = World.new({ spawn = "start", autosave = false })
+love = {
+    graphics = {
+        getWidth = function()
+            return 960
+        end,
+        getHeight = function()
+            return 540
+        end
+    }
+}
+world:update_camera()
+assert(world.camera_tracking_locked == true, "expected Basement camera to begin locked")
+assert(world.camera.x == 32 and world.camera.y == 184,
+    "expected Basement camera anchor to frame the bottom center")
+local locked_x = world.camera.x
+world.player.render_x = world.player.render_x - 1
+world.player.x = world.player.x - 1
+world:update_camera()
+assert(world.camera.x == locked_x, "expected locked camera to ignore player movement")
+
+world:set_flag("basement.passage_open", true)
+world:update_camera()
+assert(world.camera_tracking_locked == false, "expected hidden passage flag to free camera")
+assert(world.camera.x == locked_x, "expected camera unlock not to jump immediately")
+world.player.render_x = world.player.render_x - 1
+world.player.x = world.player.x - 1
+world:update_camera()
+assert(world.camera.x == locked_x - 32, "expected freed camera to follow by one full tile")
+
+print("overworld camera smoke test passed.")
 
 ```
 
@@ -16741,6 +22282,17 @@ local function assert_equal(actual, expected, label)
         error((label or "value") .. ": expected " .. tostring(expected) .. ", got " .. tostring(actual), 2)
     end
 end
+
+local obsolete_version = Save.VERSION - 1
+local obsolete_save, obsolete_error = Save.deserialize(
+    "return { save_version = " .. tostring(obsolete_version) .. " }"
+)
+assert_equal(obsolete_save, nil, "obsolete save data")
+assert_equal(
+    obsolete_error,
+    "unsupported save version " .. tostring(obsolete_version) .. "; expected " .. tostring(Save.VERSION),
+    "obsolete save error"
+)
 
 local fs = memory_filesystem()
 local path = "saves/test_slot.lua"
@@ -16814,7 +22366,7 @@ assert_equal(combat_world.run.parts[claimed_arm_id].def_id, "bone_demon_right_ba
 assert_equal(combat_world.run.parts[claimed_arm_id].status, "healthy", "claimed wounded part gets post-combat recovery")
 assert_equal(combat_world.run.discovered_parts.bone_demon_right_bare_bones, true, "claimed arm discovered")
 assert_equal(summary.claim_summary.slot_id, "arm_r", "claim summary slot")
-assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_right_arm", "claim summary replaced part")
+assert_equal(summary.claim_summary.replaced_part.def_id, "dreamer_back_hand", "claim summary replaced part")
 
 print("save smoke test passed.")
 
@@ -16879,7 +22431,9 @@ Assets.images = {
     basement_tiles = fake_image(64, 32),
     actor_pipe = fake_image(32, 32),
     actor_pipe_shovel = fake_image(32, 32),
-    player_idle_down = fake_image(32, 32)
+    player_idle_down = fake_image(32, 32),
+    player_walk_right2 = fake_image(32, 32),
+    player_walk_right3 = fake_image(32, 32)
 }
 
 local Player = require("systems.player")
@@ -16976,10 +22530,24 @@ assert(actor, "expected named Tiled actor")
 assert(actor.x == 2 and actor.y == 2, "expected Tiled pixel coordinates to convert to tile coordinates")
 assert(actor:tile_rect(32) == 32, "expected actor world x")
 
+local near_grid_actor = require("systems.actor").new({
+    id = 9,
+    name = "near_grid",
+    type = "message",
+    x = 63.99,
+    y = 31.99,
+    width = 32,
+    height = 32
+}, room)
+assert(near_grid_actor.x == 3 and near_grid_actor.y == 2,
+    "expected near-grid Tiled coordinates to snap to the intended tile")
+
 local camera_zone = room:camera_zone_at(16, 16)
 assert(camera_zone and camera_zone.id == "close_room", "expected camera zone lookup")
 assert(camera_zone:property("camera_zoom") == "close", "expected camera zone mode")
 assert(camera_zone:property("camera_bounds") == true, "expected camera zone bounds flag")
+local region_x, region_y = room:region_center("close_room", "camera_zone")
+assert(region_x == 32 and region_y == 16, "expected exact region center lookup")
 
 room:draw_tile_layer(room:layer("ground"))
 assert(#draw_calls == 3, "expected three tile draw calls")
@@ -17005,6 +22573,27 @@ player:draw(32)
 assert(#draw_calls == 1, "expected player sprite draw")
 assert(draw_calls[1].image == Assets.images.player_idle_down, "expected player idle sprite asset")
 
+draw_calls = {}
+player:press_direction("move_right", 1, 0)
+player:update(0.11, {
+    is_blocked = function()
+        return false
+    end
+})
+player:draw(32)
+assert(#draw_calls == 1, "expected moving player sprite draw")
+assert(draw_calls[1].image == Assets.images.player_walk_right2, "expected step pose before translation")
+
+draw_calls = {}
+player:update(0.11, {
+    is_blocked = function()
+        return false
+    end
+})
+player:draw(32)
+assert(draw_calls[1].image == Assets.images.player_walk_right3,
+    "expected still pose during the end of translation")
+
 print("tiled room smoke test passed.")
 
 ```
@@ -17018,6 +22607,7 @@ local Symbols = require("core.symbols")
 local Demo = require("combat.v2_demo")
 local V2AI = require("combat.v2_ai")
 local V2Encounters = require("combat.v2_encounters")
+local BPEditor = require("states.bp_editor")
 
 math.randomseed(20260615)
 
@@ -17035,6 +22625,30 @@ local function die_for(engine, combatant, part_id)
     end
 
     return nil
+end
+
+local function deterministic_roller(seed)
+    local state = seed
+    return function(minimum, maximum)
+        state = (state * 48271) % 2147483647
+        return minimum + (state % (maximum - minimum + 1))
+    end
+end
+
+local function seeded_faces(seed)
+    local player, enemy = V2Encounters.create_combatants({ encounter_id = "basement.mad_butcher" })
+    local engine = Engine:new({ rng = deterministic_roller(seed) })
+    engine:add_combatant(player)
+    engine:add_combatant(enemy)
+    engine:start_combat()
+
+    local faces = {}
+    for _, combatant in ipairs({ player, enemy }) do
+        for _, die in ipairs(engine:get_pool(combatant)) do
+            table.insert(faces, die.face_index)
+        end
+    end
+    return table.concat(faces, ",")
 end
 
 local function log_events(engine)
@@ -17104,7 +22718,31 @@ local function start_encounter(encounter_id)
     return engine, player, enemy
 end
 
+local function arm_reactive_slot(engine, combatant, part, timing, label, observations, other_part)
+    part.slot = {
+        id = "test_" .. timing .. "_" .. label,
+        name = label,
+        cost = { Symbols.ESSENCE },
+        timing = timing,
+        effect = function(_, entry)
+            table.insert(observations, {
+                label = label,
+                part = entry.part,
+                status = entry.part.status,
+                other_status = other_part and other_part.status,
+                trigger_part = entry.trigger_context and entry.trigger_context.part,
+                trigger_status = entry.trigger_context and entry.trigger_context.status_after
+            })
+            return { type = "test_reaction", label = label }
+        end
+    }
+    engine:trigger_slot(combatant, part, part.slot)
+end
+
 local function run()
+    assert_true(seeded_faces(90210) == seeded_faces(90210),
+        "Engine RNG injection should reproduce the same opening rolls")
+
     local content_errors = Demo.validate()
     assert_true(#content_errors == 0, table.concat(content_errors, "\n"))
 
@@ -17116,7 +22754,7 @@ local function run()
     local head = player:get_body_part_by_id("dreamer_head")
     local skull = enemy:get_body_part_by_id("bone_demon_skull")
     local head_die = die_for(engine, player, "dreamer_head")
-    local leg_die = die_for(engine, player, "dreamer_right_leg")
+    local leg_die = die_for(engine, player, "dreamer_front_foot")
 
     head_die.symbols = { Symbols.ESSENCE }
     leg_die.symbols = { Symbols.BLANK }
@@ -17181,6 +22819,66 @@ local function run()
     assert_true(player3.heart_points == 0, "Maiming the Dreamer's Head should deplete baseline Hearts")
     assert_true(engine3.state == "COMPLETE", "A slot-caused defeat should complete combat immediately")
     assert_true(engine3.winner == enemy3, "Bone Demon should win after a lethal Speak Doom")
+
+    local hit_engine, hit_player, hit_enemy = start_engine()
+    local hit_fore_hand = hit_player:get_body_part_by_id("dreamer_fore_hand")
+    local hit_back_hand = hit_player:get_body_part_by_id("dreamer_back_hand")
+    local hit_observations = {}
+    arm_reactive_slot(hit_engine, hit_player, hit_fore_hand, "on_hit", "Fore Riposte",
+        hit_observations, hit_back_hand)
+    arm_reactive_slot(hit_engine, hit_player, hit_back_hand, "on_hit", "Back Riposte",
+        hit_observations, hit_fore_hand)
+
+    local first_hit_die = die_for(hit_engine, hit_enemy, "bone_demon_right_bare_bones")
+    local second_hit_die = die_for(hit_engine, hit_enemy, "bone_demon_left_bare_bones")
+    first_hit_die.symbols = { Symbols.STRIKE }
+    second_hit_die.symbols = { Symbols.STRIKE }
+    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, first_hit_die.id, hit_fore_hand)
+    assert_true(ok, "First On-Hit regression attack should assign: " .. tostring(reason))
+    ok, reason = hit_engine:assign_die_to_rim(hit_enemy, second_hit_die.id, hit_back_hand)
+    assert_true(ok, "Second On-Hit regression attack should assign: " .. tostring(reason))
+    hit_engine:resolve_round()
+
+    assert_true(#hit_observations == 2, "Each struck part should resolve exactly its own On-Hit entry")
+    assert_true(hit_observations[1].part == hit_fore_hand and hit_observations[1].status == "wounded",
+        "First On-Hit entry should resolve after its owning part takes damage")
+    assert_true(hit_observations[1].other_status == "healthy",
+        "First hit must not drain the second part's On-Hit entry")
+    assert_true(hit_observations[1].trigger_part == hit_fore_hand
+            and hit_observations[1].trigger_status == "wounded",
+        "First On-Hit entry should receive its own completed hit context")
+    assert_true(hit_observations[2].part == hit_back_hand and hit_observations[2].status == "wounded",
+        "Second On-Hit entry should wait for the second part's damage")
+    assert_true(hit_observations[2].trigger_part == hit_back_hand,
+        "Second On-Hit entry should receive the second part's trigger context")
+
+    local wound_engine, wound_player, wound_enemy = start_engine()
+    local wound_fore_hand = wound_player:get_body_part_by_id("dreamer_fore_hand")
+    local wound_back_hand = wound_player:get_body_part_by_id("dreamer_back_hand")
+    local wound_observations = {}
+    arm_reactive_slot(wound_engine, wound_player, wound_fore_hand, "on_wound_maim", "Fore Flinch",
+        wound_observations, wound_back_hand)
+    arm_reactive_slot(wound_engine, wound_player, wound_back_hand, "on_wound_maim", "Back Flinch",
+        wound_observations, wound_fore_hand)
+
+    local first_wound_die = die_for(wound_engine, wound_enemy, "bone_demon_right_bare_bones")
+    local second_wound_die = die_for(wound_engine, wound_enemy, "bone_demon_left_bare_bones")
+    first_wound_die.symbols = { Symbols.STRIKE }
+    second_wound_die.symbols = { Symbols.STRIKE }
+    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, first_wound_die.id, wound_fore_hand)
+    assert_true(ok, "First On-Wound regression attack should assign: " .. tostring(reason))
+    ok, reason = wound_engine:assign_die_to_rim(wound_enemy, second_wound_die.id, wound_back_hand)
+    assert_true(ok, "Second On-Wound regression attack should assign: " .. tostring(reason))
+    wound_engine:resolve_round()
+
+    assert_true(#wound_observations == 2,
+        "Each wounded part should resolve exactly its own On-Wound/Maim entry")
+    assert_true(wound_observations[1].part == wound_fore_hand
+            and wound_observations[1].other_status == "healthy",
+        "First wound must not drain the second part's On-Wound/Maim entry")
+    assert_true(wound_observations[2].part == wound_back_hand
+            and wound_observations[2].trigger_part == wound_back_hand,
+        "Second On-Wound/Maim entry should wait for its own status change")
 
     local caster_engine, _, caster = start_encounter("basement.bone_demon")
     local caster_skull = caster:get_body_part_by_id("bone_demon_skull")
@@ -17341,7 +23039,7 @@ local function run()
 
     local mark_feed = die_for(engine6, player6, "dreamer_head")
     local mark_die = die_for(engine6, player6, "dreamer_body")
-    local after_mark_die = die_for(engine6, player6, "dreamer_right_arm")
+    local after_mark_die = die_for(engine6, player6, "dreamer_fore_hand")
     mark_feed.symbols = { Symbols.ESSENCE }
     mark_die.symbols = { Symbols.ESSENCE }
     after_mark_die.symbols = { Symbols.ESSENCE }
@@ -17365,10 +23063,22 @@ local function run()
     ok, reason = engine6:assign_die_to_rim(player6, after_mark_die.id, unmarked_rib)
     assert_true(not ok and reason == "no_strike", "Single-use spellmark should not leave all rims Essence-valid")
 
+    local spellmark_resolution = nil
+    engine6:on(Events.PART_RESOLVED, function(data)
+        if data.part == marked_skull then
+            spellmark_resolution = data
+        end
+    end)
+    engine6:resolve_round()
+    assert_true(spellmark_resolution and spellmark_resolution.strike_count == 0,
+        "Contest tally should read the effective face and count no Strike on an Essence-only spellmark")
+    assert_true(marked_skull.status == "wounded",
+        "Essence used by a rim spellmark should not deal a second damage step during contest resolution")
+
     local engine7, player7, enemy7 = start_engine()
     local armored_skull = enemy7:get_body_part_by_id("bone_demon_skull")
-    local light_strike_die = die_for(engine7, player7, "dreamer_right_leg")
-    local heavy_strike_die = die_for(engine7, player7, "dreamer_right_arm")
+    local light_strike_die = die_for(engine7, player7, "dreamer_front_foot")
+    local heavy_strike_die = die_for(engine7, player7, "dreamer_fore_hand")
     armored_skull.keywords = { "Armored" }
     light_strike_die.symbols = { Symbols.STRIKE }
     heavy_strike_die.symbols = { Symbols.STRIKE, Symbols.STRIKE }
@@ -17382,7 +23092,7 @@ local function run()
 
     local engine8, player8, enemy8 = start_engine()
     local brittle_rib = enemy8:get_body_part_by_id("bone_demon_right_bare_bones")
-    local brittle_attack = die_for(engine8, player8, "dreamer_right_leg")
+    local brittle_attack = die_for(engine8, player8, "dreamer_front_foot")
     brittle_rib.keywords = { "Brittle" }
     brittle_attack.symbols = { Symbols.STRIKE }
 
@@ -17498,10 +23208,741 @@ local function run()
     assert_true(hard_kill_zombie.heart_points == 0, "Maiming the body and one limb should defeat the Zombie")
     assert_true(preserved_head.status == "healthy", "The hard kill should preserve the claimable Brain Pan")
 
+    local butcher_engine, butcher_player, butcher = start_encounter("basement.mad_butcher")
+    assert_true(#butcher.body_parts == 6, "Mad Butcher should have a complete six-part body")
+    assert_true(butcher.ai_personality == "mad_butcher", "Mad Butcher should use his dedicated AI personality")
+
+    local welding_mask = butcher:get_body_part_by_id("butcher_welding_mask")
+    local broad_shoulders = butcher:get_body_part_by_id("butcher_broad_shoulders")
+    local hook_hand = butcher:get_body_part_by_id("butcher_hook_hand")
+    assert_true(welding_mask.hp_value == 3, "Welding Mask should be the three-Heart fast-kill route")
+    assert_true(broad_shoulders.hp_value == 1, "Broad Shoulders should cost one Heart rather than ending the fight")
+    assert_true(hook_hand.hp_value == 1, "Butcher arms should support the three-part hard-kill route")
+    assert_true(butcher:get_body_part_by_id("zombie_right_leg") ~= nil
+            and butcher:get_body_part_by_id("zombie_left_leg") ~= nil,
+        "Mad Butcher should literally reuse the Zombie's Regrowth legs")
+    assert_true(welding_mask.slot and welding_mask.slot.id == "sadism"
+            and #welding_mask.slot.cost == 4,
+        "Welding Mask should begin with a four-Strike Sadism track")
+    assert_true(broad_shoulders.slot and broad_shoulders.slot.id == "stitch_up",
+        "Broad Shoulders should carry the Head-repair slot")
+
+    local butcher_definitions = require("data.combat.alpha_basement")
+    local editor = setmetatable({}, BPEditor)
+    editor.current = editor:part_to_form(
+        butcher_definitions.parts.butcher_welding_mask,
+        butcher_definitions.slots)
+    local editor_sadism = editor:build_slot()
+    assert_true(editor_sadism.dynamic_cost
+            and editor_sadism.dynamic_cost.type == "opponent_damaged_parts",
+        "BP Editor should preserve Sadism's dynamic cost")
+    assert_true(editor_sadism.effect.type == "add_symbol_against_status"
+            and editor_sadism.effect.target_status == "wounded",
+        "BP Editor should round-trip Sadism's status-conditioned effect")
+
+    editor.current = editor:part_to_form(
+        butcher_definitions.parts.butcher_broad_shoulders,
+        butcher_definitions.slots)
+    local editor_stitch_up = editor:build_slot()
+    assert_true(editor_stitch_up.effect.target == "part_type"
+            and editor_stitch_up.effect.target_type == "HEAD",
+        "BP Editor should round-trip Stitch Up's targeted Head healing")
+
+    local wounded_player_arm = butcher_player:get_body_part_by_id("dreamer_fore_hand")
+    local maimed_player_leg = butcher_player:get_body_part_by_id("dreamer_back_foot")
+    wounded_player_arm.status = "wounded"
+    maimed_player_leg.status = "maimed"
+    welding_mask.slot_charge[1] = true
+    welding_mask.slot_charge[2] = true
+
+    local cost_change = nil
+    local sadism_resolved = false
+    butcher_engine:on(Events.SLOT_COST_CHANGED, function(data)
+        if data.part == welding_mask then
+            cost_change = data
+        end
+    end)
+    butcher_engine:on(Events.SLOT_RESOLVED, function(data)
+        if data.part == welding_mask then
+            sadism_resolved = true
+        end
+    end)
+
+    butcher_engine:start_round()
+    assert_true(cost_change and cost_change.current_length == 2,
+        "Two damaged opposing parts should contract Sadism from four pips to two")
+    assert_true(sadism_resolved, "Contracting Sadism into its banked charge should trigger it at Upkeep")
+    assert_true(next(welding_mask.slot_charge) == nil, "Triggered Sadism should clear its banked charge")
+
+    local sadism_die = die_for(butcher_engine, butcher, "butcher_hook_hand")
+    local healthy_player_body = butcher_player:get_body_part_by_id("dreamer_body")
+    sadism_die.symbols = { Symbols.STRIKE }
+    local wounded_symbols = butcher_engine:get_effective_symbols(
+        butcher, sadism_die, "rim", wounded_player_arm)
+    local healthy_symbols = butcher_engine:get_effective_symbols(
+        butcher, sadism_die, "rim", healthy_player_body)
+    assert_true(Symbols.count(wounded_symbols, Symbols.STRIKE) == 2,
+        "Sadism should add one Strike against a Wounded opposing Body Part")
+    assert_true(Symbols.count(healthy_symbols, Symbols.STRIKE) == 1,
+        "Sadism should not add Strike against a Healthy opposing Body Part")
+
+    wounded_player_arm.status = "healthy"
+    maimed_player_leg.status = "healthy"
+    butcher_engine:start_round()
+    assert_true(#welding_mask.slot.cost == 4, "Sadism should expand back to its authored cost when wounds are gone")
+    local expired_symbols = butcher_engine:get_effective_symbols(
+        butcher, die_for(butcher_engine, butcher, "butcher_hook_hand"), "rim", healthy_player_body)
+    assert_true(#expired_symbols >= 1,
+        "Starting the next round should roll a usable Hook Hand die after clearing Sadism")
+    assert_true(#butcher:get_allocation_symbol_modifiers() == 0,
+        "The previous round's Sadism modifier should clear before recomputing its cost")
+
+    local repair_engine, _, repair_butcher = start_encounter("butcher")
+    local repair_head = repair_butcher:get_body_part_by_id("butcher_welding_mask")
+    local repair_body = repair_butcher:get_body_part_by_id("butcher_broad_shoulders")
+    repair_head.status = "wounded"
+    repair_body.status = "wounded"
+    local first_repair_blood = die_for(repair_engine, repair_butcher, "zombie_right_leg")
+    local second_repair_blood = die_for(repair_engine, repair_butcher, "zombie_left_leg")
+    first_repair_blood.symbols = { Symbols.BLOOD }
+    second_repair_blood.symbols = { Symbols.BLOOD }
+
+    ok, reason = repair_engine:feed_die_to_slot(repair_butcher, first_repair_blood.id, repair_body)
+    assert_true(ok, "Stitch Up should bank its first Blood: " .. tostring(reason))
+    ok, reason = repair_engine:feed_die_to_slot(repair_butcher, second_repair_blood.id, repair_body)
+    assert_true(ok, "Stitch Up should trigger on its second Blood: " .. tostring(reason))
+    assert_true(repair_head.status == "healthy", "Stitch Up should repair the allied Head")
+    assert_true(repair_body.status == "wounded", "Stitch Up should never heal its own Body")
+
+    local repair_ai_engine, _, repair_ai_butcher = start_encounter("butcher")
+    local repair_ai_head = repair_ai_butcher:get_body_part_by_id("butcher_welding_mask")
+    local repair_ai_body = repair_ai_butcher:get_body_part_by_id("butcher_broad_shoulders")
+    repair_ai_head.status = "wounded"
+    for _, die in ipairs(repair_ai_engine:get_pool(repair_ai_butcher)) do
+        die.symbols = { Symbols.STRIKE, Symbols.STRIKE, Symbols.STRIKE }
+    end
+    die_for(repair_ai_engine, repair_ai_butcher, "zombie_right_leg").symbols = { Symbols.BLOOD }
+    local repair_move = V2AI.choose_next_allocation(repair_ai_engine, repair_ai_butcher)
+    assert_true(repair_move and repair_move.kind == "slot" and repair_move.part == repair_ai_body,
+        "Mad Butcher AI should prioritize repairing a Wounded Head")
+
+    local restraint_engine, restraint_player, restraint_butcher = start_encounter("butcher")
+    local restraint_head = restraint_butcher:get_body_part_by_id("butcher_welding_mask")
+    restraint_head.slot_charge[1] = true
+    restraint_head.slot_charge[2] = true
+    restraint_head.slot_charge[3] = true
+    for _, die in ipairs(restraint_engine:get_pool(restraint_butcher)) do
+        die.symbols = { Symbols.BLANK }
+    end
+    die_for(restraint_engine, restraint_butcher, "butcher_hook_hand").symbols = { Symbols.STRIKE }
+    local restraint_move = V2AI.choose_next_allocation(restraint_engine, restraint_butcher)
+    assert_true(restraint_move and restraint_move.kind == "rim" and restraint_move.part ~= restraint_head,
+        "Mad Butcher AI should not complete Sadism while no opposing Body Part is Wounded")
+
+    local pressure_target = restraint_player:get_body_part_by_id("dreamer_fore_hand")
+    pressure_target.status = "wounded"
+    restraint_head.slot_charge = {}
+    for _, die in ipairs(restraint_engine:get_pool(restraint_butcher)) do
+        die.symbols = { Symbols.BLANK }
+    end
+    die_for(restraint_engine, restraint_butcher, "butcher_hook_hand").symbols = {
+        Symbols.STRIKE,
+        Symbols.STRIKE,
+        Symbols.STRIKE
+    }
+    local pressure_move = V2AI.choose_next_allocation(restraint_engine, restraint_butcher)
+    assert_true(pressure_move and pressure_move.kind == "rim" and pressure_move.part == pressure_target,
+        "Mad Butcher AI should use concentrated Arm Strikes to finish Wounded parts")
+
     print("\nV2 combat smoke test passed.")
 end
 
 run()
+
+```
+
+## tools/export_tiled_room.sh
+
+```bash
+#!/bin/sh
+set -eu
+
+if [ "$#" -ne 2 ]; then
+    echo "usage: tools/export_tiled_room.sh <source.tmx> <output.lua>" >&2
+    exit 2
+fi
+
+ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+TILED_BIN=${TILED_BIN:-}
+
+if [ -z "$TILED_BIN" ]; then
+    if command -v tiled >/dev/null 2>&1; then
+        TILED_BIN=$(command -v tiled)
+    elif [ -x /Applications/Tiled.app/Contents/MacOS/Tiled ]; then
+        TILED_BIN=/Applications/Tiled.app/Contents/MacOS/Tiled
+    else
+        echo "Tiled executable not found; set TILED_BIN." >&2
+        exit 1
+    fi
+fi
+
+cd "$ROOT_DIR"
+"$TILED_BIN" --embed-tilesets --export-map lua "$1" "$2"
+echo "exported $1 -> $2"
+
+```
+
+## tools/import_legacy_assets.py
+
+```python
+#!/usr/bin/env python3
+"""Import selected GameMaker sprite frames under stable current-project IDs."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+try:
+    from PIL import Image
+except ImportError as exc:
+    raise SystemExit(
+        "This importer requires Pillow. Run it with the workspace Python runtime "
+        "or install Pillow for your Python interpreter."
+    ) from exc
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_MANIFEST = ROOT / "tools" / "legacy_assets.json"
+FRAME_PATTERN = re.compile(
+    r'"resourceType":"GMSpriteFrame".*?"name":"(?P<frame>[0-9a-f-]+)"'
+)
+SIZE_PATTERN = {
+    "width": re.compile(r'"width":\s*(\d+)'),
+    "height": re.compile(r'"height":\s*(\d+)'),
+}
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=DEFAULT_MANIFEST,
+        help="Import manifest (default: tools/legacy_assets.json).",
+    )
+    parser.add_argument(
+        "--source",
+        type=Path,
+        help="Existing checkout of the legacy GameMaker repository.",
+    )
+    parser.add_argument(
+        "--no-palette",
+        action="store_true",
+        help="Copy source pixels without applying the current project palette.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate and list outputs without writing files.",
+    )
+    return parser.parse_args()
+
+
+def run(command: list[str], cwd: Path | None = None) -> str:
+    result = subprocess.run(
+        command,
+        cwd=cwd,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    return result.stdout.strip()
+
+
+def source_checkout(manifest: dict, supplied: Path | None, stack) -> Path:
+    if supplied:
+        source = supplied.resolve()
+    else:
+        source = Path(stack.enter_context(tempfile.TemporaryDirectory()))
+        run([
+            "git",
+            "clone",
+            "--depth",
+            "1",
+            manifest["source"]["repository"],
+            str(source),
+        ])
+
+    if not (source / ".git").exists():
+        raise ValueError(f"Legacy source is not a git checkout: {source}")
+
+    expected = manifest["source"]["commit"]
+    actual = run(["git", "rev-parse", "HEAD"], cwd=source)
+    if actual != expected:
+        raise ValueError(
+            f"Legacy source is at {actual}, but the manifest pins {expected}."
+        )
+    return source
+
+
+def sprite_metadata(source: Path, sprite_name: str) -> tuple[list[str], tuple[int, int]]:
+    sprite_dir = source / "sprites" / sprite_name
+    yy_path = sprite_dir / f"{sprite_name}.yy"
+    if not yy_path.exists():
+        raise ValueError(f"Missing GameMaker sprite metadata: {yy_path}")
+
+    text = yy_path.read_text(encoding="utf-8")
+    frame_ids = [match["frame"] for match in FRAME_PATTERN.finditer(text)]
+    if not frame_ids:
+        raise ValueError(f"No ordered frames found in {yy_path}")
+
+    width_match = SIZE_PATTERN["width"].search(text)
+    height_match = SIZE_PATTERN["height"].search(text)
+    if not width_match or not height_match:
+        raise ValueError(f"Missing dimensions in {yy_path}")
+
+    return frame_ids, (int(width_match[1]), int(height_match[1]))
+
+
+def hex_color(value: str) -> tuple[int, int, int]:
+    value = value.lstrip("#")
+    if len(value) != 6:
+        raise ValueError(f"Expected six-digit color, got {value!r}")
+    return tuple(int(value[index:index + 2], 16) for index in (0, 2, 4))
+
+
+def recolor(image: Image.Image, palette: dict) -> Image.Image:
+    dark = hex_color(palette["dark"])
+    ink = hex_color(palette["ink"])
+    blood = hex_color(palette["blood"])
+    pixels = image.convert("RGBA")
+    output = []
+
+    pixel_data = (
+        pixels.get_flattened_data()
+        if hasattr(pixels, "get_flattened_data")
+        else pixels.getdata()
+    )
+    for red, green, blue, alpha in pixel_data:
+        if alpha == 0:
+            output.append((0, 0, 0, 0))
+            continue
+
+        if red >= 48 and red > green * 1.55 and red > blue * 1.55:
+            intensity = max(0.45, red / 255)
+            mapped = tuple(round(channel * intensity) for channel in blood)
+        else:
+            value = ((red + green + blue) / (3 * 255)) ** 0.8
+            mapped = tuple(
+                round(low + (high - low) * value)
+                for low, high in zip(dark, ink)
+            )
+        output.append((*mapped, alpha))
+
+    pixels.putdata(output)
+    return pixels
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def selected_frames(frame_spec, frame_ids: list[str]) -> list[tuple[int, str]]:
+    if frame_spec == "all":
+        return list(enumerate(frame_ids, start=1))
+
+    selected = []
+    for frame_number in frame_spec:
+        if frame_number < 1 or frame_number > len(frame_ids):
+            raise ValueError(
+                f"Frame {frame_number} is outside 1..{len(frame_ids)}."
+            )
+        selected.append((frame_number, frame_ids[frame_number - 1]))
+    return selected
+
+
+def output_path(stem: str, number: int, count: int) -> Path:
+    suffix = str(number) if count > 1 else ""
+    return ROOT / f"{stem}{suffix}.png"
+
+
+def import_assets(
+    manifest: dict,
+    source: Path,
+    apply_palette: bool,
+    dry_run: bool,
+) -> list[dict]:
+    report = []
+    metadata_cache = {}
+    report_path = ROOT / "assets" / "legacy" / "imported_assets.json"
+    previous_destinations = set()
+    if report_path.exists():
+        previous = json.loads(report_path.read_text(encoding="utf-8"))
+        previous_destinations = {
+            item["destination"] for item in previous.get("assets", [])
+        }
+
+    for entry in manifest["assets"]:
+        sprite_name = entry["sprite"]
+        if sprite_name not in metadata_cache:
+            metadata_cache[sprite_name] = sprite_metadata(source, sprite_name)
+        frame_ids, size = metadata_cache[sprite_name]
+
+        expected_size = tuple(entry["expected_size"])
+        if size != expected_size:
+            raise ValueError(
+                f"{sprite_name} is {size[0]}x{size[1]}, expected "
+                f"{expected_size[0]}x{expected_size[1]}."
+            )
+
+        frames = selected_frames(entry["frames"], frame_ids)
+        for frame_number, frame_id in frames:
+            source_path = source / "sprites" / sprite_name / f"{frame_id}.png"
+            if not source_path.exists():
+                raise ValueError(f"Missing source frame: {source_path}")
+
+            destination = output_path(entry["output"], frame_number, len(frames))
+            print(f"{sprite_name}[{frame_number}] -> {destination.relative_to(ROOT)}")
+
+            if not dry_run:
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                with Image.open(source_path) as source_image:
+                    output_image = (
+                        recolor(source_image, manifest["palette"])
+                        if apply_palette
+                        else source_image.convert("RGBA")
+                    )
+                    output_image.save(destination, format="PNG", optimize=True)
+
+            report.append({
+                "asset_id": destination.stem,
+                "destination": str(destination.relative_to(ROOT)),
+                "source_sprite": sprite_name,
+                "source_frame": frame_number,
+                "source_frame_id": frame_id,
+                "width": size[0],
+                "height": size[1],
+            })
+
+    if not dry_run:
+        provenance_dir = ROOT / "assets" / "legacy"
+        provenance_dir.mkdir(parents=True, exist_ok=True)
+        current_destinations = {item["destination"] for item in report}
+        for stale in sorted(previous_destinations - current_destinations):
+            stale_path = (ROOT / stale).resolve()
+            if ROOT not in stale_path.parents or "assets" not in stale_path.parts:
+                raise ValueError(f"Refusing to remove stale path outside assets: {stale}")
+            if stale_path.exists():
+                stale_path.unlink()
+                print(f"removed stale import {stale}")
+
+        shutil.copyfile(
+            source / "LICENSE",
+            provenance_dir / "IntoTheDreamlands-LICENSE.txt",
+        )
+        report_path.write_text(
+            json.dumps({
+                "source": manifest["source"],
+                "palette_applied": apply_palette,
+                "assets": report,
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        for item in report:
+            item["sha256"] = sha256(ROOT / item["destination"])
+        report_path.write_text(
+            json.dumps({
+                "source": manifest["source"],
+                "palette_applied": apply_palette,
+                "assets": report,
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+    return report
+
+
+def main() -> int:
+    args = parse_args()
+    manifest_path = args.manifest.resolve()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    from contextlib import ExitStack
+
+    with ExitStack() as stack:
+        source = source_checkout(manifest, args.source, stack)
+        report = import_assets(
+            manifest,
+            source,
+            apply_palette=not args.no_palette,
+            dry_run=args.dry_run,
+        )
+
+    print(f"Validated {len(report)} imported PNGs.")
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (OSError, subprocess.CalledProcessError, ValueError) as exc:
+        print(f"legacy asset import failed: {exc}", file=sys.stderr)
+        raise SystemExit(1)
+
+```
+
+## tools/legacy_assets.json
+
+```json
+{
+  "source": {
+    "repository": "https://github.com/rusticlion/IntoTheDreamlands.git",
+    "commit": "b8e4a35aa143728084ed97c8c1f7ab6d8b012f89"
+  },
+  "palette": {
+    "dark": "#222034",
+    "ink": "#f5f2ff",
+    "blood": "#e01f38"
+  },
+  "assets": [
+    {
+      "sprite": "spr_player_walkdown",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkup",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkleft",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkright",
+      "frames": "all",
+      "output": "assets/sprites/overworld/player_walk_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkdown",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkup",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkleft",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_player_walkright",
+      "frames": [1],
+      "output": "assets/sprites/overworld/player_idle_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_idle",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_idle",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_down",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_down",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_up",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_up",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_left",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_left",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_cat_walk_right",
+      "frames": "all",
+      "output": "assets/sprites/overworld/cat_walk_right",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_opening",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_crack",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_opening",
+      "frames": [2],
+      "output": "assets/sprites/overworld/actor_crack_resolved",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_skeleton",
+      "frames": [3],
+      "output": "assets/sprites/overworld/actor_crack_bone_demon_revealed",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_crack_zombie",
+      "frames": [3],
+      "output": "assets/sprites/overworld/actor_crack_zombie_revealed",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_pipe_porthole",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_pipe",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wall_pipe_porthole_shovel",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_pipe_shovel",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_surgery_table",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_surgery_table",
+      "expected_size": [32, 48]
+    },
+    {
+      "sprite": "spr_bloody_table",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_bloody_table",
+      "expected_size": [32, 32]
+    },
+    {
+      "sprite": "spr_blood_buckets",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_blood_buckets",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_st_andrews_cross",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_st_andrews_cross",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_basement_door",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_basement_door",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_shovel",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_shovel",
+      "expected_size": [17, 16]
+    },
+    {
+      "sprite": "spr_key",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_rusty_key",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_wrench",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_wrench",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_bolt_cutters",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_bolt_cutters",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_blindfold",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_blindfold",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_devils_brush",
+      "frames": [1],
+      "output": "assets/sprites/overworld/item_devils_brush",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_murderer",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_mad_butcher",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_demon_skull",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_bone_demon",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_blood_demon",
+      "frames": [1],
+      "output": "assets/sprites/overworld/actor_blood_demon",
+      "expected_size": [16, 16]
+    },
+    {
+      "sprite": "spr_demon_basement_bg",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_background",
+      "expected_size": [304, 384]
+    },
+    {
+      "sprite": "spr_demon_basement_actors",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_actor_layout",
+      "expected_size": [304, 384]
+    },
+    {
+      "sprite": "spr_demon_basement_mockup",
+      "frames": [1],
+      "output": "assets/reference/legacy/basement_mockup",
+      "expected_size": [304, 384]
+    }
+  ]
+}
+
+```
+
+## tools/requirements.txt
+
+```
+Pillow>=10,<15
 
 ```
 
@@ -18355,6 +24796,14 @@ local function slot_cost_text(slot, part)
     return Symbols.format_face(cost)
 end
 
+local function slot_cost_line(slot, part)
+    local current = slot_cost_text(slot, part)
+    if slot and slot.dynamic_cost and slot.base_cost and #slot.base_cost ~= #(slot.cost or {}) then
+        return current .. " (base " .. Symbols.format_face(slot.base_cost) .. ")"
+    end
+    return current
+end
+
 function BPInspector.slot_effect_text(effect)
     return Effects.describe(effect)
 end
@@ -18366,7 +24815,7 @@ function BPInspector.slot_lines(slot, part)
 
     local lines = {
         "Slot: " .. tostring(slot.name or slot.id or "Unnamed"),
-        "Cost: " .. slot_cost_text(slot, part),
+        "Cost: " .. slot_cost_line(slot, part),
         "Timing: " .. title_case(slot.timing or "spend"),
         "Effect: " .. BPInspector.slot_effect_text(slot.effect)
     }
@@ -18397,7 +24846,7 @@ function BPInspector.part_lines(part, options)
 
     if part.slot then
         table.insert(lines, "Slot: " .. tostring(part.slot.name or part.slot.id or "Unnamed"))
-        table.insert(lines, "Cost: " .. slot_cost_text(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
+        table.insert(lines, "Cost: " .. slot_cost_line(part.slot, part) .. " / Timing: " .. title_case(part.slot.timing or "spend"))
         table.insert(lines, "Effect: " .. BPInspector.slot_effect_text(part.slot.effect))
     else
         table.insert(lines, "Slot: none")

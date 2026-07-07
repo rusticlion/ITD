@@ -1,6 +1,7 @@
 local Player = require("systems.player")
 local Room = require("systems.room")
 local Catalog = require("systems.bodypart_catalog")
+local Display = require("core.display")
 local Save = require("core.save")
 local OverworldCamera = require("systems.overworld_camera")
 
@@ -350,8 +351,8 @@ function World:update_camera()
         self.room,
         px,
         py,
-        love.graphics.getWidth(),
-        love.graphics.getHeight())
+        Display.WIDTH,
+        Display.HEIGHT)
 end
 
 function World:draw()
@@ -376,8 +377,8 @@ function World:draw_hud()
     end
 
     if self.message then
-        local width = love.graphics.getWidth()
-        local height = love.graphics.getHeight()
+        local width = Display.WIDTH
+        local height = Display.HEIGHT
         local box_height = 54
         love.graphics.setColor(0.05, 0.05, 0.08, 0.92)
         love.graphics.rectangle("fill", 16, height - box_height - 16, width - 32, box_height, 4, 4)
@@ -390,9 +391,9 @@ function World:draw_hud()
     if self.camera and self.camera.show_guides then
         local label = self.camera:debug_label()
         love.graphics.setColor(0.04, 0.04, 0.07, 0.9)
-        love.graphics.rectangle("fill", love.graphics.getWidth() - 238, 10, 228, 24, 3, 3)
+        love.graphics.rectangle("fill", Display.WIDTH - 238, 10, 228, 24, 3, 3)
         love.graphics.setColor(0.9, 0.89, 0.98, 1)
-        love.graphics.printf(label, love.graphics.getWidth() - 232, 16, 216, "center")
+        love.graphics.printf(label, Display.WIDTH - 232, 16, 216, "center")
     end
 end
 

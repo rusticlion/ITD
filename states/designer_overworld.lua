@@ -1,4 +1,5 @@
 local GameState = require("core.gamestate")
+local Display = require("core.display")
 local World = require("systems.world")
 
 local DesignerOverworld = {}
@@ -89,7 +90,7 @@ end
 function DesignerOverworld:draw()
     self.world:draw()
 
-    local width = love.graphics.getWidth()
+    local width = Display.WIDTH
     local actor_count = math.min(8, #(self.world.room and self.world.room.actors or {}))
     local region_count = math.min(4, #(self.world.room and self.world.room.regions or {}))
     local panel_w = 334

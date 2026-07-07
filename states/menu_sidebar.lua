@@ -1,4 +1,5 @@
 local Assets = require("core.assets")
+local Display = require("core.display")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 
@@ -122,8 +123,8 @@ function MenuSidebar:mousepressed(x, y, button)
 end
 
 function MenuSidebar:draw()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     local panel_w = math.min(210, width - 32)
     local item_h = 32
     local panel_h = 48 + #self.items * item_h + 16

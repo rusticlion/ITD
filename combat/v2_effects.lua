@@ -293,7 +293,6 @@ DEFINITIONS.add_symbol_against_status = {
             amount = amount,
             destination = effect.destination or "rim",
             target_status = target_status,
-            duration = effect.duration or "round",
             source = {
                 type = "slot",
                 slot = entry.slot,
@@ -307,8 +306,7 @@ DEFINITIONS.add_symbol_against_status = {
             symbol = symbol,
             amount = amount,
             destination = normalize_destination(effect.destination or "rim"),
-            target_status = target_status,
-            duration = effect.duration or "round"
+            target_status = target_status
         }
     end
 }
@@ -367,7 +365,6 @@ DEFINITIONS.add_symbol_to_matching_dice = {
                 symbol = symbol,
                 amount = amount,
                 destination = effect.destination,
-                duration = effect.duration or "allocation",
                 source = {
                     type = "slot",
                     slot = entry.slot,
@@ -381,8 +378,7 @@ DEFINITIONS.add_symbol_to_matching_dice = {
             match = match,
             symbol = symbol,
             amount = amount,
-            destination = normalize_destination(effect.destination),
-            duration = effect.duration or "allocation"
+            destination = normalize_destination(effect.destination)
         }
     end
 }

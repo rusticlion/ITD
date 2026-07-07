@@ -71,9 +71,7 @@ local PROFILES = {
         charged_slot_bonus = 12,
         preferred_slots = {
             speak_doom = 24,
-            ["Speak Doom"] = 24,
-            bonestorm = 24,
-            Bonestorm = 24
+            bonestorm = 24
         },
         preferred_sockets = {
             bone_demon_skull = 28,
@@ -106,11 +104,8 @@ local PROFILES = {
         charged_slot_bonus = 8,
         preferred_slots = {
             sadism = 10,
-            Sadism = 10,
             stitch_up = 26,
-            ["Stitch Up"] = 26,
-            regenerate = 4,
-            Regrowth = 4
+            regenerate = 4
         },
         target_status_bonus = {
             wounded = 34,
@@ -237,7 +232,7 @@ local function preferred_slot_bonus(profile, slot)
     end
 
     local preferred = profile.preferred_slots or {}
-    return preferred[slot.id] or preferred[slot.name] or 0
+    return preferred[slot.id] or 0
 end
 
 local function preferred_socket_bonus(profile, part)

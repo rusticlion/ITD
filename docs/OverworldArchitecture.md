@@ -7,6 +7,9 @@
 ## 1. Locked Baseline
 
 - The game uses a **960x540 logical canvas** across overworld and combat.
+- `core.display` owns that canvas. The complete game-state stack is composed
+  there before one final presentation pass draws it to the window; screen-space
+  shaders belong in that pass rather than inside individual states.
 - Overworld maps use **32x32 logical tiles** for authoring, collision, movement, and interaction.
 - Most overworld art may be authored at **16x16 source resolution and upscaled 2x**, but direct 32x32 authoring is allowed when it reads better.
 - Player movement is **tile-stepped with smooth interpolation**: collision and interaction reason in tile coordinates; presentation eases between tiles.

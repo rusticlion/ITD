@@ -1,4 +1,5 @@
 local Assets = require("core.assets")
+local Display = require("core.display")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 local Dialog = require("systems.dialog")
@@ -191,8 +192,8 @@ function DialogState:draw()
     self:ensure_fonts()
     local previous_font = love.graphics.getFont()
 
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     local margin = 24
     local box_h = 128
     local box_x = margin

@@ -1,4 +1,5 @@
 local Assets = require("core.assets")
+local Display = require("core.display")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
 local BPInspector = require("ui.bp_inspector")
@@ -505,8 +506,8 @@ function MenuScreen:draw_placeholder(x, y, w, text)
 end
 
 function MenuScreen:draw()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     local margin = 24
     local content_x = margin + 28
     local content_y = 92

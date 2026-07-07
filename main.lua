@@ -1,6 +1,8 @@
 local Assets = require("core.assets")
+local Display = require("core.display")
 local GameState = require("core.gamestate")
 local Input = require("core.input")
+local ScreenFX = require("core.screenfx")
 local Overworld = require("states.overworld")
 local Text = require("ui.text")
 
@@ -76,6 +78,7 @@ end
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    Display.load()
     Text.install(love.graphics)
     Assets:load()
     local encounter_id = launch_arg_value("--encounter")
@@ -126,12 +129,20 @@ function love.load()
 end
 
 function love.update(dt)
-    GameState.update(dt)
+    -- ScreenFX advances on real time and returns the (possibly hit-stopped)
+    -- dt the game simulates with.
+    GameState.update(ScreenFX.update(dt))
     Input.update()
 end
 
 function love.draw()
+    Display.begin_frame()
+    ScreenFX.begin_frame()
     GameState.draw()
+    ScreenFX.end_frame()
+    Display.end_frame({
+        desaturation = ScreenFX.desaturation_amount()
+    })
 end
 
 function love.keypressed(key)
@@ -161,9 +172,15 @@ function love.textinput(text)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-    GameState.mousepressed(x, y, button, istouch, presses)
+    local logical_x, logical_y, inside = Display.window_to_logical(x, y)
+    if inside then
+        GameState.mousepressed(logical_x, logical_y, button, istouch, presses)
+    end
 end
 
 function love.mousereleased(x, y, button, istouch, presses)
-    GameState.mousereleased(x, y, button, istouch, presses)
+    -- Releases outside the presented canvas still need to cancel an active
+    -- drag, so forward the transformed coordinates even when letterboxed.
+    local logical_x, logical_y = Display.window_to_logical(x, y)
+    GameState.mousereleased(logical_x, logical_y, button, istouch, presses)
 end

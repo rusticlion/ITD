@@ -1,4 +1,5 @@
 local GameState = require("core.gamestate")
+local Display = require("core.display")
 
 local DesignerLab = {}
 DesignerLab.__index = DesignerLab
@@ -201,8 +202,8 @@ function DesignerLab:mousepressed(x, y, button)
 end
 
 function DesignerLab:draw()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     love.graphics.clear(COLORS.bg)
 
     love.graphics.setFont(self.fonts.title)

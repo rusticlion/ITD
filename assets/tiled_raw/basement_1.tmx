@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="22" height="17" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="17">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="22" height="17" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="19">
  <properties>
   <property name="camera_lock_anchor" value="camera_start"/>
   <property name="camera_unlock_flag" value="basement.passage_open"/>
@@ -98,5 +98,8 @@
   <object id="9" name="hidden_dark" type="spawn" x="288.022" y="320.013" width="31.9546" height="31.9506"/>
   <object id="10" name="boss_ready" type="spawn" x="384.002" y="128.002" width="31.9924" height="31.9911"/>
   <object id="11" name="camera_start" type="camera_anchor" x="336" y="352" width="32" height="32"/>
+  <object id="16" x="-88.5406" y="478.323"/>
+  <object id="17" x="269.693" y="618.767"/>
+  <object id="18" x="513.943" y="3.05312"/>
  </objectgroup>
 </map>

@@ -1,4 +1,5 @@
 local GameState = require("core.gamestate")
+local Display = require("core.display")
 local Crests = require("combat.crests")
 local Content = require("combat.v2_content")
 local Effects = require("combat.v2_effects")
@@ -1038,8 +1039,7 @@ function BPEditor:build_slot()
             type = "add_symbol_to_matching_dice",
             match = self.current.effect_match_symbol or Symbols.ESSENCE,
             symbol = self.current.effect_symbol or Symbols.STRIKE,
-            amount = tonumber(self.current.effect_amount) or 1,
-            duration = "allocation"
+            amount = tonumber(self.current.effect_amount) or 1
         }
         if self.current.effect_destination and self.current.effect_destination ~= "any" then
             effect.destination = self.current.effect_destination
@@ -1083,8 +1083,7 @@ function BPEditor:build_slot()
             symbol = self.current.effect_symbol or Symbols.STRIKE,
             amount = tonumber(self.current.effect_amount) or 1,
             destination = "rim",
-            target_status = self.current.effect_target_status or "wounded",
-            duration = "round"
+            target_status = self.current.effect_target_status or "wounded"
         }
     elseif effect_type == "damage_opponent_part" then
         effect.target_type = self.current.effect_target_type or "HEAD"
@@ -1176,8 +1175,7 @@ function BPEditor:lua_effect(effect)
             "type = \"add_symbol_to_matching_dice\"",
             "match = " .. lua_symbol(effect.match or effect.match_symbol or effect.source_symbol or Symbols.ESSENCE),
             "symbol = " .. lua_symbol(effect.symbol or effect.add_symbol or Symbols.STRIKE),
-            "amount = " .. tostring(effect.amount or 1),
-            "duration = " .. lua_string(effect.duration or "allocation")
+            "amount = " .. tostring(effect.amount or 1)
         }
         if effect.destination and effect.destination ~= "any" then
             table.insert(pieces, "destination = " .. lua_string(effect.destination))
@@ -1230,7 +1228,7 @@ function BPEditor:lua_effect(effect)
             .. ", amount = " .. tostring(effect.amount or 1)
             .. ", destination = " .. lua_string(effect.destination or "rim")
             .. ", target_status = " .. lua_string(effect.target_status or "wounded")
-            .. ", duration = " .. lua_string(effect.duration or "round") .. " }"
+            .. " }"
     elseif effect.type == "damage_opponent_part" then
         return "{ type = \"damage_opponent_part\", target_type = " .. lua_string(effect.target_type or "HEAD") .. ", amount = " .. tostring(effect.amount or 1) .. " }"
     elseif effect.type == "gain_crest" then
@@ -1464,7 +1462,7 @@ function BPEditor:keypressed(key)
 end
 
 function BPEditor:wheelmoved(_, y)
-    local mouse_x, mouse_y = love.mouse.getPosition()
+    local mouse_x, mouse_y = Display.pointer_position()
     if not point_in_rect(mouse_x, mouse_y, self.list_rect) then
         return
     end

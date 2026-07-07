@@ -106,8 +106,7 @@ return {
                 symbol = S,
                 amount = 1,
                 destination = "rim",
-                target_status = "wounded",
-                duration = "round"
+                target_status = "wounded"
             }
         },
         stitch_up = {
@@ -364,9 +363,7 @@ return {
                 fill_slot_bonus = 22,
                 preferred_slots = {
                     regenerate = 8,
-                    Regrowth = 8,
-                    bite = 14,
-                    Bite = 14
+                    bite = 14
                 }
             },
             parts = {

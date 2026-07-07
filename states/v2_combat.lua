@@ -1,9 +1,11 @@
 local GameState = require("core.gamestate")
 local Assets = require("core.assets")
+local Display = require("core.display")
 local Engine = require("combat.v2_engine")
 local Events = require("combat.events")
 local Keywords = require("combat.keywords")
 local Demo = require("combat.v2_demo")
+local CombatJuice = require("combat.juice")
 local Symbols = require("core.symbols")
 local SymbolDie = require("core.symbol_die")
 local V2AI = require("combat.v2_ai")
@@ -41,8 +43,11 @@ local SLOT_PIP_ROW_GAP = 1
 local AUTO_ALLOC_MOVE_DURATION = 0.42
 local AUTO_ALLOC_SETTLE_DURATION = 0.14
 local HATCH_SWALLOW_DURATION = 0.4
-local RESOLUTION_STEP_DURATION = 1.05
-local RESOLUTION_REVEAL_TIME = 0.68
+local RESOLUTION_PRESENT_TIME = 0.35
+local RESOLUTION_TICK_INTERVAL = 0.26
+local RESOLUTION_DAMAGE_TAIL = 0.6
+local RESOLUTION_BLOCK_TAIL = 0.4
+local GUNK_GHOST_DURATION = 0.9
 local SLOT_EFFECT_DURATION = 1.1
 local COMBAT_END_RETURN_DELAY = 2.35
 local CLAIM_ANIMATION_DURATION = 0.95
@@ -738,6 +743,7 @@ function V2Combat:enter(context)
     self.auto_allocation = nil
     self.assignment_visibility = setmetatable({}, { __mode = "k" })
     self.slot_activation_effects = {}
+    self.gunk_ghost_effects = {}
     self.hatch_swallow_effects = setmetatable({}, { __mode = "k" })
     self.combat_end = nil
     self.claim_ceremony = nil
@@ -764,6 +770,7 @@ function V2Combat:enter(context)
     }
 
     self:register_events()
+    self.juice = CombatJuice.new(self)
     self.engine:start_combat()
     self:begin_allocation_phase()
 end
@@ -807,8 +814,14 @@ function V2Combat:register_events()
         end
     end)
 
-    self.engine:on(Events.DAMAGE_DEALT, function()
+    self.engine:on(Events.DAMAGE_DEALT, function(data)
         self.playtest_stats.damage_events = self.playtest_stats.damage_events + 1
+        -- Resolution-phase damage witnesses its gunking at playback reveal;
+        -- immediate damage (Spend-window effects) witnesses it right here.
+        if self.engine.state ~= "RESOLUTION"
+            and (data.status_after == "wounded" or data.status_after == "maimed") then
+            self:spawn_gunk_ghosts(data.body_part)
+        end
     end)
 
     self.engine:on(Events.HEAL_APPLIED, function(data)
@@ -846,13 +859,13 @@ function V2Combat:main_x()
 end
 
 function V2Combat:rail_rect()
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     return rect(width - RAIL_WIDTH - MARGIN, MARGIN, RAIL_WIDTH, height - MARGIN * 2)
 end
 
 function V2Combat:global_spine_rect()
-    local height = love.graphics.getHeight()
+    local height = Display.HEIGHT
     return rect(MARGIN, MARGIN, GLOBAL_SPINE_WIDTH, height - MARGIN * 2)
 end
 
@@ -895,7 +908,7 @@ function V2Combat:drawer_crest_y(drawer, side)
 end
 
 function V2Combat:player_strip_rect()
-    local height = love.graphics.getHeight()
+    local height = Display.HEIGHT
     return rect(self:main_x(), height - MARGIN - STRIP_HEIGHT, self:main_width(), STRIP_HEIGHT)
 end
 
@@ -1034,11 +1047,15 @@ function V2Combat:update(dt)
     self:layout()
     local delta = dt or 0
     self.ui_time = (self.ui_time or 0) + delta
-    local mx, my = love.mouse.getPosition()
+    if self.juice then
+        self.juice:update(delta)
+    end
+    local mx, my = Display.pointer_position()
 
     if self.claim_ceremony then
         self:update_hatch_swallow_effects(delta)
         self:update_slot_activation_effects(delta)
+        self:update_gunk_ghosts(delta)
         self:update_claim_ceremony(delta)
         self:update_claim_hover(mx, my)
         return
@@ -1047,6 +1064,7 @@ function V2Combat:update(dt)
     if self.combat_end then
         self:update_hatch_swallow_effects(delta)
         self:update_slot_activation_effects(delta)
+        self:update_gunk_ghosts(delta)
         self:update_combat_end(delta)
         self:update_hover(mx, my)
         return
@@ -1060,6 +1078,7 @@ function V2Combat:update(dt)
     self:update_resolution_playback(delta)
     self:update_hatch_swallow_effects(delta)
     self:update_slot_activation_effects(delta)
+    self:update_gunk_ghosts(delta)
 
     if self.engine.state == "COMPLETE" and not self.resolution_playback and not self.auto_allocation then
         self:begin_combat_end()
@@ -1074,6 +1093,59 @@ function V2Combat:update_slot_activation_effects(dt)
         effect.elapsed = (effect.elapsed or 0) + (dt or 0)
         if effect.elapsed >= (effect.duration or SLOT_EFFECT_DURATION) then
             table.remove(self.slot_activation_effects, index)
+        end
+    end
+end
+
+-- Witness the gunking: when a part takes a damage step, two 🩸 ghosts rise
+-- from its card — the two faces just struck (the 2/2/2 structure). The pool's
+-- degradation is seen at the moment it happens, not discovered next roll.
+function V2Combat:spawn_gunk_ghosts(part)
+    if not part then
+        return
+    end
+
+    local random = (love and love.math and love.math.random) or math.random
+    local seeds = {}
+    for index = 1, 2 do
+        table.insert(seeds, {
+            offset_x = (index - 1.5) * 18,
+            drift_x = random(-8, 8)
+        })
+    end
+
+    table.insert(self.gunk_ghost_effects, {
+        part = part,
+        elapsed = 0,
+        duration = GUNK_GHOST_DURATION,
+        seeds = seeds
+    })
+end
+
+function V2Combat:update_gunk_ghosts(dt)
+    for index = #(self.gunk_ghost_effects or {}), 1, -1 do
+        local effect = self.gunk_ghost_effects[index]
+        effect.elapsed = (effect.elapsed or 0) + (dt or 0)
+        if effect.elapsed >= (effect.duration or GUNK_GHOST_DURATION) then
+            table.remove(self.gunk_ghost_effects, index)
+        end
+    end
+end
+
+function V2Combat:draw_gunk_ghosts()
+    for _, effect in ipairs(self.gunk_ghost_effects or {}) do
+        local layout = effect.part and self.card_rects[effect.part]
+        if layout then
+            local card = layout.card
+            local progress = math.max(0, math.min(1, (effect.elapsed or 0) / (effect.duration or GUNK_GHOST_DURATION)))
+            local rise = 26 * progress
+            local alpha = (1 - progress) * 0.9
+
+            for _, seed in ipairs(effect.seeds or {}) do
+                local x = card.x + card.w / 2 - SYMBOL_SIZE / 2 + seed.offset_x + seed.drift_x * progress
+                local y = card.y + 8 - rise
+                draw_symbol_sprite(Symbols.BLOOD, x, y, SYMBOL_SIZE, false, alpha)
+            end
         end
     end
 end
@@ -1470,6 +1542,9 @@ function V2Combat:begin_combat_end()
     end
 
     local winner = self.engine and self.engine.winner
+    if self.juice then
+        self.juice:combat_ended(winner == self.player)
+    end
     local result = "draw"
     local title = "Combat Ended"
     if winner == self.player then
@@ -2137,8 +2212,11 @@ function V2Combat:build_resolution_entries(event_start_index)
                 defense = data.defense,
                 strike_count = data.strike_count or 0,
                 ward_count = data.ward_count or 0,
+                pairs = math.min(data.strike_count or 0, data.ward_count or 0),
+                ticks_fired = 0,
                 hit = data.hit == true,
                 damage = nil,
+                vented = false,
                 elapsed = 0,
                 revealed = false
             }
@@ -2148,6 +2226,11 @@ function V2Combat:build_resolution_entries(event_start_index)
             local entry = latest_by_part[data.body_part]
             if entry then
                 entry.damage = data
+            end
+        elseif event and event.type == Events.SLOT_CHARGE_VENTED and data then
+            local entry = latest_by_part[data.part]
+            if entry then
+                entry.vented = true
             end
         end
     end
@@ -2182,6 +2265,12 @@ function V2Combat:reveal_resolution_entry(entry)
     if self.resolution_status_overrides and entry.part then
         self.resolution_status_overrides[entry.part] = nil
     end
+    if entry.damage and (entry.damage.status_after == "wounded" or entry.damage.status_after == "maimed") then
+        self:spawn_gunk_ghosts(entry.part)
+    end
+    if self.juice then
+        self.juice:reveal_resolution(entry)
+    end
 end
 
 function V2Combat:complete_resolution_playback()
@@ -2206,6 +2295,23 @@ function V2Combat:skip_resolution_playback()
     return true
 end
 
+-- Resolution is counting, not arithmetic — so the playback performs the count:
+-- strikes and wards pair off one tick at a time, and only the unanswered
+-- strikes land. Each entry's timeline is: present the symbols, one parry tick
+-- per matched pair, then the outcome (damage reveal or block), then a tail.
+local function resolution_tick_time(entry, tick_index)
+    return RESOLUTION_PRESENT_TIME + tick_index * RESOLUTION_TICK_INTERVAL
+end
+
+local function resolution_outcome_time(entry)
+    return RESOLUTION_PRESENT_TIME + ((entry.pairs or 0) + 1) * RESOLUTION_TICK_INTERVAL
+end
+
+local function resolution_entry_duration(entry)
+    local tail = entry.damage and RESOLUTION_DAMAGE_TAIL or RESOLUTION_BLOCK_TAIL
+    return resolution_outcome_time(entry) + tail
+end
+
 function V2Combat:update_resolution_playback(dt)
     local playback = self.resolution_playback
     local current = playback and playback.current
@@ -2214,11 +2320,20 @@ function V2Combat:update_resolution_playback(dt)
     end
 
     current.elapsed = current.elapsed + dt
-    if current.damage and current.elapsed >= RESOLUTION_STEP_DURATION * RESOLUTION_REVEAL_TIME then
+
+    while (current.ticks_fired or 0) < (current.pairs or 0)
+        and current.elapsed >= resolution_tick_time(current, (current.ticks_fired or 0) + 1) do
+        current.ticks_fired = (current.ticks_fired or 0) + 1
+        if self.juice then
+            self.juice:resolution_parry_tick(current.ticks_fired)
+        end
+    end
+
+    if current.elapsed >= resolution_outcome_time(current) then
         self:reveal_resolution_entry(current)
     end
 
-    if current.elapsed < RESOLUTION_STEP_DURATION then
+    if current.elapsed < resolution_entry_duration(current) then
         return
     end
 
@@ -2247,6 +2362,9 @@ function V2Combat:message_for_result(ok, reason)
         self.message = "Assigned."
     else
         self.message = "Invalid: " .. tostring(reason)
+        if self.juice then
+            self.juice:invalid()
+        end
     end
 end
 
@@ -2347,6 +2465,9 @@ function V2Combat:mousepressed(x, y, button)
 
     if hover.kind == "die" and hover.combatant == self.player then
         self.selected_die = hover.die
+        if self.juice then
+            self.juice:die_picked()
+        end
         local die_rect = self.die_rects[hover.die]
         self.drag = {
             die = hover.die,
@@ -3107,12 +3228,13 @@ function V2Combat:resolution_shake_offset()
         return 0, 0
     end
 
-    local progress = math.max(0, math.min(1, current.elapsed / RESOLUTION_STEP_DURATION))
-    if progress < RESOLUTION_REVEAL_TIME then
+    local outcome_time = resolution_outcome_time(current)
+    if current.elapsed < outcome_time then
         return 0, 0
     end
 
-    local remaining = 1 - progress
+    local duration = resolution_entry_duration(current)
+    local remaining = math.max(0, 1 - (current.elapsed - outcome_time) / (duration - outcome_time))
     local magnitude = 5 * remaining
     local pulse = math.sin(current.elapsed * 82)
     return pulse * magnitude, math.cos(current.elapsed * 67) * magnitude * 0.5
@@ -3130,9 +3252,15 @@ function V2Combat:draw_resolution_effects()
         return
     end
 
-    local progress = math.max(0, math.min(1, current.elapsed / RESOLUTION_STEP_DURATION))
+    -- The count is the verdict: the frame stays neutral until the outcome
+    -- tick, so the pairing itself tells the player what happened.
+    local outcome_time = resolution_outcome_time(current)
+    local outcome_shown = current.elapsed >= outcome_time
     local flash = 0.55 + 0.35 * math.sin(current.elapsed * 18)
-    local focus_color = current.hit and COLORS.attack or COLORS.defense
+    local focus_color = COLORS.muted
+    if outcome_shown then
+        focus_color = current.hit and COLORS.attack or COLORS.defense
+    end
     local card = layout.card
 
     set_color({ focus_color[1], focus_color[2], focus_color[3], 0.24 + 0.18 * flash })
@@ -3141,8 +3269,15 @@ function V2Combat:draw_resolution_effects()
     love.graphics.setLineWidth(3)
     love.graphics.rectangle("line", card.x - 4, card.y - 4, card.w + 8, card.h + 8, 7, 7)
 
-    local label_w = 108
-    local label_h = current.damage and 48 or 34
+    local strike_count = current.strike_count or 0
+    local ward_count = current.ward_count or 0
+    local columns = math.max(strike_count, ward_count)
+    local col_w = 14
+    local rows_w = columns * col_w
+    local rows_h = (strike_count > 0 and 14 or 0) + (ward_count > 0 and 14 or 0)
+
+    local label_w = math.max(84, rows_w + 16)
+    local label_h = 6 + rows_h + 16 + (current.damage and 13 or 0) + 4
     local main_x = self:main_x()
     local main_right = main_x + self:main_width()
     local label_x = math.max(main_x, math.min(card.x + card.w / 2 - label_w / 2, main_right - label_w))
@@ -3152,22 +3287,47 @@ function V2Combat:draw_resolution_effects()
     end
 
     draw_box(rect(label_x, label_y, label_w, label_h), COLORS.rail, focus_color, 6)
-    love.graphics.setFont(self.fonts.small)
-    draw_text("ATK " .. tostring(current.strike_count) .. " / DEF " .. tostring(current.ward_count),
-        label_x + 6, label_y + 6, label_w - 12, "center", COLORS.ink)
 
-    local result_text = current.hit and "HIT" or "BLOCK"
-    if progress < 0.42 then
-        result_text = "..."
+    -- Symbol rows pair off column by column: strike i above ward i. Paired
+    -- columns dim as ticks fire; unanswered strikes stay lit and pulse when
+    -- they land.
+    local present = math.min(1, current.elapsed / RESOLUTION_PRESENT_TIME)
+    local ticks = current.ticks_fired or 0
+    local pairs_total = current.pairs or 0
+    local rows_x = label_x + (label_w - rows_w) / 2 + 1
+    local strikes_y = label_y + 6
+    local wards_y = strikes_y + (strike_count > 0 and 14 or 0)
+
+    for column = 1, columns do
+        local x = rows_x + (column - 1) * col_w
+        local paired = column <= ticks
+        local alpha = present * (paired and 0.2 or 1)
+
+        if column <= strike_count then
+            local strike_alpha = alpha
+            if not paired and column > pairs_total and outcome_shown and current.hit then
+                strike_alpha = present * (0.65 + 0.35 * math.sin(self.ui_time * 14))
+            end
+            draw_symbol_sprite(Symbols.STRIKE, x, strikes_y, SYMBOL_SIZE, false, strike_alpha)
+        end
+
+        if column <= ward_count then
+            draw_symbol_sprite(Symbols.WARD, x, wards_y, SYMBOL_SIZE, false, alpha)
+        end
+    end
+
+    local result_text = "..."
+    if outcome_shown then
+        result_text = current.hit and "HIT" or "BLOCK"
     end
 
     love.graphics.setFont(self.fonts.body)
-    draw_text(result_text, label_x + 6, label_y + 20, label_w - 12, "center", focus_color)
+    draw_text(result_text, label_x + 6, label_y + 6 + rows_h + 2, label_w - 12, "center", focus_color)
 
-    if current.damage and progress >= RESOLUTION_REVEAL_TIME then
+    if current.damage and outcome_shown then
         love.graphics.setFont(self.fonts.tiny)
         local status = tostring(current.damage.status_before) .. " -> " .. tostring(current.damage.status_after)
-        draw_text(status, label_x + 6, label_y + 36, label_w - 12, "center", COLORS.muted)
+        draw_text(status, label_x + 6, label_y + 6 + rows_h + 18, label_w - 12, "center", COLORS.muted)
     end
 end
 
@@ -3524,8 +3684,8 @@ function V2Combat:draw_combat_end_overlay()
         return
     end
 
-    local width = love.graphics.getWidth()
-    local height = love.graphics.getHeight()
+    local width = Display.WIDTH
+    local height = Display.HEIGHT
     local designer = self.combat_end.designer
     local panel_w = designer and 470 or 236
     local panel_h = designer and 252 or 94
@@ -3592,7 +3752,7 @@ function V2Combat:draw_designer_hud()
         return
     end
 
-    local width = love.graphics.getWidth()
+    local width = Display.WIDTH
     local panel = rect(width - RAIL_WIDTH + 8, 8, RAIL_WIDTH - 16, 44)
     draw_box(panel, { 0.02, 0.025, 0.04, 0.94 }, COLORS.selected, 4)
     love.graphics.setFont(self.fonts.tiny)
@@ -3609,7 +3769,7 @@ end
 
 function V2Combat:draw()
     love.graphics.clear(COLORS.bg)
-    draw_image("combat_tabletop", rect(0, 0, love.graphics.getWidth(), love.graphics.getHeight()))
+    draw_image("combat_tabletop", rect(0, 0, Display.WIDTH, Display.HEIGHT))
     love.graphics.setFont(self.fonts.body)
     self:layout()
 
@@ -3639,6 +3799,7 @@ function V2Combat:draw()
     self:draw_slot_activation_effects()
     self:draw_auto_allocation_ghost()
     self:draw_resolution_effects()
+    self:draw_gunk_ghosts()
     self:draw_drag_ghost()
     self:draw_claim_ceremony()
 
